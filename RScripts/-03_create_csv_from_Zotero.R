@@ -1,6 +1,6 @@
 # Purpose: To extract zotero citation data into excel.
 # Version: 1.0
-# Platform: Written on R 2.11, Win 7, Zotero 2.01, but should work on all platforms.
+# Platform: Written on R 2.11, Win 7, Zotero 2.01, but should work on all platforms.#
 ###############################################################################
 
 ############################
