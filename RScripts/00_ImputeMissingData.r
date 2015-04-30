@@ -1,3 +1,4 @@
+#
 library(metafor)
 library(mice)
 setwd("C:\\Users\\kambach\\Desktop\\aktuelle Arbeiten\\SESYNC\\myAnalysis") #KG
