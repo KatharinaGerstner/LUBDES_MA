@@ -13,7 +13,7 @@ LMM.MA.fit <- function(yi,vi,mods,slab,inner2,outer2){
   ##########################################################################################################################
   ### fit meta-analytic multivariate/multilevel fixed- and random/mixed-effects models with or without moderators via linear (mixed-effects) models using rma.mv
   ## Viechtbauer 2015 p 189: the random argument can also contain one (and only one!) formula of the form ~ inner | outer . Effects or outcomes with different values/levels of the outer grouping variable/factor are assumed to be independent, while effects or outcomes with the same value/level of the outer grouping variable/factor share correlated random effects corresponding to the levels of the inner grouping variable/factor. The struct argument is used to specify the variance structure corresponding to the inner variable/factor. With struct="CS", a compound symmetric structure is assumed (i.e., a single variance component tau? corresponding to all values/levels of the inner variable/factor and a single correlation coefficient rho for the correlation between different values/levels). 
-  # btw, there seems to be a problem with the terms inner and out er as they are also R base functions
+  # btw, there seems to be a problem with the terms inner and outer as they are also R base functions
 # TO DO: calculate variance-covariance matrix, esp covariance for between LUI comparisons 
 #  VCov_matrix <- 
   rma.mv.fit <- rma.mv(yi=yi, V=vi, mods = mods, random = ~inner2|outer2, struct="CS", data=ES.frame, slab=slab,method="REML", tdist=FALSE, level=95, digits=4, Rscale="cor", sparse=FALSE, verbose=FALSE)
