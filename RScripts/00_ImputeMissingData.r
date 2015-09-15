@@ -5,9 +5,15 @@ setwd("C:\\Users\\kambach\\Desktop\\aktuelle Arbeiten\\SESYNC\\myAnalysis") #KG
 
 ############################################################################
 ### read .csv file directly downloaded from google docs without any changes
-data <- read.csv("LUBDES coding table v2 - 1. Coding Table version 2.csv",skip=2,na.strings=c("NA",""))
+# data <- read.csv("LUBDES coding table v2 - 1. Coding Table version 2.csv",skip=2,na.strings=c("NA",""))
+
+### alternatively (and more elegant) read data DIRECTLY from google docs as described in script -01
+gs_ls() # once authorized, this will list the files you have in GS
+LUBDES_gsheet<- gs_title("LUBDES coding table v2") # load LUBDES  coding table, this crashes sometimes but seems to work as of April 22 2015
+data <- gs_read(LUBDES_gsheet, ws = "1. Coding Table version 2") # consume data from sheet 1
+
 #names(data)
-data <- data[-1,] # remove empty row
+# data <- data[-1,] # remove empty row - obsolete
 str(data) # check variable types 
 #data[,c(30:32,39:41,34,43)] <- apply(data[,c(30:32,39:41,34,43)],2,as.numeric) # covert into numeric variables
 
