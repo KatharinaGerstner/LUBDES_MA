@@ -53,12 +53,12 @@ data[,c(41:42,45)] = complete(imp)
 # intensity.broad %in% c("low","medium","high") & within.study.intensity %in% c("single measure within one LUI", "pooled measure within one LUI")
 # levels: low_medium, low_high, medium_high
 
-  ES.frame <- data.frame(matrix(ncol=37,nrow=0))
+  ES.frame <- data.frame(matrix(ncol=36,nrow=0))
 names(ES.frame) <- c("Study.ID","Case.ID","Low.LUI","High.LUI","Habitat.Type",        
-                       "PES.Category","ES.From.BD","Fertilization","Irrigation","Pesticides",          
+                       "Product","ES.From.BD","Fertilization","Irrigation","Pesticides",          
                        "Grazing","Mowing","Clear.Cut","Selective.Logging","Partial.Logging",     
                        "Additional.Treatment", "Date.Start","Date.End","Latitude","Longitude",           
-                       "Species.Group","Species.Subgroup","Trophic.Level","Product","Richness.Mean.Low" ,  
+                       "Species.Group","Species.Subgroup","Trophic.Level","Richness.Mean.Low" ,  
                        "Richness.SD.Low","Richness.N.Low","Richness.Plot.Size","Richness.Mean.High","Richness.SD.High",    
                        "Richness.N.High","Yield.Mean.Low","Yield.SD.Low","Yield.N.Low","Yield.Mean.High" ,    
                        "Yield.SD.High","Yield.N.High")
@@ -66,39 +66,39 @@ names(ES.frame) <- c("Study.ID","Case.ID","Low.LUI","High.LUI","Habitat.Type",
 table.sort = function(dat.low,dat.high,low,high){
   data.frame("Study.ID"=dat.low$Study.ID, "Case.ID" =dat.low$Case.ID, 
              "Low.LUI" = low, "High.LUI" = high,
-             "Habitat.Type" = dat.low$Habitat.type, "PES.Category" = dat.low$PES.category, "ES.From.BD" =dat.low$ES.measure.measured.from.BD.,
+             "Land.use...land.cover" = dat.low$Land.use...land.cover, "Product" = dat.low$Product, "ES.From.BD" =dat.low$ES.measured.from.BD.,
              
              "Fertilization" = paste(dat.low$Fertilization, dat.high$Fertilization, sep="_"), 
              "Irrigation" =paste(dat.low$Irrigation, dat.high$Irrigation, sep="_"),
              "Pesticides" = paste(dat.low$Pesticides, dat.high$Pesticides, sep="_"),
              "Grazing" =paste(dat.low$Grazing, dat.high$Grazing, sep="_"), 
              "Mowing" = paste(dat.low$Mowing, dat.high$Mowing, sep="_"), 
-             "Clear.Cut" =paste(dat.low$Clear.Cut, dat.high$Clear.Cut, sep="_"),
-             "Selective.Logging" = paste(dat.low$Selective.Logging, dat.high$Selective.Logging, sep="_"),
-             "Partial.Logging" = paste(dat.low$Partial.Logging, dat.high$Partial.Logging, sep="_"), 
+             "Clear.Cut" =paste(dat.low$Clear.Cut.y.n., dat.high$Clear.Cut.y.n., sep="_"),
+             "Selective.Logging" = paste(dat.low$Selective.Logging.y.n., dat.high$Selective.Logging.y.n., sep="_"),
+             "Partial.Logging" = paste(dat.low$Partial.Logging.y.n., dat.high$Partial.Logging.y.n., sep="_"), 
              "Additional.Treatment" =dat.high$Additional.Treatment,
              
              "Date.Start" =dat.low$Date.of.study..start, "Date.End" =dat.low$Date.of.study..end, 
              "Latitude" =dat.low$latitude..N..S., "Longitude" =dat.low$longitude..E..W.,
              
              "Species.Group" =dat.low$species.group, "Species.Subgroup" =dat.low$species.subgroup.if.provided, "Trophic.Level" =dat.low$trophic.level..species.guild,
-             "Product" = dat.low$product,
+             #"Product" = dat.low$product,
              
-             "Richness.Mean.Low" =dat.low$richness.mean, "Richness.SD.Low" =dat.low$richness.SD, "Richness.N.Low" =dat.low$X..of.Plots.for.BD.measure, 
-             "Richness.Plot.Size" =dat.low$Plot.size,
-             "Richness.Mean.High" = dat.high$richness.mean, "Richness.SD.High" =dat.high$richness.SD, "Richness.N.High" =dat.high$X..of.Plots.for.BD.measure,
+             "Richness.Mean.Low" =dat.low$richness.mean, "Richness.SD.Low" =dat.low$richness.SD, "Richness.N.Low" =dat.low$X..of.samples.for.BD.measure, 
+             "Richness.Plot.Size" =dat.low$sampled.area,
+             "Richness.Mean.High" = dat.high$richness.mean, "Richness.SD.High" =dat.high$richness.SD, "Richness.N.High" =dat.high$X..of.samples.for.BD.measure,
              
-             "Yield.Mean.Low" =dat.low$yield.mean, "Yield.SD.Low" =dat.low$yield.SD, "Yield.N.Low" =dat.low$X..of.Plots.for.YD.measure,
-             "Yield.Mean.High" =dat.high$yield.mean, "Yield.SD.High" =dat.high$yield.SD, "Yield.N.High" =dat.high$X..of.Plots.for.YD.measure)
+             "Yield.Mean.Low" =dat.low$yield.mean, "Yield.SD.Low" =dat.low$yield.SD, "Yield.N.Low" =dat.low$X..of.samples.for.YD.measure,
+             "Yield.Mean.High" =dat.high$yield.mean, "Yield.SD.High" =dat.high$yield.SD, "Yield.N.High" =dat.high$X..of.samples.for.YD.measure)
 }
 
 # TO DO: remove "pooled within one LUI", change l 83: paste(data$study.case,data$species.group,sep="-") to data$study.case
 for(i in unique(paste(data$study.case,data$species.group,sep="-"))){
   data.temp = subset(data, paste(data$study.case,data$species.group,sep="-") %in% i)
   # for between broad LUI comparisons
-  temp.low = subset(data.temp, Within.study.Intensity %in% c("single measure within one LUI","pooled within one LUI","pooled measures within one LUI") & Intensity.broad   %in% "low")
-  temp.medium = subset(data.temp, Within.study.Intensity %in% c("single measure within one LUI","pooled within one LUI", "pooled measures within one LUI") & Intensity.broad   %in% "medium")
-  temp.high = subset(data.temp, Within.study.Intensity %in% c("single measure within one LUI","pooled within one LUI", "pooled measures within one LUI") & Intensity.broad   %in% "high")
+  temp.low = subset(data.temp, Within.study.Intensity %in% c("single measure within one LUI","pooled within one LUI","pooled measures within one LUI","baseline LUI", "increased LUI") & Intensity.broad   %in% "low")
+  temp.medium = subset(data.temp, Within.study.Intensity %in% c("single measure within one LUI","pooled within one LUI", "pooled measures within one LUI","baseline LUI", "increased LUI") & Intensity.broad   %in% "medium")
+  temp.high = subset(data.temp, Within.study.Intensity %in% c("single measure within one LUI","pooled within one LUI", "pooled measures within one LUI","baseline LUI", "increased LUI") & Intensity.broad   %in% "high")
   
   # for within broad LUI comparisons
   temp.low.base = subset(data.temp, Within.study.Intensity %in% "baseline LUI" & Intensity.broad   %in% "low")
@@ -108,6 +108,7 @@ for(i in unique(paste(data$study.case,data$species.group,sep="-"))){
   temp.high.base = subset(data.temp, Within.study.Intensity %in% "baseline LUI" & Intensity.broad   %in% "high")
   temp.high.increase = subset(data.temp, Within.study.Intensity %in% "increased LUI" & Intensity.broad   %in% "high")
   
+  # table.sort broken? MB
   if((nrow(temp.low) + nrow (temp.medium)) == 2){
     ES.frame = rbind(ES.frame,table.sort(temp.low,temp.medium,"low","medium"))}
   if((nrow(temp.low) + nrow (temp.high)) == 2){
@@ -121,6 +122,7 @@ for(i in unique(paste(data$study.case,data$species.group,sep="-"))){
     ES.frame = rbind(ES.frame,table.sort(temp.medium.base,temp.medium.increase,"medium","medium"))}
   if((nrow(temp.high.base) + nrow (temp.high.increase)) == 2){
     ES.frame = rbind(ES.frame,table.sort(temp.high.base,temp.high.increase,"high","high"))}
+  
   print(i)
 }
 
@@ -147,7 +149,7 @@ ES.frame[,c("Yield.Log.RR","Yield.Log.RR.Var")] =
          n2i = Yield.N.Low, n1i = Yield.N.High)
 
 ES.frame[,c("Richness.SMD","Richness.SMD.Var")] =
-  escalc("SMDH",data= ES.frame,, append =F,
+  escalc("SMDH",data= ES.frame, append =F,
          m2i = Richness.Mean.Low, m1i = Richness.Mean.High,
          sd2i = Richness.SD.Low, sd1i = Richness.SD.High,
          n2i = Richness.N.Low, n1i = Richness.N.High)
