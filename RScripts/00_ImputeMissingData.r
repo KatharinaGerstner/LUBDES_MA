@@ -1,16 +1,18 @@
 library(metafor)
 library(mice)
-setwd("C:\\Users\\kambach\\Desktop\\aktuelle Arbeiten\\SESYNC\\myAnalysis") #KG
+setwd("C:\\Users\\hoppek\\Documents\\GitHub\\LUBDES_MA") #KG
+#setwd("C:\\Users\\kambach\\Desktop\\aktuelle Arbeiten\\SESYNC\\myAnalysis") #SK
 #setwd("~/Dropbox/SESYNC-UFZ-sDiv-Call Biodiversity and Ecosystem Services/Meta-Analysis/DataAnalysis") #MB
 
 ############################################################################
 ### read .csv file directly downloaded from google docs without any changes
-# data <- read.csv("LUBDES coding table v2 - 1. Coding Table version 2.csv",skip=2,na.strings=c("NA",""))
+data <- read.csv("Input/LUBDES coding table v2 - 1. Coding Table version 2.csv",na.strings=c("NA",""))
 
 ### alternatively (and more elegant) read data DIRECTLY from google docs as described in script -01
-gs_ls() # once authorized, this will list the files you have in GS
-LUBDES_gsheet<- gs_title("LUBDES coding table v2") # load LUBDES  coding table, this crashes sometimes but seems to work as of April 22 2015
-data <- gs_read(LUBDES_gsheet, ws = "1. Coding Table version 2") # consume data from sheet 1
+#gs_ls() # once authorized, this will list the files you have in GS
+#LUBDES_gsheet<- gs_title("LUBDES coding table v2") # load LUBDES  coding table, this crashes sometimes but seems to work as of April 22 2015
+#data <- gs_read(LUBDES_gsheet, ws = "1. Coding Table version 2") # consume data from sheet 1
+### NOTE: data loaded this way is of classes 'tbl_df' and 'data.frame', rather than only 'data.frame' which is needed for imputation.
 
 #names(data)
 # data <- data[-1,] # remove empty row - obsolete
@@ -29,12 +31,32 @@ data$study.case <- factor(paste(data$Study.ID,data$Case.ID,sep="_"))
 #apply imputation methods, impute BD and yield sd and then calculate se
 # TO DO: Adapt package "mi" after Ellington et al 2015
 library(mi)
-imp = mi(data[,c(31:32,35)],mi.info(data[,c(31:32,35)]),n.imp=3,seed=42)
+# Adding "latitude..N..S.", "longitude..E..W.", "Land.cover", "PES.category" cause error
+data2impute <- data[,c("study.type", "Country", "Land.use...land.cover", "Intensity.broad", "Fertilization", "Irrigation", "Pesticides", "Grazing", "Mowing", "Clear.Cut.y.n.", "Selective.Logging.y.n.", "Partial.Logging.y.n.", "species.group", "trophic.level..species.guild", "richness.mean", "richness.SD", "X..of.samples.for.BD.measure", "sampled.area", "sampled.size.unit", "product", "yield.unit", "yield.mean", "yield.SD", "X..of.samples.for.YD.measure", "sampled.size.area", "sampled.size.unit.1")]
+# convert the data.frame to a missing_data.frame, which is an enhanced version of a data.frame that includes metadata about the variables that is essential in a missing data context
+mi.df <- missing_data.frame(data2impute) 
+# check whether the missing_data.frame constructor function initially guessed the appropriate class for each missing_variable, if not use change() 
+show(mi.df)
+image(mi.df) ## get a sense of the raw data and their missingness patterns
+# use the mi function to do the actual imputation, specify how many independent chains to utilize, how many iterations to conduct, and the maximum amount of time the user is willing to wait for all the iterations of all the chains to finish
+imputations <- mi(mi.df, n.iter = 30, n.chains = 4, max.minutes = 20)
 
-data[,c(31:32,35)] = imp
 
-imp = mice(data[,c(41:42,45)],m=,method="pmm",seed=42)
-data[,c(41:42,45)] = complete(imp)
+imp = mi(data[,c("richness.mean", "richness.SD", "X..of.samples.for.BD.measure")],mi.df,n.imp=3,seed=42)
+options(mc.cores =2)
+imputations <- mi(mi.df, n.iter = 30, n.chains = 4, max.minutes = 20)
+show(imputations)
+data.imp <- round(mipply(imputations, mean, to.matrix = TRUE), 3)
+data.imp <- pool(richness.SD ~ richness.mean + X..of.samples.for.BD.measure + species.group, data=imputations, m=5)
+data.complete <- complete(imputations)
+data[,c("richness.mean", "richness.SD")] <- imp
+data$richness.SE <- data$richness.SD/sqrt(data$X..of.samples.for.BD.measure)
+
+imp <- mice(data[,c("richness.mean", "richness.SD", "richness.SE")],seed=42)
+data[,c("richness.mean", "richness.SD", "richness.SE")] = complete(imp)
+
+imp = mice(data[,c("yield.mean", "yield.SD", "yield.SE")],method="rf",seed=42)
+data[,c("yield.mean", "yield.SD", "yield.SE")] = complete(imp)
 
 #############################################################
 ### merge baseline and increased LUI per study ID, case ID
@@ -160,5 +182,5 @@ ES.frame[,c("Yield.SMD","Yield.SMD.Var")] =
          sd2i = Yield.SD.Low, sd1i = Yield.SD.High,
          n2i = Yield.N.Low, n1i = Yield.N.High)
 
-write.csv(ES.frame, "ES_table_test.csv")
+write.csv(ES.frame, "Input/ES_table.csv")
 

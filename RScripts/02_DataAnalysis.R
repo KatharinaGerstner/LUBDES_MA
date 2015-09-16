@@ -2,10 +2,10 @@
 library(metafor)
 library(ggplot2)
 
-setwd("c:/Users/hoppek/Dropbox/sDiv_workshop/Meta-Analysis/DataAnalysis") #KG
+setwd("C:\\Users\\hoppek\\Dokumente\\GitHub\\LUBDES_MA") #KG
 #setwd("~/Dropbox/SESYNC-UFZ-sDiv-Call Biodiversity and Ecosystem Services/Meta-Analysis/DataAnalysis") #MB
 
-ES.frame = read.csv("ES_table.csv")
+ES.frame = read.csv("Input/ES_table.csv")
 ES.frame <- ES.frame[-which(ES.frame$Study.ID=="4788-Mosquera-Losada2009"),] 
 
 #########################################################################################################################################################
