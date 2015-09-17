@@ -9,10 +9,10 @@ setwd("C:\\Users\\hoppek\\Documents\\GitHub\\LUBDES_MA") #KG
 data <- read.csv("Input/LUBDES coding table v2 - 1. Coding Table version 2.csv",na.strings=c("NA",""))
 
 ### alternatively (and more elegant) read data DIRECTLY from google docs as described in script -01
-#gs_ls() # once authorized, this will list the files you have in GS
-#LUBDES_gsheet<- gs_title("LUBDES coding table v2") # load LUBDES  coding table, this crashes sometimes but seems to work as of April 22 2015
-#data <- gs_read(LUBDES_gsheet, ws = "1. Coding Table version 2") # consume data from sheet 1
-### NOTE: data loaded this way is of classes 'tbl_df' and 'data.frame', rather than only 'data.frame' which is needed for imputation.
+gs_ls() # once authorized, this will list the files you have in GS
+LUBDES_gsheet<- gs_title("LUBDES coding table v2") # load LUBDES  coding table, this crashes sometimes but seems to work as of April 22 2015
+data <- gs_read(LUBDES_gsheet, ws = "1. Coding Table version 2") # consume data from sheet 1, # NOTE: data loaded way is of classes 'tbl_df' and 'data.frame', rather than only 'data.frame' which is needed for imputation.
+data<-as.data.frame(data) 
 
 #names(data)
 # data <- data[-1,] # remove empty row - obsolete
