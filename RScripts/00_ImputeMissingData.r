@@ -1,6 +1,3 @@
-library(metafor)
-library(mice)
-
 ############################################################################
 ### load LUBDES coding table
 # TO DO: include query to be able to authorize
@@ -15,10 +12,13 @@ setwd("C:\\Users\\hoppek\\Documents\\GitHub\\LUBDES_MA") #KG
 data <- read.csv("Input/LUBDES coding table v2 - 1. Coding Table version 2.csv",na.strings=c("NA",""))
 
 ### alternatively (and more elegant) read data DIRECTLY from google docs as described in script -01
-#gs_ls() # once authorized, this will list the files you have in GS
-#LUBDES_gsheet<- gs_title("LUBDES coding table v2") # load LUBDES  coding table, this crashes sometimes but seems to work as of April 22 2015
-#data <- gs_read(LUBDES_gsheet, ws = "1. Coding Table version 2") # consume data from sheet 1
-### NOTE: data loaded this way is of classes 'tbl_df' and 'data.frame', rather than only 'data.frame' which is needed for imputation.
+library(devtools)
+devtools::install_github("jennybc/googlesheets") # documentation at:http://htmlpreview.github.io/?https://raw.githubusercontent.com/jennybc/googlesheets/master/vignettes/basic-usage.html and https://github.com/jennybc/googlesheets
+library(googlesheets)
+gs_ls() # once authorized, this will list the files you have in GS
+LUBDES_gsheet<- gs_title("LUBDES coding table v2") # load LUBDES  coding table, this crashes sometimes but seems to work as of April 22 2015
+data <- gs_read(LUBDES_gsheet, ws = "1. Coding Table version 2") # consume data from sheet 1, # NOTE: data loaded way is of classes 'tbl_df' and 'data.frame', rather than only 'data.frame' which is needed for imputation.
+data<-as.data.frame(data) 
 
 #names(data)
 str(data) # check variable types 
@@ -63,10 +63,18 @@ imputations <- mi(mi.df, n.iter = 20, n.chains = 4, max.minutes = 20)
 data[,c("richness.mean", "richness.SD", "X..of.samples.for.BD.measure", "yield.mean", "yield.SD", "X..of.samples.for.YD.measure")] <- complete(imputations, m=1)[,c("richness.mean", "richness.SD", "X..of.samples.for.BD.measure", "yield.mean", "yield.SD", "X..of.samples.for.YD.measure")]
 summary(data[,c("richness.mean", "richness.SD", "X..of.samples.for.BD.measure", "yield.mean", "yield.SD", "X..of.samples.for.YD.measure")])
 
+### calculate SE for richness and yield mean
+data$richness.SE <- data$richness.SD/sqrt(data$X..of.samples.for.BD.measure)
+data$yield.SE <- data$yield.SD/sqrt(data$X..of.samples.for.YD.measure)
+
 ##########################################################
 ### Alternatively we use the mice-package
 
 data <- read.csv("Input/LUBDES coding table v2 - 1. Coding Table version 2.csv",na.strings=c("NA",""))
+
+# alternatively:
+data <- gs_read(LUBDES_gsheet, ws = "1. Coding Table version 2") # consume data from sheet 1, # NOTE: data loaded way is of classes 'tbl_df' and 'data.frame', rather than only 'data.frame' which is needed for imputation.
+data<-as.data.frame(data) 
 
 #names(data)
 str(data) # check variable types 
@@ -79,8 +87,8 @@ data$study.case <- factor(paste(data$Study.ID,data$Case.ID,sep="_"))
 #dissmiss studies with missing mean for BD or yield
 data <- data[-(which(is.na(data$richness.mean))),]
 data <- data[-(which(is.na(data$yield.mean))),]
-library(mice)
 detach("package:mi", unload=TRUE)
+library(mice)
 
 imp <- mice(data[,c("richness.mean", "richness.SD", "X..of.samples.for.BD.measure", "yield.mean", "yield.SD", "X..of.samples.for.YD.measure")])
 data[,c("richness.mean", "richness.SD", "X..of.samples.for.BD.measure", "yield.mean", "yield.SD", "X..of.samples.for.YD.measure")] <- complete(imp)
@@ -90,7 +98,7 @@ data$richness.SE <- data$richness.SD/sqrt(data$X..of.samples.for.BD.measure)
 data$yield.SE <- data$yield.SD/sqrt(data$X..of.samples.for.YD.measure)
 
 ### check results, e.g. SD must be positive or SE will be NaN
-summary(data[,c("richness.mean", "richness.SD", "X..of.samples.for.BD.measure", "yield.mean", "yield.SD", "X..of.samples.for.YD.measure")])
+summary(data[,c("richness.mean", "richness.SD", "X..of.samples.for.BD.measure", "yield.mean", "yield.SD", "X..of.samples.for.YD.measure")]) # does not produce negative SDs
 
 ##################################
 ### save imputed data as Rdata

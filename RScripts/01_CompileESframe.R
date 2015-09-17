@@ -64,8 +64,13 @@ table.sort = function(dat.low,dat.high,low,high){
 
 # TO DO: remove "pooled within one LUI", change l 83: paste(data$study.case,data$species.group,sep="-") to data$study.case
 for(i in unique(paste(data$study.case,data$species.group,sep="-"))){
-
+  
   print(i)
+  
+  ### remove some studies from further analysis as these cause error as they have same study.case and species group but diff. species subgroups. TO DO: Decide how to deal with that issue.
+  if(i %in% c("8235-Norvez2013_1-arthropods","8002-Lohmus2013_1-woody plants",paste("9078-Hautier2014_",1:12,"-non-woody plants",sep=""),"516-Higgins1999_1-woody plants")){
+    print("ERROR. Omit from analysis.")
+    next}
   
   data.temp = subset(data, paste(data$study.case,data$species.group,sep="-") %in% i)
   # for between broad LUI comparisons
@@ -81,7 +86,7 @@ for(i in unique(paste(data$study.case,data$species.group,sep="-"))){
   temp.high.base = subset(data.temp, Within.study.Intensity %in% "baseline LUI" & Intensity.broad   %in% "high")
   temp.high.increase = subset(data.temp, Within.study.Intensity %in% "increased LUI" & Intensity.broad   %in% "high")
   
-  # table.sort broken? MB - KG: no but Norvez2013 causes trouble, TO DO: Include error-catch, such as try()
+  # table.sort broken? MB - KG: no but Norvez2013, Mastrangelo2012 cause trouble, TO DO: Include error-catch, such as try()
   if((nrow(temp.low) + nrow (temp.medium)) == 2){
     ES.frame = rbind(ES.frame,table.sort(temp.low,temp.medium,"low","medium"))}
   if((nrow(temp.low) + nrow (temp.high)) == 2){
@@ -103,6 +108,7 @@ ES.frame$LUI.range[ES.frame$LUI.range %in% c("low-medium","medium-high")] <- 1
 ES.frame$LUI.range[ES.frame$LUI.range %in% c("low-high")] <- 2
 
 ES.frame$Study.Case <- factor(paste(ES.frame$Study.ID,ES.frame$Case.ID,sep="_"))
+
 #############################
 ### calculate RR effect sizes
 
