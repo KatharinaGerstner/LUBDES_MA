@@ -1,20 +1,55 @@
-##################################
-## set the stage
-library(metafor)
-library(ggplot2)
-library(scales)
+############################################################################
+### Purpose of this skript module 03 is to:
+###
+### 03.1. Specify output directory in the dropbox or other local folder - NOT in the git directory!
+### 03.2. Plot map of studies
+### 03.3. Plot cross-diagrams
+### 03.4. 
+###
+### General comments:
+### * 
+###
+### Authors: KG, MB, SK ...
+############################################################################
 
-setwd("C:\\Users\\hoppek\\Documents\\GitHub\\LUBDES_MA") #KG
+############################################################################
+### 03.1. Specify output directory in the dropbox or other local folder - NOT in the git directory!
+### 
+### all lines should stay commented out, only temporarily set your wd
+############################################################################
 
-### load data
-ES.frame <- read.csv("ES_table.csv")
-MA.coeffs = read.csv("Output\\MA.coeffs.csv")
-ES.frame = read.csv("Input/ES_table.csv")
+#setwd("~/Dropbox/SESYNC-UFZ-sDiv-Call Biodiversity and Ecosystem Services/Meta-Analysis/DataAnalysis") #MB
+#setwd("/tmp/") #MB
 
-ES.frame.posVar <- ES.frame[ES.frame$Richness.Log.RR.Var>0 & ES.frame$Yield.Log.RR.Var>0,] # restrict analysis to study cases with positive variances
-ES.frame <- ES.frame.posVar
-ES.frame$LUI.range <- factor(ES.frame$LUI.range)
+### show current working directory and check if its local
+getwd()
 
+############################################################################
+### 03.2. Plot map of studies
+### 
+############################################################################
+
+### plot study locations using the "classic" way
+library(rworldmap)
+newmap <- getMap(resolution = "low")
+pdf("map_of_studies.pdf",pointsize=8)
+plot(newmap, main="Distribution of LUBDES studies included in the meta analysis")
+points(data$lon, data$lat, col = "blue", cex = .6, pch=2)
+dev.off()
+
+# ### plot study locations using fancy ggplot - Does NOT work properly #MB
+
+# world_map <- map_data("world")
+# p <- ggplot(legend=FALSE) +
+#   geom_polygon(data=world_map, aes(x=long, y=lat)) + 
+#   geom_point(data=data, aes(x=longitude..E..W., y=latitude..N..S.), color="blue")
+# p ## looks weird, the reason is the max latitude in data = 2011! - check!
+# ggsave("CaseDistribution.pdf", width=8, height=8, units="cm")
+
+############################################################################
+### 03.3. Plot cross-diagrams
+### 
+############################################################################
 
 ### plot all in one rush
 #TO DO: Plot for no moderators

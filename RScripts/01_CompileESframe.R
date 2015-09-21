@@ -1,37 +1,22 @@
-library(metafor)
-setwd("c:/Users/hoppek/Dropbox/sDiv_workshop/Meta-Analysis/DataAnalysis") #KG
-#setwd("~/Dropbox/SESYNC-UFZ-sDiv-Call Biodiversity and Ecosystem Services/Meta-Analysis/DataAnalysis") #MB
+############################################################################
+### Purpose of this skript module 01 is to:
+###
+### 01.1. table.sort function
+### 01.2. Compile ES frame
+### 01.3. Calculate response ratio effect sizes
+###
+### General comments:
+### * 
+###
+### Authors: KG, MB, SK ...
+############################################################################
 
 ############################################################################
-### load imputed data (cf. 00_ImputeMissingData.r)
-load("Input/data.Rdata")
+### 01.1. table.sort function
+### 
+############################################################################
 
-#############################################################
-### merge baseline and increased LUI per study ID, case ID
-### reformat table to store baseline and increased in one row
-
-# baseline must be 'no LU', 'baseline LUI' or both c('no LU', 'baseline LUI')
-# compile pairs of intensity level: 
-# intensity.broad: low, medium, high, no LU
-# within.study.intensity: no LU, baseline LUI, increased LUI, single measure within one LUI, pooled measure within one LUI
-
-# two options:
-# within-broad LUI comparisons:
-# intensity.broad %in% c("low","medium","high") & within.study.intensity %in% c("baseline LUI","increased LUI")  
-# levels: low_low, medium_medium, high_high
-# between-broad LUI comparisons:
-# intensity.broad %in% c("low","medium","high") & within.study.intensity %in% c("single measure within one LUI", "pooled measure within one LUI")
-# levels: low_medium, low_high, medium_high
-
-ES.frame <- data.frame(matrix(ncol=36,nrow=0))
-names(ES.frame) <- c("Study.ID","Case.ID","Low.LUI","High.LUI","Habitat.Type",        
-                     "Product","ES.From.BD","Fertilization","Irrigation","Pesticides",          
-                     "Grazing","Mowing","Clear.Cut","Selective.Logging","Partial.Logging",     
-                     "Additional.Treatment", "Date.Start","Date.End","Latitude","Longitude",           
-                     "Species.Group","Species.Subgroup","Trophic.Level","Richness.Mean.Low" ,  
-                     "Richness.SD.Low","Richness.N.Low","Richness.Plot.Size","Richness.Mean.High","Richness.SD.High",    
-                     "Richness.N.High","Yield.Mean.Low","Yield.SD.Low","Yield.N.Low","Yield.Mean.High" ,    
-                     "Yield.SD.High","Yield.N.High")
+### table.sort function to restructure data
 
 table.sort = function(dat.low,dat.high,low,high){
   data.frame("Study.ID"=dat.low$Study.ID, "Case.ID" =dat.low$Case.ID, 
@@ -62,7 +47,29 @@ table.sort = function(dat.low,dat.high,low,high){
              "Yield.Mean.High" =dat.high$yield.mean, "Yield.SD.High" =dat.high$yield.SD, "Yield.N.High" =dat.high$X..of.samples.for.YD.measure)
 }
 
+
+############################################################################
+### 01.1. Compile ES frame
+### 
+############################################################################
+
+### create empty ES.frame
+
+ES.frame <- data.frame(matrix(ncol=36,nrow=0))
+names(ES.frame) <- c("Study.ID","Case.ID","Low.LUI","High.LUI","Habitat.Type",        
+                     "Product","ES.From.BD","Fertilization","Irrigation","Pesticides",          
+                     "Grazing","Mowing","Clear.Cut","Selective.Logging","Partial.Logging",     
+                     "Additional.Treatment", "Date.Start","Date.End","Latitude","Longitude",           
+                     "Species.Group","Species.Subgroup","Trophic.Level","Richness.Mean.Low" ,  
+                     "Richness.SD.Low","Richness.N.Low","Richness.Plot.Size","Richness.Mean.High","Richness.SD.High",    
+                     "Richness.N.High","Yield.Mean.Low","Yield.SD.Low","Yield.N.Low","Yield.Mean.High" ,    
+                     "Yield.SD.High","Yield.N.High")
+
+
 # TO DO: remove "pooled within one LUI", change l 83: paste(data$study.case,data$species.group,sep="-") to data$study.case
+
+### re-build data to ES.frame using table.sort function
+
 for(i in unique(paste(data$study.case,data$species.group,sep="-"))){
   
   print(i)
@@ -86,7 +93,8 @@ for(i in unique(paste(data$study.case,data$species.group,sep="-"))){
   temp.high.base = subset(data.temp, Within.study.Intensity %in% "baseline LUI" & Intensity.broad   %in% "high")
   temp.high.increase = subset(data.temp, Within.study.Intensity %in% "increased LUI" & Intensity.broad   %in% "high")
   
-  # table.sort broken? MB - KG: no but Norvez2013, Mastrangelo2012 cause trouble, TO DO: Include error-catch, such as try()
+  # TO DO: Include error-catch, such as try()
+  
   if((nrow(temp.low) + nrow (temp.medium)) == 2){
     ES.frame = rbind(ES.frame,table.sort(temp.low,temp.medium,"low","medium"))}
   if((nrow(temp.low) + nrow (temp.high)) == 2){
@@ -109,10 +117,14 @@ ES.frame$LUI.range[ES.frame$LUI.range %in% c("low-high")] <- 2
 
 ES.frame$Study.Case <- factor(paste(ES.frame$Study.ID,ES.frame$Case.ID,sep="_"))
 
-#############################
-### calculate RR effect sizes
 
-#Effect size calculation
+############################################################################
+### 01.3. Calculate response ratio effect sizes
+### 
+############################################################################
+
+### Effect size calculation
+
 ES.frame[,c("Richness.Log.RR","Richness.Log.RR.Var")] = 
   escalc("ROM",data= ES.frame, append =F,
          m2i = Richness.Mean.Low, m1i = Richness.Mean.High,
@@ -137,4 +149,27 @@ ES.frame[,c("Yield.SMD","Yield.SMD.Var")] =
          sd2i = Yield.SD.Low, sd1i = Yield.SD.High,
          n2i = Yield.N.Low, n1i = Yield.N.High)
 
-write.csv(ES.frame, "Input/ES_table.csv")
+
+
+
+
+
+
+###########################################################################
+### Resterampe
+
+### merge baseline and increased LUI per study ID, case ID
+### reformat table to store baseline and increased in one row
+
+# baseline must be 'no LU', 'baseline LUI' or both c('no LU', 'baseline LUI')
+# compile pairs of intensity level: 
+# intensity.broad: low, medium, high, no LU
+# within.study.intensity: no LU, baseline LUI, increased LUI, single measure within one LUI, pooled measure within one LUI
+
+# two options:
+# within-broad LUI comparisons:
+# intensity.broad %in% c("low","medium","high") & within.study.intensity %in% c("baseline LUI","increased LUI")  
+# levels: low_low, medium_medium, high_high
+# between-broad LUI comparisons:
+# intensity.broad %in% c("low","medium","high") & within.study.intensity %in% c("single measure within one LUI", "pooled measure within one LUI")
+# levels: low_medium, low_high, medium_high

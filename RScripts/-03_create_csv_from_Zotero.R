@@ -1,11 +1,23 @@
-# Purpose: To extract zotero citation data into excel.
-# Version: 1.0
-# Platform: Written on R 2.11, Win 7, Zotero 2.01, but should work on all platforms.#
-###############################################################################
+############################################################################
+### Purpose of this skript module -03 is to:
+###
+### -03.1. To extract zotero citation data into excel.
+###
+### General comments:
+### * This skript is NOT needed to run when doing the analysis. It should work standalone
+### * should be only used by MB
+###
+### Authors: MB, web-sources, ...
+############################################################################
 
-############################
-## The following has variables you need to replace for your setup
-##########################
+
+############################################################################
+### -03.1. Extract zotero citation data into excel.
+### 
+### 
+############################################################################
+
+### The following has variables you need to replace for your setup
 
 # Replace with the path to your Zotero sqlite file
 dbZot <- "~/.mozilla/firefox/rhhh8jil.Default User/zotero/zotero.sqlite"
@@ -14,9 +26,7 @@ dbZot <- "~/.mozilla/firefox/rhhh8jil.Default User/zotero/zotero.sqlite"
 # This will include subfolders as well
 vTopFolders <- c("rawWOSimport")
 
-##########################
-
-#libraries
+### load libraries
 require(sqldf)
 require(gdata)
 require(reshape2)
