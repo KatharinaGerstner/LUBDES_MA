@@ -1,1 +1,0 @@
-list.files("c:/Users/hoppek/Dropbox/sDiv_workshop/Meta-Analysis/DataAnalysis",pa)
