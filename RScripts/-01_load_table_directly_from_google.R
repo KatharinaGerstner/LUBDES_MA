@@ -90,10 +90,6 @@ data <- data[-(which(is.na(data$yield.mean))),]
 ### create study-case identifier
 data$study.case <- factor(paste(data$Study.ID,data$Case.ID,sep="_"))
 
-### dissmiss studies with missing mean for BD or yield
-data <- data[-(which(is.na(data$richness.mean))),]
-data <- data[-(which(is.na(data$yield.mean))),]
-
 
 
 
