@@ -7,6 +7,7 @@
 setwd("C:\\Users\\hoppek\\Documents\\GitHub\\LUBDES_MA") #KG
 #setwd("C:\\Users\\kambach\\Desktop\\aktuelle Arbeiten\\SESYNC\\myAnalysis") #SK
 #setwd("~/Dropbox/SESYNC-UFZ-sDiv-Call Biodiversity and Ecosystem Services/Meta-Analysis/DataAnalysis") #MB
+#setwd("~/git/LUBDES_MA") #MB
 
 ### read .csv file directly downloaded from google docs without any changes
 data <- read.csv("Input/LUBDES coding table v2 - 1. Coding Table version 2.csv",na.strings=c("NA",""))
@@ -101,5 +102,7 @@ data$yield.SE <- data$yield.SD/sqrt(data$X..of.samples.for.YD.measure)
 summary(data[,c("richness.mean", "richness.SD", "X..of.samples.for.BD.measure", "yield.mean", "yield.SD", "X..of.samples.for.YD.measure")]) # does not produce negative SDs
 
 ##################################
+
 ### save imputed data as Rdata
 save(data, file="Input/data.Rdata")
+

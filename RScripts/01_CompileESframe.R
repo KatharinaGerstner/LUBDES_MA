@@ -68,7 +68,7 @@ for(i in unique(paste(data$study.case,data$species.group,sep="-"))){
   print(i)
   
   ### remove some studies from further analysis as these cause error as they have same study.case and species group but diff. species subgroups. TO DO: Decide how to deal with that issue.
-  if(i %in% c("8235-Norvez2013_1-arthropods","8002-Lohmus2013_1-woody plants",paste("9078-Hautier2014_",1:12,"-non-woody plants",sep=""),"516-Higgins1999_1-woody plants")){
+  if(i %in% c("8235-Norvez2013_1-arthropods","8002-Lohmus2013_1-woody plants",paste("9078-Hautier2014_",1:12,"-non-woody plants",sep=""),"516-Higgins1999_1-woody plants",paste("4212-Kembel2008_",1:3,"-all plants",sep=""))){
     print("ERROR. Omit from analysis.")
     next}
   

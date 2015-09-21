@@ -1,4 +1,21 @@
-setwd("C:\\Users\\hoppek\\Documents\\GitHub\\LUBDES_MA") #KG
+############################################################################
+### Purpose of this skript -01 is to:
+###
+### -01.1. set the working directory
+### -01.2. load all libraries needed for subsequent analysis
+### -01.3. load data directly from google docs
+############################################################################
+
+############################################################################
+### -01.1. set the working directory
+###
+### all lines should stay commeted out
+############################################################################
+
+#setwd("C:\\Users\\hoppek\\Documents\\GitHub\\LUBDES_MA") #KG
+#setwd("C:\\Users\\kambach\\Desktop\\aktuelle Arbeiten\\SESYNC\\myAnalysis") #SK
+#setwd("~/Dropbox/SESYNC-UFZ-sDiv-Call Biodiversity and Ecosystem Services/Meta-Analysis/DataAnalysis") #MB
+#setwd("~/git/LUBDES_MA") #MB
 
 # install.packages("devtools")
 library(devtools)
@@ -9,7 +26,7 @@ library(googlesheets)
 
 gs_ls() #follow the displayed url, go to browser and enter your login credentials click accept and copy key back into R
 gs_ls() # once authorized, this will list the files you have in GS
-gs_auth(new_user = TRUE) # you get an unauthorized error
+#gs_auth(new_user = TRUE) # you get an unauthorized error
 
 LUBDES_gsheet<- gs_title("LUBDES coding table v2") # load LUBDES  coding table, this crashes sometimes but seems to work as of April 22 2015
 data <- gs_read(LUBDES_gsheet, ws = "1. Coding Table version 2") # consume data from sheet 1

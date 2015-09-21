@@ -16,32 +16,34 @@ LMM.MA.fit <- function(yi,vi,mods,slab,inner2,outer2){
 ##############################################################################################################
 # TO DO: calculate variance-covariance matrix, esp covariance for between LUI comparisons 
 #  VCov_matrix <- 
-  rma.mv.fit <- rma.mv(yi=yi, V=vi, mods = mods, random = ~factor(inner2)|factor(outer2), struct="CS", data=ES.frame, slab=slab,method="REML", tdist=FALSE, level=95, digits=4, Rscale="cor", sparse=FALSE, verbose=FALSE)
+  inner3<-inner2
+  outer3<-outer2
+  rma.mv.fit <- rma.mv(yi=yi, V=vi, mods = mods, random = ~factor(inner3)|factor(outer3), struct="CS", data=ES.frame, slab=slab,method="REML", tdist=FALSE, level=95, digits=4, Rscale="cor", sparse=FALSE, verbose=FALSE)
   return(rma.mv.fit)
 }
 
 # TO DO: make a list of moderators to be tested, store model results in a list, so they can be plotted in a next step (03_Plotting.r)
 ### Analysis without moderators
-attach(ES.frame)
-Richness.MA.fit <- LMM.MA.fit(yi=Richness.Log.RR, vi=Richness.Log.RR.Var, mods=~1, slab=paste(Study.Case, Low.LUI,High.LUI,sep="_"), inner2=Case.ID, outer2=Study.ID)
-Yield.MA.fit <- LMM.MA.fit(yi=Yield.Log.RR,vi=Yield.Log.RR.Var,mods=~1,slab=paste(Study.Case,Low.LUI,High.LUI,sep="_"),inner=Study.Case,outer=Study.ID)
-detach(ES.frame)
+#attach(ES.frame)
+Richness.MA.fit <- rma.mv(yi=Richness.Log.RR, V=Richness.Log.RR.Var, mods=~1, random = ~factor(Case.ID)|factor(Study.ID), struct="CS", slab=paste(Study.Case, Low.LUI, High.LUI,sep="_"),method="REML", tdist=FALSE, level=95, digits=4, Rscale="cor", sparse=FALSE, verbose=FALSE,data=ES.frame)
+Yield.MA.fit <- rma.mv(yi=Yield.Log.RR,V=Yield.Log.RR.Var,mods=~1, random = ~factor(Case.ID)|factor(Study.ID), struct="CS", slab=paste(Study.Case, Low.LUI, High.LUI,sep="_"),method="REML", tdist=FALSE, level=95, digits=4, Rscale="cor", sparse=FALSE, verbose=FALSE,data=ES.frame)
+#detach(ES.frame)
 save(mods,Richness.MA.fit,Yield.MA.fit, file="Output/MA_model_1.Rdata")
 
 ### Store results in table
 MA.coeffs <- data.frame(Moderator="None",levels=1,mean.Richness=Richness.MA.fit$b,se.Richness=Richness.MA.fit$se,mean.Yield=Yield.MA.fit$b,se.Yield=Yield.MA.fit$se)
 
-moderator.list <- c("Land.use...land.cover","Species.Group","Trophic.Level","LUI.range")
+moderator.list <- c("Land.use...land.cover","Species.Group","Trophic.Level","LUI.range","Product")
 
 for(mods in moderator.list){
   print(mods)
   attach(ES.frame)
-  Richness.MA.fit <- LMM.MA.fit(yi=Richness.Log.RR,vi=Richness.Log.RR.Var,mods=as.formula(paste("~",mods,"-1",sep="")),slab=paste(Study.Case,Low.LUI,High.LUI,sep="_"),inner=Study.Case,outer=Study.ID)
-  Yield.MA.fit <- LMM.MA.fit(yi=Yield.Log.RR,vi=Yield.Log.RR.Var,mods=as.formula(paste("~",mods,"-1",sep="")),slab=paste(Study.Case,Low.LUI,High.LUI,sep="_"),inner=Study.Case,outer=Study.ID)
+  Richness.MA.fit <- rma.mv(yi=Richness.Log.RR,V=Richness.Log.RR.Var,mods=as.formula(paste("~",mods,"-1",sep="")),random = ~factor(Case.ID)|factor(Study.ID), struct="CS", slab=paste(Study.Case, Low.LUI, High.LUI,sep="_"),method="REML", tdist=FALSE, level=95, digits=4, Rscale="cor", sparse=FALSE, verbose=FALSE,data=ES.frame)
+  Yield.MA.fit <- rma.mv(yi=Yield.Log.RR,V=Yield.Log.RR.Var,mods=as.formula(paste("~",mods,"-1",sep="")),random = ~factor(Case.ID)|factor(Study.ID), struct="CS", slab=paste(Study.Case, Low.LUI, High.LUI,sep="_"),method="REML", tdist=FALSE, level=95, digits=4, Rscale="cor", sparse=FALSE, verbose=FALSE,data=ES.frame)
   detach(ES.frame)
   MA.coeffs <- rbind(MA.coeffs,data.frame(Moderator=rep(mods,length(Richness.MA.fit$b)),levels=unlist(lapply(strsplit(rownames(Richness.MA.fit$b),mods),function(x){x[[2]]})),mean.Richness=Richness.MA.fit$b,se.Richness=Richness.MA.fit$se,mean.Yield=Yield.MA.fit$b,se.Yield=Yield.MA.fit$se))
   print(MA.coeffs)
-  save(mods,Richness.MA.fit,Yield.MA.fit, file=paste("Output/MA_model_",mods,".Rdata",sep=""))
+  #save(mods,Richness.MA.fit,Yield.MA.fit, file=paste("Output/MA_model_",mods,".Rdata",sep=""))
 }
 
 write.csv(MA.coeffs, file="Output/MA.coeffs.csv",row.names=F)

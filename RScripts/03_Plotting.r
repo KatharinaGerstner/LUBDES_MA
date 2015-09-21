@@ -49,7 +49,7 @@ for(choose.moderator in as.character(unique(MA.coeffs$Moderator))[-1]){
     print(plot)
   }
 
-ggsave(plot, file = paste("Output/Cross_diagram_",choose.moderator,".png",sep=""), width = 15, height = 8, type = "cairo-png")
+ggsave(plot, file = paste("Cross_diagram_",choose.moderator,".png",sep=""), width = 15, height = 8, type = "cairo-png")
 
 }
 
