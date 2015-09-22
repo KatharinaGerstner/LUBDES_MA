@@ -6,8 +6,10 @@
 ### 01.3. Calculate response ratio effect sizes
 ###
 ### General comments:
-### * 
-###
+### * TO DO: build all correct pairs! e.g. for 2318-Guretzky2005 only the pair medium-low/medium-high is built but not the one between low and medium!
+### * currently also not built: 2x 2997-Kern2006, 6528-Sasaki2011 (pooled medium vs pooled high), 6684-Vintu2011 (low medium)
+###   7577-Mastrangelo2012 (pooled low vs medium or high), 8235-Norvez2013 (Case 1), 8568-Yan2013 (3 high-high cases)
+###   516-Higgins1999, ...
 ### Authors: KG, MB, SK ...
 ############################################################################
 
