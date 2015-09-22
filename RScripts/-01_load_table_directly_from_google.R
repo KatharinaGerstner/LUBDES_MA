@@ -71,10 +71,10 @@ library(ggplot2) # For plotting
 library(scales)
 library(maps) # For map data
 library(rworldmap)
-library(geosphere)
+#library(geosphere)
 library(raster)
-library(shapefiles)
-library(sp)
+#library(shapefiles)
+#library(sp)
 require(rgdal)
 
 
