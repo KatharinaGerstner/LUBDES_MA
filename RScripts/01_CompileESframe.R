@@ -110,10 +110,11 @@ for(i in unique(paste(data$study.case,data$species.group,sep="-"))){
     ES.frame = rbind(ES.frame,table.sort(temp.high.base,temp.high.increase,"high","high"))}
 }
 
-ES.frame$LUI.range <- paste(ES.frame$Low.LUI,ES.frame$High.LUI,sep="-")
-ES.frame$LUI.range[ES.frame$LUI.range %in% c("low-low","medium-medium","high-high")] <- 0
-ES.frame$LUI.range[ES.frame$LUI.range %in% c("low-medium","medium-high")] <- 1
-ES.frame$LUI.range[ES.frame$LUI.range %in% c("low-high")] <- 2
+ES.frame$LUI.range.level <- paste(ES.frame$Low.LUI,ES.frame$High.LUI,sep="-")
+ES.frame$LUI.range <- NULL
+ES.frame$LUI.range[ES.frame$LUI.range.level %in% c("low-low","medium-medium","high-high")] <- 0
+ES.frame$LUI.range[ES.frame$LUI.range.level %in% c("low-medium","medium-high")] <- 1
+ES.frame$LUI.range[ES.frame$LUI.range.level %in% c("low-high")] <- 2
 
 ES.frame$Study.Case <- factor(paste(ES.frame$Study.ID,ES.frame$Case.ID,sep="_"))
 

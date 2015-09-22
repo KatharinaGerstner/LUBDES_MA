@@ -69,7 +69,7 @@ MA.coeffs <- data.frame(Moderator="None",levels=1,mean.Richness=Richness.MA.fit$
 ############################################################################
 
 # define list of moderators
-moderator.list <- c("Land.use...land.cover","Species.Group","Trophic.Level","LUI.range","Product")
+moderator.list <- c("Land.use...land.cover","Species.Group","Trophic.Level","LUI.range.level","Product", "ES.From.BD","WWF_REALM")
 
 # run analysis
 for(mods in moderator.list){

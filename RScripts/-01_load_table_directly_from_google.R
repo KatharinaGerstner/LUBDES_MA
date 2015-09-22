@@ -70,6 +70,13 @@ library(metafor)
 library(ggplot2) # For plotting
 library(scales)
 library(maps) # For map data
+library(rworldmap)
+library(geosphere)
+library(raster)
+library(shapefiles)
+library(sp)
+require(rgdal)
+
 
 ############################################################################
 ### -01.3. load data directly from google docs
