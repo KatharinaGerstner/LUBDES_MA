@@ -17,7 +17,7 @@
 ############################################################################
 
 # set a wd suitable for downloading and extracting Ecoregions shapefile
-#setwd("/tmp") #MB
+setwd("/tmp") #MB
 
 download.file("http://maps.tnc.org/files/shp/terr-ecoregions-TNC.zip", "terr-ecoregions-TNC.zip")
 unzip("terr-ecoregions-TNC.zip")
