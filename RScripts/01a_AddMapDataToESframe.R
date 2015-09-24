@@ -26,6 +26,7 @@ unzip("terr-ecoregions-TNC.zip")
 ecoregions <- readOGR(".","tnc_terr_ecoregions")
 
 # remove unneeded information for extraction, the extract command requests this form of data
+ES.frame <- ES.frame[!is.na(ES.frame$Longitude+ES.frame$Latitude),] # remove NA lonlat
 lonlat <- cbind(ES.frame$Longitude,ES.frame$Latitude)
 
 # extract ecoregions
