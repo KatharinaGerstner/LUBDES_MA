@@ -72,7 +72,7 @@ names(ES.frame) <- c("Study.ID","Case.ID","Low.LUI","High.LUI","Habitat.Type",
 
 ### re-build data to ES.frame using table.sort function
 
-for(i in unique(paste(data$study.case,data$species.group,sep="-"))){
+for(i in unique(data$study.case)){
   
   print(i)
   
@@ -80,12 +80,8 @@ for(i in unique(paste(data$study.case,data$species.group,sep="-"))){
   if(i %in% c("8235-Norvez2013_1-arthropods","8002-Lohmus2013_1-woody plants",paste("9078-Hautier2014_",1:12,"-non-woody plants",sep=""),"516-Higgins1999_1-woody plants",paste("4212-Kembel2008_",1:3,"-all plants",sep=""))){
     print("ERROR. Omit from analysis.")
     next}
-  
-  data.temp = subset(data, paste(data$study.case,data$species.group,sep="-") %in% i)
-  # for between broad LUI comparisons
-  temp.low = subset(data.temp, Within.study.Intensity %in% c("single measure within one LUI","pooled within one LUI","pooled measures within one LUI","baseline LUI", "increased LUI") & Intensity.broad   %in% "low")
-  temp.medium = subset(data.temp, Within.study.Intensity %in% c("single measure within one LUI","pooled within one LUI", "pooled measures within one LUI","baseline LUI", "increased LUI") & Intensity.broad   %in% "medium")
-  temp.high = subset(data.temp, Within.study.Intensity %in% c("single measure within one LUI","pooled within one LUI", "pooled measures within one LUI","baseline LUI", "increased LUI") & Intensity.broad   %in% "high")
+
+  data.temp = subset(data, data$study.case %in% i)
   
   # for within broad LUI comparisons
   temp.low.base = subset(data.temp, Within.study.Intensity %in% "baseline LUI" & Intensity.broad   %in% "low")
@@ -94,32 +90,41 @@ for(i in unique(paste(data$study.case,data$species.group,sep="-"))){
   temp.medium.increase = subset(data.temp, Within.study.Intensity %in% "increased LUI" & Intensity.broad   %in% "medium")
   temp.high.base = subset(data.temp, Within.study.Intensity %in% "baseline LUI" & Intensity.broad   %in% "high")
   temp.high.increase = subset(data.temp, Within.study.Intensity %in% "increased LUI" & Intensity.broad   %in% "high")
-  
-  # TO DO: Include error-catch, such as try()
-  
-  if((nrow(temp.low) + nrow (temp.medium)) == 2){
-    ES.frame = rbind(ES.frame,table.sort(temp.low,temp.medium,"low","medium"))}
-  if((nrow(temp.low) + nrow (temp.high)) == 2){
-    ES.frame = rbind(ES.frame,table.sort(temp.low,temp.high,"low","high"))}
-  if((nrow(temp.medium) + nrow (temp.high)) == 2){
-    ES.frame = rbind(ES.frame,table.sort(temp.medium,temp.high,"medium","high"))}
-  
+
   if((nrow(temp.low.base) + nrow (temp.low.increase)) == 2){
     ES.frame = rbind(ES.frame,table.sort(temp.low.base,temp.low.increase,"low","low"))}
   if((nrow(temp.medium.base) + nrow (temp.medium.increase)) == 2){
     ES.frame = rbind(ES.frame,table.sort(temp.medium.base,temp.medium.increase,"medium","medium"))}
   if((nrow(temp.high.base) + nrow (temp.high.increase)) == 2){
     ES.frame = rbind(ES.frame,table.sort(temp.high.base,temp.high.increase,"high","high"))}
+  
+  ### for between broad LUI comparisons
+  temp.low = subset(data.temp, Within.study.Intensity %in% c("single measure within one LUI","pooled measures within one LUI") & Intensity.broad %in% "low")
+  temp.medium = subset(data.temp, Within.study.Intensity %in% c("single measure within one LUI","pooled measures within one LUI") & Intensity.broad %in% "medium")
+  temp.high = subset(data.temp, Within.study.Intensity %in% c("single measure within one LUI","pooled measures within one LUI") & Intensity.broad %in% "high")
+  
+  if(nrow(temp.low) >1 | nrow(temp.medium) >1 | nrow(temp.high) >1){ 
+    print(paste(i, "single and pooled measures within one LUI"))
+    next
+  }
+
+  if((nrow(temp.low) + nrow (temp.medium)) == 2){
+    ES.frame = rbind(ES.frame,table.sort(temp.low,temp.medium,"low","medium"))}
+  if((nrow(temp.low) + nrow (temp.high)) == 2){
+    ES.frame = rbind(ES.frame,table.sort(temp.low,temp.high,"low","high"))}
+  if((nrow(temp.medium) + nrow (temp.high)) == 2){
+    ES.frame = rbind(ES.frame,table.sort(temp.medium,temp.high,"medium","high"))}
+
 }
 
 ES.frame$LUI.range.level <- paste(ES.frame$Low.LUI,ES.frame$High.LUI,sep="-")
+
 ES.frame$LUI.range <- NULL
 ES.frame$LUI.range[ES.frame$LUI.range.level %in% c("low-low","medium-medium","high-high")] <- 0
 ES.frame$LUI.range[ES.frame$LUI.range.level %in% c("low-medium","medium-high")] <- 1
 ES.frame$LUI.range[ES.frame$LUI.range.level %in% c("low-high")] <- 2
 
-ES.frame$Study.Case <- factor(paste(ES.frame$Study.ID,ES.frame$Case.ID,sep="_"))
-
+ES.frame$Study.Case <- paste(ES.frame$Study.ID,ES.frame$Case.ID,sep="-")
 
 ############################################################################
 ### 01.3. Calculate response ratio effect sizes
