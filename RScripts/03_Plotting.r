@@ -30,20 +30,20 @@ getwd()
 ############################################################################
 
 ### plot study locations using the "classic" way
-newmap <- getMap(resolution = "low")
+#newmap <- getMap(resolution = "low")
 #pdf("map_of_studies.pdf",pointsize=8)
-plot(newmap, main="Distribution of LUBDES studies included in the meta analysis")
-points(data$lon, data$lat, col = "blue", cex = .6, pch=2)
+#plot(newmap, main="Distribution of LUBDES studies included in the meta analysis")
+#points(data$lon, data$lat, col = "blue", cex = .6, pch=2)
 #dev.off()
 
-# ### plot study locations using fancy ggplot - Does NOT work properly #MB
+# ### plot study locations using fancy ggplot - Does NOT work properly #MB - works again! # KG
 
-# world_map <- map_data("world")
-# p <- ggplot(legend=FALSE) +
-#   geom_polygon(data=world_map, aes(x=long, y=lat)) + 
-#   geom_point(data=data, aes(x=longitude..E..W., y=latitude..N..S.), color="blue")
-# p ## looks weird, the reason is the max latitude in data = 2011! - check!
-# ggsave("CaseDistribution.pdf", width=8, height=8, units="cm")
+world_map <- map_data("world")
+p <- ggplot() +
+  geom_polygon(data=world_map, aes(x=long, y=lat, group=group), fill="white",color="black") + 
+  geom_point(data=data, aes(x=longitude..E..W., y=latitude..N..S.), color="blue")
+p ## looks weird, the reason is the max latitude in data = 2011! - check!
+ggsave("CaseDistribution.png", width=8, height=8, units="cm")
 
 ############################################################################
 ### 03.3. Plot cross-diagrams
@@ -52,7 +52,7 @@ points(data$lon, data$lat, col = "blue", cex = .6, pch=2)
 
 ### plot all in one rush
 #TO DO: Plot for no moderators
-for(choose.moderator in as.character(unique(MA.coeffs$Moderator))[-1]){
+for(choose.moderator in as.character(unique(MA.coeffs$Moderator[-1]))){
   ES.moderator.subset <- subset(MA.coeffs, Moderator %in% choose.moderator)
   ES.moderator.subset$Moderator <- factor(ES.moderator.subset$Moderator)
   ES.moderator.subset$levels <- factor(ES.moderator.subset$levels)
@@ -71,7 +71,7 @@ for(choose.moderator in as.character(unique(MA.coeffs$Moderator))[-1]){
   }
   
   if(nrow(ES.moderator.subset) == 1){
-   ggplot() + 
+   plot <- ggplot() + 
       geom_point(data=ES.frame, aes(x=Yield.Log.RR, y=Richness.Log.RR), color="grey", size=3.5) +
       geom_pointrange(data=ES.moderator.subset, aes(x=mean.Yield, y=mean.Richness, ymin=mean.Richness	- (1.96*se.Richness), ymax=mean.Richness	+ (1.96*se.Richness)), color="green", size=1) +
       geom_segment(data=ES.moderator.subset, aes(x=mean.Yield - (1.96*se.Yield), xend=mean.Yield + (1.96*se.Yield), y = mean.Richness, yend = mean.Richness), color="green", size=1) +
@@ -87,3 +87,29 @@ ggsave(plot, file = paste("Cross_diagram_",choose.moderator,".png",sep=""), widt
 
 }
 
+############################################################################
+### 03.4. Forest plots for noLU vs low/medium/high LU
+### 
+############################################################################
+
+### plot all in one rush
+#TO DO: Plot for no moderators
+for(choose.moderator in as.character(unique(MA.coeffs.noLU$Moderator))[-1]){
+  ES.moderator.subset <- subset(MA.coeffs.noLU, Moderator %in% choose.moderator)
+  ES.moderator.subset$Moderator <- factor(ES.moderator.subset$Moderator)
+  ES.moderator.subset$levels <- factor(ES.moderator.subset$levels)
+  
+  if(nrow(ES.moderator.subset) >= 2){
+    plot <- ggplot(ES.moderator.subset, aes(x=levels, y=mean.Richness, ymin=mean.Richness-1.96*se.Richness, ymax=mean.Richness+1.96*se.Richness)) + 
+      geom_pointrange() + 
+      coord_flip() +
+      geom_hline(x=0, linetype="twodash") + # weird: draws the line at x=0!!
+      scale_y_continuous(labels=trans_format("exp", comma_format(digits=2))) + 
+      ylab("Response Ratio") +
+        xlab(ES.moderator.subset$Moderator) #switch because of the coord_flip() above
+    print(plot)
+  }
+  
+  ggsave(plot, file = paste("ForestPlot",choose.moderator,".png",sep=""), width = 15, height = 8, type = "cairo-png")
+  
+}

@@ -32,17 +32,17 @@ lonlat <- cbind(ES.frame$Longitude,ES.frame$Latitude)
 # extract ecoregions
 realms_extract <- extract(ecoregions,lonlat)
 ES.frame <- cbind(ES.frame,realms_extract$WWF_MHTNAM)
-colnames(ES.frame)[which(names(ES.frame) == "realms_extract$WWF_MHTNAM")]<-"WWF_MHTNAM"
+colnames(ES.frame)[which(names(ES.frame) == "realms_extract$WWF_MHTNAM")]<-"BIOME"
 
-### WWF realms:
-# AA	Australasia
-# AN	Antarctic
-# AT	Afrotropic
-# IM	Indo-Malay
-# NA	Nearctic
-# NT	Neotropic
-# OC	Oceania
-# PA	Palearctic
+### for ES.frame.noLU
+# remove unneeded information for extraction, the extract command requests this form of data
+ES.frame.noLU <- ES.frame.noLU[!is.na(ES.frame.noLU$Longitude+ES.frame.noLU$Latitude),] # remove NA lonlat
+lonlat.noLU <- cbind(ES.frame.noLU$Longitude,ES.frame.noLU$Latitude)
+
+# extract ecoregions
+realms_extract <- extract(ecoregions,lonlat.noLU)
+ES.frame.noLU <- cbind(ES.frame.noLU,realms_extract$WWF_MHTNAM)
+colnames(ES.frame.noLU)[which(names(ES.frame.noLU) == "realms_extract$WWF_MHTNAM")]<-"BIOME"
 
 
 

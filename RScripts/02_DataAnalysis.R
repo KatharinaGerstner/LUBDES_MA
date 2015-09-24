@@ -28,10 +28,10 @@
 ############################################################################
 
 
-ES.frame.posVar <- ES.frame[ES.frame$Richness.Log.RR.Var>0 & ES.frame$Yield.Log.RR.Var>0,] # restrict analysis to study cases with positive variances
-ES.frame <- ES.frame.posVar
-ES.frame$LUI.range <- factor(ES.frame$LUI.range)
+ES.frame <- subset(ES.frame, Richness.Log.RR.Var>0 & Yield.Log.RR.Var>0) # restrict analysis to study cases with positive variances
+#ES.frame$LUI.range <- factor(ES.frame$LUI.range)
 
+ES.frame.noLU <- subset(ES.frame.noLU, Richness.Log.RR.Var>0) # restrict analysis to study cases with positive variances
 
 ############################################################################
 ### 02.2. LMM.MA.fit function
@@ -69,7 +69,7 @@ MA.coeffs <- data.frame(Moderator="None",levels=1,mean.Richness=Richness.MA.fit$
 ############################################################################
 
 # define list of moderators
-moderator.list <- c("Land.use...land.cover","Species.Group","Trophic.Level","LUI.range.level","Product", "ES.From.BD","WWF_MHTNAM")
+moderator.list <- c("Land.use...land.cover","Species.Group","Trophic.Level","LUI.range.level","Product", "ES.From.BD","BIOME")
 
 # run analysis
 for(mods in moderator.list){
@@ -81,6 +81,31 @@ for(mods in moderator.list){
   MA.coeffs <- rbind(MA.coeffs,data.frame(Moderator=rep(mods,length(Richness.MA.fit$b)),levels=unlist(lapply(strsplit(rownames(Richness.MA.fit$b),mods),function(x){x[[2]]})),mean.Richness=Richness.MA.fit$b,se.Richness=Richness.MA.fit$se,mean.Yield=Yield.MA.fit$b,se.Yield=Yield.MA.fit$se))
   print(MA.coeffs)
 }
+
+############################################################################
+### 02.5. Analysis with moderators for no LU vs low/medium/high LU
+### 
+############################################################################
+
+### Analysis without moderators
+Richness.MA.fit.noLU <- rma.mv(yi=Richness.Log.RR, V=Richness.Log.RR.Var, mods=~1, random = ~factor(Case.ID)|factor(Study.ID), struct="CS", slab=paste(Study.Case, Low.LUI, High.LUI,sep="_"),method="REML", tdist=FALSE, level=95, digits=4, Rscale="cor", sparse=FALSE, verbose=FALSE,data=ES.frame.noLU)
+
+### Store results in table
+MA.coeffs.noLU <- data.frame(Moderator="None",levels=1,mean.Richness=Richness.MA.fit.noLU$b,se.Richness=Richness.MA.fit.noLU$se)
+
+# define list of moderators
+moderator.list <- c("Land.use...land.cover","Species.Group","Trophic.Level","BIOME")
+
+# run analysis
+for(mods in moderator.list){
+  print(mods)
+  attach(ES.frame.noLU)
+  Richness.MA.fit.noLU <- rma.mv(yi=Richness.Log.RR,V=Richness.Log.RR.Var,mods=as.formula(paste("~",mods,"-1",sep="")),random = ~factor(Case.ID)|factor(Study.ID), struct="CS", slab=paste(Study.Case, Low.LUI, High.LUI,sep="_"),method="REML", tdist=FALSE, level=95, digits=4, Rscale="cor", sparse=FALSE, verbose=FALSE,data=ES.frame.noLU)
+  detach(ES.frame.noLU)
+  MA.coeffs.noLU <- rbind(MA.coeffs.noLU,data.frame(Moderator=rep(mods,length(Richness.MA.fit.noLU$b)),levels=unlist(lapply(strsplit(rownames(Richness.MA.fit.noLU$b),mods),function(x){x[[2]]})),mean.Richness=Richness.MA.fit.noLU$b,se.Richness=Richness.MA.fit.noLU$se))
+  print(MA.coeffs.noLU)
+}
+
 
 ###########################################################################
 ### Resterampe

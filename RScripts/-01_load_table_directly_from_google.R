@@ -141,12 +141,3 @@ data$study.case <- factor(paste(data$Study.ID,data$Case.ID,sep="_"))
 
 # write.csv(data, "Input/LUBDES coding table v2 - 1. Coding Table version 2.csv")
 
-# ### plot study locations
-# library(maps) # For map data
-# library(ggplot2)
-# world_map <- map_data("world")
-# p <- ggplot(legend=FALSE) +
-#   geom_polygon(data=world_map, aes(x=long, y=lat)) + 
-#   geom_point(data=data, aes(x=longitude..E..W., y=latitude..N..S.), color="blue")
-# p ## looks weird, the reason is the max latitude in data = 2011! - check!
-# ggsave("Output/CaseDistribution.pdf", width=8, height=8, units="cm")

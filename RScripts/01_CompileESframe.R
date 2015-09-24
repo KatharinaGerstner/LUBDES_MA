@@ -67,7 +67,13 @@ names(ES.frame) <- c("Study.ID","Case.ID","Low.LUI","High.LUI","Habitat.Type",
                      "Richness.N.High","Yield.Mean.Low","Yield.SD.Low","Yield.N.Low","Yield.Mean.High" ,    
                      "Yield.SD.High","Yield.N.High")
 
-ES.frame.noLU <- ES.frame
+ES.frame.noLU <- data.frame(matrix(ncol=32,nrow=0))
+names(ES.frame.noLU) <- c("Study.ID","Case.ID","Low.LUI","High.LUI","Habitat.Type",        
+                     "Product","ES.From.BD","Fertilization","Irrigation","Pesticides",          
+                     "Grazing","Mowing","Clear.Cut","Selective.Logging","Partial.Logging",     
+                     "Additional.Treatment", "Date.Start","Date.End","Latitude","Longitude",           
+                     "Species.Group","Species.Subgroup","Trophic.Level","Richness.Mean.Low" ,  
+                     "Richness.SD.Low","Richness.N.Low","Richness.Plot.Size","Richness.Mean.High","Richness.SD.High", "Richness.N.High")
 
 # TO DO: remove "pooled within one LUI", change l 83: paste(data$study.case,data$species.group,sep="-") to data$study.case
 
@@ -185,24 +191,17 @@ ES.frame.noLU[,c("Richness.Log.RR","Richness.Log.RR.Var")] =
          sd2i = Richness.SD.Low, sd1i = Richness.SD.High,
          n2i = Richness.N.Low, n1i = Richness.N.High)
 
-ES.frame.noLU[,c("Yield.Log.RR","Yield.Log.RR.Var")] = 
-  escalc("ROM",data= ES.frame.noLU, append =F,
-         m2i = Yield.Mean.Low, m1i = Yield.Mean.High,
-         sd2i = Yield.SD.Low, sd1i = Yield.SD.High,
-         n2i = Yield.N.Low, n1i = Yield.N.High)
-
 ES.frame.noLU[,c("Richness.SMD","Richness.SMD.Var")] =
   escalc("SMDH",data= ES.frame.noLU, append =F,
          m2i = Richness.Mean.Low, m1i = Richness.Mean.High,
          sd2i = Richness.SD.Low, sd1i = Richness.SD.High,
          n2i = Richness.N.Low, n1i = Richness.N.High)
 
-ES.frame.noLU[,c("Yield.SMD","Yield.SMD.Var")] = 
-  escalc("SMDH",data= ES.frame.noLU, append = F,
-         m2i = Yield.Mean.Low, m1i = Yield.Mean.High,
-         sd2i = Yield.SD.Low, sd1i = Yield.SD.High,
-         n2i = Yield.N.Low, n1i = Yield.N.High)
-
+### remove objects from workspace
+rm(temp.noLU,temp.lowLU,temp.mediumLU,temp.highLU,
+   temp.low.base,temp.medium.base,temp.high.base,
+   temp.low.increase,temp.medium.increase,temp.high.increase,
+   temp.low,temp.medium,temp.high)
 
 ###########################################################################
 ### Resterampe
