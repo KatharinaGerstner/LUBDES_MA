@@ -17,19 +17,20 @@
 ############################################################################
 
 # set a wd suitable for downloading and extracting Ecoregions shapefile
-setwd("/tmp") #MB
+setwd("C:/Users/hoppek/Documents/temp") # KG
+#setwd("/tmp") #MB
 
 download.file("http://maps.tnc.org/files/shp/terr-ecoregions-TNC.zip", "terr-ecoregions-TNC.zip")
 unzip("terr-ecoregions-TNC.zip")
 
-ecoregions<-readOGR(".","tnc_terr_ecoregions")
+ecoregions <- readOGR(".","tnc_terr_ecoregions")
 
 # remove unneeded information for extraction, the extract command requests this form of data
-lonlat<-cbind(ES.frame$Longitude,ES.frame$Latitude)
+lonlat <- cbind(ES.frame$Longitude,ES.frame$Latitude)
 
 # extract ecoregions
-realms_extract<-extract(ecoregions,lonlat)
-ES.frame<-cbind(ES.frame,realms_extract$WWF_MHTNAM)
+realms_extract <- extract(ecoregions,lonlat)
+ES.frame <- cbind(ES.frame,realms_extract$WWF_MHTNAM)
 colnames(ES.frame)[which(names(ES.frame) == "realms_extract$WWF_MHTNAM")]<-"WWF_MHTNAM"
 
 ### WWF realms:

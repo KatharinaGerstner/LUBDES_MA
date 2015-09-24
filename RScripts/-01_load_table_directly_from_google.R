@@ -76,6 +76,7 @@ library(raster)
 #library(shapefiles)
 #library(sp)
 require(rgdal)
+library(rgeos)
 
 ############################################################################
 ### -01.3. load data directly from google docs
