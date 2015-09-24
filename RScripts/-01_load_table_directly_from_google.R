@@ -77,6 +77,7 @@ library(raster)
 #library(sp)
 require(rgdal)
 
+#test
 
 ############################################################################
 ### -01.3. load data directly from google docs
