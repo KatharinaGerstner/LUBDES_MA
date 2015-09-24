@@ -67,6 +67,7 @@ names(ES.frame) <- c("Study.ID","Case.ID","Low.LUI","High.LUI","Habitat.Type",
                      "Richness.N.High","Yield.Mean.Low","Yield.SD.Low","Yield.N.Low","Yield.Mean.High" ,    
                      "Yield.SD.High","Yield.N.High")
 
+ES.frame.noLU <- ES.frame
 
 # TO DO: remove "pooled within one LUI", change l 83: paste(data$study.case,data$species.group,sep="-") to data$study.case
 
@@ -77,13 +78,31 @@ for(i in unique(data$study.case)){
   print(i)
   
   ### remove some studies from further analysis as these cause error as they have same study.case and species group but diff. species subgroups. TO DO: Decide how to deal with that issue.
-  if(i %in% c("8235-Norvez2013_1-arthropods","8002-Lohmus2013_1-woody plants",paste("9078-Hautier2014_",1:12,"-non-woody plants",sep=""),"516-Higgins1999_1-woody plants",paste("4212-Kembel2008_",1:3,"-all plants",sep=""))){
-    print("ERROR. Omit from analysis.")
-    next}
+#  if(i %in% c("8235-Norvez2013_1","8002-Lohmus2013_1",paste("9078-Hautier2014_",1:12,sep=""),"516-Higgins1999_1",paste("4212-Kembel2008_",1:3,sep=""))){
+#    print("ERROR. Omit from analysis.")
+#    next}
 
   data.temp = subset(data, data$study.case %in% i)
+
+  ### for nu LUI
+  temp.noLU <- subset(data.temp, Within.study.Intensity %in% "no LU")
+  temp.lowLU = subset(data.temp, Within.study.Intensity %in% c("single measure within one LUI","pooled measures within one LUI") & Intensity.broad %in% "low")
+  temp.mediumLU = subset(data.temp, Within.study.Intensity %in% c("single measure within one LUI","pooled measures within one LUI") & Intensity.broad %in% "medium")
+  temp.highLU = subset(data.temp, Within.study.Intensity %in% c("single measure within one LUI","pooled measures within one LUI") & Intensity.broad %in% "high")
   
-  # for within broad LUI comparisons
+  if(nrow(temp.noLU) > 1 | nrow(temp.lowLU) >1 | nrow(temp.mediumLU) >1 | nrow(temp.highLU) >1){ 
+    print(paste(i, "single and pooled measures within one LUI"))
+    next
+  }
+
+  if((nrow(temp.noLU) + nrow (temp.lowLU)) == 2){
+    ES.frame.noLU = rbind(ES.frame,table.sort(temp.noLU,temp.lowLU,"no LU","low"))}
+  if((nrow(temp.noLU) + nrow (temp.mediumLU)) == 2){
+    ES.frame.noLU = rbind(ES.frame,table.sort(temp.noLU,temp.mediumLU,"no LU","medium"))}
+  if((nrow(temp.noLU) + nrow (temp.highLU)) == 2){
+    ES.frame.noLU = rbind(ES.frame,table.sort(temp.noLU,temp.highLU,"no LU","high"))}
+
+  ### for within broad LUI comparisons
   temp.low.base = subset(data.temp, Within.study.Intensity %in% "baseline LUI" & Intensity.broad   %in% "low")
   temp.low.increase = subset(data.temp, Within.study.Intensity %in% "increased LUI" & Intensity.broad   %in% "low")
   temp.medium.base = subset(data.temp, Within.study.Intensity %in% "baseline LUI" & Intensity.broad   %in% "medium")
@@ -119,12 +138,13 @@ for(i in unique(data$study.case)){
 
 ES.frame$LUI.range.level <- paste(ES.frame$Low.LUI,ES.frame$High.LUI,sep="-")
 
-ES.frame$LUI.range <- NULL
+ES.frame$LUI.range <- NA
 ES.frame$LUI.range[ES.frame$LUI.range.level %in% c("low-low","medium-medium","high-high")] <- 0
 ES.frame$LUI.range[ES.frame$LUI.range.level %in% c("low-medium","medium-high")] <- 1
 ES.frame$LUI.range[ES.frame$LUI.range.level %in% c("low-high")] <- 2
 
 ES.frame$Study.Case <- paste(ES.frame$Study.ID,ES.frame$Case.ID,sep="-")
+ES.frame.noLU$Study.Case <- paste(ES.frame.noLU$Study.ID,ES.frame.noLU$Case.ID,sep="-")
 
 ############################################################################
 ### 01.3. Calculate response ratio effect sizes
@@ -157,10 +177,31 @@ ES.frame[,c("Yield.SMD","Yield.SMD.Var")] =
          sd2i = Yield.SD.Low, sd1i = Yield.SD.High,
          n2i = Yield.N.Low, n1i = Yield.N.High)
 
+############################################################
 
+ES.frame.noLU[,c("Richness.Log.RR","Richness.Log.RR.Var")] = 
+  escalc("ROM",data= ES.frame.noLU, append =F,
+         m2i = Richness.Mean.Low, m1i = Richness.Mean.High,
+         sd2i = Richness.SD.Low, sd1i = Richness.SD.High,
+         n2i = Richness.N.Low, n1i = Richness.N.High)
 
+ES.frame.noLU[,c("Yield.Log.RR","Yield.Log.RR.Var")] = 
+  escalc("ROM",data= ES.frame.noLU, append =F,
+         m2i = Yield.Mean.Low, m1i = Yield.Mean.High,
+         sd2i = Yield.SD.Low, sd1i = Yield.SD.High,
+         n2i = Yield.N.Low, n1i = Yield.N.High)
 
+ES.frame.noLU[,c("Richness.SMD","Richness.SMD.Var")] =
+  escalc("SMDH",data= ES.frame.noLU, append =F,
+         m2i = Richness.Mean.Low, m1i = Richness.Mean.High,
+         sd2i = Richness.SD.Low, sd1i = Richness.SD.High,
+         n2i = Richness.N.Low, n1i = Richness.N.High)
 
+ES.frame.noLU[,c("Yield.SMD","Yield.SMD.Var")] = 
+  escalc("SMDH",data= ES.frame.noLU, append = F,
+         m2i = Yield.Mean.Low, m1i = Yield.Mean.High,
+         sd2i = Yield.SD.Low, sd1i = Yield.SD.High,
+         n2i = Yield.N.Low, n1i = Yield.N.High)
 
 
 ###########################################################################
