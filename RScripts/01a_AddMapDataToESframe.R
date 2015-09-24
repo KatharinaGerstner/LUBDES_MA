@@ -5,7 +5,7 @@
 ###
 ### General comments:
 ### * TO DO: link global data using coordinates and countries
-###   biomes, land use history, NPP
+###   for continous data such as land use history, NPP
 ###
 ### Authors: MB ...
 ############################################################################
@@ -29,8 +29,8 @@ lonlat<-cbind(ES.frame$Longitude,ES.frame$Latitude)
 
 # extract ecoregions
 realms_extract<-extract(ecoregions,lonlat)
-ES.frame<-cbind(ES.frame,realms_extract$WWF_REALM)
-colnames(ES.frame)[which(names(ES.frame) == "realms_extract$WWF_REALM")]<-"WWF_REALM"
+ES.frame<-cbind(ES.frame,realms_extract$WWF_MHTNAM)
+colnames(ES.frame)[which(names(ES.frame) == "realms_extract$WWF_MHTNAM")]<-"WWF_MHTNAM"
 
 ### WWF realms:
 # AA	Australasia

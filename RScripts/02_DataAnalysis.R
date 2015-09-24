@@ -69,7 +69,7 @@ MA.coeffs <- data.frame(Moderator="None",levels=1,mean.Richness=Richness.MA.fit$
 ############################################################################
 
 # define list of moderators
-moderator.list <- c("Land.use...land.cover","Species.Group","Trophic.Level","LUI.range.level","Product", "ES.From.BD","WWF_REALM")
+moderator.list <- c("Land.use...land.cover","Species.Group","Trophic.Level","LUI.range.level","Product", "ES.From.BD","WWF_MHTNAM")
 
 # run analysis
 for(mods in moderator.list){
@@ -92,7 +92,7 @@ for(mods in moderator.list){
 # empirically: calculate correlation matrix of ES for the entire data set and check whether there is a structure, i.e. correlations of ES within one study.case are generally higher
 # if yes (how to determine?): apply theoretic calculations of covariance
 # if no: there is no need to account for non-independen as it comes with increasing number of degrees of freedoms and makes the whole model less robust 
-data.frame(data$Study.Case,data$LUI.comparison)
+# data.frame(data$Study.Case,data$LUI.comparison)
 
 ## Model selection for MA models
 ## Account for scale dependency in biodiversity data
