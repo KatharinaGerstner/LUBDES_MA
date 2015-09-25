@@ -7,7 +7,7 @@
 ### 03.4. 
 ###
 ### General comments:
-### * 
+### * TO DO: change palette for scale_color_brewer() to get rid of the warning "In RColorBrewer::brewer.pal(n, pal) : n too large, allowed maximum for palette Set1 is 9 Returning the palette you asked for with that many colors"
 ###
 ### Authors: KG, MB, SK ...
 ############################################################################
@@ -51,8 +51,7 @@ ggsave("CaseDistribution.png", width=8, height=8, units="cm")
 ############################################################################
 
 ### plot all in one rush
-#TO DO: Plot for no moderators
-for(choose.moderator in as.character(unique(MA.coeffs$Moderator[-1]))){
+for(choose.moderator in as.character(unique(MA.coeffs$Moderator))){
   ES.moderator.subset <- subset(MA.coeffs, Moderator %in% choose.moderator)
   ES.moderator.subset$Moderator <- factor(ES.moderator.subset$Moderator)
   ES.moderator.subset$levels <- factor(ES.moderator.subset$levels)
@@ -65,7 +64,7 @@ for(choose.moderator in as.character(unique(MA.coeffs$Moderator[-1]))){
       geom_hline(data=ES.frame, x=0, linetype="twodash") + geom_vline(data=ES.frame, y=0, linetype="twodash") +
       scale_y_continuous(labels=trans_format("exp",comma_format(digits=2))) + 
       scale_x_continuous(labels=trans_format("exp",comma_format(digits=2))) +
-      scale_colour_brewer(palette="Set1") +
+      scale_colour_brewer(palette="Set1",labels=paste(levels(factor(ES.frame[,which(names(ES.frame) %in% choose.moderator)]))," (",table(factor(ES.frame[,which(names(ES.frame) %in% choose.moderator)])), ")", sep="")) +
       ylab("RR (Species Richness)") + xlab("RR (Yield)") + labs(color=choose.moderator)
     print(plot)
   }
@@ -100,13 +99,13 @@ for(choose.moderator in as.character(unique(MA.coeffs.noLU$Moderator))[-1]){
   ES.moderator.subset$levels <- factor(ES.moderator.subset$levels)
   
   if(nrow(ES.moderator.subset) >= 2){
-    plot <- ggplot(ES.moderator.subset, aes(x=levels, y=mean.Richness, ymin=mean.Richness-1.96*se.Richness, ymax=mean.Richness+1.96*se.Richness)) + 
+    plot <- ggplot(ES.moderator.subset, aes(x=paste(levels(factor(ES.frame.noLU[,which(names(ES.frame.noLU) %in% choose.moderator)]))," (",table(factor(ES.frame.noLU[,which(names(ES.frame.noLU) %in% choose.moderator)])), ")", sep=""), y=mean.Richness, ymin=mean.Richness-1.96*se.Richness, ymax=mean.Richness+1.96*se.Richness)) + 
       geom_pointrange() + 
       coord_flip() +
       geom_hline(x=0, linetype="twodash") + # weird: draws the line at x=0!!
       scale_y_continuous(labels=trans_format("exp", comma_format(digits=2))) + 
       ylab("Response Ratio") +
-        xlab(ES.moderator.subset$Moderator) #switch because of the coord_flip() above
+      xlab(ES.moderator.subset$Moderator)  #switch because of the coord_flip() above
     print(plot)
   }
   
