@@ -4,7 +4,7 @@
 ### 03.1. Specify output directory in the dropbox or other local folder - NOT in the git directory!
 ### 03.2. Plot map of studies
 ### 03.3. Plot cross-diagrams
-### 03.4. 
+### 03.4. Forest plots for noLU vs low/medium/high LU
 ###
 ### General comments:
 ### * TO DO: change palette for scale_color_brewer() to get rid of the warning "In RColorBrewer::brewer.pal(n, pal) : n too large, allowed maximum for palette Set1 is 9 Returning the palette you asked for with that many colors"
