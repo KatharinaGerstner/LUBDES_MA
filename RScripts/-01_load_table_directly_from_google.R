@@ -24,6 +24,8 @@
 ### -01.2. load all libraries needed for subsequent analysis
 ### -01.3. load data directly from google docs
 ### -01.4. adapt data structure
+### -01a.1. load screening data directly from google docs
+### -01a.2. plot pie charts about statistics
 ### 00.1. impute missing data using mice package
 ### 00.2. impute missing data using mi package 
 ### 01.1. table.sort function
