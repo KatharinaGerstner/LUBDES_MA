@@ -5,6 +5,8 @@
 ### 02.2. LMM.MA.fit function
 ### 02.3. Analysis without moderators
 ### 02.4. Analysis with moderators
+### 02.5. Analysis with moderators for no LU vs low/medium/high LU
+### 02.6. multivariate analysis with and without moderators (not yet working)
 ###
 ### General comments:
 ### * 02.2. LMM.MA.fit function is currently not needed
@@ -105,6 +107,30 @@ for(mods in moderator.list){
   MA.coeffs.noLU <- rbind(MA.coeffs.noLU,data.frame(Moderator=rep(mods,length(Richness.MA.fit.noLU$b)),levels=unlist(lapply(strsplit(rownames(Richness.MA.fit.noLU$b),mods),function(x){x[[2]]})),mean.Richness=Richness.MA.fit.noLU$b,se.Richness=Richness.MA.fit.noLU$se))
   print(MA.coeffs.noLU)
 }
+
+############################################################################
+### 02.6. multivariate analysis with and without moderators (not yet working)
+### (cf. ?dat.berkey1998)
+############################################################################
+# ### restructure ES.frame: Richness.Log.RR, Yield.Log.RR in separate rows
+# ES.frame.reduced <- ES.frame[,c("Study.Case","Land.use...land.cover","Species.Group","Species.Subgroup","Trophic.Level","LUI.range.level","LUI.range","BIOME")]
+# dat <- rbind(ES.frame.reduced,ES.frame.reduced)
+# dat$outcome <- c(rep("Richness",nrow(ES.frame)),rep("Yield",nrow(ES.frame)))
+# 
+# ### compute covariance matrix between Richness and Yield RR per Study.Case
+# covar <- cov(ES.frame$Richness.Log.RR.Var,ES.frame$Yield.Log.RR.Var) ## don't know how to determine covariance of Richness and Yield RR per Study.Case
+# dat$Log.RR <- c(ES.frame$Richness.Log.RR,ES.frame$Yield.Log.RR)
+# dat$Richness.Log.RR.Var <- c(cbind(t(ES.frame$Richness.Log.RR.Var,covar)))
+# dat$Yield.Log.RR.Var <- c(cbind(t(covar,ES.frame$Yield.Log.RR.Var)))
+# 
+# ### construct list of the variance-covariance matrices of the observed outcomes for the studies
+# V <- lapply(split(dat[,c("Richness.Log.RR.Var", "Yield.Log.RR.Var")], ES.frame$Study.Case), as.matrix)
+# ### construct block diagonal matrix
+# V <- bldiag(V)
+# 
+# ### Fit multivariate meta-analytic model
+# MA.fit <- rma.mv(yi, V, mods = ~ outcome + outcome:I(year - 1983) - 1,
+#                  random = ~ outcome | trial, struct="UN", data=dat, method="ML")
 
 
 ###########################################################################
