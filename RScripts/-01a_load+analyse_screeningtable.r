@@ -35,9 +35,18 @@ duplicates <- screening.data[duplicated(screening.data$TITLE),] ## TO DO: Check 
 screening.data <- screening.data[!duplicated(screening.data$TITLE),]
 
 screening.data$Coding_Decision_final <- screening.data$Coding_Decision..1
-screening.data$Coding_Decision_final[which(screening.data$Coding_Decision..1=="Re-evaluate use for study")] <- screening.data$Coding_Decision..2[which(screening.data$Coding_Decision..1=="Re-evaluate use for study")]
-stats.todo <- 
-stats <- table(screening.data$Coding_Decision_final, exclude=NULL) # not found==no access to publication?
+screening.data$Coding_Decision_final[!is.na(screening.data$Coding_Decision..2)] <- screening.data$Coding_Decision..2[!is.na(screening.data$Coding_Decision..2)]
+
+screening.data$Status_Decision <- factor(paste(screening.data$Status,screening.data$Coding_Decision_final,sep="_"))
+
+# screening.data$Status_final <- screening.data$Status
+# screening.data$Status_final[c("study removed after evaluation","study removed during coding")] <- "Rejected"
+# screening.data$Status_final[names(table(screening.data$Status, exclude=NULL))[grep("will code",names(table(screening.data$Status, exclude=NULL)))]] <- "To be coded"
+# screening.data$Status_final[is.na(screening.data$Status_final)&] <- "Pending discussion"
+
+#stats.todo <- 
+#stats <- table(screening.data$Coding_Decision_final, exclude=NULL) # not found==no access to publication?
+#stats.recoded <- data.frame(Rejected=,Coded,ToCode,ToBeDiscussed)
 
 png(file=paste(getwd(),"/piechart_screen_total.png",sep=""))
 pie(c(sum(stats[1:9]),stats[10]), labels=paste(c("Screened","Not yet screened")," (",c(sum(stats[1:9]),stats[10]),")",sep=""), col=rainbow(2))
