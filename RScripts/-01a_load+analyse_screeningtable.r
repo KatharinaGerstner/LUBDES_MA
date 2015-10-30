@@ -39,6 +39,18 @@ screening.data$Coding_Decision_final[!is.na(screening.data$Coding_Decision..2)] 
 
 screening.data$Status_Decision <- factor(paste(screening.data$Status,screening.data$Coding_Decision_final,sep="_"))
 
+screen1 <- table(screening.data$Use_for_Study)
+sum(screen1[c("Definitely","Maybe-High")])/sum(screen1[c("Definitely","Maybe-High","Maybe-Low", "No","No ")])
+screen1["ML-Yes"]/sum(screen1[c("ML-Yes","ML-No")])
+
+screen2 <- subset(screening.data, Use_for_Study %in% c("Definitely","Maybe-High","ML-Yes"))
+stats1 <- table(screen2$Coding_Decision_final,exclude=NULL)
+pie(c(sum(stats1[1:(length(stats1)-1)]),stats1[length(stats1)]), labels=paste(c("Screened","Not yet screened")," (",c(sum(stats1[1:(length(stats1)-1)]),stats1[length(stats1)]),")",sep=""), col=rainbow(2))
+
+stats2 <- table(screen2$Status)
+temp <- data.frame(accepted=sum(stats2["coding complete"]), ToDo=sum(stats2)-sum(stats2[c("coding complete","study removed during coding", "study removed after evaluation")]), rejected=sum(stats2[c("coding complete","study removed during coding", "study removed after evaluation")]))
+pie(as.numeric(temp),labels=paste(names(temp)," (",temp, ")",sep=""),col=rainbow(length(temp)))
+
 # screening.data$Status_final <- screening.data$Status
 # screening.data$Status_final[c("study removed after evaluation","study removed during coding")] <- "Rejected"
 # screening.data$Status_final[names(table(screening.data$Status, exclude=NULL))[grep("will code",names(table(screening.data$Status, exclude=NULL)))]] <- "To be coded"
