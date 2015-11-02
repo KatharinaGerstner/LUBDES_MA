@@ -37,6 +37,7 @@ table.sort = function(dat.low,dat.high,low,high){
              
              "Date.Start" =dat.low$Date.of.study..start, "Date.End" =dat.low$Date.of.study..end, 
              "Latitude" =dat.low$latitude..N..S., "Longitude" =dat.low$longitude..E..W.,
+             "Country.Code" = dat.low$Country,
              
              "Species.Group" =dat.low$species.group, "Species.Subgroup" =dat.low$species.subgroup.if.provided, "Trophic.Level" =dat.low$trophic.level..species.guild,
              #"Product" = dat.low$product,
@@ -57,21 +58,21 @@ table.sort = function(dat.low,dat.high,low,high){
 
 ### create empty ES.frame
 
-ES.frame <- data.frame(matrix(ncol=36,nrow=0))
+ES.frame <- data.frame(matrix(ncol=37,nrow=0))
 names(ES.frame) <- c("Study.ID","Case.ID","Low.LUI","High.LUI","Habitat.Type",        
                      "Product","ES.From.BD","Fertilization","Irrigation","Pesticides",          
                      "Grazing","Mowing","Clear.Cut","Selective.Logging","Partial.Logging",     
-                     "Additional.Treatment", "Date.Start","Date.End","Latitude","Longitude",           
+                     "Additional.Treatment", "Date.Start","Date.End","Latitude","Longitude", "Country.Code",          
                      "Species.Group","Species.Subgroup","Trophic.Level","Richness.Mean.Low" ,  
                      "Richness.SD.Low","Richness.N.Low","Richness.Plot.Size","Richness.Mean.High","Richness.SD.High",    
                      "Richness.N.High","Yield.Mean.Low","Yield.SD.Low","Yield.N.Low","Yield.Mean.High" ,    
                      "Yield.SD.High","Yield.N.High")
 
-ES.frame.noLU <- data.frame(matrix(ncol=32,nrow=0))
+ES.frame.noLU <- data.frame(matrix(ncol=33,nrow=0))
 names(ES.frame.noLU) <- c("Study.ID","Case.ID","Low.LUI","High.LUI","Habitat.Type",        
                      "Product","ES.From.BD","Fertilization","Irrigation","Pesticides",          
                      "Grazing","Mowing","Clear.Cut","Selective.Logging","Partial.Logging",     
-                     "Additional.Treatment", "Date.Start","Date.End","Latitude","Longitude",           
+                     "Additional.Treatment", "Date.Start","Date.End","Latitude","Longitude", "Country.Code",          
                      "Species.Group","Species.Subgroup","Trophic.Level","Richness.Mean.Low" ,  
                      "Richness.SD.Low","Richness.N.Low","Richness.Plot.Size","Richness.Mean.High","Richness.SD.High", "Richness.N.High")
 

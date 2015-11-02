@@ -4,21 +4,21 @@
 ### 01a.1. Intersect studies with global maps of WWF_REALMs Ecoregions
 ###
 ### General comments:
-### * TO DO: link global data using coordinates and countries
-###   for continous data such as land use history, NPP
+### * TO DO: download maps and store them, link global data using coordinates and countries
+###   for continuous data such as land use history, NPP
 ###
 ### Authors: MB ...
 ############################################################################
+
+# set a wd suitable for downloading and extracting Ecoregions shapefile
+setwd("C:/Users/hoppek/Documents/temp") # KG
+#setwd("/tmp") #MB
 
 ############################################################################
 ### 01a.1. Intersect studies with global maps of WWF_REALMs Ecoregions
 ### 
 ### 
 ############################################################################
-
-# set a wd suitable for downloading and extracting Ecoregions shapefile
-setwd("C:/Users/hoppek/Documents/temp") # KG
-#setwd("/tmp") #MB
 
 download.file("http://maps.tnc.org/files/shp/terr-ecoregions-TNC.zip", "terr-ecoregions-TNC.zip")
 unzip("terr-ecoregions-TNC.zip")
@@ -44,7 +44,14 @@ realms_extract <- extract(ecoregions,lonlat.noLU)
 ES.frame.noLU <- cbind(ES.frame.noLU,realms_extract$WWF_MHTNAM)
 colnames(ES.frame.noLU)[which(names(ES.frame.noLU) == "realms_extract$WWF_MHTNAM")]<-"BIOME"
 
+############################################################################
+### 01a.2. Intersect studies with global maps of GDP per capita
+############################################################################
 
+#download.file("http://databank.worldbank.org/data/reports.aspx?source=2&type=metadata&series=NY.GDP.MKTP.CD", destfile="GDP_2000")
+unzip("GDP_per_capita.zip")
+GDP.pc <- read.csv("ny.gdp.pcap.cd_Indicator_en_csv_v2.csv",skip=4)
+GDP.pc.2000 <- data.frame(Country.Code=GDP.pc$Country.Code,GDP.pc.2000=GDP.pc$X2000)
 
-
-
+ES.frame <- join(ES.frame,GDP.pc.2000,by="Country.Code")
+ES.frame.noLU <- join(ES.frame.noLU,GDP.pc.2000,by="Country.Code")

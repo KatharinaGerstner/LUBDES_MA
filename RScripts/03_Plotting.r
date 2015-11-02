@@ -51,8 +51,8 @@ ggsave("CaseDistribution.png", width=8, height=8, units="cm")
 ############################################################################
 
 ### plot all in one rush
-for(choose.moderator in as.character(unique(MA.coeffs$Moderator))){
-  ES.moderator.subset <- subset(MA.coeffs, Moderator %in% choose.moderator)
+for(choose.moderator in as.character(unique(MA.coeffs.cat$Moderator))){
+  ES.moderator.subset <- subset(MA.coeffs.cat, Moderator %in% choose.moderator)
   ES.moderator.subset$Moderator <- factor(ES.moderator.subset$Moderator)
   ES.moderator.subset$levels <- factor(ES.moderator.subset$levels)
   

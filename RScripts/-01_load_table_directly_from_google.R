@@ -36,11 +36,10 @@
 ### 02.2. LMM.MA.fit function
 ### 02.3. Analysis without moderators
 ### 02.4. Analysis with moderators
-### 02.5. Analysis with moderators for no LU vs low/medium/high LU
-### 02.6. multivariate analysis with and without moderators (not yet working)
 ### 03.1. Specify output directory in the dropbox or other local folder - NOT in the git directory!
 ### 03.2. Plot map of studies
 ### 03.3. Plot cross-diagrams
+### 03.4. Forest plots for noLU vs low/medium/high LU
 ###
 ### Authors: MB, KG, ...
 ############################################################################
@@ -81,6 +80,8 @@ library(raster)
 #library(sp)
 require(rgdal)
 library(rgeos)
+library(RColorBrewer)
+library(plyr) # for joining datasets
 
 ############################################################################
 ### -01.3. load data directly from google docs
