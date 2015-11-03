@@ -86,6 +86,44 @@ ggsave(plot, file = paste("Cross_diagram_",choose.moderator,".png",sep=""), widt
 
 }
 
+for(i in 2:nrow(MA.coeffs.cont)){
+  print(MA.coeffs.cont$Moderator[i])
+  ES.moderator.subset <- MA.coeffs.cont[i,]
+  
+  ## Transform prediction list from rma to dataframe
+  richness.preds.df <- data.frame(slab=preds.richness[[i]]$slab, pred.richness=preds.richness[[i]]$pred, cr.lb.richness=preds.richness[[i]]$cr.lb, cr.ub.richness=preds.richness[[i]]$cr.ub)
+  yield.preds.df <- data.frame(slab=preds.yield[[i]]$slab, pred.yield=preds.yield[[i]]$pred, cr.lb.yield=preds.yield[[i]]$cr.lb, cr.ub.yield=preds.yield[[i]]$cr.ub)
+  
+  ### combine ES.frame with predictions dataframe
+  pred.frame <- subset(ES.frame,Study.Case %in% sapply(richness.preds$slab,function(x) strsplit(x,"_")[[1]][1]))
+  pred.frame$slab <- paste(pred.frame$Study.Case, pred.frame$Low.LUI, pred.frame$High.LUI,sep="_")
+  pred.frame <- join_all(list(pred.frame,richness.preds.df,yield.preds.df),by="slab")
+  
+  ### Transform predictions dataframe so that there is one column Response (Richness, Yield) and in another the corresponding logRR
+  pred.frame.trans <- rbind(pred.frame,pred.frame)
+  pred.frame.trans$Response <- c(rep("Richness",nrow(pred.frame)),rep("Yield",nrow(pred.frame)))
+  pred.frame.trans$Log.RR <- c(pred.frame$Richness.Log.RR,pred.frame$Yield.Log.RR)
+  
+  Richness.reg.line <- function(xvar){
+    ES.moderator.subset$Richness.intercept+ES.moderator.subset$Richness.slope*xvar
+  }
+  Yield.reg.line <- function(xvar){
+    ES.moderator.subset$Yield.intercept+ES.moderator.subset$Yield.slope*xvar
+  }
+  
+  plot1 <- ggplot(data=pred.frame.trans, aes(x=GDP.pc.2000)) + 
+    geom_point(aes(y=Log.RR, color=Response), size=3.5) +
+    geom_abline(intercept=ES.moderator.subset$Richness.intercept, slope=ES.moderator.subset$Richness.slope,color="red") +
+    geom_abline(intercept=ES.moderator.subset$Yield.intercept, slope=ES.moderator.subset$Yield.slope,color="blue") +
+    geom_ribbon(aes(ymin=cr.lb.richness,ymax=cr.ub.richness),fill="red",alpha=0.2) +
+    geom_ribbon(aes(ymin=cr.lb.yield,ymax=cr.ub.yield),fill="blue",alpha=0.2) +
+    scale_y_continuous(labels=trans_format("exp",comma_format(digits=2))) + 
+    scale_colour_manual(values=c("red","blue"),labels=c("Richness","Yield")) +
+    ylab("RR") 
+  
+  print(plot1)
+  ggsave(plot1, file = paste("Scatterplot_",choose.moderator,".png",sep=""), width = 15, height = 8, type = "cairo-png")
+}
 ############################################################################
 ### 03.4. Forest plots for noLU vs low/medium/high LU
 ### 

@@ -20,8 +20,8 @@ setwd("C:/Users/hoppek/Documents/temp") # KG
 ### 
 ############################################################################
 
-download.file("http://maps.tnc.org/files/shp/terr-ecoregions-TNC.zip", "terr-ecoregions-TNC.zip")
-unzip("terr-ecoregions-TNC.zip")
+#download.file("http://maps.tnc.org/files/shp/terr-ecoregions-TNC.zip", "terr-ecoregions-TNC.zip")
+#unzip("terr-ecoregions-TNC.zip")
 
 ecoregions <- readOGR(".","tnc_terr_ecoregions")
 
@@ -55,3 +55,6 @@ GDP.pc.2000 <- data.frame(Country.Code=GDP.pc$Country.Code,GDP.pc.2000=GDP.pc$X2
 
 ES.frame <- join(ES.frame,GDP.pc.2000,by="Country.Code")
 ES.frame.noLU <- join(ES.frame.noLU,GDP.pc.2000,by="Country.Code")
+
+### remove objectes to save workspace
+rm(ecoregions,lonlat,realms_extract,lonlat.noLU,GDP.pc,GDP.pc.2000)

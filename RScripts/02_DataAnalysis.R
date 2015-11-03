@@ -60,6 +60,8 @@ ES.frame.noLU <- subset(ES.frame.noLU, Richness.Log.RR.Var>0) # restrict analysi
 ### Analysis without moderators
 Richness.MA.fit <- rma.mv(yi=Richness.Log.RR, V=Richness.Log.RR.Var, mods=~1, random = ~factor(Case.ID)|factor(Study.ID), struct="CS", slab=paste(Study.Case, Low.LUI, High.LUI,sep="_"),method="REML", tdist=FALSE, level=95, digits=4, Rscale="cor", sparse=FALSE, verbose=FALSE,data=ES.frame)
 Yield.MA.fit <- rma.mv(yi=Yield.Log.RR,V=Yield.Log.RR.Var,mods=~1, random = ~factor(Case.ID)|factor(Study.ID), struct="CS", slab=paste(Study.Case, Low.LUI, High.LUI,sep="_"),method="REML", tdist=FALSE, level=95, digits=4, Rscale="cor", sparse=FALSE, verbose=FALSE,data=ES.frame)
+preds.richness <- predict.rma(Richness.MA.fit) 
+preds.yield <- predict.rma(Yield.MA.fit) 
 
 ### Store results in table
 MA.coeffs.cat <- data.frame(Moderator="None",levels=1,mean.Richness=Richness.MA.fit$b,se.Richness=Richness.MA.fit$se,mean.Yield=Yield.MA.fit$b,se.Yield=Yield.MA.fit$se)
@@ -92,6 +94,8 @@ for(mods in moderator.list.cont){
   detach(ES.frame)
   MA.coeffs.cont <- rbind(MA.coeffs.cont,data.frame(Moderator=mods, Richness.intercept=Richness.MA.fit$b[1], Richness.slope=Richness.MA.fit$b[2], Richness.se.intercept=Richness.MA.fit$se[1], Richness.se.slope=Richness.MA.fit$se[2], Yield.intercept=Yield.MA.fit$b[1], Yield.slope=Yield.MA.fit$b[2], Yield.se.intercept=Yield.MA.fit$se[1], Yield.se.slope=Yield.MA.fit$se[2]))
   print(MA.coeffs.cont)
+  preds.richness <- list(preds.richness, predict.rma(Richness.MA.fit)) 
+  preds.yield <- list(preds.yield, predict.rma(Yield.MA.fit)) 
 }
 
 ############################################################################
