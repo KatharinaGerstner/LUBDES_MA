@@ -95,7 +95,7 @@ for(i in 2:nrow(MA.coeffs.cont)){
   yield.preds.df <- data.frame(slab=preds.yield[[i]]$slab, pred.yield=preds.yield[[i]]$pred, cr.lb.yield=preds.yield[[i]]$cr.lb, cr.ub.yield=preds.yield[[i]]$cr.ub)
   
   ### combine ES.frame with predictions dataframe
-  pred.frame <- subset(ES.frame,Study.Case %in% sapply(richness.preds$slab,function(x) strsplit(x,"_")[[1]][1]))
+  pred.frame <- subset(ES.frame,Study.Case %in% sapply(as.character(richness.preds.df$slab),function(x) strsplit(x,"_")[[1]][1]))
   pred.frame$slab <- paste(pred.frame$Study.Case, pred.frame$Low.LUI, pred.frame$High.LUI,sep="_")
   pred.frame <- join_all(list(pred.frame,richness.preds.df,yield.preds.df),by="slab")
   
