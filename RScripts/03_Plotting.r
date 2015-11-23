@@ -41,9 +41,9 @@ getwd()
 world_map <- map_data("world")
 p <- ggplot() +
   geom_polygon(data=world_map, aes(x=long, y=lat, group=group), fill="white",color="black") + 
-  geom_point(data=data, aes(x=longitude..E..W., y=latitude..N..S.), color="blue")
+  geom_point(data=data, aes(x=as.numeric(longitude..E..W.), y=as.numeric(latitude..N..S.)), color="blue")
 p ## looks weird, the reason is the max latitude in data = 2011! - check!
-ggsave("CaseDistribution.png", width=8, height=8, units="cm")
+ggsave(path2temp %+% "/CaseDistribution.png", width=8, height=8, units="cm")
 
 ############################################################################
 ### 03.3. Plot cross-diagrams
@@ -82,7 +82,7 @@ for(choose.moderator in as.character(unique(MA.coeffs.cat$Moderator))){
     print(plot)
   }
 
-ggsave(plot, file = paste("Cross_diagram_",choose.moderator,".png",sep=""), width = 15, height = 8, type = "cairo-png")
+ggsave(plot, file = paste(path2temp %+% "/Cross_diagram_",gsub(".","",choose.moderator,fixed=T),".png",sep=""), width = 15, height = 8, type = "cairo-png")
 
 }
 
@@ -122,7 +122,7 @@ for(i in 2:nrow(MA.coeffs.cont)){
     ylab("RR") 
   
   print(plot1)
-  ggsave(plot1, file = paste("Scatterplot_",choose.moderator,".png",sep=""), width = 15, height = 8, type = "cairo-png")
+  ggsave(plot1, file = paste(path2temp %+% "/Scatterplot_",gsub(".","",MA.coeffs.cont$Moderator[i],fixed=T),".png",sep=""), width = 15, height = 8, type = "cairo-png")
 }
 ############################################################################
 ### 03.4. Forest plots for noLU vs low/medium/high LU
@@ -147,6 +147,6 @@ for(choose.moderator in as.character(unique(MA.coeffs.noLU$Moderator))[-1]){
     print(plot)
   }
   
-  ggsave(plot, file = paste("ForestPlot",choose.moderator,".png",sep=""), width = 15, height = 8, type = "cairo-png")
+  ggsave(plot, file = paste(path2temp %+% "/ForestPlot",gsub(".","",choose.moderator,fixed=T),".png",sep=""), width = 15, height = 8, type = "cairo-png")
   
 }
