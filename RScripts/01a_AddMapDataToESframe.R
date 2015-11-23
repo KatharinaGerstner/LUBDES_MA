@@ -11,8 +11,8 @@
 ############################################################################
 
 # set a wd suitable for downloading and extracting Ecoregions shapefile
-#setwd("C:/Users/hoppek/Documents/temp") # KG
-setwd("/tmp") #MB
+# setwd("C:/Users/hoppek/Documents/temp") # KG
+#setwd("/tmp") #MB
 
 ############################################################################
 ### 01a.1. Intersect studies with global maps of WWF_REALMs Ecoregions
@@ -20,10 +20,10 @@ setwd("/tmp") #MB
 ### 
 ############################################################################
 
-download.file("http://maps.tnc.org/files/shp/terr-ecoregions-TNC.zip", "terr-ecoregions-TNC.zip")
-unzip("terr-ecoregions-TNC.zip")
+#download.file("http://maps.tnc.org/files/shp/terr-ecoregions-TNC.zip", path2temp %+% "/terr-ecoregions-TNC.zip")
+#unzip(path2temp %+% "/terr-ecoregions-TNC.zip")
 
-ecoregions <- readOGR(".","tnc_terr_ecoregions")
+ecoregions <- readOGR(path2temp,"tnc_terr_ecoregions")
 
 # remove unneeded information for extraction, the extract command requests this form of data
 ES.frame <- ES.frame[!is.na(ES.frame$Longitude+ES.frame$Latitude),] # remove NA lonlat
@@ -48,12 +48,12 @@ colnames(ES.frame.noLU)[which(names(ES.frame.noLU) == "realms_extract$WWF_MHTNAM
 ### 01a.2. Intersect studies with global maps of GDP per capita
 ############################################################################
 
-### go to "http://databank.worldbank.org/data/reports.aspx?source=2&type=metadata&series=NY.GDP.MKTP.CD#" 
-### and download the data as csv (top right corner), the file will be called "Data_Extract_From_World_Development_Indicators.zip". 
+### go to "http://data.worldbank.org/indicator/NY.GDP.PCAP.CD/countries" 
+### and download the data as csv (top right corner), the file will be called "ny.gdp.pcap.cd_Indicator_en_csv_v2.zip". 
 ### Put it in your active working directory and continue
 
-unzip("Data_Extract_From_World_Development_Indicators.zip")
-GDP.pc <- read.csv("Data_Extract_From_World_Development_Indicators_Data.csv")
+unzip(path2temp %+% "/ny.gdp.pcap.cd_Indicator_en_csv_v2.zip")
+GDP.pc <- read.csv(path2temp %+% "/ny.gdp.pcap.cd_Indicator_en_csv_v2.csv",skip=4)
 GDP.pc.2000 <- data.frame(Country.Code=GDP.pc$Country.Code,GDP.pc.2000=GDP.pc$X2000)
 
 ES.frame <- join(ES.frame,GDP.pc.2000,by="Country.Code")

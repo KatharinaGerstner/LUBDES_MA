@@ -36,18 +36,17 @@ table.sort = function(dat.low,dat.high,low,high){
              "Additional.Treatment" =dat.high$Additional.Treatment,
              
              "Date.Start" =dat.low$Date.of.study..start, "Date.End" =dat.low$Date.of.study..end, 
-             "Latitude" =dat.low$latitude..N..S., "Longitude" =dat.low$longitude..E..W.,
+             "Latitude" =as.numeric(dat.low$latitude..N..S.), "Longitude" =as.numeric(dat.low$longitude..E..W.),
              "Country.Code" = dat.low$Country,
              
              "Species.Group" =dat.low$species.group, "Species.Subgroup" =dat.low$species.subgroup.if.provided, "Trophic.Level" =dat.low$trophic.level..species.guild,
              #"Product" = dat.low$product,
              
-             "Richness.Mean.Low" =dat.low$richness.mean, "Richness.SD.Low" =dat.low$richness.SD, "Richness.N.Low" =dat.low$X..of.samples.for.BD.measure, 
-             "Richness.Plot.Size" =dat.low$sampled.area,
-             "Richness.Mean.High" = dat.high$richness.mean, "Richness.SD.High" =dat.high$richness.SD, "Richness.N.High" =dat.high$X..of.samples.for.BD.measure,
-             
-             "Yield.Mean.Low" =dat.low$yield.mean, "Yield.SD.Low" =dat.low$yield.SD, "Yield.N.Low" =dat.low$X..of.samples.for.YD.measure,
-             "Yield.Mean.High" =dat.high$yield.mean, "Yield.SD.High" =dat.high$yield.SD, "Yield.N.High" =dat.high$X..of.samples.for.YD.measure)
+             "Richness.Mean.Low" = as.numeric(dat.low$richness.mean), "Richness.SD.Low" =as.numeric(dat.low$richness.SD), "Richness.N.Low" =as.numeric(dat.low$X..of.samples.for.BD.measure), 
+             "Richness.Plot.Size" = as.numeric(dat.low$sampled.area),
+             "Richness.Mean.High" = as.numeric(dat.high$richness.mean), "Richness.SD.High" = as.numeric(dat.high$richness.SD), "Richness.N.High" = as.numeric(dat.high$X..of.samples.for.BD.measure),             
+             "Yield.Mean.Low" = as.numeric(dat.low$yield.mean), "Yield.SD.Low" = as.numeric(dat.low$yield.SD), "Yield.N.Low" = as.numeric(dat.low$X..of.samples.for.YD.measure),
+             "Yield.Mean.High" = as.numeric(dat.high$yield.mean), "Yield.SD.High" = as.numeric(dat.high$yield.SD), "Yield.N.High" = as.numeric(dat.high$X..of.samples.for.YD.measure))
 }
 
 
