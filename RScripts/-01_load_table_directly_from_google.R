@@ -82,6 +82,7 @@ require(rgdal)
 library(rgeos)
 library(RColorBrewer)
 library(plyr) # for joining datasets
+library(countrycode)
 
 ############################################################################
 ### -01.3. load data directly from google docs
