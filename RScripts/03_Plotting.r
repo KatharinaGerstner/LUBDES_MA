@@ -58,14 +58,15 @@ for(choose.moderator in as.character(unique(MA.coeffs.cat$Moderator))){
   
   if(nrow(ES.moderator.subset) >= 2){
     plot <- ggplot() + 
-      geom_point(data=ES.frame, aes(x=Yield.Log.RR, y=Richness.Log.RR, color=as.factor(ES.frame[,which(names(ES.frame) %in% choose.moderator)])), size=3.5) +
-      geom_pointrange(data=ES.moderator.subset, aes(x=mean.Yield, y=mean.Richness, ymin=mean.Richness - (1.96*se.Richness), ymax=mean.Richness + (1.96*se.Richness),color=factor(levels)), size=1) +
-      geom_segment(data=ES.moderator.subset, aes(x=mean.Yield - (1.96*se.Yield), xend=mean.Yield + (1.96*se.Yield), y = mean.Richness, yend = mean.Richness, color=factor(levels)),size=1) +
+      geom_point(data=ES.frame, aes(x=Yield.Log.RR, y=Richness.Log.RR, color=as.factor(ES.frame[,which(names(ES.frame) %in% choose.moderator)])), size=4) +
+      geom_pointrange(data=ES.moderator.subset, aes(x=mean.Yield, y=mean.Richness, ymin=mean.Richness - (1.96*se.Richness), ymax=mean.Richness + (1.96*se.Richness),color=factor(levels)), size=1.5) +
+      geom_segment(data=ES.moderator.subset, aes(x=mean.Yield - (1.96*se.Yield), xend=mean.Yield + (1.96*se.Yield), y = mean.Richness, yend = mean.Richness, color=factor(levels)),size=1.5) +
       geom_hline(data=ES.frame, x=0, linetype="twodash") + geom_vline(data=ES.frame, y=0, linetype="twodash") +
       scale_y_continuous(labels=trans_format("exp",comma_format(digits=2))) + 
       scale_x_continuous(labels=trans_format("exp",comma_format(digits=2))) +
       scale_colour_brewer(palette="Set1",labels=paste(levels(factor(ES.frame[,which(names(ES.frame) %in% choose.moderator)]))," (",table(factor(ES.frame[,which(names(ES.frame) %in% choose.moderator)])), ")", sep="")) +
-      ylab("RR (Species Richness)") + xlab("RR (Yield)") + labs(color=choose.moderator)
+      ylab("RR (Species Richness)") + xlab("RR (Yield)") + labs(color=choose.moderator) +
+      theme(axis.title = element_text(size = rel(1.5)), axis.text = element_text(size = rel(1.5)),legend.text=element_text(size = rel(1.5)),legend.title=element_text(size = rel(1.5)))
     print(plot)
   }
   
@@ -78,17 +79,20 @@ for(choose.moderator in as.character(unique(MA.coeffs.cat$Moderator))){
       geom_vline(data=ES.frame, y=0, linetype="twodash") +
       scale_y_continuous(labels=trans_format("exp", comma_format(digits=2))) + 
       scale_x_continuous(labels=trans_format("exp", comma_format(digits=2))) +
-      ylab("RR (Species Richness)") + xlab("RR (Yield)") + guides(fill=FALSE)
-    print(plot)
+      ylab("RR (Species Richness)") + xlab("RR (Yield)") + guides(fill=FALSE) +
+      theme(axis.title = element_text(size = rel(1.5)), axis.text = element_text(size = rel(1.5)),legend.text=element_text(size = rel(1.5)),legend.title=element_text(size = rel(1.5)))    
+   
+   print(plot)
   }
 
-ggsave(plot, file = paste(path2temp %+% "/Cross_diagram_",gsub(".","",choose.moderator,fixed=T),".png",sep=""), width = 15, height = 8, type = "cairo-png")
+ggsave(plot, file = paste(path2temp %+% "/Cross_diagram_",gsub(".","",choose.moderator,fixed=T),".png",sep=""), width = 20, height = 8, type = "cairo-png")
 
 }
 
 for(i in 2:nrow(MA.coeffs.cont)){
   print(MA.coeffs.cont$Moderator[i])
   ES.moderator.subset <- MA.coeffs.cont[i,]
+  if(all(is.na(ES.moderator.subset))) next
   
   ## Transform prediction list from rma to dataframe
   richness.preds.df <- data.frame(slab=preds.richness[[i]]$slab, pred.richness=preds.richness[[i]]$pred, cr.lb.richness=preds.richness[[i]]$cr.lb, cr.ub.richness=preds.richness[[i]]$cr.ub)
@@ -119,10 +123,11 @@ for(i in 2:nrow(MA.coeffs.cont)){
     geom_ribbon(aes(ymin=cr.lb.yield,ymax=cr.ub.yield),fill="blue",alpha=0.2) +
     scale_y_continuous(labels=trans_format("exp",comma_format(digits=2))) + 
     scale_colour_manual(values=c("red","blue"),labels=c("Richness","Yield")) +
-    ylab("RR") 
+    ylab("RR")  +
+    theme(axis.title = element_text(size = rel(1.5)), axis.text = element_text(size = rel(1.5)),legend.text=element_text(size = rel(1.5)),legend.title=element_text(size = rel(1.5)))
   
   print(plot1)
-  ggsave(plot1, file = paste(path2temp %+% "/Scatterplot_",gsub(".","",MA.coeffs.cont$Moderator[i],fixed=T),".png",sep=""), width = 15, height = 8, type = "cairo-png")
+  ggsave(plot1, file = paste(path2temp %+% "/Scatterplot_",gsub(".","",MA.coeffs.cont$Moderator[i],fixed=T),".png",sep=""), width = 20, height = 8, type = "cairo-png")
 }
 ############################################################################
 ### 03.4. Forest plots for noLU vs low/medium/high LU
@@ -138,15 +143,17 @@ for(choose.moderator in as.character(unique(MA.coeffs.noLU$Moderator))[-1]){
   
   if(nrow(ES.moderator.subset) >= 2){
     plot <- ggplot(ES.moderator.subset, aes(x=paste(levels(factor(ES.frame.noLU[,which(names(ES.frame.noLU) %in% choose.moderator)]))," (",table(factor(ES.frame.noLU[,which(names(ES.frame.noLU) %in% choose.moderator)])), ")", sep=""), y=mean.Richness, ymin=mean.Richness-1.96*se.Richness, ymax=mean.Richness+1.96*se.Richness)) + 
-      geom_pointrange() + 
+      geom_pointrange(size=1.2) + 
       coord_flip() +
       geom_hline(x=0, linetype="twodash") + # weird: draws the line at x=0!!
       scale_y_continuous(labels=trans_format("exp", comma_format(digits=2))) + 
       ylab("Response Ratio") +
-      xlab(ES.moderator.subset$Moderator)  #switch because of the coord_flip() above
+      xlab(ES.moderator.subset$Moderator)  + #switch because of the coord_flip() above 
+      theme(axis.title = element_text(size = rel(1.8)), axis.text = element_text(size = rel(1.8)),legend.text=element_text(size = rel(1.8)),legend.title=element_text(size = rel(1.8)))
     print(plot)
   }
   
-  ggsave(plot, file = paste(path2temp %+% "/ForestPlot",gsub(".","",choose.moderator,fixed=T),".png",sep=""), width = 15, height = 8, type = "cairo-png")
+  ggsave(plot, file = paste(path2temp %+% "/ForestPlot",gsub(".","",choose.moderator,fixed=T),".png",sep=""), width = 20, height = 8, type = "cairo-png")
   
 }
+

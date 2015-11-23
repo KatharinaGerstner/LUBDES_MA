@@ -16,8 +16,7 @@
 ############################################################################
 
 # set a wd suitable for downloading and extracting Ecoregions shapefile
-# setwd("C:/Users/hoppek/Documents/temp") # KG
-setwd("/tmp") #MB
+setwd(path2temp %+% "/") 
 
 ############################################################################
 ### 01a.1. Intersect studies with global maps of WWF_REALMs Ecoregions
@@ -25,7 +24,7 @@ setwd("/tmp") #MB
 ### 
 ############################################################################
 
-download.file("https://www.dropbox.com/s/ihivf2ie98wxvee/terr-ecoregions-TNC.zip?dl=1", "terr-ecoregions-TNC.zip")
+download.file("https://www.dropbox.com/s/ihivf2ie98wxvee/terr-ecoregions-TNC.zip?dl=1", "terr-ecoregions-TNC.zip", mode="wb")
 unzip("terr-ecoregions-TNC.zip")
 
 ecoregions <- readOGR(path2temp,"tnc_terr_ecoregions")
@@ -54,17 +53,10 @@ colnames(ES.frame.noLU)[which(names(ES.frame.noLU) == "realms_extract$WWF_MHTNAM
 ############################################################################
 
 
-download.file("https://www.dropbox.com/s/v00kxpmll1pb5fm/Data_Extract_From_World_Development_Indicators.zip?dl=1", "Data_Extract_From_World_Development_Indicators.zip")
+download.file("https://www.dropbox.com/s/v00kxpmll1pb5fm/Data_Extract_From_World_Development_Indicators.zip?dl=1", "Data_Extract_From_World_Development_Indicators.zip", mode="wb")
 unzip("Data_Extract_From_World_Development_Indicators.zip")
 
-GDP.pc <- read.csv("Data_Extract_From_World_Development_Indicators_Data.csv")
-
-### go to "http://data.worldbank.org/indicator/NY.GDP.PCAP.CD/countries" 
-### and download the data as csv (top right corner), the file will be called "ny.gdp.pcap.cd_Indicator_en_csv_v2.zip". 
-### Put it in your active working directory and continue
-
-#unzip(path2temp %+% "/ny.gdp.pcap.cd_Indicator_en_csv_v2.zip")
-#GDP.pc <- read.csv(path2temp %+% "/ny.gdp.pcap.cd_Indicator_en_csv_v2.csv",skip=4)
+GDP.pc <- read.csv("Data_Extract_From_World_Development_Indicators_Data.csv",na.strings="..")
 
 GDP.pc.2000 <- data.frame(Country.Code=GDP.pc$Country.Code,GDP.pc.2000=GDP.pc$X2000)
 
@@ -75,7 +67,7 @@ ES.frame.noLU <- join(ES.frame.noLU,GDP.pc.2000,by="Country.Code")
 ### 01a.3. Intersect studies with annual mean radiation (Climond)
 ############################################################################
 
-download.file("https://www.dropbox.com/s/me92v7ozmixy75a/CM10_1975H_Bio_ASCII_V1.2.zip?dl=1", "CM10_1975H_Bio_ASCII_V1.2.zip")
+download.file("https://www.dropbox.com/s/me92v7ozmixy75a/CM10_1975H_Bio_ASCII_V1.2.zip?dl=1", "CM10_1975H_Bio_ASCII_V1.2.zip", mode="wb")
 unzip("CM10_1975H_Bio_ASCII_V1.2.zip")
 
 annual_mean_radiation <- raster("CM10_1975H_Bio_V1.2/CM10_1975H_Bio20_V1.2.txt")
@@ -90,7 +82,7 @@ ES.frame.noLU$annual_mean_radiation<-extract(annual_mean_radiation,lonlat)
 ### 01a.4. Intersect studies with gross capital stock in agriculture
 ############################################################################
 
-download.file("https://www.dropbox.com/s/xgqrmyiqx2lqvyl/Investment_CapitalStock_E_All_Data.zip?dl=1", "Investment_CapitalStock_E_All_Data.zip")
+download.file("https://www.dropbox.com/s/xgqrmyiqx2lqvyl/Investment_CapitalStock_E_All_Data.zip?dl=1", "Investment_CapitalStock_E_All_Data.zip", mode="wb")
 unzip("Investment_CapitalStock_E_All_Data.zip")
 
 capital_stock_in_agriculture <- read.csv("Investment_CapitalStock_E_All_Data.csv")
@@ -115,7 +107,7 @@ ES.frame.noLU <- merge(ES.frame.noLU,capital_stock_in_agriculture,by=c("Country.
 
 ### data from http://www.earthenv.org/texture.html
 
-download.file("https://www.dropbox.com/s/bwpzna0y4e1t77e/Dissimilarity_01_05_25km_uint32.tif?dl=1", "habitat_dissimilarity.tif")
+download.file("https://www.dropbox.com/s/bwpzna0y4e1t77e/Dissimilarity_01_05_25km_uint32.tif?dl=1", "habitat_dissimilarity.tif", mode="wb")
 
 habitat_dissimilarity <- raster("habitat_dissimilarity.tif")
 
@@ -129,3 +121,4 @@ ES.frame.noLU$habitat_dissimilarity<-extract(habitat_dissimilarity,lonlat)
 ### remove objectes to save workspace
 rm(ecoregions,lonlat,realms_extract,lonlat.noLU,GDP.pc,GDP.pc.2000,annual_mean_radiation,capital_stock_in_agriculture,habitat_dissimilarity)
 
+setwd(path2wd)

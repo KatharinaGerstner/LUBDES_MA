@@ -74,7 +74,7 @@ MA.coeffs.cont <- data.frame(Moderator="None",Richness.intercept=Richness.MA.fit
 
 # define list of moderators
 moderator.list.cat <- c("Land.use...land.cover","Species.Group","Trophic.Level","LUI.range.level","Product", "ES.From.BD","BIOME")
-moderator.list.cont <- c("GDP.pc.2000")
+moderator.list.cont <- c("GDP.pc.2000","annual_mean_radiation","capital_stock_in_agriculture","habitat_dissimilarity")
 # run analysis
 for(mods in moderator.list.cat){
   print(mods)
@@ -116,8 +116,8 @@ for(mods in moderator.list.cont){
   ### tabularize model parameters
   MA.coeffs.cont <- rbind(MA.coeffs.cont,data.frame(Moderator=mods, Richness.intercept=Richness.MA.fit$b[1], Richness.slope=Richness.MA.fit$b[2], Richness.se.intercept=Richness.MA.fit$se[1], Richness.se.slope=Richness.MA.fit$se[2], Yield.intercept=Yield.MA.fit$b[1], Yield.slope=Yield.MA.fit$b[2], Yield.se.intercept=Yield.MA.fit$se[1], Yield.se.slope=Yield.MA.fit$se[2]))
   print(MA.coeffs.cont)
-  preds.richness <- list(preds.richness, predict.rma(Richness.MA.fit)) 
-  preds.yield <- list(preds.yield, predict.rma(Yield.MA.fit)) 
+  preds.richness <- ifelse(all(is.na(Richness.MA.fit)),list(preds.richness, pred = NA, se = NA, ci.lb = NA, ci.ub = NA, cr.lb = NA, cr.ub = NA),list(preds.richness, predict.rma(Richness.MA.fit))) 
+  preds.yield <- ifelse(all(is.na(Yield.MA.fit)),list(preds.yield,  pred = NA, se = NA, ci.lb = NA, ci.ub = NA, cr.lb = NA, cr.ub = NA),list(preds.yield, predict.rma(Yield.MA.fit))) 
 }
 
 ############################################################################
