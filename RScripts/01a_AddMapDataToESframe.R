@@ -87,9 +87,11 @@ unzip("Investment_CapitalStock_E_All_Data.zip")
 
 capital_stock_in_agriculture <- read.csv("Investment_CapitalStock_E_All_Data.csv")
 
-# convert foa codes into iso3c codes
-capital_stock_in_agriculture$CountryCode<-countrycode(capital_stock_in_agriculture$CountryCode,"fao","iso3c")
-capital_stock_in_agriculture<-data.frame(Country.Code=capital_stock_in_agriculture$CountryCode,capital_millionUSD=capital_stock_in_agriculture$Value,Date.End=capital_stock_in_agriculture$Year)
+# convert fao codes into iso3c codes
+capital_stock_in_agriculture$CountryCode <- countrycode(capital_stock_in_agriculture$CountryCode,"fao","iso3c")
+capital_stock_in_agriculture <- data.frame(Country.Code = capital_stock_in_agriculture$CountryCode,
+                                           capital_millionUSD = capital_stock_in_agriculture$Value,
+                                           Date.End = capital_stock_in_agriculture$Year)
 
 ES.frame <- merge(ES.frame,capital_stock_in_agriculture,by=c("Country.Code","Date.End"))
 ES.frame.noLU <- merge(ES.frame.noLU,capital_stock_in_agriculture,by=c("Country.Code","Date.End"))

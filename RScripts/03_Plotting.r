@@ -90,13 +90,14 @@ ggsave(plot, file = paste(path2temp %+% "/Cross_diagram_",gsub(".","",choose.mod
 }
 
 for(i in 2:nrow(MA.coeffs.cont)){
-  print(MA.coeffs.cont$Moderator[i])
+  mods <- MA.coeffs.cont$Moderator[i]
+  print(mods)
   ES.moderator.subset <- MA.coeffs.cont[i,]
-  if(all(is.na(ES.moderator.subset))) next
+  if(all(is.na(ES.moderator.subset[-1]))) next
   
   ## Transform prediction list from rma to dataframe
-  richness.preds.df <- data.frame(slab=preds.richness[[i]]$slab, pred.richness=preds.richness[[i]]$pred, cr.lb.richness=preds.richness[[i]]$cr.lb, cr.ub.richness=preds.richness[[i]]$cr.ub)
-  yield.preds.df <- data.frame(slab=preds.yield[[i]]$slab, pred.yield=preds.yield[[i]]$pred, cr.lb.yield=preds.yield[[i]]$cr.lb, cr.ub.yield=preds.yield[[i]]$cr.ub)
+  richness.preds.df <- data.frame(slab=preds.richness[[mods]]$slab, pred.richness=preds.richness[[mods]]$pred, cr.lb.richness=preds.richness[[mods]]$cr.lb, cr.ub.richness=preds.richness[[mods]]$cr.ub)
+  yield.preds.df <- data.frame(slab=preds.yield[[mods]]$slab, pred.yield=preds.yield[[mods]]$pred, cr.lb.yield=preds.yield[[mods]]$cr.lb, cr.ub.yield=preds.yield[[mods]]$cr.ub)
   
   ### combine ES.frame with predictions dataframe
   pred.frame <- subset(ES.frame,Study.Case %in% sapply(as.character(richness.preds.df$slab),function(x) strsplit(x,"_")[[1]][1]))

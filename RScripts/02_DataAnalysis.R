@@ -45,7 +45,7 @@ ES.frame.noLU <- subset(ES.frame.noLU, Richness.Log.RR.Var>0) # restrict analysi
 # #  VCov_matrix <- 
 #   inner3<-inner2
 #   outer3<-outer2
-#   rma.mv.fit <- rma.mv(yi=yi, V=vi, mods = mods, random = ~factor(inner3)|factor(outer3), struct="CS", data=ES.frame, slab=slab,method="REML", tdist=FALSE, level=95, digits=4, Rscale="cor", sparse=FALSE, verbose=FALSE)
+#   rma.mv.fit <- rma.mv(yi=yi, V=vi, mods = mods, random = ~factor(inner3)|factor(outer3), struct="CS", data=ES.frame, slab=slab,method="REML", tdist=FALSE, level=95, digits=4)
 #   return(rma.mv.fit)
 # }
 
@@ -58,10 +58,12 @@ ES.frame.noLU <- subset(ES.frame.noLU, Richness.Log.RR.Var>0) # restrict analysi
 
 
 ### Analysis without moderators
-Richness.MA.fit <- rma.mv(yi=Richness.Log.RR, V=Richness.Log.RR.Var, mods=~1, random = ~factor(Case.ID)|factor(Study.ID), struct="CS", slab=paste(Study.Case, Low.LUI, High.LUI,sep="_"),method="REML", tdist=FALSE, level=95, digits=4, Rscale="cor", sparse=FALSE, verbose=FALSE,data=ES.frame)
-Yield.MA.fit <- rma.mv(yi=Yield.Log.RR,V=Yield.Log.RR.Var,mods=~1, random = ~factor(Case.ID)|factor(Study.ID), struct="CS", slab=paste(Study.Case, Low.LUI, High.LUI,sep="_"),method="REML", tdist=FALSE, level=95, digits=4, Rscale="cor", sparse=FALSE, verbose=FALSE,data=ES.frame)
-preds.richness <- predict.rma(Richness.MA.fit) 
-preds.yield <- predict.rma(Yield.MA.fit) 
+Richness.MA.fit <- rma.mv(yi=Richness.Log.RR, V=Richness.Log.RR.Var, mods=~1, random = ~factor(Case.ID)|factor(Study.ID), struct="CS", slab=paste(Study.Case, Low.LUI, High.LUI,sep="_"),method="REML", tdist=FALSE, level=95, digits=4,data=ES.frame)
+Yield.MA.fit <- rma.mv(yi=Yield.Log.RR,V=Yield.Log.RR.Var,mods=~1, random = ~factor(Case.ID)|factor(Study.ID), struct="CS", slab=paste(Study.Case, Low.LUI, High.LUI,sep="_"),method="REML", tdist=FALSE, level=95, digits=4,data=ES.frame)
+preds.richness <- list()
+preds.richness[["None"]] <- predict.rma(Richness.MA.fit) 
+preds.yield <- list()
+preds.yield[["None"]] <- predict.rma(Yield.MA.fit) 
 
 ### Store results in table
 MA.coeffs.cat <- data.frame(Moderator="None",levels=1,mean.Richness=Richness.MA.fit$b,se.Richness=Richness.MA.fit$se,mean.Yield=Yield.MA.fit$b,se.Yield=Yield.MA.fit$se)
@@ -74,51 +76,66 @@ MA.coeffs.cont <- data.frame(Moderator="None",Richness.intercept=Richness.MA.fit
 
 # define list of moderators
 moderator.list.cat <- c("Land.use...land.cover","Species.Group","Trophic.Level","LUI.range.level","Product", "ES.From.BD","BIOME")
-moderator.list.cont <- c("GDP.pc.2000","annual_mean_radiation","capital_stock_in_agriculture","habitat_dissimilarity")
+moderator.list.cont <- c("GDP.pc.2000","annual_mean_radiation","capital_millionUSD","habitat_dissimilarity")
+
 # run analysis
 for(mods in moderator.list.cat){
+  
   print(mods)
+
   ### fit model
   attach(ES.frame)
-  Richness.MA.fit <- try(rma.mv(yi=Richness.Log.RR,V=Richness.Log.RR.Var,mods=as.formula(paste("~",mods,"-1",sep="")),random = ~factor(Case.ID)|factor(Study.ID), struct="CS", slab=paste(Study.Case, Low.LUI, High.LUI,sep="_"),method="REML", tdist=FALSE, level=95, digits=4, Rscale="cor", sparse=FALSE, verbose=FALSE,data=ES.frame), silent=T)
-  Yield.MA.fit <- try(rma.mv(yi=Yield.Log.RR,V=Yield.Log.RR.Var,mods=as.formula(paste("~",mods,"-1",sep="")),random = ~factor(Case.ID)|factor(Study.ID), struct="CS", slab=paste(Study.Case, Low.LUI, High.LUI,sep="_"),method="REML", tdist=FALSE, level=95, digits=4, Rscale="cor", sparse=FALSE, verbose=FALSE,data=ES.frame),silent=T)
-  detach(ES.frame)
+  Richness.MA.fit <- try(rma.mv(yi=Richness.Log.RR,V=Richness.Log.RR.Var,mods=as.formula(paste("~",mods,"-1",sep="")),random = ~factor(Case.ID)|factor(Study.ID), struct="CS", slab=paste(Study.Case, Low.LUI, High.LUI,sep="_"),method="REML", tdist=FALSE, level=95, digits=4,data=ES.frame), silent=T)
   ### catch errors
   if(class(Richness.MA.fit)=="try-error") {
-    geterrmessage()
+    print(geterrmessage())
     Richness.MA.fit <- data.frame(b=NA,se=NA)
   }
+
+  ### fit model
+  Yield.MA.fit <- try(rma.mv(yi=Yield.Log.RR,V=Yield.Log.RR.Var,mods=as.formula(paste("~",mods,"-1",sep="")),random = ~factor(Case.ID)|factor(Study.ID), struct="CS", slab=paste(Study.Case, Low.LUI, High.LUI,sep="_"),method="REML", tdist=FALSE, level=95, digits=4,data=ES.frame),silent=T)
+  ### catch errors
   if(class(Yield.MA.fit)=="try-error") {
-    geterrmessage()
+    print(geterrmessage())
     Yield.MA.fit <- data.frame(b=NA,se=NA)
   }
+  
+  detach(ES.frame)
+
   ### tabularize model parameters
   MA.coeffs.cat <- rbind(MA.coeffs.cat,data.frame(Moderator=rep(mods,length(Richness.MA.fit$b)),levels=unlist(lapply(strsplit(rownames(Richness.MA.fit$b),mods),function(x){x[[2]]})),mean.Richness=Richness.MA.fit$b,se.Richness=Richness.MA.fit$se,mean.Yield=Yield.MA.fit$b,se.Yield=Yield.MA.fit$se))
-  print(MA.coeffs.cat)
 }
+print(MA.coeffs.cat)
 
 for(mods in moderator.list.cont){
+  
   print(mods)
   attach(ES.frame)
+  
   ### fit model
-  Richness.MA.fit <- try(rma.mv(yi=Richness.Log.RR,V=Richness.Log.RR.Var,mods=as.formula(paste("~",mods,sep="")),random = ~factor(Case.ID)|factor(Study.ID), struct="CS", slab=paste(Study.Case, Low.LUI, High.LUI,sep="_"),method="REML", tdist=FALSE, level=95, digits=4, Rscale="cor", sparse=FALSE, verbose=FALSE,data=ES.frame),silent=T)
-  Yield.MA.fit <- try(rma.mv(yi=Yield.Log.RR,V=Yield.Log.RR.Var,mods=as.formula(paste("~",mods,sep="")),random = ~factor(Case.ID)|factor(Study.ID), struct="CS", slab=paste(Study.Case, Low.LUI, High.LUI,sep="_"),method="REML", tdist=FALSE, level=95, digits=4, Rscale="cor", sparse=FALSE, verbose=FALSE,data=ES.frame),silent=T)
-  detach(ES.frame)
+  Richness.MA.fit <- try(rma.mv(yi=Richness.Log.RR,V=Richness.Log.RR.Var,mods=as.formula(paste("~",mods,sep="")),random = ~factor(Case.ID)|factor(Study.ID), struct="CS", slab=paste(Study.Case, Low.LUI, High.LUI,sep="_"),method="REML", tdist=FALSE, level=95, digits=4,data=ES.frame),silent=T)
   ### catch errors
   if(class(Richness.MA.fit)=="try-error") {
-    geterrmessage()
+    print(geterrmessage())
     Richness.MA.fit <- data.frame(b=c(NA,NA),se=c(NA,NA))
   }
+
+  ### fit model
+  Yield.MA.fit <- try(rma.mv(yi=Yield.Log.RR,V=Yield.Log.RR.Var,mods=as.formula(paste("~",mods,sep="")),random = ~factor(Case.ID)|factor(Study.ID), struct="CS", slab=paste(Study.Case, Low.LUI, High.LUI,sep="_"),method="REML", tdist=FALSE, level=95, digits=4,data=ES.frame),silent=T)
+  ### catch errors
   if(class(Yield.MA.fit)=="try-error") {
-    geterrmessage()
+    print(geterrmessage())
     Yield.MA.fit <- data.frame(b=c(NA,NA),se=c(NA,NA))
   }
+  
+  detach(ES.frame)
+
   ### tabularize model parameters
   MA.coeffs.cont <- rbind(MA.coeffs.cont,data.frame(Moderator=mods, Richness.intercept=Richness.MA.fit$b[1], Richness.slope=Richness.MA.fit$b[2], Richness.se.intercept=Richness.MA.fit$se[1], Richness.se.slope=Richness.MA.fit$se[2], Yield.intercept=Yield.MA.fit$b[1], Yield.slope=Yield.MA.fit$b[2], Yield.se.intercept=Yield.MA.fit$se[1], Yield.se.slope=Yield.MA.fit$se[2]))
-  print(MA.coeffs.cont)
-  preds.richness <- ifelse(all(is.na(Richness.MA.fit)),list(preds.richness, pred = NA, se = NA, ci.lb = NA, ci.ub = NA, cr.lb = NA, cr.ub = NA),list(preds.richness, predict.rma(Richness.MA.fit))) 
-  preds.yield <- ifelse(all(is.na(Yield.MA.fit)),list(preds.yield,  pred = NA, se = NA, ci.lb = NA, ci.ub = NA, cr.lb = NA, cr.ub = NA),list(preds.yield, predict.rma(Yield.MA.fit))) 
+  preds.richness[[mods]] <- ifelse(all(is.na(Richness.MA.fit)),list(pred = NA, se = NA, ci.lb = NA, ci.ub = NA, cr.lb = NA, cr.ub = NA), predict.rma(Richness.MA.fit)) 
+  preds.yield[[mods]] <- ifelse(all(is.na(Yield.MA.fit)), list(pred = NA, se = NA, ci.lb = NA, ci.ub = NA, cr.lb = NA, cr.ub = NA), predict.rma(Yield.MA.fit)) 
 }
+print(MA.coeffs.cont)
 
 ############################################################################
 ### 02.5. Analysis with moderators for no LU vs low/medium/high LU
@@ -126,7 +143,7 @@ for(mods in moderator.list.cont){
 ############################################################################
 
 ### Analysis without moderators
-Richness.MA.fit.noLU <- rma.mv(yi=Richness.Log.RR, V=Richness.Log.RR.Var, mods=~1, random = ~factor(Case.ID)|factor(Study.ID), struct="CS", slab=paste(Study.Case, Low.LUI, High.LUI,sep="_"),method="REML", tdist=FALSE, level=95, digits=4, Rscale="cor", sparse=FALSE, verbose=FALSE,data=ES.frame.noLU)
+Richness.MA.fit.noLU <- rma.mv(yi=Richness.Log.RR, V=Richness.Log.RR.Var, mods=~1, random = ~factor(Case.ID)|factor(Study.ID), struct="CS", slab=paste(Study.Case, Low.LUI, High.LUI,sep="_"),method="REML", tdist=FALSE, level=95, digits=4,data=ES.frame.noLU)
 
 ### Store results in table
 MA.coeffs.noLU <- data.frame(Moderator="None",levels=1,mean.Richness=Richness.MA.fit.noLU$b,se.Richness=Richness.MA.fit.noLU$se)
@@ -139,18 +156,18 @@ for(mods in moderator.list){
   print(mods)
   ### fit model 
   attach(ES.frame.noLU)
-  Richness.MA.fit.noLU <- try(rma.mv(yi=Richness.Log.RR,V=Richness.Log.RR.Var,mods=as.formula(paste("~",mods,"-1",sep="")),random = ~factor(Case.ID)|factor(Study.ID), struct="CS", slab=paste(Study.Case, Low.LUI, High.LUI,sep="_"),method="REML", tdist=FALSE, level=95, digits=4, Rscale="cor", sparse=FALSE, verbose=FALSE,data=ES.frame.noLU),silent=T)
-  detach(ES.frame.noLU)
+  Richness.MA.fit.noLU <- try(rma.mv(yi=Richness.Log.RR,V=Richness.Log.RR.Var,mods=as.formula(paste("~",mods,"-1",sep="")),random = ~factor(Case.ID)|factor(Study.ID), struct="CS", slab=paste(Study.Case, Low.LUI, High.LUI,sep="_"),method="REML", tdist=FALSE, level=95, digits=4,data=ES.frame.noLU),silent=T)
   ### catch errors
   if(class(Richness.MA.fit.noLU)=="try-error") {
     geterrmessage()
     Richness.MA.fit.noLU <- data.frame(b=NA,se=NA)
   }
+  detach(ES.frame.noLU)
+
   ### tabularize model parameters
-  
   MA.coeffs.noLU <- rbind(MA.coeffs.noLU,data.frame(Moderator=rep(mods,length(Richness.MA.fit.noLU$b)),levels=unlist(lapply(strsplit(rownames(Richness.MA.fit.noLU$b),mods),function(x){x[[2]]})),mean.Richness=Richness.MA.fit.noLU$b,se.Richness=Richness.MA.fit.noLU$se))
-  print(MA.coeffs.noLU)
 }
+print(MA.coeffs.noLU)
 
 ############################################################################
 ### 02.6. multivariate analysis with and without moderators (not yet working)

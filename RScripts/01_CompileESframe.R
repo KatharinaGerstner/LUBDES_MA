@@ -158,6 +158,8 @@ ES.frame.noLU$Study.Case <- paste(ES.frame.noLU$Study.ID,ES.frame.noLU$Case.ID,s
 ############################################################################
 
 ### Effect size calculation
+### "ROM" ... ratio of means
+### "SMD" ... standardized mean difference with bias correction (Hedges, 1981)
 
 ES.frame[,c("Richness.Log.RR","Richness.Log.RR.Var")] = 
   escalc("ROM",data= ES.frame, append =F,
@@ -172,13 +174,13 @@ ES.frame[,c("Yield.Log.RR","Yield.Log.RR.Var")] =
          n2i = Yield.N.Low, n1i = Yield.N.High)
 
 ES.frame[,c("Richness.SMD","Richness.SMD.Var")] =
-  escalc("SMDH",data= ES.frame, append =F,
+  escalc("SMD",data= ES.frame, append =F,
          m2i = Richness.Mean.Low, m1i = Richness.Mean.High,
          sd2i = Richness.SD.Low, sd1i = Richness.SD.High,
          n2i = Richness.N.Low, n1i = Richness.N.High)
 
 ES.frame[,c("Yield.SMD","Yield.SMD.Var")] = 
-  escalc("SMDH",data= ES.frame, append = F,
+  escalc("SMD",data= ES.frame, append = F,
          m2i = Yield.Mean.Low, m1i = Yield.Mean.High,
          sd2i = Yield.SD.Low, sd1i = Yield.SD.High,
          n2i = Yield.N.Low, n1i = Yield.N.High)
@@ -186,13 +188,13 @@ ES.frame[,c("Yield.SMD","Yield.SMD.Var")] =
 ############################################################
 
 ES.frame.noLU[,c("Richness.Log.RR","Richness.Log.RR.Var")] = 
-  escalc("ROM",data= ES.frame.noLU, append =F,
+  escalc("ROM", data= ES.frame.noLU, append =F,
          m2i = Richness.Mean.Low, m1i = Richness.Mean.High,
          sd2i = Richness.SD.Low, sd1i = Richness.SD.High,
          n2i = Richness.N.Low, n1i = Richness.N.High)
 
 ES.frame.noLU[,c("Richness.SMD","Richness.SMD.Var")] =
-  escalc("SMDH",data= ES.frame.noLU, append =F,
+  escalc("SMD", data= ES.frame.noLU, append =F,
          m2i = Richness.Mean.Low, m1i = Richness.Mean.High,
          sd2i = Richness.SD.Low, sd1i = Richness.SD.High,
          n2i = Richness.N.Low, n1i = Richness.N.High)
