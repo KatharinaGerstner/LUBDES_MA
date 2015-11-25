@@ -86,16 +86,28 @@ download.file("https://www.dropbox.com/s/xgqrmyiqx2lqvyl/Investment_CapitalStock
 unzip("Investment_CapitalStock_E_All_Data.zip")
 
 capital_stock_in_agriculture <- read.csv("Investment_CapitalStock_E_All_Data.csv")
+capital_stock_in_agriculture <- subset(capital_stock_in_agriculture, Item == "Capital Stock + (Total)" & Element == "Gross Capital Stock (constant 2005 prices)")
 
 # convert fao codes into iso3c codes
 capital_stock_in_agriculture$CountryCode <- countrycode(capital_stock_in_agriculture$CountryCode,"fao","iso3c")
 capital_stock_in_agriculture <- data.frame(Country.Code = capital_stock_in_agriculture$CountryCode,
                                            capital_millionUSD = capital_stock_in_agriculture$Value,
-                                           Date.End = capital_stock_in_agriculture$Year)
+                                           Date.End4CS = capital_stock_in_agriculture$Year)
+capital_stock_in_agriculture <- capital_stock_in_agriculture[!is.na(capital_stock_in_agriculture$Country.Code),] ## exclude Country.Code==NA from merging as this produces duplicates
 
-ES.frame <- merge(ES.frame,capital_stock_in_agriculture,by=c("Country.Code","Date.End"))
-ES.frame.noLU <- merge(ES.frame.noLU,capital_stock_in_agriculture,by=c("Country.Code","Date.End"))
+###
+ES.frame$Date.End4CS <- ES.frame$Date.End
+ES.frame$Date.End4CS[ES.frame$Date.End4CS>2007] <- 2007 ## use capital stock data from 2007 if study ends after
 
+ES.frame <- join(ES.frame,capital_stock_in_agriculture,by=c("Country.Code","Date.End4CS"))
+ES.frame <- ES.frame[,-which(names(ES.frame)=="Date.End4CS")] ## remove previously added column
+
+###
+ES.frame.noLU$Date.End4CS <- ES.frame.noLU$Date.End
+ES.frame.noLU$Date.End4CS[ES.frame.noLU$Date.End4CS>2007] <- 2007 ## use capital stock data from 2007 if study ends after
+
+ES.frame.noLU <- join(ES.frame.noLU,capital_stock_in_agriculture,by=c("Country.Code","Date.End4CS"))
+ES.frame.noLU <- ES.frame.noLU[,-which(names(ES.frame.noLU)=="Date.End4CS")] ## remove previously added column
 
 ############################################################################
 ### 01a.5. Intersect studies with Agricultural intensity (efficiency) in the neighborhood
