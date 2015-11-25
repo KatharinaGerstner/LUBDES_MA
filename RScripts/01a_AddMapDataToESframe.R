@@ -16,7 +16,7 @@
 ############################################################################
 
 # set a wd suitable for downloading and extracting Ecoregions shapefile
-setwd(path2temp %+% "/") 
+setwd(path2temp)# %+% "/") 
 
 ############################################################################
 ### 01a.1. Intersect studies with global maps of WWF_REALMs Ecoregions
@@ -78,23 +78,23 @@ ES.frame$annual_mean_radiation<-extract(annual_mean_radiation,lonlat)
 lonlat<-cbind(ES.frame.noLU$Longitude,ES.frame.noLU$Latitude)
 ES.frame.noLU$annual_mean_radiation<-extract(annual_mean_radiation,lonlat)
 
-############################################################################
-### 01a.4. Intersect studies with gross capital stock in agriculture
-############################################################################
-
-download.file("https://www.dropbox.com/s/xgqrmyiqx2lqvyl/Investment_CapitalStock_E_All_Data.zip?dl=1", "Investment_CapitalStock_E_All_Data.zip", mode="wb")
-unzip("Investment_CapitalStock_E_All_Data.zip")
-
-capital_stock_in_agriculture <- read.csv("Investment_CapitalStock_E_All_Data.csv")
-
-# convert fao codes into iso3c codes
-capital_stock_in_agriculture$CountryCode <- countrycode(capital_stock_in_agriculture$CountryCode,"fao","iso3c")
-capital_stock_in_agriculture <- data.frame(Country.Code = capital_stock_in_agriculture$CountryCode,
-                                           capital_millionUSD = capital_stock_in_agriculture$Value,
-                                           Date.End = capital_stock_in_agriculture$Year)
-
-ES.frame <- merge(ES.frame,capital_stock_in_agriculture,by=c("Country.Code","Date.End"))
-ES.frame.noLU <- merge(ES.frame.noLU,capital_stock_in_agriculture,by=c("Country.Code","Date.End"))
+# ############################################################################
+# ### 01a.4. Intersect studies with gross capital stock in agriculture
+# ############################################################################
+# 
+# download.file("https://www.dropbox.com/s/xgqrmyiqx2lqvyl/Investment_CapitalStock_E_All_Data.zip?dl=1", "Investment_CapitalStock_E_All_Data.zip", mode="wb")
+# unzip("Investment_CapitalStock_E_All_Data.zip")
+# 
+# capital_stock_in_agriculture <- read.csv("Investment_CapitalStock_E_All_Data.csv")
+# 
+# # convert fao codes into iso3c codes
+# capital_stock_in_agriculture$CountryCode <- countrycode(capital_stock_in_agriculture$CountryCode,"fao","iso3c")
+# capital_stock_in_agriculture <- data.frame(Country.Code = capital_stock_in_agriculture$CountryCode,
+#                                            capital_millionUSD = capital_stock_in_agriculture$Value,
+#                                            Date.End = capital_stock_in_agriculture$Year)
+# 
+# ES.frame <- merge(ES.frame,capital_stock_in_agriculture,by=c("Country.Code","Date.End"))
+# ES.frame.noLU <- merge(ES.frame.noLU,capital_stock_in_agriculture,by=c("Country.Code","Date.End"))
 
 
 ############################################################################

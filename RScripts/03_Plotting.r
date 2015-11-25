@@ -43,7 +43,7 @@ p <- ggplot() +
   geom_polygon(data=world_map, aes(x=long, y=lat, group=group), fill="white",color="black") + 
   geom_point(data=data, aes(x=as.numeric(longitude..E..W.), y=as.numeric(latitude..N..S.)), color="blue")
 p ## looks weird, the reason is the max latitude in data = 2011! - check!
-ggsave(path2temp %+% "/CaseDistribution.png", width=8, height=8, units="cm")
+ggsave(paste(path2temp, "/CaseDistribution.png",sep=""), width=8, height=8, units="cm")
 
 ############################################################################
 ### 03.3. Plot cross-diagrams
@@ -85,7 +85,7 @@ for(choose.moderator in as.character(unique(MA.coeffs.cat$Moderator))){
    print(plot)
   }
 
-ggsave(plot, file = paste(path2temp %+% "/Cross_diagram_",gsub(".","",choose.moderator,fixed=T),".png",sep=""), width = 20, height = 8, type = "cairo-png")
+ggsave(plot, file = paste(path2temp,"/Cross_diagram_",gsub(".","",choose.moderator,fixed=T),".png",sep=""), width = 20, height = 8, type = "cairo-png")
 
 }
 
@@ -128,7 +128,7 @@ for(i in 2:nrow(MA.coeffs.cont)){
     theme(axis.title = element_text(size = rel(1.5)), axis.text = element_text(size = rel(1.5)),legend.text=element_text(size = rel(1.5)),legend.title=element_text(size = rel(1.5)))
   
   print(plot1)
-  ggsave(plot1, file = paste(path2temp %+% "/Scatterplot_",gsub(".","",MA.coeffs.cont$Moderator[i],fixed=T),".png",sep=""), width = 20, height = 8, type = "cairo-png")
+  ggsave(plot1, file = paste(path2temp, "/Scatterplot_",gsub(".","",MA.coeffs.cont$Moderator[i],fixed=T),".png",sep=""), width = 20, height = 8, type = "cairo-png")
 }
 ############################################################################
 ### 03.4. Forest plots for noLU vs low/medium/high LU
@@ -154,7 +154,7 @@ for(choose.moderator in as.character(unique(MA.coeffs.noLU$Moderator))[-1]){
     print(plot)
   }
   
-  ggsave(plot, file = paste(path2temp %+% "/ForestPlot",gsub(".","",choose.moderator,fixed=T),".png",sep=""), width = 20, height = 8, type = "cairo-png")
+  ggsave(plot, file = paste(path2temp, "/ForestPlot",gsub(".","",choose.moderator,fixed=T),".png",sep=""), width = 20, height = 8, type = "cairo-png")
   
 }
 

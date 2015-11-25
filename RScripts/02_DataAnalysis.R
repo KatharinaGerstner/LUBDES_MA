@@ -75,7 +75,7 @@ MA.coeffs.cont <- data.frame(Moderator="None",Richness.intercept=Richness.MA.fit
 ############################################################################
 
 # define list of moderators
-moderator.list.cat <- c("Land.use...land.cover","Species.Group","Trophic.Level","LUI.range.level","Product", "ES.From.BD","BIOME")
+moderator.list.cat <- c("Land.use...land.cover","Species.Group","Trophic.Level","LUI.range.level","Product", "ES.From.BD")#,"BIOME")
 moderator.list.cont <- c("GDP.pc.2000","annual_mean_radiation","capital_millionUSD","habitat_dissimilarity")
 
 # run analysis
@@ -149,7 +149,7 @@ Richness.MA.fit.noLU <- rma.mv(yi=Richness.Log.RR, V=Richness.Log.RR.Var, mods=~
 MA.coeffs.noLU <- data.frame(Moderator="None",levels=1,mean.Richness=Richness.MA.fit.noLU$b,se.Richness=Richness.MA.fit.noLU$se)
 
 # define list of moderators
-moderator.list <- c("Land.use...land.cover","Species.Group","Trophic.Level","BIOME")
+moderator.list <- c("Land.use...land.cover","Species.Group","Trophic.Level")#,"BIOME")
 
 # run analysis
 for(mods in moderator.list){
