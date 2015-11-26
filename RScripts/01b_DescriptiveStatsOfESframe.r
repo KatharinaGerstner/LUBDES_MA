@@ -14,13 +14,13 @@
 setwd(path2temp %+% "/")
 
 ### 01.b.1 Protocol structure and summary of variables in the ES.frame
-sink('str_summary_ES.frame.txt')
+sink('str_summary_ESframe.txt')
 str(ES.frame)
 summary(ES.frame)
 sink()
 
 ### 01.b.2 Plot Histograms of all variables in the ES.frame 
-pdf("PlotHist_ES.frame.pdf", width = 15)
+pdf("PlotHist_ESframe.pdf", width = 15)
 for(i in 1:ncol(ES.frame)){
   p <- ggplot(data=ES.frame) + 
     geom_histogram(aes(x=ES.frame[,i]), size=0.4) + 
@@ -39,7 +39,7 @@ summary(ES.frame.noLU)
 sink()
 
 ### 01.b.4 Plot Histograms of all variables in the ES.frame.noLU 
-pdf("PlotHist_ES.frame.noLU.pdf", width = 15)
+pdf("PlotHist_ESframenoLU.pdf", width = 15)
 for(i in 1:ncol(ES.frame.noLU)){
   p <- ggplot(data=ES.frame.noLU) + 
     geom_histogram(aes(x=ES.frame.noLU[,i]), size=0.4) + 

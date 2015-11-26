@@ -20,13 +20,20 @@ getwd()
 ### 
 ############################################################################
 
+### plot study locations using the "classic" way
+# newmap <- getMap(resolution = "low")
+# png(paste(path2temp, "/CaseDistribution.png",sep=""),width=12,height=8,units="cm",res=200)
+# plot(newmap,col="lightgrey")
+# points(data$lon, data$lat, col = "blue", cex = .8, pch=2)
+# dev.off()
+
 ### plot study locations using fancy ggplot
 world_map <- map_data("world")
 p <- ggplot() +
-  geom_polygon(data=world_map, aes(x=long, y=lat, group=group), fill="white",color="black") + 
-  geom_point(data=data, aes(x=as.numeric(longitude..E..W.), y=as.numeric(latitude..N..S.)), color="blue")
-p ## looks weird, the reason is the max latitude in data = 2011! - check!
-ggsave(paste(path2temp, "/CaseDistribution.png",sep=""), width=8, height=8, units="cm")
+  geom_polygon(data=world_map, aes(x=long, y=lat, group=group), fill="white",color="black",lwd=0.4) + 
+  geom_point(data=data, aes(x=as.numeric(longitude..E..W.), y=as.numeric(latitude..N..S.)), color="blue", shape=2, size=1)
+p 
+ggsave(paste(path2temp, "/CaseDistribution.png",sep=""), width=12, height=8, units="cm")
 
 ############################################################################
 ### 03.3. Plot cross-diagrams
@@ -146,11 +153,5 @@ for(choose.moderator in as.character(unique(MA.coeffs.noLU$Moderator))[-1]){
 ### RESTERAMPE ###
 ##################
 
-### plot study locations using the "classic" way
-#newmap <- getMap(resolution = "low")
-#pdf("map_of_studies.pdf",pointsize=8)
-#plot(newmap, main="Distribution of LUBDES studies included in the meta analysis")
-#points(data$lon, data$lat, col = "blue", cex = .6, pch=2)
-#dev.off()
 
 # 
