@@ -132,8 +132,8 @@ for(mods in moderator.list.cont){
 
   ### tabularize model parameters
   MA.coeffs.cont <- rbind(MA.coeffs.cont,data.frame(Moderator=mods, Richness.intercept=Richness.MA.fit$b[1], Richness.slope=Richness.MA.fit$b[2], Richness.se.intercept=Richness.MA.fit$se[1], Richness.se.slope=Richness.MA.fit$se[2], Yield.intercept=Yield.MA.fit$b[1], Yield.slope=Yield.MA.fit$b[2], Yield.se.intercept=Yield.MA.fit$se[1], Yield.se.slope=Yield.MA.fit$se[2]))
-  preds.richness[[mods]] <- ifelse(all(is.na(Richness.MA.fit)),list(pred = NA, se = NA, ci.lb = NA, ci.ub = NA, cr.lb = NA, cr.ub = NA), predict.rma(Richness.MA.fit)) 
-  preds.yield[[mods]] <- ifelse(all(is.na(Yield.MA.fit)), list(pred = NA, se = NA, ci.lb = NA, ci.ub = NA, cr.lb = NA, cr.ub = NA), predict.rma(Yield.MA.fit)) 
+  preds.richness[[mods]] <- ifelse(all(is.na(Richness.MA.fit)),list(data.frame(pred = NA, se = NA, ci.lb = NA, ci.ub = NA, cr.lb = NA, cr.ub = NA)), list(predict.rma(Richness.MA.fit))) 
+  preds.yield[[mods]] <- ifelse(all(is.na(Yield.MA.fit)), list(data.frame(pred = NA, se = NA, ci.lb = NA, ci.ub = NA, cr.lb = NA, cr.ub = NA)), list(predict.rma(Yield.MA.fit))) 
 }
 print(MA.coeffs.cont)
 

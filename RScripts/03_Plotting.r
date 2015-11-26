@@ -12,15 +12,6 @@
 ### Authors: KG, MB, SK ...
 ############################################################################
 
-############################################################################
-### 03.1. Specify output directory in the dropbox or other local folder - NOT in the git directory!
-### 
-### all lines should stay commented out, only temporarily set your wd
-############################################################################
-
-#setwd("~/Dropbox/SESYNC-UFZ-sDiv-Call Biodiversity and Ecosystem Services/Meta-Analysis/DataAnalysis") #MB
-#setwd("/tmp/") #MB
-
 ### show current working directory and check if its local
 getwd()
 
@@ -29,21 +20,13 @@ getwd()
 ### 
 ############################################################################
 
-### plot study locations using the "classic" way
-#newmap <- getMap(resolution = "low")
-#pdf("map_of_studies.pdf",pointsize=8)
-#plot(newmap, main="Distribution of LUBDES studies included in the meta analysis")
-#points(data$lon, data$lat, col = "blue", cex = .6, pch=2)
-#dev.off()
-
-# ### plot study locations using fancy ggplot - Does NOT work properly #MB - works again! # KG
-
+### plot study locations using fancy ggplot
 world_map <- map_data("world")
 p <- ggplot() +
   geom_polygon(data=world_map, aes(x=long, y=lat, group=group), fill="white",color="black") + 
   geom_point(data=data, aes(x=as.numeric(longitude..E..W.), y=as.numeric(latitude..N..S.)), color="blue")
 p ## looks weird, the reason is the max latitude in data = 2011! - check!
-ggsave(path2temp %+% "/CaseDistribution.png", width=8, height=8, units="cm")
+ggsave(paste(path2temp, "/CaseDistribution.png",sep=""), width=8, height=8, units="cm")
 
 ############################################################################
 ### 03.3. Plot cross-diagrams
@@ -85,7 +68,7 @@ for(choose.moderator in as.character(unique(MA.coeffs.cat$Moderator))){
    print(plot)
   }
 
-ggsave(plot, file = paste(path2temp %+% "/Cross_diagram_",gsub(".","",choose.moderator,fixed=T),".png",sep=""), width = 20, height = 8, type = "cairo-png")
+ggsave(plot, file = paste(path2temp,"/Cross_diagram_",gsub(".","",choose.moderator,fixed=T),".png",sep=""), width = 20, height = 8, type = "cairo-png")
 
 }
 
@@ -96,8 +79,8 @@ for(i in 2:nrow(MA.coeffs.cont)){
   if(all(is.na(ES.moderator.subset[-1]))) next
   
   ## Transform prediction list from rma to dataframe
-  richness.preds.df <- data.frame(slab=preds.richness[[mods]]$slab, pred.richness=preds.richness[[mods]]$pred, cr.lb.richness=preds.richness[[mods]]$cr.lb, cr.ub.richness=preds.richness[[mods]]$cr.ub)
-  yield.preds.df <- data.frame(slab=preds.yield[[mods]]$slab, pred.yield=preds.yield[[mods]]$pred, cr.lb.yield=preds.yield[[mods]]$cr.lb, cr.ub.yield=preds.yield[[mods]]$cr.ub)
+  richness.preds.df <- data.frame(slab=preds.richness[[mods]][[1]]$slab, pred.richness=preds.richness[[mods]][[1]]$pred, ci.lb.richness=preds.richness[[mods]][[1]]$ci.lb, ci.ub.richness=preds.richness[[mods]][[1]]$ci.ub)
+  yield.preds.df <- data.frame(slab=preds.yield[[mods]][[1]]$slab, pred.yield=preds.yield[[mods]][[1]]$pred, ci.lb.yield=preds.yield[[mods]][[1]]$ci.lb, ci.ub.yield=preds.yield[[mods]][[1]]$ci.ub)
   
   ### combine ES.frame with predictions dataframe
   pred.frame <- subset(ES.frame,Study.Case %in% sapply(as.character(richness.preds.df$slab),function(x) strsplit(x,"_")[[1]][1]))
@@ -116,20 +99,21 @@ for(i in 2:nrow(MA.coeffs.cont)){
     ES.moderator.subset$Yield.intercept+ES.moderator.subset$Yield.slope*xvar
   }
   
-  plot1 <- ggplot(data=pred.frame.trans, aes(x=GDP.pc.2000)) + 
+  plot1 <- ggplot(data=pred.frame.trans, aes(x=pred.frame.trans[,paste(mods)])) + 
     geom_point(aes(y=Log.RR, color=Response), size=3.5) +
     geom_abline(intercept=ES.moderator.subset$Richness.intercept, slope=ES.moderator.subset$Richness.slope,color="red") +
     geom_abline(intercept=ES.moderator.subset$Yield.intercept, slope=ES.moderator.subset$Yield.slope,color="blue") +
-    geom_ribbon(aes(ymin=cr.lb.richness,ymax=cr.ub.richness),fill="red",alpha=0.2) +
-    geom_ribbon(aes(ymin=cr.lb.yield,ymax=cr.ub.yield),fill="blue",alpha=0.2) +
+    geom_ribbon(aes(ymin=ci.lb.richness,ymax=ci.ub.richness),fill="red",alpha=0.2) +
+    geom_ribbon(aes(ymin=ci.lb.yield,ymax=ci.ub.yield),fill="blue",alpha=0.2) +
     scale_y_continuous(labels=trans_format("exp",comma_format(digits=2))) + 
     scale_colour_manual(values=c("red","blue"),labels=c("Richness","Yield")) +
-    ylab("RR")  +
+    ylab("RR")  + xlab(paste(mods)) +
     theme(axis.title = element_text(size = rel(1.5)), axis.text = element_text(size = rel(1.5)),legend.text=element_text(size = rel(1.5)),legend.title=element_text(size = rel(1.5)))
   
   print(plot1)
-  ggsave(plot1, file = paste(path2temp %+% "/Scatterplot_",gsub(".","",MA.coeffs.cont$Moderator[i],fixed=T),".png",sep=""), width = 20, height = 8, type = "cairo-png")
+  ggsave(plot1, file = paste(path2temp, "/Scatterplot_",gsub(".","",MA.coeffs.cont$Moderator[i],fixed=T),".png",sep=""), width = 20, height = 8, type = "cairo-png")
 }
+
 ############################################################################
 ### 03.4. Forest plots for noLU vs low/medium/high LU
 ### 
@@ -154,7 +138,19 @@ for(choose.moderator in as.character(unique(MA.coeffs.noLU$Moderator))[-1]){
     print(plot)
   }
   
-  ggsave(plot, file = paste(path2temp %+% "/ForestPlot",gsub(".","",choose.moderator,fixed=T),".png",sep=""), width = 20, height = 8, type = "cairo-png")
+  ggsave(plot, file = paste(path2temp, "/ForestPlot",gsub(".","",choose.moderator,fixed=T),".png",sep=""), width = 20, height = 8, type = "cairo-png")
   
 }
 
+##################
+### RESTERAMPE ###
+##################
+
+### plot study locations using the "classic" way
+#newmap <- getMap(resolution = "low")
+#pdf("map_of_studies.pdf",pointsize=8)
+#plot(newmap, main="Distribution of LUBDES studies included in the meta analysis")
+#points(data$lon, data$lat, col = "blue", cex = .6, pch=2)
+#dev.off()
+
+# 
