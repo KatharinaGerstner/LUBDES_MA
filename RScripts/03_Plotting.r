@@ -52,8 +52,8 @@ for(choose.moderator in as.character(unique(MA.coeffs.cat$Moderator))){
       geom_pointrange(data=ES.moderator.subset, aes(x=mean.Yield, y=mean.Richness, ymin=mean.Richness - (1.96*se.Richness), ymax=mean.Richness + (1.96*se.Richness),color=factor(levels)), size=1.5) +
       geom_segment(data=ES.moderator.subset, aes(x=mean.Yield - (1.96*se.Yield), xend=mean.Yield + (1.96*se.Yield), y = mean.Richness, yend = mean.Richness, color=factor(levels)),size=1.5) +
       geom_hline(data=ES.frame, x=0, linetype="twodash") + geom_vline(data=ES.frame, y=0, linetype="twodash") +
-      scale_y_continuous(labels=trans_format("exp",comma_format(digits=2))) + 
-      scale_x_continuous(labels=trans_format("exp",comma_format(digits=2))) +
+      #scale_y_continuous(labels=trans_format("exp",comma_format(digits=2))) + 
+      #scale_x_continuous(labels=trans_format("exp",comma_format(digits=2))) +
       scale_colour_brewer(palette="Set1",labels=paste(levels(factor(ES.frame[,which(names(ES.frame) %in% choose.moderator)]))," (",table(factor(ES.frame[,which(names(ES.frame) %in% choose.moderator)])), ")", sep="")) +
       ylab("RR (Species Richness)") + xlab("RR (Yield)") + labs(color=choose.moderator) +
       theme(axis.title = element_text(size = rel(1.5)), axis.text = element_text(size = rel(1.5)),legend.text=element_text(size = rel(1.5)),legend.title=element_text(size = rel(1.5)))
@@ -67,8 +67,8 @@ for(choose.moderator in as.character(unique(MA.coeffs.cat$Moderator))){
       geom_segment(data=ES.moderator.subset, aes(x=mean.Yield - (1.96*se.Yield), xend=mean.Yield + (1.96*se.Yield), y = mean.Richness, yend = mean.Richness), color="green", size=1) +
       geom_hline(data=ES.frame, x=0, linetype="twodash") + 
       geom_vline(data=ES.frame, y=0, linetype="twodash") +
-      scale_y_continuous(labels=trans_format("exp", comma_format(digits=2))) + 
-      scale_x_continuous(labels=trans_format("exp", comma_format(digits=2))) +
+      #scale_y_continuous(labels=trans_format("exp", comma_format(digits=2))) + 
+      #scale_x_continuous(labels=trans_format("exp", comma_format(digits=2))) +
       ylab("RR (Species Richness)") + xlab("RR (Yield)") + guides(fill=FALSE) +
       theme(axis.title = element_text(size = rel(1.5)), axis.text = element_text(size = rel(1.5)),legend.text=element_text(size = rel(1.5)),legend.title=element_text(size = rel(1.5)))    
    

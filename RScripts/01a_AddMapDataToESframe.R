@@ -78,7 +78,7 @@ if (file.exists("CM10_1975H_Bio_ASCII_V1.2.zip")==FALSE){
 download.file("https://www.dropbox.com/s/me92v7ozmixy75a/CM10_1975H_Bio_ASCII_V1.2.zip?dl=1", "CM10_1975H_Bio_ASCII_V1.2.zip", mode="wb")
 unzip("CM10_1975H_Bio_ASCII_V1.2.zip")
 } else {
-  unzip("CM10_1975H_Bio_ASCII_V1.2.zip")
+unzip("CM10_1975H_Bio_ASCII_V1.2.zip")
 }
 
 annual_mean_radiation <- raster("CM10_1975H_Bio_V1.2/CM10_1975H_Bio20_V1.2.txt")
