@@ -16,6 +16,10 @@
 ### 
 ############################################################################
 
+### impute also zero SD's as we can't work with that in the analysis
+data$richness.SD[data$richness.SD==0] <- NA
+data$yield.SD[data$yield.SD==0] <- NA
+
 ### impute
 imp <- mice(data[,c("richness.mean", "richness.SD", "X..of.samples.for.BD.measure", "yield.mean", "yield.SD", "X..of.samples.for.YD.measure")])
 data[,c("richness.mean", "richness.SD", "X..of.samples.for.BD.measure", "yield.mean", "yield.SD", "X..of.samples.for.YD.measure")] <- complete(imp)
