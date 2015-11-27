@@ -158,14 +158,18 @@ for(mods in moderator.list){
   attach(ES.frame.noLU)
   Richness.MA.fit.noLU <- try(rma.mv(yi=Richness.Log.RR,V=Richness.Log.RR.Var,mods=as.formula(paste("~",mods,"-1",sep="")),random = ~factor(Case.ID)|factor(Study.ID), struct="CS", slab=paste(Study.Case, Low.LUI, High.LUI,sep="_"),method="REML", tdist=FALSE, level=95, digits=4,data=ES.frame.noLU),silent=T)
   ### catch errors
-  if(class(Richness.MA.fit.noLU)=="try-error") {
+  if(class(Richness.MA.fit.noLU)[1]=="try-error") {
     geterrmessage()
     Richness.MA.fit.noLU <- data.frame(b=NA,se=NA)
   }
   detach(ES.frame.noLU)
 
-  ### tabularize model parameters
-  MA.coeffs.noLU <- rbind(MA.coeffs.noLU,data.frame(Moderator=rep(mods,length(Richness.MA.fit.noLU$b)),levels=ifelse(mods=="Product:High.LUI",rownames(Richness.MA.fit.noLU$b),unlist(lapply(strsplit(rownames(Richness.MA.fit.noLU$b),mods),function(x){x[[2]]}))),mean.Richness=Richness.MA.fit.noLU$b,se.Richness=Richness.MA.fit.noLU$se))
+  ### tabularize model parameters  
+  ifelse(mods=="Product:High.LUI", levels <- unlist(lapply(strsplit(unlist(lapply(strsplit(rownames(Richness.MA.fit.noLU$b),"Product"),function(x)x[[2]])),"High.LUI"),function(y) paste(y[1],y[2],sep=""))), levels <- unlist(lapply(strsplit(rownames(Richness.MA.fit.noLU$b),mods),function(x){x[[2]]})))
+  MA.coeffs.noLU <- rbind(MA.coeffs.noLU,data.frame(Moderator=rep(mods,length(Richness.MA.fit.noLU$b)),
+                                                    levels=levels,
+                                                    mean.Richness=Richness.MA.fit.noLU$b,
+                                                    se.Richness=Richness.MA.fit.noLU$se))
 }
 print(MA.coeffs.noLU)
 

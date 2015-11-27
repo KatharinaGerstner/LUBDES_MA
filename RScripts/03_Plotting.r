@@ -134,7 +134,8 @@ for(choose.moderator in as.character(unique(MA.coeffs.noLU$Moderator))[-1]){
   ES.moderator.subset$levels <- factor(ES.moderator.subset$levels)
   
   if(nrow(ES.moderator.subset) >= 2){
-    plot <- ggplot(ES.moderator.subset, aes(x=paste(levels(factor(ES.frame.noLU[,which(names(ES.frame.noLU) %in% choose.moderator)]))," (",table(factor(ES.frame.noLU[,which(names(ES.frame.noLU) %in% choose.moderator)])), ")", sep=""), y=mean.Richness, ymin=mean.Richness-1.96*se.Richness, ymax=mean.Richness+1.96*se.Richness)) + 
+    ifelse(choose.moderator=="Product:High.LUI",n.levels <- table(paste(ES.frame.noLU$Product,ES.frame.noLU$High.LUI,sep=":"))[length(n.levels):1], n.levels <- table(factor(ES.frame.noLU[,which(names(ES.frame.noLU) %in% choose.moderator)])))
+    plot <- ggplot(ES.moderator.subset, aes(x=paste(levels," (",n.levels, ")", sep=""), y=mean.Richness, ymin=mean.Richness-1.96*se.Richness, ymax=mean.Richness+1.96*se.Richness)) + 
       geom_pointrange(size=1.2) + 
       coord_flip() +
       geom_hline(x=0, linetype="twodash") + # weird: draws the line at x=0!!
@@ -145,7 +146,7 @@ for(choose.moderator in as.character(unique(MA.coeffs.noLU$Moderator))[-1]){
     print(plot)
   }
   
-  ggsave(plot, file = paste(path2temp, "/ForestPlot",gsub(".","",choose.moderator,fixed=T),".png",sep=""), width = 20, height = 8, type = "cairo-png")
+  ggsave(plot, file = paste(path2temp, "/ForestPlot",gsub(":","",gsub(".","",choose.moderator,fixed=T),fixed=T),".png",sep=""), width = 20, height = 8, type = "cairo-png")
   
 }
 
