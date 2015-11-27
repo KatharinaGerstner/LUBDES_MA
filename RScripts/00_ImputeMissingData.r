@@ -10,6 +10,7 @@
 ### Authors: KG, MB, SK ...
 ############################################################################
 
+dataimp <- data
 
 ############################################################################
 ### 00.1. impute missing data using mice package
@@ -24,7 +25,6 @@
 # data2imp <- data[,c("richness.mean", "richness.SD", "X..of.samples.for.BD.measure", "yield.mean", "yield.SD", "X..of.samples.for.YD.measure")]
 # predictorMatrix1 <- matrix(c(rep(0,6),c(1,0,1,0,0,0),rep(0,6),rep(0,6),c(0,0,0,1,0,1),rep(0,6)),ncol=ncol(data2imp),byrow=T) # only impute SDs using the corresponding means and sample.size
 # 
-# dataimp <- data
 # imp <- mice(data2imp,predictorMatrix=predictorMatrix1,m=20)
 # dataimp[,c("richness.mean", "richness.SD", "X..of.samples.for.BD.measure", "yield.mean", "yield.SD", "X..of.samples.for.YD.measure")] <- complete(imp)
 
