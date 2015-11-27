@@ -102,11 +102,11 @@ for(i in unique(dataimp$study.case)){
   }
 
   if((nrow(temp.noLU) + nrow (temp.lowLU)) == 2){
-    ES.frame.noLU = rbind(ES.frame,table.sort(temp.noLU,temp.lowLU,"no LU","low"))}
+    ES.frame.noLU = rbind(ES.frame.noLU,table.sort(temp.noLU,temp.lowLU,"no LU","low"))}
   if((nrow(temp.noLU) + nrow (temp.mediumLU)) == 2){
-    ES.frame.noLU = rbind(ES.frame,table.sort(temp.noLU,temp.mediumLU,"no LU","medium"))}
+    ES.frame.noLU = rbind(ES.frame.noLU,table.sort(temp.noLU,temp.mediumLU,"no LU","medium"))}
   if((nrow(temp.noLU) + nrow (temp.highLU)) == 2){
-    ES.frame.noLU = rbind(ES.frame,table.sort(temp.noLU,temp.highLU,"no LU","high"))}
+    ES.frame.noLU = rbind(ES.frame.noLU,table.sort(temp.noLU,temp.highLU,"no LU","high"))}
 
   ### for within broad LUI comparisons
   temp.low.base = subset(data.temp, Within.study.Intensity %in% "baseline LUI" & Intensity.broad   %in% "low")
