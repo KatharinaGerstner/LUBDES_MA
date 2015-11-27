@@ -24,16 +24,9 @@ data$yield.SD[data$yield.SD==0] <- NA
 data2imp <- data[,c("richness.mean", "richness.SD", "X..of.samples.for.BD.measure", "yield.mean", "yield.SD", "X..of.samples.for.YD.measure")]
 predictorMatrix1 <- matrix(c(rep(0,6),c(1,0,1,0,0,0),rep(0,6),rep(0,6),c(0,0,0,1,0,1),rep(0,6)),ncol=ncol(data2imp),byrow=T) # only impute SDs using the corresponding means and sample.size
 
-predictorMatrix2 <- matrix(c(rep(0,6),c(1,0,0,0,0,0),rep(0,6),rep(0,6),c(0,0,0,1,0,0),rep(0,6)),ncol=ncol(data2imp),byrow=T) # only impute SDs using the corresponding means
-
-data1 <- data
-data2 <- data
-
-imp <- mice(data2imp,predictorMatrix=predictorMatrix1)
-data1[,c("richness.mean", "richness.SD", "X..of.samples.for.BD.measure", "yield.mean", "yield.SD", "X..of.samples.for.YD.measure")] <- complete(imp)
-
-imp <- mice(data2imp,predictorMatrix=predictorMatrix2)
-data2[,c("richness.mean", "richness.SD", "X..of.samples.for.BD.measure", "yield.mean", "yield.SD", "X..of.samples.for.YD.measure")] <- complete(imp)
+dataimp <- data
+imp <- mice(data2imp,predictorMatrix=predictorMatrix1,m=20)
+dataimp[,c("richness.mean", "richness.SD", "X..of.samples.for.BD.measure", "yield.mean", "yield.SD", "X..of.samples.for.YD.measure")] <- complete(imp)
 
 ### calculate SE for richness and yield mean
 # data$richness.SE <- data$richness.SD/sqrt(data$X..of.samples.for.BD.measure)

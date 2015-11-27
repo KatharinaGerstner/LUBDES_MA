@@ -18,7 +18,7 @@
 ### 
 ############################################################################
 
-### table.sort function to restructure data
+### table.sort function to restructure dataimp
 
 table.sort = function(dat.low,dat.high,low,high){
   data.frame("Study.ID"=dat.low$Study.ID, "Case.ID" =dat.low$Case.ID, 
@@ -75,11 +75,11 @@ names(ES.frame.noLU) <- c("Study.ID","Case.ID","Low.LUI","High.LUI","Habitat.Typ
                      "Species.Group","Species.Subgroup","Trophic.Level","Richness.Mean.Low" ,  
                      "Richness.SD.Low","Richness.N.Low","Richness.Plot.Size","Richness.Mean.High","Richness.SD.High", "Richness.N.High")
 
-# TO DO: remove "pooled within one LUI", change l 83: paste(data$study.case,data$species.group,sep="-") to data$study.case
+# TO DO: remove "pooled within one LUI", change l 83: paste(dataimp$study.case,dataimp$species.group,sep="-") to dataimp$study.case
 
-### re-build data to ES.frame using table.sort function
+### re-build dataimp to ES.frame using table.sort function
 
-for(i in unique(data$study.case)){
+for(i in unique(dataimp$study.case)){
   
   print(i)
   
@@ -88,7 +88,7 @@ for(i in unique(data$study.case)){
 #    print("ERROR. Omit from analysis.")
 #    next}
 
-  data.temp = subset(data, data$study.case %in% i)
+  data.temp = subset(dataimp, dataimp$study.case %in% i)
 
   ### for nu LUI
   temp.noLU <- subset(data.temp, Within.study.Intensity %in% "no LU")

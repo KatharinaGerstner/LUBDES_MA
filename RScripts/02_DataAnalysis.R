@@ -149,7 +149,7 @@ Richness.MA.fit.noLU <- rma.mv(yi=Richness.Log.RR, V=Richness.Log.RR.Var, mods=~
 MA.coeffs.noLU <- data.frame(Moderator="None",levels=1,mean.Richness=Richness.MA.fit.noLU$b,se.Richness=Richness.MA.fit.noLU$se)
 
 # define list of moderators
-moderator.list <- c("Land.use...land.cover","Species.Group","Trophic.Level","BIOME")
+moderator.list <- c("Products","Products:High.LUI","Land.use...land.cover","Species.Group","BIOME")
 
 # run analysis
 for(mods in moderator.list){
