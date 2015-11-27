@@ -43,19 +43,19 @@ pdf(paste(path2temp,"piecharts.pdf",sep="/"), width=10)
 stats.screen1 <- table(screening.data$Use_for_Study)[c(1,2,5,3,4,6)]
 sum(stats.screen1[c("Definitely","Maybe-High")])/sum(stats.screen1[c("Definitely","Maybe-High","Maybe-Low", "No")])
 stats.screen1["ML-Yes"]/sum(stats.screen1[c("ML-Yes","ML-No")])
-pie(stats.screen1,labels=paste(names(stats.screen1)," (",stats.screen1, ")",sep=""),col=c(brewer.pal(3, "Greens"),brewer.pal(3, "Reds")), main="Results of abstract screening",cex=1.5)
+pie(stats.screen1,labels=paste(names(stats.screen1)," (",stats.screen1, ")",sep=""),col=c(brewer.pal(3, "Greens"),brewer.pal(3, "Reds")), main="Results of abstract screening",cex=2)
 
 ### Progress in screening (#studies screened vs not screened)
 screen2 <- subset(screening.data, Use_for_Study %in% c("Definitely","Maybe-High","ML-Yes"))
 stats1.screen2 <- table(screen2$Coding_Decision_final,exclude=NULL)
-pie(c(sum(stats1.screen2[1:(length(stats1.screen2)-1)]),stats1.screen2[length(stats1.screen2)]), labels=paste(c("Screened","Not yet screened")," (",c(sum(stats1.screen2[1:(length(stats1.screen2)-1)]),stats1.screen2[length(stats1.screen2)]),")",sep=""), col=c("green","red"), main="Progress in full-text-screening",cex=1.5)
+pie(c(sum(stats1.screen2[1:(length(stats1.screen2)-1)]),stats1.screen2[length(stats1.screen2)]), labels=paste(c("Screened","Not yet screened")," (",c(sum(stats1.screen2[1:(length(stats1.screen2)-1)]),stats1.screen2[length(stats1.screen2)]),")",sep=""), col=c("green","red"), main="Progress in full-text-screening",cex=2)
 
 temp <- c(stats1.screen2["Proceed and Code!"],sum(stats1.screen2[c("Authors contacted","Contact authors and request data","Need data from figures","Needing clarification")]),sum(stats1.screen2[c("Got access to publication","paper in spanish","Re-evaluate use for study")]),sum(stats1.screen2[c("Code-ability Rejected","Ignored","Rejection confirmed")]),sum(stats1.screen2[c("no access to publication","not found")]))
-pie(temp,labels=paste(c("Proceed and Code", "Pending discussion or\n requested data", "Pending screening","Rejected", "No access")," (",temp, ")",sep=""), col=c(brewer.pal(3,"Greens"),"red","white"),main="Preliminary results of full-text screening",cex=1.5)
+pie(temp,labels=paste(c("Proceed and Code", "Pending discussion or\n requested data", "Pending screening","Rejected", "No access")," (",temp, ")",sep=""), col=c(brewer.pal(3,"Greens"),"red","white"),main="Preliminary results of full-text screening",cex=2)
 
 ### Progress in screened studies
 stats2.screen2 <- table(screen2$Status)
 temp <- data.frame(accepted=sum(stats2.screen2["coding complete"]), ToDo=sum(stats2.screen2)-sum(stats2.screen2[c("coding complete","study removed during coding", "study removed after evaluation")]), rejected=sum(stats2.screen2[c("coding complete","study removed during coding", "study removed after evaluation")]))
-pie(as.numeric(temp),labels=paste(names(temp)," (",temp, ")",sep=""),col=c("green","white","red"),main="Progress in studies accepted in full-text screening",cex=1.5)
+pie(as.numeric(temp),labels=paste(names(temp)," (",temp, ")",sep=""),col=c("green","white","red"),main="Progress in studies accepted in full-text screening",cex=2)
 
 dev.off()

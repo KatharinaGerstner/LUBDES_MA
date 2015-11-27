@@ -24,8 +24,12 @@ setwd(path2temp %+% "/")
 ### 
 ############################################################################
 
-download.file("https://www.dropbox.com/s/ihivf2ie98wxvee/terr-ecoregions-TNC.zip?dl=1", "terr-ecoregions-TNC.zip", mode="wb")
-unzip("terr-ecoregions-TNC.zip")
+if (file.exists("terr-ecoregions-TNC.zip")==FALSE){
+  download.file("https://www.dropbox.com/s/ihivf2ie98wxvee/terr-ecoregions-TNC.zip?dl=1", "terr-ecoregions-TNC.zip", mode="wb")
+  unzip("terr-ecoregions-TNC.zip")
+} else {
+  unzip("terr-ecoregions-TNC.zip")
+}
 
 ecoregions <- readOGR(path2temp,"tnc_terr_ecoregions")
 
@@ -52,9 +56,12 @@ colnames(ES.frame.noLU)[which(names(ES.frame.noLU) == "realms_extract$WWF_MHTNAM
 ### 01a.2. Intersect studies with global maps of GDP per capita
 ############################################################################
 
-
-download.file("https://www.dropbox.com/s/v00kxpmll1pb5fm/Data_Extract_From_World_Development_Indicators.zip?dl=1", "Data_Extract_From_World_Development_Indicators.zip", mode="wb")
-unzip("Data_Extract_From_World_Development_Indicators.zip")
+if (file.exists("Data_Extract_From_World_Development_Indicators.zip")==FALSE){
+  download.file("https://www.dropbox.com/s/v00kxpmll1pb5fm/Data_Extract_From_World_Development_Indicators.zip?dl=1", "Data_Extract_From_World_Development_Indicators.zip", mode="wb")
+  unzip("Data_Extract_From_World_Development_Indicators.zip")
+} else {
+  unzip("Data_Extract_From_World_Development_Indicators.zip")
+}
 
 GDP.pc <- read.csv("Data_Extract_From_World_Development_Indicators_Data.csv",na.strings="..")
 
@@ -67,8 +74,12 @@ ES.frame.noLU <- join(ES.frame.noLU,GDP.pc.2000,by="Country.Code")
 ### 01a.3. Intersect studies with annual mean radiation (Climond)
 ############################################################################
 
-download.file("https://www.dropbox.com/s/me92v7ozmixy75a/CM10_1975H_Bio_ASCII_V1.2.zip?dl=1", "CM10_1975H_Bio_ASCII_V1.2.zip", mode="wb")
-unzip("CM10_1975H_Bio_ASCII_V1.2.zip")
+if (file.exists("CM10_1975H_Bio_ASCII_V1.2.zip")==FALSE){
+  download.file("https://www.dropbox.com/s/me92v7ozmixy75a/CM10_1975H_Bio_ASCII_V1.2.zip?dl=1", "CM10_1975H_Bio_ASCII_V1.2.zip", mode="wb")
+  unzip("CM10_1975H_Bio_ASCII_V1.2.zip")
+} else {
+  unzip("CM10_1975H_Bio_ASCII_V1.2.zip")
+}
 
 annual_mean_radiation <- raster("CM10_1975H_Bio_V1.2/CM10_1975H_Bio20_V1.2.txt")
 
@@ -82,8 +93,12 @@ ES.frame.noLU$annual_mean_radiation<-extract(annual_mean_radiation,lonlat)
 ### 01a.4. Intersect studies with gross capital stock in agriculture
 ############################################################################
 
-download.file("https://www.dropbox.com/s/xgqrmyiqx2lqvyl/Investment_CapitalStock_E_All_Data.zip?dl=1", "Investment_CapitalStock_E_All_Data.zip", mode="wb")
-unzip("Investment_CapitalStock_E_All_Data.zip")
+if (file.exists("Investment_CapitalStock_E_All_Data.zip")==FALSE){
+  download.file("https://www.dropbox.com/s/xgqrmyiqx2lqvyl/Investment_CapitalStock_E_All_Data.zip?dl=1", "Investment_CapitalStock_E_All_Data.zip", mode="wb")
+  unzip("Investment_CapitalStock_E_All_Data.zip")
+} else {
+  unzip("Investment_CapitalStock_E_All_Data.zip")
+}
 
 capital_stock_in_agriculture <- read.csv("Investment_CapitalStock_E_All_Data.csv")
 capital_stock_in_agriculture <- subset(capital_stock_in_agriculture, Item == "Capital Stock + (Total)" & Element == "Gross Capital Stock (constant 2005 prices)")
@@ -121,7 +136,13 @@ ES.frame.noLU <- ES.frame.noLU[,-which(names(ES.frame.noLU)=="Date.End4CS")] ## 
 
 ### data from http://www.earthenv.org/texture.html
 
-download.file("https://www.dropbox.com/s/bwpzna0y4e1t77e/Dissimilarity_01_05_25km_uint32.tif?dl=1", "habitat_dissimilarity.tif", mode="wb")
+if (file.exists("habitat_dissimilarity.tif")==FALSE){
+  download.file("https://www.dropbox.com/s/bwpzna0y4e1t77e/Dissimilarity_01_05_25km_uint32.tif?dl=1", "habitat_dissimilarity.tif", mode="wb")
+  habitat_dissimilarity <- raster("habitat_dissimilarity.tif")
+} else {
+  habitat_dissimilarity <- raster("habitat_dissimilarity.tif")
+}
+
 
 habitat_dissimilarity <- raster("habitat_dissimilarity.tif")
 
