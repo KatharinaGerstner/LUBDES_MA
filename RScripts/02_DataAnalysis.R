@@ -149,7 +149,7 @@ Richness.MA.fit.noLU <- rma.mv(yi=Richness.Log.RR, V=Richness.Log.RR.Var, mods=~
 MA.coeffs.noLU <- data.frame(Moderator="None",levels=1,mean.Richness=Richness.MA.fit.noLU$b,se.Richness=Richness.MA.fit.noLU$se)
 
 # define list of moderators
-moderator.list <- c("Products","Products:High.LUI","Land.use...land.cover","Species.Group","BIOME")
+moderator.list <- c("Product","Product:High.LUI","Land.use...land.cover","Species.Group","BIOME")
 
 # run analysis
 for(mods in moderator.list){
@@ -165,7 +165,7 @@ for(mods in moderator.list){
   detach(ES.frame.noLU)
 
   ### tabularize model parameters
-  MA.coeffs.noLU <- rbind(MA.coeffs.noLU,data.frame(Moderator=rep(mods,length(Richness.MA.fit.noLU$b)),levels=unlist(lapply(strsplit(rownames(Richness.MA.fit.noLU$b),mods),function(x){x[[2]]})),mean.Richness=Richness.MA.fit.noLU$b,se.Richness=Richness.MA.fit.noLU$se))
+  MA.coeffs.noLU <- rbind(MA.coeffs.noLU,data.frame(Moderator=rep(mods,length(Richness.MA.fit.noLU$b)),levels=ifelse(mods=="Product:High.LUI",rownames(Richness.MA.fit.noLU$b),unlist(lapply(strsplit(rownames(Richness.MA.fit.noLU$b),mods),function(x){x[[2]]}))),mean.Richness=Richness.MA.fit.noLU$b,se.Richness=Richness.MA.fit.noLU$se))
 }
 print(MA.coeffs.noLU)
 
