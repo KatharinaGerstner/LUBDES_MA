@@ -20,7 +20,6 @@
 data$richness.SD[data$richness.SD==0] <- NA
 data$yield.SD[data$yield.SD==0] <- NA
 
-<<<<<<< HEAD
 ### impute
 data2imp <- data[,c("richness.mean", "richness.SD", "X..of.samples.for.BD.measure", "yield.mean", "yield.SD", "X..of.samples.for.YD.measure")]
 predictorMatrix1 <- matrix(c(rep(0,6),c(1,0,1,0,0,0),rep(0,6),rep(0,6),c(0,0,0,1,0,1),rep(0,6)),ncol=ncol(data2imp),byrow=T) # only impute SDs using the corresponding means and sample.size
@@ -39,30 +38,6 @@ data2[,c("richness.mean", "richness.SD", "X..of.samples.for.BD.measure", "yield.
 ### calculate SE for richness and yield mean
 # data$richness.SE <- data$richness.SD/sqrt(data$X..of.samples.for.BD.measure)
 # data$yield.SE <- data$yield.SD/sqrt(data$X..of.samples.for.YD.measure)
-=======
-### impute ES and BD separately
-### after a long discussion with Ralf, lots of trial runs manipulating N of studies that had no data to be 
-### imputed, MB and RS conclude that using mi in its current form is not a good idea.
-### 2do: calculate relative percentage of SD of mean and apply this to missing SD means, also do the +1 and -1 SD to test if this is robust
-
-# imp <- mice(data[,c("richness.mean", "richness.SD", "X..of.samples.for.BD.measure")])
-# data[,c("richness.mean", "richness.SD", "X..of.samples.for.BD.measure")] <- complete(imp)
-# 
-# imp <- mice(data[,c("yield.mean", "yield.SD", "X..of.samples.for.YD.measure")])
-# data[,c("yield.mean", "yield.SD", "X..of.samples.for.YD.measure")] <- complete(imp)
-
-
-# 
-# ### impute
-# imp <- mice(data[,c("richness.mean", "richness.SD", "X..of.samples.for.BD.measure", "yield.mean", "yield.SD", "X..of.samples.for.YD.measure")])
-# data[,c("richness.mean", "richness.SD", "X..of.samples.for.BD.measure", "yield.mean", "yield.SD", "X..of.samples.for.YD.measure")] <- complete(imp)
->>>>>>> 60d7f60e3bdd9686377ce26c739ebb4df3caa2f1
-
-### Obsolete?
-# ### calculate SE for richness and yield mean
-# data$richness.SE <- data$richness.SD/sqrt(data$X..of.samples.for.BD.measure)
-# data$yield.SE <- data$yield.SD/sqrt(data$X..of.samples.for.YD.measure)
-# 
 # ### check results, e.g. SD must be positive or SE will be NaN
 # summary(data[,c("richness.mean", "richness.SD", "X..of.samples.for.BD.measure", "yield.mean", "yield.SD", "X..of.samples.for.YD.measure")]) # does not produce negative SDs
 
