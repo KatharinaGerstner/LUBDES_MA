@@ -42,6 +42,41 @@ data2[,c("richness.mean", "richness.SD", "X..of.samples.for.BD.measure", "yield.
 # summary(data[,c("richness.mean", "richness.SD", "X..of.samples.for.BD.measure", "yield.mean", "yield.SD", "X..of.samples.for.YD.measure")]) # does not produce negative SDs
 
 ############################################################################
+### 00.2. crude-impute based on average SD/mean ratio
+### 
+############################################################################
+
+data$richness.SD[data$richness.SD==0] <- NA
+data$yield.SD[data$yield.SD==0] <- NA
+
+data$richness_sd_of_mean<-apply(subset(data, select=c(richness.mean,richness.SD)),1,function(x) (x[2]/x[1]))
+data$yield_sd_of_mean<-apply(subset(data, select=c(yield.mean,yield.SD)),1,function(x) (x[2]/x[1]))
+
+data$richness_sd_of_mean[data$richness_sd_of_mean==Inf]<-NA
+data$yield_sd_of_mean[data$yield_sd_of_mean==Inf]<-NA
+
+mean_richness_sd_of_mean<-mean(data$richness_sd_of_mean,na.rm=TRUE)
+mean_yield_sd_of_mean<-mean(data$yield_sd_of_mean,na.rm=TRUE)
+
+sd_richness_sd_of_mean<-sd(data$richness_sd_of_mean,na.rm=TRUE)
+sd_yield_sd_of_mean<-sd(data$yield_sd_of_mean,na.rm=TRUE)
+
+### choose one of three options
+
+### without SD
+# data$richness.SD[is.na(data$richness.SD)]<-(data$richness.mean[is.na(data$richness.SD)]*mean_richness_sd_of_mean)
+# data$yield.SD[is.na(data$yield.SD)]<-(data$yield.mean[is.na(data$yield.SD)]*mean_yield_sd_of_mean)
+
+### + 1sd
+data$richness.SD[is.na(data$richness.SD)]<-(data$richness.mean[is.na(data$richness.SD)]*(mean_richness_sd_of_mean+sd_richness_sd_of_mean))
+data$yield.SD[is.na(data$yield.SD)]<-(data$yield.mean[is.na(data$yield.SD)]*(mean_yield_sd_of_mean+sd_yield_sd_of_mean))
+
+### -1sd
+#data$richness.SD[is.na(data$richness.SD)]<-(data$richness.mean[is.na(data$richness.SD)]*(mean_richness_sd_of_mean-sd_richness_sd_of_mean))
+#data$yield.SD[is.na(data$yield.SD)]<-(data$yield.mean[is.na(data$yield.SD)]*(mean_yield_sd_of_mean-sd_yield_sd_of_mean))
+
+
+############################################################################
 ### 00.2. impute missing data using mi package
 ###
 ### Currently not working!

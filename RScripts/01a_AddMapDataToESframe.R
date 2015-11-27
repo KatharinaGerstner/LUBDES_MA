@@ -25,17 +25,10 @@ setwd(path2temp %+% "/")
 ############################################################################
 
 if (file.exists("terr-ecoregions-TNC.zip")==FALSE){
-<<<<<<< HEAD
   download.file("https://www.dropbox.com/s/ihivf2ie98wxvee/terr-ecoregions-TNC.zip?dl=1", "terr-ecoregions-TNC.zip", mode="wb")
   unzip("terr-ecoregions-TNC.zip")
 } else {
   unzip("terr-ecoregions-TNC.zip")
-=======
-download.file("https://www.dropbox.com/s/ihivf2ie98wxvee/terr-ecoregions-TNC.zip?dl=1", "terr-ecoregions-TNC.zip", mode="wb")
-unzip("terr-ecoregions-TNC.zip")
-  } else {
-unzip("terr-ecoregions-TNC.zip")
->>>>>>> 60d7f60e3bdd9686377ce26c739ebb4df3caa2f1
 }
 
 ecoregions <- readOGR(path2temp,"tnc_terr_ecoregions")
@@ -64,13 +57,8 @@ colnames(ES.frame.noLU)[which(names(ES.frame.noLU) == "realms_extract$WWF_MHTNAM
 ############################################################################
 
 if (file.exists("Data_Extract_From_World_Development_Indicators.zip")==FALSE){
-<<<<<<< HEAD
-  download.file("https://www.dropbox.com/s/v00kxpmll1pb5fm/Data_Extract_From_World_Development_Indicators.zip?dl=1", "Data_Extract_From_World_Development_Indicators.zip", mode="wb")
-  unzip("Data_Extract_From_World_Development_Indicators.zip")
-=======
 download.file("https://www.dropbox.com/s/v00kxpmll1pb5fm/Data_Extract_From_World_Development_Indicators.zip?dl=1", "Data_Extract_From_World_Development_Indicators.zip", mode="wb")
 unzip("Data_Extract_From_World_Development_Indicators.zip")
->>>>>>> 60d7f60e3bdd9686377ce26c739ebb4df3caa2f1
 } else {
   unzip("Data_Extract_From_World_Development_Indicators.zip")
 }
@@ -87,17 +75,10 @@ ES.frame.noLU <- join(ES.frame.noLU,GDP.pc.2000,by="Country.Code")
 ############################################################################
 
 if (file.exists("CM10_1975H_Bio_ASCII_V1.2.zip")==FALSE){
-<<<<<<< HEAD
-  download.file("https://www.dropbox.com/s/me92v7ozmixy75a/CM10_1975H_Bio_ASCII_V1.2.zip?dl=1", "CM10_1975H_Bio_ASCII_V1.2.zip", mode="wb")
-  unzip("CM10_1975H_Bio_ASCII_V1.2.zip")
-} else {
-  unzip("CM10_1975H_Bio_ASCII_V1.2.zip")
-=======
 download.file("https://www.dropbox.com/s/me92v7ozmixy75a/CM10_1975H_Bio_ASCII_V1.2.zip?dl=1", "CM10_1975H_Bio_ASCII_V1.2.zip", mode="wb")
 unzip("CM10_1975H_Bio_ASCII_V1.2.zip")
 } else {
 unzip("CM10_1975H_Bio_ASCII_V1.2.zip")
->>>>>>> 60d7f60e3bdd9686377ce26c739ebb4df3caa2f1
 }
 
 annual_mean_radiation <- raster("CM10_1975H_Bio_V1.2/CM10_1975H_Bio20_V1.2.txt")
@@ -113,13 +94,8 @@ ES.frame.noLU$annual_mean_radiation<-extract(annual_mean_radiation,lonlat)
 ############################################################################
 
 if (file.exists("Investment_CapitalStock_E_All_Data.zip")==FALSE){
-<<<<<<< HEAD
-  download.file("https://www.dropbox.com/s/xgqrmyiqx2lqvyl/Investment_CapitalStock_E_All_Data.zip?dl=1", "Investment_CapitalStock_E_All_Data.zip", mode="wb")
-  unzip("Investment_CapitalStock_E_All_Data.zip")
-=======
 download.file("https://www.dropbox.com/s/xgqrmyiqx2lqvyl/Investment_CapitalStock_E_All_Data.zip?dl=1", "Investment_CapitalStock_E_All_Data.zip", mode="wb")
 unzip("Investment_CapitalStock_E_All_Data.zip")
->>>>>>> 60d7f60e3bdd9686377ce26c739ebb4df3caa2f1
 } else {
   unzip("Investment_CapitalStock_E_All_Data.zip")
 }
@@ -161,24 +137,11 @@ ES.frame.noLU <- ES.frame.noLU[,-which(names(ES.frame.noLU)=="Date.End4CS")] ## 
 ### data from http://www.earthenv.org/texture.html
 
 if (file.exists("habitat_dissimilarity.tif")==FALSE){
-<<<<<<< HEAD
   download.file("https://www.dropbox.com/s/bwpzna0y4e1t77e/Dissimilarity_01_05_25km_uint32.tif?dl=1", "habitat_dissimilarity.tif", mode="wb")
   habitat_dissimilarity <- raster("habitat_dissimilarity.tif")
 } else {
   habitat_dissimilarity <- raster("habitat_dissimilarity.tif")
 }
-
-
-=======
-download.file("https://www.dropbox.com/s/bwpzna0y4e1t77e/Dissimilarity_01_05_25km_uint32.tif?dl=1", "habitat_dissimilarity.tif", mode="wb")
-habitat_dissimilarity <- raster("habitat_dissimilarity.tif")
-} else {
-habitat_dissimilarity <- raster("habitat_dissimilarity.tif")
-}
-  
-  
->>>>>>> 60d7f60e3bdd9686377ce26c739ebb4df3caa2f1
-habitat_dissimilarity <- raster("habitat_dissimilarity.tif")
 
 lonlat<-cbind(ES.frame$Longitude,ES.frame$Latitude)
 ES.frame$habitat_dissimilarity<-extract(habitat_dissimilarity,lonlat)
