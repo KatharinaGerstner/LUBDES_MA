@@ -37,7 +37,7 @@ screening.data <- screening.data[!duplicated(screening.data$TITLE),]
 screening.data$Coding_Decision_final <- screening.data$Coding_Decision..1
 screening.data$Coding_Decision_final[!is.na(screening.data$Coding_Decision..2)] <- screening.data$Coding_Decision..2[!is.na(screening.data$Coding_Decision..2)]
 
-pdf(paste(path2temp,"piecharts.pdf",sep="/"), width=10)
+#pdf(paste(path2temp,"piecharts.pdf",sep="/"), width=10)
 
 ### testing threshold setting for machine learning score, aim: acceptance rate for ML is approximately the same than for manual screening
 stats.screen1 <- table(screening.data$Use_for_Study)[c(1,2,5,3,4,6)]
@@ -58,4 +58,4 @@ stats2.screen2 <- table(screen2$Status)
 temp <- data.frame(accepted=sum(stats2.screen2["coding complete"]), ToDo=sum(stats2.screen2)-sum(stats2.screen2[c("coding complete","study removed during coding", "study removed after evaluation")]), rejected=sum(stats2.screen2[c("coding complete","study removed during coding", "study removed after evaluation")]))
 pie(as.numeric(temp),labels=paste(names(temp)," (",temp, ")",sep=""),col=c("green","white","red"),main="Progress in studies accepted in full-text screening",cex=2)
 
-dev.off()
+#dev.off()
