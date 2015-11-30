@@ -149,8 +149,33 @@ ES.frame$habitat_dissimilarity<-extract(habitat_dissimilarity,lonlat)
 lonlat<-cbind(ES.frame.noLU$Longitude,ES.frame.noLU$Latitude)
 ES.frame.noLU$habitat_dissimilarity<-extract(habitat_dissimilarity,lonlat)
 
+############################################################################
+### 01a.7. Intersect studies with Land-use history
+############################################################################
+timeseries.hyde <- list("sus_hbc6000","sus_hbc3000","sus_hbc1000","sus_had0","sus_had1000","sus_had1500","sus_had1750","sus_had1900","sus_had1950","sus_had2000")
+timeseries.kk10 <- list("sus_kbc6000","sus_kbc3000","sus_kbc1000","sus_kad0","sus_kad1000","sus_kad1500","sus_kad1750","sus_kad1900","sus_kad1950","sus_kad2000")
 
+hyde.LUhist.stack <- stack(lapply(timeseries.hyde,function(x) raster("c:/Users/hoppek/Documents/LUBDES/LUBDES_DATA/ellis_etal_2013_dataset/hyde/sus_use/" %+% x)))
+kk10.LUhist.stack <- stack(lapply(timeseries.kk10,function(x) raster("c:/Users/hoppek/Documents/LUBDES/LUBDES_DATA/ellis_etal_2013_dataset/kk10/sus_use/" %+% x)))
+
+lonlat <- cbind(ES.frame$Longitude,ES.frame$Latitude)
+hyde.extract.year.of.first.use <- extract(hyde.LUhist.stack,lonlat) 
+names(hyde.extract.year.of.first.use) <- c("-6000","-3000","-1000","0","1000","1500","1750","1900","1950","2000")
+hyde.year.of.first.use <- apply(hyde.extract.year.of.first.use,1,function(x){ifelse(sum(x)>0,as.numeric(names(hyde.extract.year.of.first.use)[min(which(x==1))]),NA)}) # NA if no significant use were detectable
+kk10.extract.year.of.first.use <- extract(kk10.LUhist.stack,lonlat) 
+names(kk10.extract.year.of.first.use) <- c("-6000","-3000","-1000","0","1000","1500","1750","1900","1950","2000")
+kk10.year.of.first.use <- apply(kk10.extract.year.of.first.use,1,function(x){ifelse(sum(x)>0,as.numeric(names(kk10.extract.year.of.first.use)[min(which(x==1))]),NA)}) # NA if no significant use were detectable
+ES.frame$year.of.first.use <- apply(cbind(hyde.year.of.first.use,kk10.year.of.first.use),1,function(x){ifelse(all(is.na(x)),NA,min(x,na.rm=T))})
+ES.frame$start.agr.use <- ifelse(ES.frame$year.of.first.use < 1750,"old","young")
+
+############################################################################
+### 01a.8. Intersect studies with Population density
+############################################################################
+#pop.data <- raster("c:/Users/hoppek/Documents/LUBDES/LUBDES_DATA/Population_density/gldens00/glds00ag/")
+
+############################################################################
 ### remove objectes to save workspace
-rm(ecoregions,lonlat,realms_extract,lonlat.noLU,GDP.pc,GDP.pc.2000,annual_mean_radiation,capital_stock_in_agriculture,habitat_dissimilarity)
+############################################################################
+rm(ecoregions,lonlat,realms_extract,lonlat.noLU,GDP.pc,GDP.pc.2000,annual_mean_radiation,capital_stock_in_agriculture,habitat_dissimilarity, timeseries.hyde,timeseries.kk10,hyde.LUhist.stack,kk10.LUhist.stack,hyde.extract.year.of.first.use,kk10.extract.year.of.first.use)
 
 setwd(path2wd)
