@@ -40,12 +40,13 @@ dev.off()
 ### 
 ############################################################################
 
-### plot all in one rush
+### plot cross diagrams for categorical moderators
 for(choose.moderator in as.character(unique(MA.coeffs.cat$Moderator))){
   ES.moderator.subset <- subset(MA.coeffs.cat, Moderator %in% choose.moderator)
   ES.moderator.subset$Moderator <- factor(ES.moderator.subset$Moderator)
   ES.moderator.subset$levels <- factor(ES.moderator.subset$levels)
   
+  ### plot cross diagrams
   if(nrow(ES.moderator.subset) >= 2){
     plot <- ggplot() + 
       geom_point(data=ES.frame, aes(x=Yield.Log.RR, y=Richness.Log.RR, color=as.factor(ES.frame[,which(names(ES.frame) %in% choose.moderator)])), size=4) +
@@ -79,6 +80,7 @@ ggsave(plot, file = paste(path2temp,"/Cross_diagram_",gsub(".","",choose.moderat
 
 }
 
+### plot scatterplots for continuous moderators
 for(i in 2:nrow(MA.coeffs.cont)){
   mods <- MA.coeffs.cont$Moderator[i]
   print(mods)
@@ -112,6 +114,7 @@ for(i in 2:nrow(MA.coeffs.cont)){
     geom_abline(intercept=ES.moderator.subset$Yield.intercept, slope=ES.moderator.subset$Yield.slope,color="blue") +
     geom_ribbon(aes(ymin=ci.lb.richness,ymax=ci.ub.richness),fill="red",alpha=0.2) +
     geom_ribbon(aes(ymin=ci.lb.yield,ymax=ci.ub.yield),fill="blue",alpha=0.2) +
+    geom_hline(x=0, linetype="twodash") + 
     scale_y_continuous(labels=trans_format("exp",comma_format(digits=2))) + 
     scale_colour_manual(values=c("red","blue"),labels=c("Richness","Yield")) +
     ylab("RR")  + xlab(paste(mods)) +
