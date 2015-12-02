@@ -152,11 +152,19 @@ ES.frame.noLU$habitat_dissimilarity<-extract(habitat_dissimilarity,lonlat)
 ############################################################################
 ### 01a.7. Intersect studies with Land-use history
 ############################################################################
+
+if (file.exists("ellis_etal_2013_dataset.zip")==FALSE){
+  download.file("https://www.dropbox.com/s/6qkr58sjimclpst/ellis_etal_2013_dataset.zip?dl=1", "ellis_etal_2013_dataset.zip", mode="wb")
+  unzip("ellis_etal_2013_dataset.zip")
+} else {
+  unzip <- raster("ellis_etal_2013_dataset.zip")
+}
+
 timeseries.hyde <- list("sus_hbc6000","sus_hbc3000","sus_hbc1000","sus_had0","sus_had1000","sus_had1500","sus_had1750","sus_had1900","sus_had1950","sus_had2000")
 timeseries.kk10 <- list("sus_kbc6000","sus_kbc3000","sus_kbc1000","sus_kad0","sus_kad1000","sus_kad1500","sus_kad1750","sus_kad1900","sus_kad1950","sus_kad2000")
 
-hyde.LUhist.stack <- stack(lapply(timeseries.hyde,function(x) raster("c:/Users/hoppek/Documents/LUBDES/LUBDES_DATA/ellis_etal_2013_dataset/hyde/sus_use/" %+% x)))
-kk10.LUhist.stack <- stack(lapply(timeseries.kk10,function(x) raster("c:/Users/hoppek/Documents/LUBDES/LUBDES_DATA/ellis_etal_2013_dataset/kk10/sus_use/" %+% x)))
+hyde.LUhist.stack <- stack(lapply(timeseries.hyde,function(x) raster("hyde/sus_use/" %+% x)))
+kk10.LUhist.stack <- stack(lapply(timeseries.kk10,function(x) raster("kk10/sus_use/" %+% x)))
 
 lonlat <- cbind(ES.frame$Longitude,ES.frame$Latitude)
 hyde.extract.year.of.first.use <- extract(hyde.LUhist.stack,lonlat) 
