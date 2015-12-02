@@ -2,11 +2,10 @@
 ### Purpose of this skript module 02 is to:
 ###
 ### 02.1. Prepare data analysis
-### 02.2. LMM.MA.fit function
-### 02.3. Analysis without moderators
-### 02.4. Analysis with moderators
-### 02.5. Analysis with moderators for no LU vs low/medium/high LU
-### 02.6. multivariate analysis with and without moderators (not yet working)
+### 02.2. Analysis without moderators
+### 02.3. Analysis with moderators
+### 02.4. Analysis with moderators for no LU vs low/medium/high LU
+### 02.5. multivariate analysis with and without moderators (not yet working)
 ###
 ### General comments:
 ### * 02.2. LMM.MA.fit function is currently not needed
@@ -26,7 +25,6 @@
 
 ############################################################################
 ### 02.1. Prepare data analysis
-### 
 ############################################################################
 
 ES.frame <- subset(ES.frame, Richness.Log.RR.Var>0 & Yield.Log.RR.Var>0) # restrict analysis to study cases with positive variances
@@ -34,51 +32,38 @@ ES.frame <- subset(ES.frame, Richness.Log.RR.Var>0 & Yield.Log.RR.Var>0) # restr
 
 ES.frame.noLU <- subset(ES.frame.noLU, Richness.Log.RR.Var>0) # restrict analysis to study cases with positive variances
 
-############################################################################
-### 02.2. LMM.MA.fit function
-### * 02.2. LMM.MA.fit function is currently not needed
-############################################################################
+### store models in a list
+Richness.MA.model <- list() 
+Yield.MA.model <- list()
 
-### LMM.MA.fit function
-# LMM.MA.fit <- function(yi,vi,mods,slab,inner2,outer2){
-# # TO DO: calculate variance-covariance matrix, esp covariance for between LUI comparisons 
-# #  VCov_matrix <- 
-#   inner3<-inner2
-#   outer3<-outer2
-#   rma.mv.fit <- rma.mv(yi=yi, V=vi, mods = mods, random = ~factor(inner3)|factor(outer3), struct="CS", data=ES.frame, slab=slab,method="REML", tdist=FALSE, level=95, digits=4)
-#   return(rma.mv.fit)
-# }
-
-############################################################################
-### 02.3. Analysis without moderators
-### 
-############################################################################
-
-# TO DO: make a list of moderators to be tested, store model results in a list, so they can be plotted in a next step (03_Plotting.r)
-
-
-### Analysis without moderators
-Richness.MA.fit <- rma.mv(yi=Richness.Log.RR, V=Richness.Log.RR.Var, mods=~1, random = ~factor(Case.ID)|factor(Study.ID), struct="CS", slab=paste(Study.Case, Low.LUI, High.LUI,sep="_"),method="REML", tdist=FALSE, level=95, digits=4,data=ES.frame)
-Yield.MA.fit <- rma.mv(yi=Yield.Log.RR,V=Yield.Log.RR.Var,mods=~1, random = ~factor(Case.ID)|factor(Study.ID), struct="CS", slab=paste(Study.Case, Low.LUI, High.LUI,sep="_"),method="REML", tdist=FALSE, level=95, digits=4,data=ES.frame)
+### store predictions in a list
 preds.richness <- list()
-preds.richness[["None"]] <- predict.rma(Richness.MA.fit) 
 preds.yield <- list()
+
+############################################################################
+### 02.2. Analysis without moderators
+############################################################################
+
+Richness.MA.fit <- rma.mv(yi=Richness.Log.RR, V=Richness.Log.RR.Var, mods=~1, random = ~factor(Case.ID)|factor(Study.ID), struct="CS", slab=paste(Study.Case, Low.LUI, High.LUI,sep="_"),method="REML", tdist=FALSE, level=95, digits=4,data=ES.frame)
+Richness.MA.model[["None"]] <- Richness.MA.fit
+preds.richness[["None"]] <- predict.rma(Richness.MA.fit) 
+
+Yield.MA.fit <- rma.mv(yi=Yield.Log.RR,V=Yield.Log.RR.Var,mods=~1, random = ~factor(Case.ID)|factor(Study.ID), struct="CS", slab=paste(Study.Case, Low.LUI, High.LUI,sep="_"),method="REML", tdist=FALSE, level=95, digits=4,data=ES.frame)
+Yield.MA.model[["None"]] <- Yield.MA.fit
 preds.yield[["None"]] <- predict.rma(Yield.MA.fit) 
 
-### Store results in table
+### Store parameter estimates in a table
 MA.coeffs.cat <- data.frame(Moderator="None",levels=1,mean.Richness=Richness.MA.fit$b,se.Richness=Richness.MA.fit$se,mean.Yield=Yield.MA.fit$b,se.Yield=Yield.MA.fit$se)
 MA.coeffs.cont <- data.frame(Moderator="None",Richness.intercept=Richness.MA.fit$b,Richness.slope=0, Richness.se.intercept=Richness.MA.fit$se, Richness.se.slope=0, Yield.intercept=Yield.MA.fit$b, Yield.slope=0, Yield.se.intercept=Yield.MA.fit$se, Yield.se.slope=0)
-
 ############################################################################
-### 02.4. Analysis with moderators
-### 
+### 02.3. Analysis with moderators
 ############################################################################
 
-# define list of moderators
+### define list of moderators
 moderator.list.cat <- c("Land.use...land.cover","Species.Group","Trophic.Level","LUI.range.level","Product", "ES.From.BD","BIOME","start.agr.use")
 moderator.list.cont <- c("GDP.pc.2000","annual_mean_radiation","capital_millionUSD","habitat_dissimilarity","year.of.first.use")
 
-# run analysis
+### run analysis for categorical moderators
 for(mods in moderator.list.cat){
   
   print(mods)
@@ -86,6 +71,7 @@ for(mods in moderator.list.cat){
   ### fit model
   attach(ES.frame)
   Richness.MA.fit <- try(rma.mv(yi=Richness.Log.RR,V=Richness.Log.RR.Var,mods=as.formula(paste("~",mods,"-1",sep="")),random = ~factor(Case.ID)|factor(Study.ID), struct="CS", slab=paste(Study.Case, Low.LUI, High.LUI,sep="_"),method="REML", tdist=FALSE, level=95, digits=4,data=ES.frame), silent=T)
+  Richness.MA.model[[mods]] <- Richness.MA.fit
   ### catch errors
   if(class(Richness.MA.fit)=="try-error") {
     print(geterrmessage())
@@ -94,6 +80,7 @@ for(mods in moderator.list.cat){
 
   ### fit model
   Yield.MA.fit <- try(rma.mv(yi=Yield.Log.RR,V=Yield.Log.RR.Var,mods=as.formula(paste("~",mods,"-1",sep="")),random = ~factor(Case.ID)|factor(Study.ID), struct="CS", slab=paste(Study.Case, Low.LUI, High.LUI,sep="_"),method="REML", tdist=FALSE, level=95, digits=4,data=ES.frame),silent=T)
+  Yield.MA.model[[mods]] <- Yield.MA.fit
   ### catch errors
   if(class(Yield.MA.fit)=="try-error") {
     print(geterrmessage())
@@ -107,6 +94,7 @@ for(mods in moderator.list.cat){
 }
 print(MA.coeffs.cat)
 
+### run analysis for continuous moderators
 for(mods in moderator.list.cont){
   
   print(mods)
@@ -114,6 +102,7 @@ for(mods in moderator.list.cont){
   
   ### fit model
   Richness.MA.fit <- try(rma.mv(yi=Richness.Log.RR,V=Richness.Log.RR.Var,mods=as.formula(paste("~",mods,sep="")),random = ~factor(Case.ID)|factor(Study.ID), struct="CS", slab=paste(Study.Case, Low.LUI, High.LUI,sep="_"),method="REML", tdist=FALSE, level=95, digits=4,data=ES.frame),silent=T)
+  Richness.MA.model[["None"]] <- Richness.MA.fit
   ### catch errors
   if(class(Richness.MA.fit)=="try-error") {
     print(geterrmessage())
@@ -122,6 +111,7 @@ for(mods in moderator.list.cont){
 
   ### fit model
   Yield.MA.fit <- try(rma.mv(yi=Yield.Log.RR,V=Yield.Log.RR.Var,mods=as.formula(paste("~",mods,sep="")),random = ~factor(Case.ID)|factor(Study.ID), struct="CS", slab=paste(Study.Case, Low.LUI, High.LUI,sep="_"),method="REML", tdist=FALSE, level=95, digits=4,data=ES.frame),silent=T)
+  Yield.MA.model[[mods]] <- Yield.MA.fit
   ### catch errors
   if(class(Yield.MA.fit)=="try-error") {
     print(geterrmessage())
@@ -138,12 +128,14 @@ for(mods in moderator.list.cont){
 print(MA.coeffs.cont)
 
 ############################################################################
-### 02.5. Analysis with moderators for no LU vs low/medium/high LU
-### 
+### 02.4. Analysis with moderators for no LU vs low/medium/high LU
 ############################################################################
+
+Richness.MA.model.noLU <- list()
 
 ### Analysis without moderators
 Richness.MA.fit.noLU <- rma.mv(yi=Richness.Log.RR, V=Richness.Log.RR.Var, mods=~1, random = ~factor(Case.ID)|factor(Study.ID), struct="CS", slab=paste(Study.Case, Low.LUI, High.LUI,sep="_"),method="REML", tdist=FALSE, level=95, digits=4,data=ES.frame.noLU)
+Richness.MA.model.noLU[["None"]] <- Richness.MA.fit.noLU
 
 ### Store results in table
 MA.coeffs.noLU <- data.frame(Moderator="None",levels=1,mean.Richness=Richness.MA.fit.noLU$b,se.Richness=Richness.MA.fit.noLU$se)
@@ -157,6 +149,7 @@ for(mods in moderator.list){
   ### fit model 
   attach(ES.frame.noLU)
   Richness.MA.fit.noLU <- try(rma.mv(yi=Richness.Log.RR,V=Richness.Log.RR.Var,mods=as.formula(paste("~",mods,"-1",sep="")),random = ~factor(Case.ID)|factor(Study.ID), struct="CS", slab=paste(Study.Case, Low.LUI, High.LUI,sep="_"),method="REML", tdist=FALSE, level=95, digits=4,data=ES.frame.noLU),silent=T)
+  Richness.MA.model.noLU[[mods]] <- Richness.MA.fit.noLU
   ### catch errors
   if(class(Richness.MA.fit.noLU)[1]=="try-error") {
     geterrmessage()
@@ -201,6 +194,21 @@ print(MA.coeffs.noLU)
 ###########################################################################
 ### Resterampe
 ### use full model with all levels simultaneously or separate models for each level
+
+############################################################################
+### 02.2. LMM.MA.fit function
+### * 02.2. LMM.MA.fit function is currently not needed
+############################################################################
+
+### LMM.MA.fit function
+# LMM.MA.fit <- function(yi,vi,mods,slab,inner2,outer2){
+# # TO DO: calculate variance-covariance matrix, esp covariance for between LUI comparisons 
+# #  VCov_matrix <- 
+#   inner3<-inner2
+#   outer3<-outer2
+#   rma.mv.fit <- rma.mv(yi=yi, V=vi, mods = mods, random = ~factor(inner3)|factor(outer3), struct="CS", data=ES.frame, slab=slab,method="REML", tdist=FALSE, level=95, digits=4)
+#   return(rma.mv.fit)
+# }
 
 ### implement or not the variance-covariance matrix: 
 # is the information content of the covariance of the ES worth to include at the harm of model robustness?
