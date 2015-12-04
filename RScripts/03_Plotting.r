@@ -52,7 +52,7 @@ for(choose.moderator in as.character(unique(MA.coeffs.cat$Moderator))){
   ### plot cross diagrams
   if(nrow(ES.moderator.subset) >= 2){
     plot <- ggplot() + 
-      geom_point(data=ES.frame, aes(x=Yield.Log.RR, y=Richness.Log.RR, color=as.factor(ES.frame[,which(names(ES.frame) %in% choose.moderator)])), size=4) +
+      geom_point(data=ES.frame, aes(x=Yield.Log.RR, y=Richness.Log.RR, color=as.factor(ES.frame[,which(names(ES.frame) %in% choose.moderator)])), size=4, alpha=.5) +
       geom_pointrange(data=ES.moderator.subset, aes(x=mean.Yield, y=mean.Richness, ymin=mean.Richness - (1.96*se.Richness), ymax=mean.Richness + (1.96*se.Richness),color=factor(levels)), size=1.5) +
       geom_segment(data=ES.moderator.subset, aes(x=mean.Yield - (1.96*se.Yield), xend=mean.Yield + (1.96*se.Yield), y = mean.Richness, yend = mean.Richness, color=factor(levels)),size=1.5) +
       geom_hline(data=ES.frame, x=0, linetype="twodash") + geom_vline(data=ES.frame, y=0, linetype="twodash") +
@@ -66,7 +66,7 @@ for(choose.moderator in as.character(unique(MA.coeffs.cat$Moderator))){
   
   if(nrow(ES.moderator.subset) == 1){
    plot <- ggplot() + 
-      geom_point(data=ES.frame, aes(x=Yield.Log.RR, y=Richness.Log.RR), color="grey", size=3.5) +
+      geom_point(data=ES.frame, aes(x=Yield.Log.RR, y=Richness.Log.RR), color="grey", size=3.5, alpha=.5) +
       geom_pointrange(data=ES.moderator.subset, aes(x=mean.Yield, y=mean.Richness, ymin=mean.Richness	- (1.96*se.Richness), ymax=mean.Richness	+ (1.96*se.Richness)), color="green", size=1) +
       geom_segment(data=ES.moderator.subset, aes(x=mean.Yield - (1.96*se.Yield), xend=mean.Yield + (1.96*se.Yield), y = mean.Richness, yend = mean.Richness), color="green", size=1) +
       geom_hline(data=ES.frame, x=0, linetype="twodash") + 
@@ -112,7 +112,7 @@ for(i in 2:nrow(MA.coeffs.cont)){
   }
   
   plot1 <- ggplot(data=pred.frame.trans, aes(x=pred.frame.trans[,paste(mods)])) + 
-    geom_point(aes(y=Log.RR, color=Response), size=3.5) +
+    geom_point(aes(y=Log.RR, color=Response), size=3.5, alpha=.5) +
     geom_abline(intercept=ES.moderator.subset$Richness.intercept, slope=ES.moderator.subset$Richness.slope,color="red") +
     geom_abline(intercept=ES.moderator.subset$Yield.intercept, slope=ES.moderator.subset$Yield.slope,color="blue") +
     geom_ribbon(aes(ymin=ci.lb.richness,ymax=ci.ub.richness),fill="red",alpha=0.2) +
