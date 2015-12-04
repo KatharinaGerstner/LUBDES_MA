@@ -2,6 +2,7 @@
 ### Purpose of this skript module 01a is to:
 ###
 ### 01a.1. Intersect studies with global maps of WWF_REALMs Ecoregions
+### 01a.2. Intersect studies with global maps of climate zones (Köppen-Geiger)
 ### 01a.2. Intersect studies with global maps of GDP per capita
 ### 01a.3. Intersect studies with annual mean radiation (Climond)
 ### 01a.4. Intersect studies with gross capital stock in agriculture
@@ -18,10 +19,15 @@
 # set a wd suitable for downloading and extracting Ecoregions shapefile
 setwd(path2temp %+% "/") 
 
+# remove unneeded information for extraction, the extract command requests this form of data
+ES.frame <- ES.frame[!is.na(ES.frame$Longitude+ES.frame$Latitude),] # remove NA lonlat
+lonlat <- cbind(ES.frame$Longitude,ES.frame$Latitude)
+
+ES.frame.noLU <- ES.frame.noLU[!is.na(ES.frame.noLU$Longitude+ES.frame.noLU$Latitude),] # remove NA lonlat
+lonlat.noLU <- cbind(ES.frame.noLU$Longitude,ES.frame.noLU$Latitude)
+
 ############################################################################
 ### 01a.1. Intersect studies with global maps of WWF_REALMs Ecoregions
-### 
-### 
 ############################################################################
 
 if (file.exists("terr-ecoregions-TNC.zip")==FALSE){
@@ -31,20 +37,12 @@ if (file.exists("terr-ecoregions-TNC.zip")==FALSE){
 
 ecoregions <- readOGR(path2temp,"tnc_terr_ecoregions")
 
-# remove unneeded information for extraction, the extract command requests this form of data
-ES.frame <- ES.frame[!is.na(ES.frame$Longitude+ES.frame$Latitude),] # remove NA lonlat
-lonlat <- cbind(ES.frame$Longitude,ES.frame$Latitude)
-
 # extract ecoregions
 realms_extract <- extract(ecoregions,lonlat)
 ES.frame <- cbind(ES.frame,realms_extract$WWF_MHTNAM)
 colnames(ES.frame)[which(names(ES.frame) == "realms_extract$WWF_MHTNAM")]<-"BIOME"
 
 ### for ES.frame.noLU
-# remove unneeded information for extraction, the extract command requests this form of data
-ES.frame.noLU <- ES.frame.noLU[!is.na(ES.frame.noLU$Longitude+ES.frame.noLU$Latitude),] # remove NA lonlat
-lonlat.noLU <- cbind(ES.frame.noLU$Longitude,ES.frame.noLU$Latitude)
-
 # extract ecoregions
 realms_extract <- extract(ecoregions,lonlat.noLU)
 ES.frame.noLU <- cbind(ES.frame.noLU,realms_extract$WWF_MHTNAM)
@@ -53,8 +51,52 @@ colnames(ES.frame.noLU)[which(names(ES.frame.noLU) == "realms_extract$WWF_MHTNAM
 ############################################################################
 ### 01a.2. Intersect studies with global maps of climate zones (Köppen-Geiger)
 ############################################################################
-# climate_zone <- raster("c:/Users/hoppek/Documents/LUBDES/LUBDES_DATA/climate_zones_1976-2000_ASCII.txt")
-# climate_zone <- read.asciigrid("c:/Users/hoppek/Documents/LUBDES/LUBDES_DATA/climate_zones_1976-2000_ASCII.txt",colname="Cls")
+if (file.exists("1976-2000_GIS.zip")==FALSE){
+  download.file("http://koeppen-geiger.vu-wien.ac.at/data/1976-2000_GIS.zip","1976-2000_GIS.zip", mode="wb")
+  unzip("1976-2000_GIS.zip")
+} else {unzip("1976-2000_GIS.zip")}
+climate_zone <- readOGR(path2temp,"1976-2000")
+# Legend(GRIDCODE)
+# 11 ... Af
+# 12 ... Am
+# 13 ... As
+# 14 ... Aw
+# 21 ... BWk
+# 22 ... BWh
+# 26 ... BSk
+# 27 ... BSh
+# 31 ... Cfa
+# 32 ... Cfb
+# 33 ... Cfc
+# 34 ... Csa
+# 35 ... Csb
+# 36 ... Csc
+# 37 ... Cwa
+# 38 ... Cwb
+# 39 ... Cwc
+# 41 ... Dfa
+# 42 ... Dfb
+# 43 ... Dfc
+# 44 ... Dfd
+# 45 ... Dsa
+# 46 ... Dsb
+# 47 ... Dsc
+# 48 ... Dsd
+# 49 ... Dwa
+# 50 ... Dwb
+# 51 ... Dwc
+# 52 ... Dwd
+# 61 ... EF
+# 62 ... ET
+
+# extract ecoregions
+climate_extract <- extract(climate_zone,lonlat)
+ES.frame$main_climate <- cut(climate_extract$GRIDCODE, breaks=c(10,20,30,40,50,60), labels=c("equatorial","arid","warm temperature","snow","polar"))
+
+### for ES.frame.noLU
+climate_extract <- extract(climate_zone,lonlat.noLU)
+ES.frame.noLU$main_climate <- cut(climate_extract$GRIDCODE, breaks=c(10,20,30,40,50,60), labels=c("equatorial","arid","warm temperature","snow","polar"))
+
 # 
 
 ############################################################################
@@ -86,13 +128,11 @@ if (file.exists("CM10_1975H_Bio_ASCII_V1.2.zip")==FALSE){
   unzip("CM10_1975H_Bio_ASCII_V1.2.zip")
 }
 
-annual_mean_radiation <- raster("CM10_1975H_Bio_V1.2/CM10_1975H_Bio20_V1.2.txt")
+annual_mean_radiation <- raster("CM10_1975H_Bio_V1.2/CM10_1975H_Bio20_V1.2.txt",crs=CRS("+proj=longlat +datum=WGS84 +no_defs +ellps=WGS84 +towgs84=0,0,0"))
 
-lonlat<-cbind(ES.frame$Longitude,ES.frame$Latitude)
-ES.frame$annual_mean_radiation<-extract(annual_mean_radiation,lonlat, buffer=10000, fun="mean") # consider a buffer of radius=10km² around each dot
+ES.frame$annual_mean_radiation<-extract(annual_mean_radiation,lonlat, buffer=10000, fun=mean) # consider a buffer of radius=10km² around each dot
 
-lonlat<-cbind(ES.frame.noLU$Longitude,ES.frame.noLU$Latitude)
-ES.frame.noLU$annual_mean_radiation<-extract(annual_mean_radiation,lonlat, buffer=10000, fun="mean") # consider a buffer of radius=10km² around each dot
+ES.frame.noLU$annual_mean_radiation<-extract(annual_mean_radiation,lonlat.noLU, buffer=10000, fun=mean) # consider a buffer of radius=10km² around each dot
 
 ############################################################################
 ### 01a.4. Intersect studies with gross capital stock in agriculture
@@ -150,11 +190,9 @@ if (file.exists("habitat_dissimilarity.tif")==FALSE){
   
 habitat_dissimilarity <- raster("habitat_dissimilarity.tif")
 
-lonlat<-cbind(ES.frame$Longitude,ES.frame$Latitude)
-ES.frame$habitat_dissimilarity<-extract(habitat_dissimilarity,lonlat, buffer=10000, fun="mean") # consider a buffer of radius=10km² around each dot)
+ES.frame$habitat_dissimilarity<-extract(habitat_dissimilarity,lonlat, buffer=10000, fun=mean) # consider a buffer of radius=10km² around each dot)
 
-lonlat<-cbind(ES.frame.noLU$Longitude,ES.frame.noLU$Latitude)
-ES.frame.noLU$habitat_dissimilarity<-extract(habitat_dissimilarity,lonlat, buffer=10000, fun="mean") # consider a buffer of radius=10km² around each dot)
+ES.frame.noLU$habitat_dissimilarity<-extract(habitat_dissimilarity,lonlat.noLU, buffer=10000, fun=mean) # consider a buffer of radius=10km² around each dot)
 
 ############################################################################
 ### 01a.7. Intersect studies with Land-use history
@@ -173,7 +211,7 @@ timeseries.kk10 <- list("sus_kbc6000","sus_kbc3000","sus_kbc1000","sus_kad0","su
 hyde.LUhist.stack <- stack(lapply(timeseries.hyde,function(x) raster("hyde/sus_use/" %+% x)))
 kk10.LUhist.stack <- stack(lapply(timeseries.kk10,function(x) raster("kk10/sus_use/" %+% x)))
 
-lonlat <- cbind(ES.frame$Longitude,ES.frame$Latitude)
+## ES.frame
 hyde.extract.year.of.first.use <- extract(hyde.LUhist.stack,lonlat) 
 names(hyde.extract.year.of.first.use) <- c("-6000","-3000","-1000","0","1000","1500","1750","1900","1950","2000")
 hyde.year.of.first.use <- apply(hyde.extract.year.of.first.use,1,function(x){ifelse(sum(x)>0,as.numeric(names(hyde.extract.year.of.first.use)[min(which(x==1))]),NA)}) # NA if no significant use were detectable
@@ -184,20 +222,35 @@ ES.frame$year.of.first.use <- apply(cbind(hyde.year.of.first.use,kk10.year.of.fi
 ES.frame$start.agr.use <- ifelse(ES.frame$year.of.first.use < 1500,"old","young")
 ES.frame$start.agr.use[is.na(ES.frame$start.agr.use)] <- "not yet used"
 
+## ES.frame.noLU
+hyde.extract.year.of.first.use <- extract(hyde.LUhist.stack,lonlat.noLU) 
+names(hyde.extract.year.of.first.use) <- c("-6000","-3000","-1000","0","1000","1500","1750","1900","1950","2000")
+hyde.year.of.first.use <- apply(hyde.extract.year.of.first.use,1,function(x){ifelse(sum(x)>0,as.numeric(names(hyde.extract.year.of.first.use)[min(which(x==1))]),NA)}) # NA if no significant use were detectable
+kk10.extract.year.of.first.use <- extract(kk10.LUhist.stack,lonlat.noLU) 
+names(kk10.extract.year.of.first.use) <- c("-6000","-3000","-1000","0","1000","1500","1750","1900","1950","2000")
+kk10.year.of.first.use <- apply(kk10.extract.year.of.first.use,1,function(x){ifelse(sum(x)>0,as.numeric(names(kk10.extract.year.of.first.use)[min(which(x==1))]),NA)}) # NA if no significant use were detectable
+ES.frame.noLU$year.of.first.use <- apply(cbind(hyde.year.of.first.use,kk10.year.of.first.use),1,function(x){ifelse(all(is.na(x)),NA,min(x,na.rm=T))})
+ES.frame.noLU$start.agr.use <- ifelse(ES.frame.noLU$year.of.first.use < 1500,"old","young")
+ES.frame.noLU$start.agr.use[is.na(ES.frame.noLU$start.agr.use)] <- "not yet used"
+
 ############################################################################
 ### 01a.8. Intersect studies with Population density
 ############################################################################
 pop.data <- raster("c:/Users/hoppek/Documents/LUBDES/LUBDES_DATA/Population_density/gldens00/glds00ag")
 
-lonlat<-cbind(ES.frame$Longitude,ES.frame$Latitude)
-ES.frame$pop.dens.2000 <- extract(pop.data,lonlat, buffer=10000, fun="mean") # consider a buffer of radius=10km² around each dot)
+ES.frame$pop.dens.2000 <- extract(pop.data,lonlat, buffer=10000, fun=mean) # consider a buffer of radius=10km² around each dot)
 
-lonlat <- cbind(ES.frame.noLU$Longitude,ES.frame.noLU$Latitude)
-ES.frame.noLU$pop.dens.2000 <- extract(pop.data,lonlat, buffer=10000, fun="mean") # consider a buffer of radius=10km² around each dot)
+ES.frame.noLU$pop.dens.2000 <- extract(pop.data,lonlat.noLU, buffer=10000, fun=mean) # consider a buffer of radius=10km² around each dot)
+
+############################################################################
+### 01a.9. Combine LUI classifiers
+############################################################################
+
+# not yet working
 
 ############################################################################
 ### remove objectes to save workspace
 ############################################################################
-rm(ecoregions,lonlat,realms_extract,lonlat.noLU,GDP.pc,GDP.pc.2000,annual_mean_radiation,capital_stock_in_agriculture,habitat_dissimilarity, timeseries.hyde,timeseries.kk10,hyde.LUhist.stack,kk10.LUhist.stack,hyde.extract.year.of.first.use,kk10.extract.year.of.first.use)
+rm(lonlat, lonlat.noLU,ecoregions,climate_extract,realms_extract,GDP.pc,GDP.pc.2000,annual_mean_radiation,capital_stock_in_agriculture,habitat_dissimilarity, timeseries.hyde,timeseries.kk10,hyde.LUhist.stack,kk10.LUhist.stack,hyde.extract.year.of.first.use,kk10.extract.year.of.first.use,hyde.year.of.first.use,kk10.year.of.first.use)
 
 setwd(path2wd)

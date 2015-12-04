@@ -60,7 +60,7 @@ MA.coeffs.cont <- data.frame(Moderator="None",Richness.intercept=Richness.MA.fit
 ############################################################################
 
 ### define list of moderators
-moderator.list.cat <- c("Land.use...land.cover","Species.Group","Trophic.Level","LUI.range.level","Product", "ES.From.BD","BIOME","start.agr.use")
+moderator.list.cat <- c("Land.use...land.cover","Species.Group","Trophic.Level","LUI.range.level","Product", "ES.From.BD","BIOME", "main_climate","start.agr.use")
 moderator.list.cont <- c("GDP.pc.2000","annual_mean_radiation","capital_millionUSD","habitat_dissimilarity","year.of.first.use")
 
 ### run analysis for categorical moderators
