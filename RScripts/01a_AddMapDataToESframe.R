@@ -236,7 +236,15 @@ ES.frame.noLU$start.agr.use[is.na(ES.frame.noLU$start.agr.use)] <- "not yet used
 ############################################################################
 ### 01a.8. Intersect studies with Population density
 ############################################################################
-pop.data <- raster("c:/Users/hoppek/Documents/LUBDES/LUBDES_DATA/Population_density/gldens00/glds00ag")
+
+if (file.exists("Population_density.zip")==FALSE){
+  download.file("https://www.dropbox.com/s/1pgyh8jyvynjlca/Population_density.zip?dl=1", "Population_density.zip", mode="wb")
+  unzip("Population_density.zip")
+} else {
+  unzip ("Population_density.zip")
+}
+
+pop.data <- raster("gldens00/glds00ag")
 
 ES.frame$pop.dens.2000 <- extract(pop.data,lonlat, buffer=10000, fun=mean) # consider a buffer of radius=10km² around each dot)
 
