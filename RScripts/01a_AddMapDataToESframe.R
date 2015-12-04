@@ -202,7 +202,7 @@ if (file.exists("ellis_etal_2013_dataset.zip")==FALSE){
   download.file("https://www.dropbox.com/s/6qkr58sjimclpst/ellis_etal_2013_dataset.zip?dl=1", "ellis_etal_2013_dataset.zip", mode="wb")
   unzip("ellis_etal_2013_dataset.zip")
 } else {
-  unzip <- raster("ellis_etal_2013_dataset.zip")
+  unzip ("ellis_etal_2013_dataset.zip")
 }
 
 timeseries.hyde <- list("sus_hbc6000","sus_hbc3000","sus_hbc1000","sus_had0","sus_had1000","sus_had1500","sus_had1750","sus_had1900","sus_had1950","sus_had2000")
