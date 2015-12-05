@@ -1,20 +1,17 @@
 ############################################################################
-### Purpose of this skript module 01 is to:
+### Purpose of this skript module 04 is to:
 ###
-### 01.1. table.sort function
-### 01.2. Compile ES frame
-### 01.3. Calculate response ratio effect sizes
+### 04.1. table.sort function
+### 04.2. Compile ES frame
+### 04.3. Calculate response ratio effect sizes
 ###
 ### General comments:
-### * TO DO: build all correct pairs! e.g. for 2318-Guretzky2005 only the pair medium-low/medium-high is built but not the one between low and medium!
-### * currently also not built: 2x 2997-Kern2006, 6528-Sasaki2011 (pooled medium vs pooled high), 6684-Vintu2011 (low medium)
-###   7577-Mastrangelo2012 (pooled low vs medium or high), 8235-Norvez2013 (Case 1), 8568-Yan2013 (3 high-high cases)
-###   516-Higgins1999, ...
+###
 ### Authors: KG, MB, SK ...
 ############################################################################
 
 ############################################################################
-### 01.1. table.sort function
+### 04.1. table.sort function
 ### 
 ############################################################################
 
@@ -49,9 +46,8 @@ table.sort = function(dat.low,dat.high,low,high){
              "Yield.Mean.High" = as.numeric(dat.high$yield.mean), "Yield.SD.High" = as.numeric(dat.high$yield.SD), "Yield.N.High" = as.numeric(dat.high$X..of.samples.for.YD.measure))
 }
 
-
 ############################################################################
-### 01.1. Compile ES frame
+### 04.2. Compile ES frame
 ### 
 ############################################################################
 
@@ -153,7 +149,7 @@ ES.frame$Study.Case <- paste(ES.frame$Study.ID,ES.frame$Case.ID,sep="-")
 ES.frame.noLU$Study.Case <- paste(ES.frame.noLU$Study.ID,ES.frame.noLU$Case.ID,sep="-")
 
 ############################################################################
-### 01.3. Calculate response ratio effect sizes
+### 04.3. Calculate response ratio effect sizes
 ### 
 ############################################################################
 
@@ -199,6 +195,7 @@ ES.frame.noLU[,c("Richness.SMD","Richness.SMD.Var")] =
          sd2i = Richness.SD.Low, sd1i = Richness.SD.High,
          n2i = Richness.N.Low, n1i = Richness.N.High)
 
+############################################################
 ### remove objects from workspace
 rm(temp.noLU,temp.lowLU,temp.mediumLU,temp.highLU,
    temp.low.base,temp.medium.base,temp.high.base,

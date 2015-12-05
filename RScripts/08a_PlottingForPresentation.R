@@ -1,10 +1,9 @@
 ############################################################################
-### Purpose of this skript module 03 is to:
+### Purpose of this skript module 08a is to:
 ###
-### 03.1. Specify output directory in the dropbox or other local folder - NOT in the git directory!
-### 03.2. Plot map of studies
-### 03.3. Plot cross-diagrams
-### 03.4. Forest plots for noLU vs low/medium/high LU
+### 08a.1. Plot map of studies
+### 08a.2. Plot cross-diagrams
+### 08a.3. Forest plots for noLU vs low/medium/high LU
 ###
 ### General comments:
 ### * TO DO: change palette for scale_color_brewer() to get rid of the warning "In RColorBrewer::brewer.pal(n, pal) : n too large, allowed maximum for palette Set1 is 9 Returning the palette you asked for with that many colors"
@@ -16,7 +15,7 @@
 getwd()
 
 ############################################################################
-### 03.2. Plot map of studies
+### 08a.1. Plot map of studies
 ### 
 ############################################################################
 
@@ -39,7 +38,7 @@ p
 ggsave(paste(path2temp, "/CaseDistribution.png",sep=""), width=18, height=10, units="cm")
 
 ############################################################################
-### 03.3. Plot cross-diagrams
+### 08a.2. Plot cross-diagrams
 ### 
 ############################################################################
 
@@ -58,6 +57,7 @@ for(choose.moderator in as.character(unique(MA.coeffs.cat$Moderator))){
       geom_hline(data=ES.frame, x=0, linetype="twodash") + geom_vline(data=ES.frame, y=0, linetype="twodash") +
       scale_y_continuous(labels=trans_format("exp",comma_format(digits=2))) + 
       scale_x_continuous(labels=trans_format("exp",comma_format(digits=2))) +
+      xlim(-2,2) + ylim(-1,1) + # zoom into the image
       scale_colour_brewer(palette="Set1",labels=paste(levels(factor(ES.frame[,which(names(ES.frame) %in% choose.moderator)]))," (",table(factor(ES.frame[,which(names(ES.frame) %in% choose.moderator)])), ")", sep="")) +
       ylab("RR (Species Richness)") + xlab("RR (Yield)") + labs(color=choose.moderator) +
       theme(axis.title = element_text(size = rel(1.5)), axis.text = element_text(size = rel(1.5)),legend.text=element_text(size = rel(1.5)),legend.title=element_text(size = rel(1.5)))
@@ -128,7 +128,7 @@ for(i in 2:nrow(MA.coeffs.cont)){
 }
 
 ############################################################################
-### 03.4. Forest plots for noLU vs low/medium/high LU
+### 08a.3. Forest plots for noLU vs low/medium/high LU
 ### 
 ############################################################################
 

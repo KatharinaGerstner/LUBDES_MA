@@ -1,17 +1,19 @@
 ############################################################################
-### Purpose of this skript module 01a is to:
+### Purpose of this skript module 05 is to:
 ###
-### 01a.1. Intersect studies with global maps of WWF_REALMs Ecoregions
-### 01a.2. Intersect studies with global maps of climate zones (Köppen-Geiger)
-### 01a.2. Intersect studies with global maps of GDP per capita
-### 01a.3. Intersect studies with annual mean radiation (Climond)
-### 01a.4. Intersect studies with gross capital stock in agriculture
-### 01a.5. Intersect studies with Agricultural intensity (efficiency) in the neighborhood
-### 01a.6. Intersect studies with Global Habitat Heterogeneity, Dissimilarity
+### 05.1. Intersect studies with global maps of WWF_REALMs Ecoregions
+### 05.2. Intersect studies with global maps of climate zones (Köppen-Geiger)
+### 05.2. Intersect studies with global maps of GDP per capita
+### 05.3. Intersect studies with annual mean radiation (Climond)
+### 05.4. Intersect studies with gross capital stock in agriculture
+### 05.5. Intersect studies with Agricultural intensity (efficiency) in the neighborhood
+### 05.6. Intersect studies with Global Habitat Heterogeneity, Dissimilarity
+### 05.7. Intersect studies with Land-use history
+### 05.8. Intersect studies with Population density
 ###
 ### General comments:
 ### * TO DO: download maps and store them, link global data using coordinates and countries
-###   for continuous data such as land use history, NPP
+###   for continuous data such as NPP (londcover dependence?), PAR as alternative to solar radiation
 ###
 ### Authors: MB ...
 ############################################################################
@@ -27,7 +29,7 @@ ES.frame.noLU <- ES.frame.noLU[!is.na(ES.frame.noLU$Longitude+ES.frame.noLU$Lati
 lonlat.noLU <- cbind(ES.frame.noLU$Longitude,ES.frame.noLU$Latitude)
 
 ############################################################################
-### 01a.1. Intersect studies with global maps of WWF_REALMs Ecoregions
+### 05.1. Intersect studies with global maps of WWF_REALMs Ecoregions
 ############################################################################
 
 if (file.exists("terr-ecoregions-TNC.zip")==FALSE){
@@ -49,7 +51,7 @@ ES.frame.noLU <- cbind(ES.frame.noLU,realms_extract$WWF_MHTNAM)
 colnames(ES.frame.noLU)[which(names(ES.frame.noLU) == "realms_extract$WWF_MHTNAM")]<-"BIOME"
 
 ############################################################################
-### 01a.2. Intersect studies with global maps of climate zones (Köppen-Geiger)
+### 05.2. Intersect studies with global maps of climate zones (Köppen-Geiger)
 ############################################################################
 if (file.exists("1976-2000_GIS.zip")==FALSE){
   download.file("http://koeppen-geiger.vu-wien.ac.at/data/1976-2000_GIS.zip","1976-2000_GIS.zip", mode="wb")
@@ -97,8 +99,6 @@ ES.frame$main_climate <- cut(climate_extract$GRIDCODE, breaks=c(10,20,30,40,50,6
 climate_extract <- extract(climate_zone,lonlat.noLU)
 ES.frame.noLU$main_climate <- cut(climate_extract$GRIDCODE, breaks=c(10,20,30,40,50,60), labels=c("equatorial","arid","warm temperature","snow","polar"))
 
-# 
-
 ############################################################################
 ### 01a.2. Intersect studies with global maps of GDP per capita
 ############################################################################
@@ -118,7 +118,7 @@ ES.frame <- join(ES.frame,GDP.pc.2000,by="Country.Code")
 ES.frame.noLU <- join(ES.frame.noLU,GDP.pc.2000,by="Country.Code")
 
 ############################################################################
-### 01a.3. Intersect studies with annual mean radiation (Climond)
+### 05.3. Intersect studies with annual mean radiation (Climond)
 ############################################################################
 
 if (file.exists("CM10_1975H_Bio_ASCII_V1.2.zip")==FALSE){
@@ -135,7 +135,7 @@ ES.frame$annual_mean_radiation<-extract(annual_mean_radiation,lonlat, buffer=100
 ES.frame.noLU$annual_mean_radiation<-extract(annual_mean_radiation,lonlat.noLU, buffer=10000, fun=mean) # consider a buffer of radius=10km² around each dot
 
 ############################################################################
-### 01a.4. Intersect studies with gross capital stock in agriculture
+### 05.4. Intersect studies with gross capital stock in agriculture
 ############################################################################
 
 if (file.exists("Investment_CapitalStock_E_All_Data.zip")==FALSE){
@@ -170,13 +170,13 @@ ES.frame.noLU <- join(ES.frame.noLU,capital_stock_in_agriculture,by=c("Country.C
 ES.frame.noLU <- ES.frame.noLU[,-which(names(ES.frame.noLU)=="Date.End4CS")] ## remove previously added column
 
 ############################################################################
-### 01a.5. Intersect studies with Agricultural intensity (efficiency) in the neighborhood
+### 05.5. Intersect studies with Agricultural intensity (efficiency) in the neighborhood
 ############################################################################
 
 ### not yet working
 
 ############################################################################
-### 01a.6. Intersect studies with Global Habitat Heterogeneity, Dissimilarity
+### 05.6. Intersect studies with Global Habitat Heterogeneity, Dissimilarity
 ############################################################################
 
 ### data from http://www.earthenv.org/texture.html
@@ -195,7 +195,7 @@ ES.frame$habitat_dissimilarity<-extract(habitat_dissimilarity,lonlat, buffer=100
 ES.frame.noLU$habitat_dissimilarity<-extract(habitat_dissimilarity,lonlat.noLU, buffer=10000, fun=mean) # consider a buffer of radius=10km² around each dot)
 
 ############################################################################
-### 01a.7. Intersect studies with Land-use history
+### 05.7. Intersect studies with Land-use history
 ############################################################################
 
 if (file.exists("ellis_etal_2013_dataset.zip")==FALSE){
@@ -234,7 +234,7 @@ ES.frame.noLU$start.agr.use <- ifelse(ES.frame.noLU$year.of.first.use < 1500,"ol
 ES.frame.noLU$start.agr.use[is.na(ES.frame.noLU$start.agr.use)] <- "not yet used"
 
 ############################################################################
-### 01a.8. Intersect studies with Population density
+### 05.8. Intersect studies with Population density
 ############################################################################
 
 if (file.exists("Population_density.zip")==FALSE){
@@ -251,7 +251,7 @@ ES.frame$pop.dens.2000 <- extract(pop.data,lonlat, buffer=10000, fun=mean) # con
 ES.frame.noLU$pop.dens.2000 <- extract(pop.data,lonlat.noLU, buffer=10000, fun=mean) # consider a buffer of radius=10km² around each dot)
 
 ############################################################################
-### 01a.9. Combine LUI classifiers
+### 05.9. Combine LUI classifiers
 ############################################################################
 
 # not yet working

@@ -1,10 +1,10 @@
 ############################################################################
-### Purpose of this skript module 01a is to:
+### Purpose of this skript module 06 is to:
 ###
-### 01.b.1 Protocol structure and summary of variables in the ES.frame
-### 01.b.2 Plot Histograms of all variables in the ES.frame 
-### 01.b.3 Protocol structure and summary of variables in the ES.frame.noLU
-### 01.b.4 Plot Histograms of all variables in the ES.frame.noLU 
+### 06.1 Protocol structure and summary of variables in the ES.frame
+### 06.2 Plot Histograms of all variables in the ES.frame 
+### 06.3 Protocol structure and summary of variables in the ES.frame.noLU
+### 06.4 Plot Histograms of all variables in the ES.frame.noLU 
 ###
 ### General comments:
 ###
@@ -13,13 +13,19 @@
 
 setwd(path2temp %+% "/")
 
-### 01.b.1 Protocol structure and summary of variables in the ES.frame
+############################################################################
+### 06.1 Protocol structure and summary of variables in the ES.frame
+############################################################################
+
 sink('str_summary_ESframe.txt')
 str(ES.frame)
 summary(ES.frame)
 sink()
 
-### 01.b.2 Plot Histograms of all variables in the ES.frame 
+############################################################################
+### 06.2 Plot Histograms of all variables in the ES.frame 
+############################################################################
+
 #pdf("PlotHist_ESframe.pdf", width = 15)
 for(i in 1:ncol(ES.frame)){
   p <- ggplot(data=ES.frame) + 
@@ -34,13 +40,19 @@ for(i in 1:ncol(ES.frame)){
 }  
 #dev.off()
 
-### 01.b.3 Protocol structure and summary of variables in the ES.frame.noLU
+############################################################################
+### 06.3 Protocol structure and summary of variables in the ES.frame.noLU
+############################################################################
+
 sink('str_summary_ES.frame.noLU.txt')
 str(ES.frame.noLU)
 summary(ES.frame.noLU)
 sink()
 
-### 01.b.4 Plot Histograms of all variables in the ES.frame.noLU 
+############################################################################
+### 06.4 Plot Histograms of all variables in the ES.frame.noLU 
+############################################################################
+
 #pdf("PlotHist_ESframenoLU.pdf", width = 15)
 for(i in 1:ncol(ES.frame.noLU)){
   p <- ggplot(data=ES.frame.noLU) + 

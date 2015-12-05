@@ -1,14 +1,14 @@
 ############################################################################
 ### Purpose of this skript module -01a is to:
 ###
-### -01a.1. load screening data directly from google docs
-### -01a.2. plot pie charts about statistics
+### -01.1. load screening data directly from google docs
+### -01.2. plot pie charts about statistics
 ###
 ### Authors: MB, KG, ...
 ############################################################################
 
 ############################################################################
-### -01a.1. load data directly from google docs
+### -01.1. load data directly from google docs
 ############################################################################
 
 ### authorize with google docs, the first time or in a new session:
@@ -28,7 +28,7 @@ screening.data <- as.data.frame(screening.data) #some functions don't like the t
 str(screening.data)
 
 ############################################################################
-### -01a.2. plot pie charts
+### -01.2. plot pie charts
 ############################################################################
 ### remove duplicates
 duplicates <- screening.data[duplicated(screening.data$TITLE),] ## TO DO: Check duplicates, as some duplicates are so far not recognized and screened twice

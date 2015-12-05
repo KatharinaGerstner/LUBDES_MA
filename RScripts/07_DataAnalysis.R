@@ -1,11 +1,11 @@
 ############################################################################
-### Purpose of this skript module 02 is to:
+### Purpose of this skript module 07 is to:
 ###
-### 02.1. Prepare data analysis
-### 02.2. Analysis without moderators
-### 02.3. Analysis with moderators
-### 02.4. Analysis with moderators for no LU vs low/medium/high LU
-### 02.5. multivariate analysis with and without moderators (not yet working)
+### 07.1. Prepare data analysis
+### 07.2. Analysis without moderators
+### 07.3. Analysis with moderators
+### 07.4. Analysis with moderators for no LU vs low/medium/high LU
+### 07.5. multivariate analysis with and without moderators (not yet working)
 ###
 ### General comments:
 ### * 02.2. LMM.MA.fit function is currently not needed
@@ -24,7 +24,7 @@
 ############################################################################
 
 ############################################################################
-### 02.1. Prepare data analysis
+### 07.1. Prepare data analysis
 ############################################################################
 
 ES.frame <- subset(ES.frame, Richness.Log.RR.Var>0 & Yield.Log.RR.Var>0) # restrict analysis to study cases with positive variances
@@ -41,7 +41,7 @@ preds.richness <- list()
 preds.yield <- list()
 
 ############################################################################
-### 02.2. Analysis without moderators
+### 07.2. Analysis without moderators
 ############################################################################
 
 Richness.MA.fit <- rma.mv(yi=Richness.Log.RR, V=Richness.Log.RR.Var, mods=~1, random = ~factor(Case.ID)|factor(Study.ID), struct="CS", slab=paste(Study.Case, Low.LUI, High.LUI,sep="_"),method="REML", tdist=FALSE, level=95, digits=4,data=ES.frame)
@@ -55,13 +55,14 @@ preds.yield[["None"]] <- predict.rma(Yield.MA.fit)
 ### Store parameter estimates in a table
 MA.coeffs.cat <- data.frame(Moderator="None",levels=1,mean.Richness=Richness.MA.fit$b,se.Richness=Richness.MA.fit$se,mean.Yield=Yield.MA.fit$b,se.Yield=Yield.MA.fit$se)
 MA.coeffs.cont <- data.frame(Moderator="None",Richness.intercept=Richness.MA.fit$b,Richness.slope=0, Richness.se.intercept=Richness.MA.fit$se, Richness.se.slope=0, Yield.intercept=Yield.MA.fit$b, Yield.slope=0, Yield.se.intercept=Yield.MA.fit$se, Yield.se.slope=0)
+
 ############################################################################
-### 02.3. Analysis with moderators
+### 07.3. Analysis with moderators
 ############################################################################
 
 ### define list of moderators
 moderator.list.cat <- c("Land.use...land.cover","Species.Group","Trophic.Level","LUI.range.level","Product", "ES.From.BD","BIOME", "main_climate","start.agr.use")
-moderator.list.cont <- c("GDP.pc.2000","annual_mean_radiation","capital_millionUSD","habitat_dissimilarity","year.of.first.use")
+moderator.list.cont <- c("GDP.pc.2000","annual_mean_radiation","capital_millionUSD","habitat_dissimilarity","year.of.first.use", "pop.dens.2000")
 
 ### run analysis for categorical moderators
 for(mods in moderator.list.cat){
@@ -95,6 +96,7 @@ for(mods in moderator.list.cat){
 print(MA.coeffs.cat)
 
 ### run analysis for continuous moderators
+
 for(mods in moderator.list.cont){
   
   print(mods)
@@ -128,7 +130,7 @@ for(mods in moderator.list.cont){
 print(MA.coeffs.cont)
 
 ############################################################################
-### 02.4. Analysis with moderators for no LU vs low/medium/high LU
+### 07.4. Analysis with moderators for no LU vs low/medium/high LU
 ############################################################################
 
 Richness.MA.model.noLU <- list()
@@ -167,9 +169,10 @@ for(mods in moderator.list){
 print(MA.coeffs.noLU)
 
 ############################################################################
-### 02.6. multivariate analysis with and without moderators (not yet working)
+### 07.5. multivariate analysis with and without moderators (not yet working)
 ### (cf. ?dat.berkey1998)
 ############################################################################
+
 ### restructure ES.frame: Richness.Log.RR, Yield.Log.RR in separate rows
 # ES.frame.reduced <- ES.frame[,c("Study.Case","Land.use...land.cover","Species.Group","Species.Subgroup","Trophic.Level","LUI.range.level","LUI.range","BIOME")]
 # dat <- rbind(ES.frame.reduced,ES.frame.reduced)
@@ -195,10 +198,6 @@ print(MA.coeffs.noLU)
 ### Resterampe
 ### use full model with all levels simultaneously or separate models for each level
 
-############################################################################
-### 02.2. LMM.MA.fit function
-### * 02.2. LMM.MA.fit function is currently not needed
-############################################################################
 
 ### LMM.MA.fit function
 # LMM.MA.fit <- function(yi,vi,mods,slab,inner2,outer2){
