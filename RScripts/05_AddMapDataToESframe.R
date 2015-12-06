@@ -244,11 +244,11 @@ if (file.exists("Population_density.zip")==FALSE){
   unzip ("Population_density.zip")
 }
 
-pop.data <- raster("gldens00/glds00ag")
+pop.data <- raster("Population_density/gldens00/glds00ag")
 
-ES.frame$pop.dens.2000 <- extract(pop.data,lonlat, buffer=100000, fun=mean) # consider a buffer of radius=10km² around each dot)
+ES.frame$pop.dens.2000 <- extract(pop.data,lonlat, buffer=100000, fun=mean) # consider a buffer of radius=100km² around each dot)
 
-ES.frame.noLU$pop.dens.2000 <- extract(pop.data,lonlat.noLU, buffer=100000, fun=mean) # consider a buffer of radius=10km² around each dot)
+ES.frame.noLU$pop.dens.2000 <- extract(pop.data,lonlat.noLU, buffer=100000, fun=mean) # consider a buffer of radius=100km² around each dot)
 
 ############################################################################
 ### 05.9. Combine LUI classifiers
@@ -261,4 +261,4 @@ ES.frame.noLU$pop.dens.2000 <- extract(pop.data,lonlat.noLU, buffer=100000, fun=
 ############################################################################
 rm(lonlat, lonlat.noLU,ecoregions,climate_extract,realms_extract,GDP.pc,GDP.pc.2000,annual_mean_radiation,capital_stock_in_agriculture,habitat_dissimilarity, timeseries.hyde,timeseries.kk10,hyde.LUhist.stack,kk10.LUhist.stack,hyde.extract.year.of.first.use,kk10.extract.year.of.first.use,hyde.year.of.first.use,kk10.year.of.first.use)
 
-#setwd(path2wd)
+setwd(path2wd)

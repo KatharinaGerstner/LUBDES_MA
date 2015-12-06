@@ -19,19 +19,24 @@ getwd()
 ### 
 ############################################################################
 
-### plot study locations using the "classic" way
-# newmap <- getMap(resolution = "low")
-# png(paste(path2temp, "/CaseDistribution.png",sep=""),width=24,height=16,units="cm",res=200)
-# plot(newmap)
-# points(data$lon, data$lat, col = "blue", cex = .8, pch=17)
-# dev.off()
-# 
+world_map <- map_data("world")
+p <- ggplot() +
+  geom_polygon(data=world_map, aes(x=long, y=lat, group=group),fill="white",color="black",lwd=0.2) + 
+  geom_point(data=ES.frame, aes(x=Longitude, y=Latitude, ymin=-55), color="blue", shape=4, size=1) +
+  scale_x_continuous(breaks=c(-90, 0, 90), labels=c("90° W", "0", "90° E")) +
+  scale_y_continuous(breaks=c(-60, -30, 0, 30, 60), labels=c("60°S", "30°S","0°", "30°N","60°N")) +
+  xlab("") + ylab("") 
+p 
+ggsave(paste(path2temp, "/CaseDistributionAll.png",sep=""), width=18, height=10, units="cm")
+ 
 ### plot study locations using fancy ggplot
 world_map <- map_data("world")
 ES.frame <- within(ES.frame, LUI.range.level <- factor(LUI.range.level, levels = c("low-low","low-medium","low-high","medium-medium","medium-high","high-high"))) # resort levels for plotting
 p <- ggplot() +
   geom_polygon(data=world_map, aes(x=long, y=lat, group=group),fill="white",color="black",lwd=0.3) + 
   geom_point(data=ES.frame, aes(x=Longitude, y=Latitude, ymin=-55), color="blue", shape=2, size=1) +
+  scale_x_continuous(breaks=c(-90, 0, 90), labels=c("90° W", "0", "90° E")) +
+  scale_y_continuous(breaks=c(-60, -30, 0, 30, 60), labels=c("60°S", "30°S","0°", "30°N","60°N")) +
   xlab("") + ylab("") +
   facet_wrap(~LUI.range.level)   
 p 
@@ -41,6 +46,10 @@ ggsave(paste(path2temp, "/CaseDistribution.png",sep=""), width=18, height=10, un
 ### 08a.2. Plot cross-diagrams
 ### 
 ############################################################################
+
+### zoom into image
+y.limits <- c(-1,1)
+x.limits <- c(-2,2)
 
 ### plot cross diagrams for categorical moderators
 for(choose.moderator in as.character(unique(MA.coeffs.cat$Moderator))){
@@ -55,9 +64,8 @@ for(choose.moderator in as.character(unique(MA.coeffs.cat$Moderator))){
       geom_pointrange(data=ES.moderator.subset, aes(x=mean.Yield, y=mean.Richness, ymin=mean.Richness - (1.96*se.Richness), ymax=mean.Richness + (1.96*se.Richness),color=factor(levels)), size=1.5) +
       geom_segment(data=ES.moderator.subset, aes(x=mean.Yield - (1.96*se.Yield), xend=mean.Yield + (1.96*se.Yield), y = mean.Richness, yend = mean.Richness, color=factor(levels)),size=1.5) +
       geom_hline(data=ES.frame, x=0, linetype="twodash") + geom_vline(data=ES.frame, y=0, linetype="twodash") +
-      scale_y_continuous(labels=trans_format("exp",comma_format(digits=2))) + 
-      scale_x_continuous(labels=trans_format("exp",comma_format(digits=2))) +
-      xlim(-2,2) + ylim(-1,1) + # zoom into the image
+      scale_y_continuous(labels=trans_format("exp",comma_format(digits=2)),limits=y.limits) + 
+      scale_x_continuous(labels=trans_format("exp",comma_format(digits=2)),limits=x.limits) +
       scale_colour_brewer(palette="Set1",labels=paste(levels(factor(ES.frame[,which(names(ES.frame) %in% choose.moderator)]))," (",table(factor(ES.frame[,which(names(ES.frame) %in% choose.moderator)])), ")", sep="")) +
       ylab("RR (Species Richness)") + xlab("RR (Yield)") + labs(color=choose.moderator) +
       theme(axis.title = element_text(size = rel(1.5)), axis.text = element_text(size = rel(1.5)),legend.text=element_text(size = rel(1.5)),legend.title=element_text(size = rel(1.5)))
@@ -71,8 +79,8 @@ for(choose.moderator in as.character(unique(MA.coeffs.cat$Moderator))){
       geom_segment(data=ES.moderator.subset, aes(x=mean.Yield - (1.96*se.Yield), xend=mean.Yield + (1.96*se.Yield), y = mean.Richness, yend = mean.Richness), color="green", size=1) +
       geom_hline(data=ES.frame, x=0, linetype="twodash") + 
       geom_vline(data=ES.frame, y=0, linetype="twodash") +
-      scale_y_continuous(labels=trans_format("exp", comma_format(digits=2))) + 
-      scale_x_continuous(labels=trans_format("exp", comma_format(digits=2))) +
+      scale_y_continuous(labels=trans_format("exp", comma_format(digits=2)),limits=y.limits) + 
+      scale_x_continuous(labels=trans_format("exp", comma_format(digits=2)),limits=x.limits) +
       ylab("RR (Species Richness)") + xlab("RR (Yield)") + guides(fill=FALSE) +
       theme(axis.title = element_text(size = rel(1.5)), axis.text = element_text(size = rel(1.5)),legend.text=element_text(size = rel(1.5)),legend.title=element_text(size = rel(1.5)))    
    

@@ -8,7 +8,6 @@
 ### 07.5. multivariate analysis with and without moderators (not yet working)
 ###
 ### General comments:
-### * 02.2. LMM.MA.fit function is currently not needed
 ### * fit meta-analytic multivariate/multilevel fixed- and random/mixed-effects models with or
 ###   without moderators via linear (mixed-effects) models using rma.mv 
 ### * Viechtbauer 2015 p 189: the random argument can also contain one (and only one!) formula of the form ~ inner | outer . 

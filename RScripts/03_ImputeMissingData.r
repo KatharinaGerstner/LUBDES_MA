@@ -13,14 +13,14 @@
 ############################################################################
 
 dataimp <- data
+### impute also zero SD's as we can't work with that in the analysis
+data$richness.SD[data$richness.SD==0] <- NA
+data$yield.SD[data$yield.SD==0] <- NA
 
 ############################################################################
 ### 03.1. crude-impute based on average SD/mean ratio
 ### 
 ############################################################################
-
-dataimp$richness.SD[dataimp$richness.SD==0] <- NA
-dataimp$yield.SD[dataimp$yield.SD==0] <- NA
 
 dataimp$richness_sd_of_mean<-apply(subset(dataimp, select=c(richness.mean,richness.SD)),1,function(x) (x[2]/x[1]))
 dataimp$yield_sd_of_mean<-apply(subset(dataimp, select=c(yield.mean,yield.SD)),1,function(x) (x[2]/x[1]))
@@ -54,23 +54,15 @@ dataimp$yield.SD[is.na(dataimp$yield.SD)]<-(dataimp$yield.mean[is.na(dataimp$yie
 ### 
 ############################################################################
 
-# ### impute also zero SD's as we can't work with that in the analysis
-# data$richness.SD[data$richness.SD==0] <- NA
-# data$yield.SD[data$yield.SD==0] <- NA
-# 
-# ### impute
 # data2imp <- data[,c("richness.mean", "richness.SD", "X..of.samples.for.BD.measure", "yield.mean", "yield.SD", "X..of.samples.for.YD.measure")]
 # predictorMatrix1 <- matrix(c(rep(0,6),c(1,0,1,0,0,0),rep(0,6),rep(0,6),c(0,0,0,1,0,1),rep(0,6)),ncol=ncol(data2imp),byrow=T) # only impute SDs using the corresponding means and sample.size
 # 
-# imp <- mice(data2imp,predictorMatrix=predictorMatrix1,m=20)
-# dataimp[,c("richness.mean", "richness.SD", "X..of.samples.for.BD.measure", "yield.mean", "yield.SD", "X..of.samples.for.YD.measure")] <- complete(imp)
-
-### calculate SE for richness and yield mean
-# data$richness.SE <- data$richness.SD/sqrt(data$X..of.samples.for.BD.measure)
-# data$yield.SE <- data$yield.SD/sqrt(data$X..of.samples.for.YD.measure)
-# ### check results, e.g. SD must be positive or SE will be NaN
-# summary(data[,c("richness.mean", "richness.SD", "X..of.samples.for.BD.measure", "yield.mean", "yield.SD", "X..of.samples.for.YD.measure")]) # does not produce negative SDs
-
+# nchains <- 10
+# imp <- mice(data2imp,predictorMatrix=predictorMatrix1,m=nchains)
+# # rowMeans(imp$imp$richness.SD)
+# temp <- complete(imp, "long")
+# dataimp$richness.SD <- rowMeans(matrix(temp$richness.SD, ncol=nchains, byrow=F))
+# dataimp$yield.SD <- rowMeans(matrix(temp$yield.SD, ncol=nchains, byrow=F))
 
 ############################################################################
 ### 03.3. impute missing data using mi package
