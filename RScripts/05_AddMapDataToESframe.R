@@ -130,9 +130,9 @@ if (file.exists("CM10_1975H_Bio_ASCII_V1.2.zip")==FALSE){
 
 annual_mean_radiation <- raster("CM10_1975H_Bio_V1.2/CM10_1975H_Bio20_V1.2.txt",crs=CRS("+proj=longlat +datum=WGS84 +no_defs +ellps=WGS84 +towgs84=0,0,0"))
 
-ES.frame$annual_mean_radiation<-extract(annual_mean_radiation,lonlat, buffer=10000, fun=mean) # consider a buffer of radius=10km² around each dot
+ES.frame$annual_mean_radiation<-extract(annual_mean_radiation,lonlat, buffer=100000, fun=mean) # consider a buffer of radius=10km² around each dot
 
-ES.frame.noLU$annual_mean_radiation<-extract(annual_mean_radiation,lonlat.noLU, buffer=10000, fun=mean) # consider a buffer of radius=10km² around each dot
+ES.frame.noLU$annual_mean_radiation<-extract(annual_mean_radiation,lonlat.noLU, buffer=100000, fun=mean) # consider a buffer of radius=10km² around each dot
 
 ############################################################################
 ### 05.4. Intersect studies with gross capital stock in agriculture
