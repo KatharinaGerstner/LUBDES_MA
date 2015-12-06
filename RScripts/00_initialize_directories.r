@@ -73,10 +73,10 @@
 ############################################################################
 
 
-path2wd <- "C:/Users/hoppek/Documents/GitHub/LUBDES_MA/RScripts/" #KG
-path2temp <- "C:/Users/hoppek/Documents/temp" #KG
-#path2wd <- "~/git/LUBDES_MA/RScripts/" #MB
-#path2temp <- "/tmp" #MB
+#path2wd <- "C:/Users/hoppek/Documents/GitHub/LUBDES_MA/RScripts/" #KG
+#path2temp <- "C:/Users/hoppek/Documents/temp" #KG
+path2wd <- "~/git/LUBDES_MA/RScripts/" #MB
+path2temp <- "/tmp" #MB
 
 ############################################################################
 ### 00.2. define global helper functions
@@ -97,11 +97,11 @@ path2temp <- "C:/Users/hoppek/Documents/temp" #KG
 source(path2wd %+% "01_load_libraries.r")
 source(path2wd %+% "02_load_table_directly_from_google.R")
 source(path2wd %+% "03_ImputeMissingData.r")
-source(path2wd %+% "04_CompileESframe.r")
-source(path2wd %+% "05_AddMapDataToESframe.r")
+source(path2wd %+% "04_CompileESframe.R")
+source(path2wd %+% "05_AddMapDataToESframe.R")
 #source(path2wd %+% "06_DescriptiveStatsOfESframe.r")
-source(path2wd %+% "07_DataAnalysis.r")
+source(path2wd %+% "07_DataAnalysis.R")
 source(path2wd %+% "08_Plotting.r")
-#source(path2wd %+% "09_ModelDiagnostics.r") # not yet working
+#source(path2wd %+% "09_ModelDiagnostics.R") # not yet working
 #source(path2wd %+% "10_UncertaintyAnalysis.R") # not yet working
 
