@@ -76,7 +76,7 @@
 #path2wd <- "C:/Users/hoppek/Documents/GitHub/LUBDES_MA/RScripts/" #KG
 #path2temp <- "C:/Users/hoppek/Documents/temp" #KG
 path2wd <- "~/git/LUBDES_MA/RScripts/" #MB
-path2temp <- "/tmp" #MB
+path2temp <- "~/tmp" #MB
 
 ############################################################################
 ### 00.2. define global helper functions

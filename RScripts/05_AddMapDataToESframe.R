@@ -57,7 +57,7 @@ if (file.exists("1976-2000_GIS.zip")==FALSE){
   download.file("http://koeppen-geiger.vu-wien.ac.at/data/1976-2000_GIS.zip","1976-2000_GIS.zip", mode="wb")
   unzip("1976-2000_GIS.zip")
 } else {unzip("1976-2000_GIS.zip")}
-climate_zone <- readOGR(path2temp,"1976-2000")
+climate_zone <- readOGR(dsn=path2temp,layer="1976-2000")
 # Legend(GRIDCODE)
 # 11 ... Af
 # 12 ... Am
@@ -261,4 +261,4 @@ ES.frame.noLU$pop.dens.2000 <- extract(pop.data,lonlat.noLU, buffer=10000, fun=m
 ############################################################################
 rm(lonlat, lonlat.noLU,ecoregions,climate_extract,realms_extract,GDP.pc,GDP.pc.2000,annual_mean_radiation,capital_stock_in_agriculture,habitat_dissimilarity, timeseries.hyde,timeseries.kk10,hyde.LUhist.stack,kk10.LUhist.stack,hyde.extract.year.of.first.use,kk10.extract.year.of.first.use,hyde.year.of.first.use,kk10.year.of.first.use)
 
-setwd(path2wd)
+#setwd(path2wd)
