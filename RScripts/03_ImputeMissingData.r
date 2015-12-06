@@ -22,31 +22,31 @@ data$yield.SD[data$yield.SD==0] <- NA
 ### 
 ############################################################################
 
-dataimp$richness_sd_of_mean<-apply(subset(dataimp, select=c(richness.mean,richness.SD)),1,function(x) (x[2]/x[1]))
-dataimp$yield_sd_of_mean<-apply(subset(dataimp, select=c(yield.mean,yield.SD)),1,function(x) (x[2]/x[1]))
-
-dataimp$richness_sd_of_mean[dataimp$richness_sd_of_mean==Inf]<-NA
-dataimp$yield_sd_of_mean[dataimp$yield_sd_of_mean==Inf]<-NA
-
-mean_richness_sd_of_mean<-mean(dataimp$richness_sd_of_mean,na.rm=TRUE)
-mean_yield_sd_of_mean<-mean(dataimp$yield_sd_of_mean,na.rm=TRUE)
-
-sd_richness_sd_of_mean<-sd(dataimp$richness_sd_of_mean,na.rm=TRUE)
-sd_yield_sd_of_mean<-sd(dataimp$yield_sd_of_mean,na.rm=TRUE)
-
-### choose one of three options
-
-### without SD
-# dataimp$richness.SD[is.na(dataimp$richness.SD)]<-(dataimp$richness.mean[is.na(dataimp$richness.SD)]*mean_richness_sd_of_mean)
-# dataimp$yield.SD[is.na(dataimp$yield.SD)]<-(dataimp$yield.mean[is.na(dataimp$yield.SD)]*mean_yield_sd_of_mean)
-
-### + 1sd
-dataimp$richness.SD[is.na(dataimp$richness.SD)]<-(dataimp$richness.mean[is.na(dataimp$richness.SD)]*(mean_richness_sd_of_mean+sd_richness_sd_of_mean))
-dataimp$yield.SD[is.na(dataimp$yield.SD)]<-(dataimp$yield.mean[is.na(dataimp$yield.SD)]*(mean_yield_sd_of_mean+sd_yield_sd_of_mean))
-
-### -1sd
-#dataimp$richness.SD[is.na(dataimp$richness.SD)]<-(dataimp$richness.mean[is.na(dataimp$richness.SD)]*(mean_richness_sd_of_mean-sd_richness_sd_of_mean))
-#dataimp$yield.SD[is.na(dataimp$yield.SD)]<-(dataimp$yield.mean[is.na(dataimp$yield.SD)]*(mean_yield_sd_of_mean-sd_yield_sd_of_mean))
+# dataimp$richness_sd_of_mean<-apply(subset(dataimp, select=c(richness.mean,richness.SD)),1,function(x) (x[2]/x[1]))
+# dataimp$yield_sd_of_mean<-apply(subset(dataimp, select=c(yield.mean,yield.SD)),1,function(x) (x[2]/x[1]))
+# 
+# dataimp$richness_sd_of_mean[dataimp$richness_sd_of_mean==Inf]<-NA
+# dataimp$yield_sd_of_mean[dataimp$yield_sd_of_mean==Inf]<-NA
+# 
+# mean_richness_sd_of_mean<-mean(dataimp$richness_sd_of_mean,na.rm=TRUE)
+# mean_yield_sd_of_mean<-mean(dataimp$yield_sd_of_mean,na.rm=TRUE)
+# 
+# sd_richness_sd_of_mean<-sd(dataimp$richness_sd_of_mean,na.rm=TRUE)
+# sd_yield_sd_of_mean<-sd(dataimp$yield_sd_of_mean,na.rm=TRUE)
+# 
+# ### choose one of three options
+# 
+# ### without SD
+# # dataimp$richness.SD[is.na(dataimp$richness.SD)]<-(dataimp$richness.mean[is.na(dataimp$richness.SD)]*mean_richness_sd_of_mean)
+# # dataimp$yield.SD[is.na(dataimp$yield.SD)]<-(dataimp$yield.mean[is.na(dataimp$yield.SD)]*mean_yield_sd_of_mean)
+# 
+# ### + 1sd
+# dataimp$richness.SD[is.na(dataimp$richness.SD)]<-(dataimp$richness.mean[is.na(dataimp$richness.SD)]*(mean_richness_sd_of_mean+sd_richness_sd_of_mean))
+# dataimp$yield.SD[is.na(dataimp$yield.SD)]<-(dataimp$yield.mean[is.na(dataimp$yield.SD)]*(mean_yield_sd_of_mean+sd_yield_sd_of_mean))
+# 
+# ### -1sd
+# #dataimp$richness.SD[is.na(dataimp$richness.SD)]<-(dataimp$richness.mean[is.na(dataimp$richness.SD)]*(mean_richness_sd_of_mean-sd_richness_sd_of_mean))
+# #dataimp$yield.SD[is.na(dataimp$yield.SD)]<-(dataimp$yield.mean[is.na(dataimp$yield.SD)]*(mean_yield_sd_of_mean-sd_yield_sd_of_mean))
 
 
 ############################################################################
@@ -54,16 +54,30 @@ dataimp$yield.SD[is.na(dataimp$yield.SD)]<-(dataimp$yield.mean[is.na(dataimp$yie
 ### 
 ############################################################################
 
-# data2imp <- data[,c("richness.mean", "richness.SD", "X..of.samples.for.BD.measure", "yield.mean", "yield.SD", "X..of.samples.for.YD.measure")]
-# predictorMatrix1 <- matrix(c(rep(0,6),c(1,0,1,0,0,0),rep(0,6),rep(0,6),c(0,0,0,1,0,1),rep(0,6)),ncol=ncol(data2imp),byrow=T) # only impute SDs using the corresponding means and sample.size
-# 
-# nchains <- 10
-# imp <- mice(data2imp,predictorMatrix=predictorMatrix1,m=nchains)
-# # rowMeans(imp$imp$richness.SD)
-# temp <- complete(imp, "long")
-# dataimp$richness.SD <- rowMeans(matrix(temp$richness.SD, ncol=nchains, byrow=F))
-# dataimp$yield.SD <- rowMeans(matrix(temp$yield.SD, ncol=nchains, byrow=F))
+### specify columns necessary for imputation
+data2imp.richness <- data[,c("richness.mean", "richness.SD", "X..of.samples.for.BD.measure")]
+data2imp.yield <- data[,c("yield.mean", "yield.SD", "X..of.samples.for.YD.measure")] 
 
+### specify columns used for prediction
+### only impute SDs using the corresponding means and sample.size
+predictorMatrix1 <- matrix(c(rep(0,3),c(1,0,1),rep(0,3)),
+                           ncol=3,byrow=T)
+
+nchains <- 10
+### impute
+imp.richness <- mice(data2imp.richness, predictorMatrix=predictorMatrix1,
+            method = "pmm",
+            m=nchains, maxit =20, printFlag = FALSE)
+temp <- complete(imp.richness, "long")
+dataimp$richness.SD <- rowMeans(matrix(temp$richness.SD, ncol=nchains, byrow=F))
+
+imp.yield <- mice(data2imp.yield[data$Intensity.broad!="no LU",], predictorMatrix=predictorMatrix1,
+                     method = "pmm",
+                     m=nchains, maxit =20, printFlag = FALSE)
+temp <- complete(imp.yield, "long")
+dataimp$yield.SD[data$Intensity.broad!="no LU"] <- rowMeans(matrix(temp$yield.SD, ncol=nchains, byrow=F))
+
+rm(data2imp.richness, data2imp.yield, temp, predictorMatrix1)
 ############################################################################
 ### 03.3. impute missing data using mi package
 ###
