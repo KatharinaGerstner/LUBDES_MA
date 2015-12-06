@@ -246,9 +246,9 @@ if (file.exists("Population_density.zip")==FALSE){
 
 pop.data <- raster("gldens00/glds00ag")
 
-ES.frame$pop.dens.2000 <- extract(pop.data,lonlat, buffer=10000, fun=mean) # consider a buffer of radius=10km² around each dot)
+ES.frame$pop.dens.2000 <- extract(pop.data,lonlat, buffer=100000, fun=mean) # consider a buffer of radius=10km² around each dot)
 
-ES.frame.noLU$pop.dens.2000 <- extract(pop.data,lonlat.noLU, buffer=10000, fun=mean) # consider a buffer of radius=10km² around each dot)
+ES.frame.noLU$pop.dens.2000 <- extract(pop.data,lonlat.noLU, buffer=100000, fun=mean) # consider a buffer of radius=10km² around each dot)
 
 ############################################################################
 ### 05.9. Combine LUI classifiers
