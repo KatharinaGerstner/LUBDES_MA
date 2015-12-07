@@ -61,7 +61,7 @@ MA.coeffs.cont <- data.frame(Moderator="None",Richness.intercept=Richness.MA.fit
 
 ### define list of moderators
 moderator.list.cat <- c("Land.use...land.cover","Species.Group","Trophic.Level","LUI.range.level","Product", "ES.From.BD","BIOME", "main_climate","start.agr.use")
-moderator.list.cont <- c("GDP.pc.2000","annual_mean_radiation","rel_capital_stock_in_agriculture","habitat_dissimilarity","time.since.first.use", "pop.dens.2000")
+moderator.list.cont <- c("GDP.pc.2000","annual_mean_radiation","rel_capital_stock_in_agriculture","habitat_dissimilarity","time.since.first.use", "pop.dens.2000","npp")
 
 ### run analysis for categorical moderators
 for(mods in moderator.list.cat){

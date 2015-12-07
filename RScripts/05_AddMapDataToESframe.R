@@ -44,6 +44,22 @@ realms_extract <- extract(ecoregions,lonlat)
 ES.frame <- cbind(ES.frame,realms_extract$WWF_MHTNAM)
 colnames(ES.frame)[which(names(ES.frame) == "realms_extract$WWF_MHTNAM")]<-"BIOME"
 
+ES.frame$BIOME <- paste(ES.frame$BIOME)
+ES.frame$BIOME[(ES.frame$BIOME=="Tropical and Subtropical Moist Broadleaf Forests")]<-"Tropical Forests"
+ES.frame$BIOME[(ES.frame$BIOME=="Tropical and Subtropical Dry Broadleaf Forests")]<-"Tropical Forests"
+ES.frame$BIOME[(ES.frame$BIOME=="Tropical and Subtropical Coniferous Forests")]<-"Tropical Forests"
+ES.frame$BIOME[(ES.frame$BIOME=="Temperate Broadleaf and Mixed Forests")]<-"Temperate_Boreal Forests"
+ES.frame$BIOME[(ES.frame$BIOME=="Temperate Conifer Forests")]<-"Temperate_Boreal Forests"
+ES.frame$BIOME[(ES.frame$BIOME=="Boreal Forests/Taiga")]<-"Temperate_Boreal Forests"
+ES.frame$BIOME[(ES.frame$BIOME=="Mediterranean Forests, Woodlands and Scrub")]<-"Drylands"
+ES.frame$BIOME[(ES.frame$BIOME=="Deserts and Xeric Shrublands")]<-"Drylands"
+ES.frame$BIOME[(ES.frame$BIOME=="Tropical and Subtropical Grasslands, Savannas and Shrublands")]<-"Tropical Grasslands"
+ES.frame$BIOME[(ES.frame$BIOME=="Flooded Grasslands and Savannas")]<-"Tropical Grasslands"
+ES.frame$BIOME[(ES.frame$BIOME=="Temperate Grasslands, Savannas and Shrublands")]<-"Temperate_Montane Grasslands"
+ES.frame$BIOME[(ES.frame$BIOME=="Montane Grasslands and Shrublands")]<-"Temperate_Montane Grasslands"
+ES.frame$BIOME[(ES.frame$BIOME=="NA")]<-NA
+ES.frame$BIOME <- factor(ES.frame$BIOME)
+
 ### for ES.frame.noLU
 # extract ecoregions
 realms_extract <- extract(ecoregions,lonlat.noLU)
@@ -57,7 +73,7 @@ if (file.exists("1976-2000_GIS.zip")==FALSE){
   download.file("http://koeppen-geiger.vu-wien.ac.at/data/1976-2000_GIS.zip","1976-2000_GIS.zip", mode="wb")
   unzip("1976-2000_GIS.zip")
 } else {unzip("1976-2000_GIS.zip")}
-climate_zone <- readOGR(".",layer="1976-2000")
+climate_zone <- readOGR(dsn=".",layer="1976-2000")
 # Legend(GRIDCODE)
 # 11 ... Af
 # 12 ... Am
@@ -128,11 +144,21 @@ if (file.exists("CM10_1975H_Bio_ASCII_V1.2.zip")==FALSE){
   unzip("CM10_1975H_Bio_ASCII_V1.2.zip")
 }
 
+if (file.exists("tn0_all_gcm.asc")==FALSE){
+  download.file("https://www.dropbox.com/s/689m9pc5bnejbg9/tn0_all_gcm.asc?dl=0")
+}
+
 annual_mean_radiation <- raster("CM10_1975H_Bio_V1.2/CM10_1975H_Bio20_V1.2.txt",crs=CRS("+proj=longlat +datum=WGS84 +no_defs +ellps=WGS84 +towgs84=0,0,0"))
 
 ES.frame$annual_mean_radiation<-extract(annual_mean_radiation,lonlat, buffer=100000, fun=mean) # consider a buffer of radius=100km around each dot
 
 ES.frame.noLU$annual_mean_radiation<-extract(annual_mean_radiation,lonlat.noLU, buffer=100000, fun=mean) # consider a buffer of radius=100km around each dot
+
+npp <- raster("tn0_all_gcm.asc",crs=CRS("+proj=longlat +datum=WGS84 +no_defs +ellps=WGS84 +towgs84=0,0,0"))
+
+ES.frame$npp<-extract(npp,lonlat,buffer=100000,fun=mean)
+
+ES.frame.noLU$npp<-extract(npp,lonlat.noLU, buffer=100000, fun=mean)
 
 ############################################################################
 ### 05.4. Intersect studies with gross capital stock in agriculture
