@@ -72,9 +72,12 @@
 ### needs to be adjusted individually
 ############################################################################
 
+path2temp <- "/Users/rseppelt/Documents/Projekte/LU-BD-ES (SESYNC, Ralf)/Temp" #RS
+path2wd <- "/Users/rseppelt/Documents/git/LUBDES_MA/RScripts/" #RS
 
-path2wd <- "C:/Users/hoppek/Documents/GitHub/LUBDES_MA/RScripts/" #KG
-path2temp <- "C:/Users/hoppek/Documents/temp" #KG
+
+#path2wd <- "C:/Users/hoppek/Documents/GitHub/LUBDES_MA/RScripts/" #KG
+#path2temp <- "C:/Users/hoppek/Documents/temp" #KG
 #path2wd <- "~/git/LUBDES_MA/RScripts/" #MB
 #path2temp <- "~/tmp" #MB
 
