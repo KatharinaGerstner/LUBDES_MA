@@ -82,10 +82,15 @@ if (cn == "cle162m-10.local")
   path2wd <- "C:/Users/Tim/Documents/LUBDES_MA/RScripts/" #TN
   path2temp <- "C:/Users/Tim/Documents/LUBDES_MA_Out/" #TN
   
-} else
+} else if (cn == "juro-MacBookPro"){
+  path2wd <- "" #MB
+  path2temp <- "" #MB
+  
+}else
 {
   path2wd <- "C:/Users/hoppek/Documents/GitHub/LUBDES_MA/RScripts/" #KG
   path2temp <- "C:/Users/hoppek/Documents/temp" #KG
+  
   
 }
 
