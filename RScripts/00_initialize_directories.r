@@ -73,10 +73,12 @@
 ############################################################################
 
 
-#path2wd <- "C:/Users/hoppek/Documents/GitHub/LUBDES_MA/RScripts/" #KG
-#path2temp <- "C:/Users/hoppek/Documents/temp" #KG
-path2wd <- "~/git/LUBDES_MA/RScripts/" #MB
-path2temp <- "~/tmp" #MB
+path2wd <- "C:/Users/hoppek/Documents/GitHub/LUBDES_MA/RScripts/" #KG
+path2wd <- "C:/Users/Tim/Documents/LUBDES_MA/RScripts/" #TN
+path2temp <- "C:/Users/hoppek/Documents/temp" #KG
+path2temp <- "C:/Users/Tim/Documents/LUBDES_MA_Out/" #TN
+#path2wd <- "~/git/LUBDES_MA/RScripts/" #MB
+#path2temp <- "~/tmp" #MB
 
 ############################################################################
 ### 00.2. define global helper functions

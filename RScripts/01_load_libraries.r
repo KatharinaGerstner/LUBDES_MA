@@ -17,7 +17,7 @@
 
 library(devtools) # needed for library googlesheets
 library(googlesheets) # for loading data directly from google
-#library(mice) # for imputation
+library(mice) # for imputation
 #library(mi) # for imputation
 library(metafor) # for meta analysis
 library(ggplot2) # For plotting

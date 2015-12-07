@@ -8,7 +8,6 @@
 ### 07.5. multivariate analysis with and without moderators (not yet working)
 ###
 ### General comments:
-### * 02.2. LMM.MA.fit function is currently not needed
 ### * fit meta-analytic multivariate/multilevel fixed- and random/mixed-effects models with or
 ###   without moderators via linear (mixed-effects) models using rma.mv 
 ### * Viechtbauer 2015 p 189: the random argument can also contain one (and only one!) formula of the form ~ inner | outer . 
@@ -30,7 +29,12 @@
 ES.frame <- subset(ES.frame, Richness.Log.RR.Var>0 & Yield.Log.RR.Var>0) # restrict analysis to study cases with positive variances
 #ES.frame$LUI.range <- factor(ES.frame$LUI.range)
 
+### Remove pseudo-replicates
+ES.frame.richness <- ES.frame[!duplicated(ES.frame[,c("Study.ID","Case.ID","LUI.range.level","Species.Group")]),]
+ES.frame.yield <- ES.frame[!duplicated(ES.frame[,c("Study.ID","LUI.range.level","Product")]),]
+
 ES.frame.noLU <- subset(ES.frame.noLU, Richness.Log.RR.Var>0) # restrict analysis to study cases with positive variances
+ES.frame.noLU.richness <- ES.frame.noLU[!duplicated(ES.frame.noLU[,c("Study.Case","High.LUI","Species.Group")]),]
 
 ### store models in a list
 Richness.MA.model <- list() 
@@ -44,11 +48,11 @@ preds.yield <- list()
 ### 07.2. Analysis without moderators
 ############################################################################
 
-Richness.MA.fit <- rma.mv(yi=Richness.Log.RR, V=Richness.Log.RR.Var, mods=~1, random = ~factor(Case.ID)|factor(Study.ID), struct="CS", slab=paste(Study.Case, Low.LUI, High.LUI,sep="_"),method="REML", tdist=FALSE, level=95, digits=4,data=ES.frame)
+Richness.MA.fit <- rma.mv(yi=Richness.Log.RR, V=Richness.Log.RR.Var, mods=~1, random = ~factor(Case.ID)|factor(Study.ID), struct="CS", slab=paste(Study.Case, Low.LUI, High.LUI,sep="_"),method="REML", tdist=FALSE, level=95, digits=4,data=ES.frame.richness)
 Richness.MA.model[["None"]] <- Richness.MA.fit
 preds.richness[["None"]] <- predict.rma(Richness.MA.fit) 
 
-Yield.MA.fit <- rma.mv(yi=Yield.Log.RR,V=Yield.Log.RR.Var,mods=~1, random = ~factor(Case.ID)|factor(Study.ID), struct="CS", slab=paste(Study.Case, Low.LUI, High.LUI,sep="_"),method="REML", tdist=FALSE, level=95, digits=4,data=ES.frame)
+Yield.MA.fit <- rma.mv(yi=Yield.Log.RR,V=Yield.Log.RR.Var,mods=~1, random = ~factor(Case.ID)|factor(Study.ID), struct="CS", slab=paste(Study.Case, Low.LUI, High.LUI,sep="_"),method="REML", tdist=FALSE, level=95, digits=4,data=ES.frame)#[!duplicated(data[c("Study.ID","LUI.range.level","Product"),])])
 Yield.MA.model[["None"]] <- Yield.MA.fit
 preds.yield[["None"]] <- predict.rma(Yield.MA.fit) 
 
@@ -62,7 +66,7 @@ MA.coeffs.cont <- data.frame(Moderator="None",Richness.intercept=Richness.MA.fit
 
 ### define list of moderators
 moderator.list.cat <- c("Land.use...land.cover","Species.Group","Trophic.Level","LUI.range.level","Product", "ES.From.BD","BIOME", "main_climate","start.agr.use")
-moderator.list.cont <- c("GDP.pc.2000","annual_mean_radiation","capital_millionUSD","habitat_dissimilarity","year.of.first.use", "pop.dens.2000")
+moderator.list.cont <- c("GDP.pc.2000","annual_mean_radiation","rel_capital_stock_in_agriculture","habitat_dissimilarity","time.since.first.use", "pop.dens.2000","npp")
 
 ### run analysis for categorical moderators
 for(mods in moderator.list.cat){
@@ -70,8 +74,8 @@ for(mods in moderator.list.cat){
   print(mods)
 
   ### fit model
-  attach(ES.frame)
-  Richness.MA.fit <- try(rma.mv(yi=Richness.Log.RR,V=Richness.Log.RR.Var,mods=as.formula(paste("~",mods,"-1",sep="")),random = ~factor(Case.ID)|factor(Study.ID), struct="CS", slab=paste(Study.Case, Low.LUI, High.LUI,sep="_"),method="REML", tdist=FALSE, level=95, digits=4,data=ES.frame), silent=T)
+#  attach(ES.frame)
+  Richness.MA.fit <- try(rma.mv(yi=Richness.Log.RR,V=Richness.Log.RR.Var,mods=as.formula(paste("~",mods,"-1",sep="")),random = ~factor(Case.ID)|factor(Study.ID), struct="CS", slab=paste(Study.Case, Low.LUI, High.LUI,sep="_"),method="REML", tdist=FALSE, level=95, digits=4,data=ES.frame.richness), silent=T)
   Richness.MA.model[[mods]] <- Richness.MA.fit
   ### catch errors
   if(class(Richness.MA.fit)=="try-error") {
@@ -80,7 +84,7 @@ for(mods in moderator.list.cat){
   }
 
   ### fit model
-  Yield.MA.fit <- try(rma.mv(yi=Yield.Log.RR,V=Yield.Log.RR.Var,mods=as.formula(paste("~",mods,"-1",sep="")),random = ~factor(Case.ID)|factor(Study.ID), struct="CS", slab=paste(Study.Case, Low.LUI, High.LUI,sep="_"),method="REML", tdist=FALSE, level=95, digits=4,data=ES.frame),silent=T)
+  Yield.MA.fit <- try(rma.mv(yi=Yield.Log.RR,V=Yield.Log.RR.Var,mods=as.formula(paste("~",mods,"-1",sep="")),random = ~factor(Case.ID)|factor(Study.ID), struct="CS", slab=paste(Study.Case, Low.LUI, High.LUI,sep="_"),method="REML", tdist=FALSE, level=95, digits=4,data=ES.frame.yield),silent=T)
   Yield.MA.model[[mods]] <- Yield.MA.fit
   ### catch errors
   if(class(Yield.MA.fit)=="try-error") {
@@ -88,7 +92,7 @@ for(mods in moderator.list.cat){
     Yield.MA.fit <- data.frame(b=NA,se=NA)
   }
   
-  detach(ES.frame)
+#  detach(ES.frame)
 
   ### tabularize model parameters
   MA.coeffs.cat <- rbind(MA.coeffs.cat,data.frame(Moderator=rep(mods,length(Richness.MA.fit$b)),levels=unlist(lapply(strsplit(rownames(Richness.MA.fit$b),mods),function(x){x[[2]]})),mean.Richness=Richness.MA.fit$b,se.Richness=Richness.MA.fit$se,mean.Yield=Yield.MA.fit$b,se.Yield=Yield.MA.fit$se))
@@ -100,10 +104,10 @@ print(MA.coeffs.cat)
 for(mods in moderator.list.cont){
   
   print(mods)
-  attach(ES.frame)
+#  attach(ES.frame)
   
   ### fit model
-  Richness.MA.fit <- try(rma.mv(yi=Richness.Log.RR,V=Richness.Log.RR.Var,mods=as.formula(paste("~",mods,sep="")),random = ~factor(Case.ID)|factor(Study.ID), struct="CS", slab=paste(Study.Case, Low.LUI, High.LUI,sep="_"),method="REML", tdist=FALSE, level=95, digits=4,data=ES.frame),silent=T)
+  Richness.MA.fit <- try(rma.mv(yi=Richness.Log.RR,V=Richness.Log.RR.Var,mods=as.formula(paste("~",mods,sep="")),random = ~factor(Case.ID)|factor(Study.ID), struct="CS", slab=paste(Study.Case, Low.LUI, High.LUI,sep="_"),method="REML", tdist=FALSE, level=95, digits=4,data=ES.frame.richness),silent=T)
   Richness.MA.model[["None"]] <- Richness.MA.fit
   ### catch errors
   if(class(Richness.MA.fit)=="try-error") {
@@ -112,7 +116,7 @@ for(mods in moderator.list.cont){
   }
 
   ### fit model
-  Yield.MA.fit <- try(rma.mv(yi=Yield.Log.RR,V=Yield.Log.RR.Var,mods=as.formula(paste("~",mods,sep="")),random = ~factor(Case.ID)|factor(Study.ID), struct="CS", slab=paste(Study.Case, Low.LUI, High.LUI,sep="_"),method="REML", tdist=FALSE, level=95, digits=4,data=ES.frame),silent=T)
+  Yield.MA.fit <- try(rma.mv(yi=Yield.Log.RR,V=Yield.Log.RR.Var,mods=as.formula(paste("~",mods,sep="")),random = ~factor(Case.ID)|factor(Study.ID), struct="CS", slab=paste(Study.Case, Low.LUI, High.LUI,sep="_"),method="REML", tdist=FALSE, level=95, digits=4,data=ES.frame.yield),silent=T)
   Yield.MA.model[[mods]] <- Yield.MA.fit
   ### catch errors
   if(class(Yield.MA.fit)=="try-error") {
@@ -120,7 +124,7 @@ for(mods in moderator.list.cont){
     Yield.MA.fit <- data.frame(b=c(NA,NA),se=c(NA,NA))
   }
   
-  detach(ES.frame)
+#  detach(ES.frame)
 
   ### tabularize model parameters
   MA.coeffs.cont <- rbind(MA.coeffs.cont,data.frame(Moderator=mods, Richness.intercept=Richness.MA.fit$b[1], Richness.slope=Richness.MA.fit$b[2], Richness.se.intercept=Richness.MA.fit$se[1], Richness.se.slope=Richness.MA.fit$se[2], Yield.intercept=Yield.MA.fit$b[1], Yield.slope=Yield.MA.fit$b[2], Yield.se.intercept=Yield.MA.fit$se[1], Yield.se.slope=Yield.MA.fit$se[2]))
@@ -149,15 +153,15 @@ moderator.list <- c("Product","Product:High.LUI","Land.use...land.cover","Specie
 for(mods in moderator.list){
   print(mods)
   ### fit model 
-  attach(ES.frame.noLU)
-  Richness.MA.fit.noLU <- try(rma.mv(yi=Richness.Log.RR,V=Richness.Log.RR.Var,mods=as.formula(paste("~",mods,"-1",sep="")),random = ~factor(Case.ID)|factor(Study.ID), struct="CS", slab=paste(Study.Case, Low.LUI, High.LUI,sep="_"),method="REML", tdist=FALSE, level=95, digits=4,data=ES.frame.noLU),silent=T)
+#  attach(ES.frame.noLU)
+  Richness.MA.fit.noLU <- try(rma.mv(yi=Richness.Log.RR,V=Richness.Log.RR.Var,mods=as.formula(paste("~",mods,"-1",sep="")),random = ~factor(Case.ID)|factor(Study.ID), struct="CS", slab=paste(Study.Case, Low.LUI, High.LUI,sep="_"),method="REML", tdist=FALSE, level=95, digits=4,data=ES.frame.noLU.richness),silent=T)
   Richness.MA.model.noLU[[mods]] <- Richness.MA.fit.noLU
   ### catch errors
   if(class(Richness.MA.fit.noLU)[1]=="try-error") {
     geterrmessage()
     Richness.MA.fit.noLU <- data.frame(b=NA,se=NA)
   }
-  detach(ES.frame.noLU)
+#  detach(ES.frame.noLU)
 
   ### tabularize model parameters  
   ifelse(mods=="Product:High.LUI", levels <- unlist(lapply(strsplit(unlist(lapply(strsplit(rownames(Richness.MA.fit.noLU$b),"Product"),function(x)x[[2]])),"High.LUI"),function(y) paste(y[1],y[2],sep=""))), levels <- unlist(lapply(strsplit(rownames(Richness.MA.fit.noLU$b),mods),function(x){x[[2]]})))
@@ -168,30 +172,6 @@ for(mods in moderator.list){
 }
 print(MA.coeffs.noLU)
 
-############################################################################
-### 07.5. multivariate analysis with and without moderators (not yet working)
-### (cf. ?dat.berkey1998)
-############################################################################
-
-### restructure ES.frame: Richness.Log.RR, Yield.Log.RR in separate rows
-# ES.frame.reduced <- ES.frame[,c("Study.Case","Land.use...land.cover","Species.Group","Species.Subgroup","Trophic.Level","LUI.range.level","LUI.range","BIOME")]
-# dat <- rbind(ES.frame.reduced,ES.frame.reduced)
-# dat$outcome <- c(rep("Richness",nrow(ES.frame)),rep("Yield",nrow(ES.frame)))
-# 
-# ### compute covariance matrix between Richness and Yield RR per Study.Case
-# covar <- cov(ES.frame$Richness.Log.RR.Var,ES.frame$Yield.Log.RR.Var) ## don't know how to determine covariance of Richness and Yield RR per Study.Case
-# dat$Log.RR <- c(ES.frame$Richness.Log.RR,ES.frame$Yield.Log.RR)
-# dat$Richness.Log.RR.Var <- c(cbind(t(c(ES.frame$Richness.Log.RR.Var,covar))))
-# dat$Yield.Log.RR.Var <- c(cbind(t(covar,ES.frame$Yield.Log.RR.Var)))
-# 
-# ### construct list of the variance-covariance matrices of the observed outcomes for the studies
-# V <- lapply(split(dat[,c("Richness.Log.RR.Var", "Yield.Log.RR.Var")], dat$Study.Case), as.matrix)
-# ### construct block diagonal matrix
-# V <- bldiag(V)
-# 
-# ### Fit multivariate meta-analytic model
-# MA.fit <- rma.mv(yi=Log.RR, V, mods = ~ outcome + outcome:BIOME - 1,
-#                  random = ~factor(Case.ID)|factor(Study.ID), struct="UN", data=dat, method="ML")
 
 
 ###########################################################################
