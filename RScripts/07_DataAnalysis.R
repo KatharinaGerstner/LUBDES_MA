@@ -61,7 +61,7 @@ MA.coeffs.cont <- data.frame(Moderator="None",Richness.intercept=Richness.MA.fit
 
 ### define list of moderators
 moderator.list.cat <- c("Land.use...land.cover","Species.Group","Trophic.Level","LUI.range.level","Product", "ES.From.BD","BIOME", "main_climate","start.agr.use")
-moderator.list.cont <- c("GDP.pc.2000","annual_mean_radiation","capital_millionUSD","habitat_dissimilarity","year.of.first.use", "pop.dens.2000")
+moderator.list.cont <- c("GDP.pc.2000","annual_mean_radiation","rel_capital_stock_in_agriculture","habitat_dissimilarity","time.since.first.use", "pop.dens.2000")
 
 ### run analysis for categorical moderators
 for(mods in moderator.list.cat){
@@ -167,30 +167,6 @@ for(mods in moderator.list){
 }
 print(MA.coeffs.noLU)
 
-############################################################################
-### 07.5. multivariate analysis with and without moderators (not yet working)
-### (cf. ?dat.berkey1998)
-############################################################################
-
-### restructure ES.frame: Richness.Log.RR, Yield.Log.RR in separate rows
-# ES.frame.reduced <- ES.frame[,c("Study.Case","Land.use...land.cover","Species.Group","Species.Subgroup","Trophic.Level","LUI.range.level","LUI.range","BIOME")]
-# dat <- rbind(ES.frame.reduced,ES.frame.reduced)
-# dat$outcome <- c(rep("Richness",nrow(ES.frame)),rep("Yield",nrow(ES.frame)))
-# 
-# ### compute covariance matrix between Richness and Yield RR per Study.Case
-# covar <- cov(ES.frame$Richness.Log.RR.Var,ES.frame$Yield.Log.RR.Var) ## don't know how to determine covariance of Richness and Yield RR per Study.Case
-# dat$Log.RR <- c(ES.frame$Richness.Log.RR,ES.frame$Yield.Log.RR)
-# dat$Richness.Log.RR.Var <- c(cbind(t(c(ES.frame$Richness.Log.RR.Var,covar))))
-# dat$Yield.Log.RR.Var <- c(cbind(t(covar,ES.frame$Yield.Log.RR.Var)))
-# 
-# ### construct list of the variance-covariance matrices of the observed outcomes for the studies
-# V <- lapply(split(dat[,c("Richness.Log.RR.Var", "Yield.Log.RR.Var")], dat$Study.Case), as.matrix)
-# ### construct block diagonal matrix
-# V <- bldiag(V)
-# 
-# ### Fit multivariate meta-analytic model
-# MA.fit <- rma.mv(yi=Log.RR, V, mods = ~ outcome + outcome:BIOME - 1,
-#                  random = ~factor(Case.ID)|factor(Study.ID), struct="UN", data=dat, method="ML")
 
 
 ###########################################################################

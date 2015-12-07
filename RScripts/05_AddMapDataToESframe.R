@@ -37,7 +37,7 @@ if (file.exists("terr-ecoregions-TNC.zip")==FALSE){
   unzip("terr-ecoregions-TNC.zip")
   } else {unzip("terr-ecoregions-TNC.zip")}
 
-ecoregions <- readOGR(path2temp,"tnc_terr_ecoregions")
+ecoregions <- readOGR(".","tnc_terr_ecoregions")
 
 # extract ecoregions
 realms_extract <- extract(ecoregions,lonlat)
@@ -57,7 +57,7 @@ if (file.exists("1976-2000_GIS.zip")==FALSE){
   download.file("http://koeppen-geiger.vu-wien.ac.at/data/1976-2000_GIS.zip","1976-2000_GIS.zip", mode="wb")
   unzip("1976-2000_GIS.zip")
 } else {unzip("1976-2000_GIS.zip")}
-climate_zone <- readOGR(dsn=path2temp,layer="1976-2000")
+climate_zone <- readOGR(".",layer="1976-2000")
 # Legend(GRIDCODE)
 # 11 ... Af
 # 12 ... Am
@@ -130,9 +130,9 @@ if (file.exists("CM10_1975H_Bio_ASCII_V1.2.zip")==FALSE){
 
 annual_mean_radiation <- raster("CM10_1975H_Bio_V1.2/CM10_1975H_Bio20_V1.2.txt",crs=CRS("+proj=longlat +datum=WGS84 +no_defs +ellps=WGS84 +towgs84=0,0,0"))
 
-ES.frame$annual_mean_radiation<-extract(annual_mean_radiation,lonlat, buffer=100000, fun=mean) # consider a buffer of radius=10km² around each dot
+ES.frame$annual_mean_radiation<-extract(annual_mean_radiation,lonlat, buffer=100000, fun=mean) # consider a buffer of radius=100km around each dot
 
-ES.frame.noLU$annual_mean_radiation<-extract(annual_mean_radiation,lonlat.noLU, buffer=100000, fun=mean) # consider a buffer of radius=10km² around each dot
+ES.frame.noLU$annual_mean_radiation<-extract(annual_mean_radiation,lonlat.noLU, buffer=100000, fun=mean) # consider a buffer of radius=100km around each dot
 
 ############################################################################
 ### 05.4. Intersect studies with gross capital stock in agriculture
@@ -145,29 +145,30 @@ if (file.exists("Investment_CapitalStock_E_All_Data.zip")==FALSE){
   unzip("Investment_CapitalStock_E_All_Data.zip")
 }
 
+download.file("https://www.dropbox.com/s/fscg314f6kkvbhv/Data_Extract_From_World_Development_Indicators_Data.csv?dl=1", "agricultural_area.csv")
+agricultural_area <- read.csv("agricultural_area.csv")
+agricultural_area$X2007..YR2007. <- as.numeric(agricultural_area$X2007..YR2007.)
+agricultural_area$CountryCode <- countrycode(agricultural_area$Country.Code,"wb","iso3c")
+agricultural_area <- data.frame(Country.Code = agricultural_area$CountryCode,
+                                agricultural_area = agricultural_area$X2007..YR2007.)
+ES.frame$agricultural_area <- agricultural_area$agricultural_area[(match(ES.frame$Country.Code,agricultural_area$Country.Code))]
+
 capital_stock_in_agriculture <- read.csv("Investment_CapitalStock_E_All_Data.csv")
-capital_stock_in_agriculture <- subset(capital_stock_in_agriculture, Item == "Capital Stock + (Total)" & Element == "Gross Capital Stock (constant 2005 prices)")
+capital_stock_in_agriculture <- subset(capital_stock_in_agriculture, Item == "Capital Stock + (Total)" & Element == "Gross Capital Stock (constant 2005 prices)" & Year == 2007)
 
 # convert fao codes into iso3c codes
 capital_stock_in_agriculture$CountryCode <- countrycode(capital_stock_in_agriculture$CountryCode,"fao","iso3c")
 capital_stock_in_agriculture <- data.frame(Country.Code = capital_stock_in_agriculture$CountryCode,
-                                           capital_millionUSD = capital_stock_in_agriculture$Value,
-                                           Date.End4CS = capital_stock_in_agriculture$Year)
+                                           capital_millionUSD = capital_stock_in_agriculture$Value)
+capital_stock_in_agriculture$agricultural_area <- agricultural_area$agricultural_area[(match(capital_stock_in_agriculture$Country.Code,agricultural_area$Country.Code))]
+capital_stock_in_agriculture$rel_capital_stock_in_agriculture <- capital_stock_in_agriculture$capital_millionUSD/capital_stock_in_agriculture$agricultural_area
 capital_stock_in_agriculture <- capital_stock_in_agriculture[!is.na(capital_stock_in_agriculture$Country.Code),] ## exclude Country.Code==NA from merging as this produces duplicates
 
-###
-ES.frame$Date.End4CS <- ES.frame$Date.End
-ES.frame$Date.End4CS[ES.frame$Date.End4CS>2007] <- 2007 ## use capital stock data from 2007 if study ends after
+ES.frame <- join(ES.frame,capital_stock_in_agriculture[,c("Country.Code","rel_capital_stock_in_agriculture")],by="Country.Code")
+ES.frame$rel_capital_stock_in_agriculture <- log(ES.frame$rel_capital_stock_in_agriculture)
 
-ES.frame <- join(ES.frame,capital_stock_in_agriculture,by=c("Country.Code","Date.End4CS"))
-ES.frame <- ES.frame[,-which(names(ES.frame)=="Date.End4CS")] ## remove previously added column
-
-###
-ES.frame.noLU$Date.End4CS <- ES.frame.noLU$Date.End
-ES.frame.noLU$Date.End4CS[ES.frame.noLU$Date.End4CS>2007] <- 2007 ## use capital stock data from 2007 if study ends after
-
-ES.frame.noLU <- join(ES.frame.noLU,capital_stock_in_agriculture,by=c("Country.Code","Date.End4CS"))
-ES.frame.noLU <- ES.frame.noLU[,-which(names(ES.frame.noLU)=="Date.End4CS")] ## remove previously added column
+ES.frame.noLU <- join(ES.frame.noLU,capital_stock_in_agriculture[,c("Country.Code","rel_capital_stock_in_agriculture")],by="Country.Code")
+ES.frame.noLU$rel_capital_stock_in_agriculture <- log(ES.frame.noLU$rel_capital_stock_in_agriculture)
 
 ############################################################################
 ### 05.5. Intersect studies with Agricultural intensity (efficiency) in the neighborhood
@@ -218,8 +219,8 @@ hyde.year.of.first.use <- apply(hyde.extract.year.of.first.use,1,function(x){ife
 kk10.extract.year.of.first.use <- extract(kk10.LUhist.stack,lonlat) 
 names(kk10.extract.year.of.first.use) <- c("-6000","-3000","-1000","0","1000","1500","1750","1900","1950","2000")
 kk10.year.of.first.use <- apply(kk10.extract.year.of.first.use,1,function(x){ifelse(sum(x)>0,as.numeric(names(kk10.extract.year.of.first.use)[min(which(x==1))]),NA)}) # NA if no significant use were detectable
-ES.frame$year.of.first.use <- apply(cbind(hyde.year.of.first.use,kk10.year.of.first.use),1,function(x){ifelse(all(is.na(x)),NA,min(x,na.rm=T))})
-ES.frame$start.agr.use <- ifelse(ES.frame$year.of.first.use < 1500,"old","young")
+ES.frame$time.since.first.use <- log(2000-apply(cbind(hyde.year.of.first.use,kk10.year.of.first.use),1,function(x){ifelse(all(is.na(x)),NA,min(x,na.rm=T))})+1)
+ES.frame$start.agr.use <- ifelse(ES.frame$time.since.first.use >= 500,"old","young")
 ES.frame$start.agr.use[is.na(ES.frame$start.agr.use)] <- "not yet used"
 
 ## ES.frame.noLU
@@ -229,8 +230,8 @@ hyde.year.of.first.use <- apply(hyde.extract.year.of.first.use,1,function(x){ife
 kk10.extract.year.of.first.use <- extract(kk10.LUhist.stack,lonlat.noLU) 
 names(kk10.extract.year.of.first.use) <- c("-6000","-3000","-1000","0","1000","1500","1750","1900","1950","2000")
 kk10.year.of.first.use <- apply(kk10.extract.year.of.first.use,1,function(x){ifelse(sum(x)>0,as.numeric(names(kk10.extract.year.of.first.use)[min(which(x==1))]),NA)}) # NA if no significant use were detectable
-ES.frame.noLU$year.of.first.use <- apply(cbind(hyde.year.of.first.use,kk10.year.of.first.use),1,function(x){ifelse(all(is.na(x)),NA,min(x,na.rm=T))})
-ES.frame.noLU$start.agr.use <- ifelse(ES.frame.noLU$year.of.first.use < 1500,"old","young")
+ES.frame.noLU$time.since.first.use <- log(2000-apply(cbind(hyde.year.of.first.use,kk10.year.of.first.use),1,function(x){ifelse(all(is.na(x)),NA,min(x,na.rm=T))})+1)
+ES.frame.noLU$start.agr.use <- ifelse(ES.frame.noLU$time.since.first.use >= 500,"old","young")
 ES.frame.noLU$start.agr.use[is.na(ES.frame.noLU$start.agr.use)] <- "not yet used"
 
 ############################################################################
@@ -246,9 +247,9 @@ if (file.exists("Population_density.zip")==FALSE){
 
 pop.data <- raster("Population_density/gldens00/glds00ag")
 
-ES.frame$pop.dens.2000 <- extract(pop.data,lonlat, buffer=100000, fun=mean) # consider a buffer of radius=100km² around each dot)
+ES.frame$pop.dens.2000 <- log(extract(pop.data,lonlat, buffer=100000, fun=mean)) # consider a buffer of radius=100km² around each dot)
 
-ES.frame.noLU$pop.dens.2000 <- extract(pop.data,lonlat.noLU, buffer=100000, fun=mean) # consider a buffer of radius=100km² around each dot)
+ES.frame.noLU$pop.dens.2000 <- log(extract(pop.data,lonlat.noLU, buffer=100000, fun=mean)) # consider a buffer of radius=100km² around each dot)
 
 ############################################################################
 ### 05.9. Combine LUI classifiers
@@ -259,6 +260,6 @@ ES.frame.noLU$pop.dens.2000 <- extract(pop.data,lonlat.noLU, buffer=100000, fun=
 ############################################################################
 ### remove objectes to save workspace
 ############################################################################
-rm(lonlat, lonlat.noLU,ecoregions,climate_extract,realms_extract,GDP.pc,GDP.pc.2000,annual_mean_radiation,capital_stock_in_agriculture,habitat_dissimilarity, timeseries.hyde,timeseries.kk10,hyde.LUhist.stack,kk10.LUhist.stack,hyde.extract.year.of.first.use,kk10.extract.year.of.first.use,hyde.year.of.first.use,kk10.year.of.first.use)
+rm(lonlat, lonlat.noLU,ecoregions,climate_extract,realms_extract,GDP.pc,GDP.pc.2000,annual_mean_radiation,agricultural_area,capital_stock_in_agriculture,habitat_dissimilarity, timeseries.hyde,timeseries.kk10,hyde.LUhist.stack,kk10.LUhist.stack,hyde.extract.year.of.first.use,kk10.extract.year.of.first.use,hyde.year.of.first.use,kk10.year.of.first.use)
 
 setwd(path2wd)
