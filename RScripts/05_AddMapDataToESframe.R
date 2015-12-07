@@ -145,7 +145,7 @@ if (file.exists("CM10_1975H_Bio_ASCII_V1.2.zip")==FALSE){
 }
 
 if (file.exists("tn0_all_gcm.asc")==FALSE){
-  download.file("https://www.dropbox.com/s/689m9pc5bnejbg9/tn0_all_gcm.asc?dl=0")
+  download.file("https://www.dropbox.com/s/689m9pc5bnejbg9/tn0_all_gcm.asc?dl=1","tn0_all_gcm.asc")
 }
 
 annual_mean_radiation <- raster("CM10_1975H_Bio_V1.2/CM10_1975H_Bio20_V1.2.txt",crs=CRS("+proj=longlat +datum=WGS84 +no_defs +ellps=WGS84 +towgs84=0,0,0"))

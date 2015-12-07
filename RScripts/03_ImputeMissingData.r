@@ -14,8 +14,8 @@
 
 dataimp <- data
 ### impute also zero SD's as we can't work with that in the analysis
-data$richness.SD[data$richness.SD==0] <- NA
-data$yield.SD[data$yield.SD==0] <- NA
+dataimp$richness.SD[data$richness.SD==0] <- NA
+dataimp$yield.SD[data$yield.SD==0] <- NA
 
 ############################################################################
 ### 03.1. crude-impute based on average SD/mean ratio
@@ -54,28 +54,39 @@ data$yield.SD[data$yield.SD==0] <- NA
 ### 
 ############################################################################
 
+dataimp$richnessID <- paste(dataimp$Study.ID,dataimp$richness.mean,dataimp$X..of.samples.for.BD.measure)
+dataimp$yieldID <- paste(dataimp$Study.ID,dataimp$yield.mean,dataimp$X..of.samples.for.YD.measure)
+
 ### specify columns necessary for imputation
-data2imp.richness <- data[,c("richness.mean", "richness.SD", "X..of.samples.for.BD.measure")]
-data2imp.yield <- data[,c("yield.mean", "yield.SD", "X..of.samples.for.YD.measure")] 
+data2imp.richness <- dataimp[,c("richnessID","richness.mean", "richness.SD", "X..of.samples.for.BD.measure")]
+data2imp.yield <- dataimp[dataimp$Intensity.broad!="no LU",c("yieldID","yield.mean", "yield.SD", "X..of.samples.for.YD.measure")] 
+
+### reduce dataframe, remove duplicates in Study.ID_meanRRs
+data2imp.richness <- data2imp.richness[!duplicated(data2imp.richness[,"richnessID"]),]
+data2imp.yield <- data2imp.yield[!duplicated(data2imp.yield[,"yieldID"]),]
 
 ### specify columns used for prediction
 ### only impute SDs using the corresponding means and sample.size
-predictorMatrix1 <- matrix(c(rep(0,3),c(1,0,1),rep(0,3)),
-                           ncol=3,byrow=T)
+predictorMatrix1 <- matrix(c(rep(0,4),rep(0,4),c(0,1,0,1),rep(0,4)),
+                           ncol=4,byrow=T)
 
 nchains <- 10
+
 ### impute
 imp.richness <- mice(data2imp.richness, predictorMatrix=predictorMatrix1,
             method = "pmm",
             m=nchains, maxit =20, printFlag = FALSE)
 temp <- complete(imp.richness, "long")
-dataimp$richness.SD <- rowMeans(matrix(temp$richness.SD, ncol=nchains, byrow=F))
+data2imp.richness$richness.SD <- rowMeans(matrix(temp$richness.SD, ncol=nchains, byrow=F))
 
-imp.yield <- mice(data2imp.yield[data$Intensity.broad!="no LU",], predictorMatrix=predictorMatrix1,
+imp.yield <- mice(data2imp.yield, predictorMatrix=predictorMatrix1,
                      method = "pmm",
                      m=nchains, maxit =20, printFlag = FALSE)
 temp <- complete(imp.yield, "long")
-dataimp$yield.SD[data$Intensity.broad!="no LU"] <- rowMeans(matrix(temp$yield.SD, ncol=nchains, byrow=F))
+data2imp.yield$yield.SD <- rowMeans(matrix(temp$yield.SD, ncol=nchains, byrow=F))
+
+dataimp$richness.SD[is.na(dataimp$richness.SD)]<-data2imp.richness$richness.SD[match(dataimp$richnessID[is.na(dataimp$richness.SD)],data2imp.richness$richnessID)]
+dataimp$yield.SD[is.na(dataimp$yield.SD)]<-data2imp.yield$yield.SD[match(dataimp$yieldID[is.na(dataimp$yield.SD)],data2imp.yield$yieldID)]
 
 rm(data2imp.richness, data2imp.yield, temp, predictorMatrix1)
 ############################################################################
