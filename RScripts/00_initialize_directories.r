@@ -78,12 +78,14 @@ if (cn == "cle162m-10.local")
 {
   path2temp <- "/Users/rseppelt/Documents/Projekte/LU-BD-ES (SESYNC, Ralf)/Temp" 
   path2wd <- "/Users/rseppelt/Documents/git/LUBDES_MA/RScripts/" 
+} else if (cn == "UCBTTNE-LT"){
+  path2wd <- "C:/Users/Tim/Documents/LUBDES_MA/RScripts/" #TN
+  path2temp <- "C:/Users/Tim/Documents/LUBDES_MA_Out/" #TN
+  
 } else
 {
   path2wd <- "C:/Users/hoppek/Documents/GitHub/LUBDES_MA/RScripts/" #KG
-  path2wd <- "C:/Users/Tim/Documents/LUBDES_MA/RScripts/" #TN
   path2temp <- "C:/Users/hoppek/Documents/temp" #KG
-  path2temp <- "C:/Users/Tim/Documents/LUBDES_MA_Out/" #TN
   
 }
 
