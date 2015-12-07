@@ -37,7 +37,7 @@ if (file.exists("terr-ecoregions-TNC.zip")==FALSE){
   unzip("terr-ecoregions-TNC.zip")
   } else {unzip("terr-ecoregions-TNC.zip")}
 
-ecoregions <- readOGR(path2temp,"tnc_terr_ecoregions")
+ecoregions <- readOGR(".","tnc_terr_ecoregions")
 
 # extract ecoregions
 realms_extract <- extract(ecoregions,lonlat)
@@ -57,7 +57,7 @@ if (file.exists("1976-2000_GIS.zip")==FALSE){
   download.file("http://koeppen-geiger.vu-wien.ac.at/data/1976-2000_GIS.zip","1976-2000_GIS.zip", mode="wb")
   unzip("1976-2000_GIS.zip")
 } else {unzip("1976-2000_GIS.zip")}
-climate_zone <- readOGR(dsn=path2temp,layer="1976-2000")
+climate_zone <- readOGR(dsn=".",layer="1976-2000")
 # Legend(GRIDCODE)
 # 11 ... Af
 # 12 ... Am
