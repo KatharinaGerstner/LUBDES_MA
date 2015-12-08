@@ -9,6 +9,10 @@
 ### Authors: KG
 ############################################################################
 
+### run loop over all models
+# for(mods in mods){}
+mods <- "LUI.range.level"
+
 ############################################################################
 ### 09.1. model diagnostics
 ############################################################################
@@ -41,15 +45,20 @@ y.seq <- seq(min(h),max(h),length.out=100)
 D <- (x.seq^2*y.seq)/((length(Richness.MA.model[[mods]]$b)+1)*(1-y.seq))
 
 plot(rstandard(Richness.MA.model[[mods]])$z~h,xlab="Leverage",ylab="Standardized Residuals", main="Residuals vs. Leverage")
-contour(x.seq,y.seq,D)
+#contour(x.seq,y.seq,D) # not working
+
 ### publication bias
 # Egger's regression test (regtest() function),
 # the trim and fill method (trimfill() function),
 
-
 ############################################################################
 ### 09.2. model performances
 ############################################################################
-# model fit criteria (logLik() and deviance() functions),
-# information criteria (AIC(), BIC(), and fitstats() functions),
+# model fit criteria (logLik() and deviance() functions), information criteria (AIC(), BIC(), and fitstats() functions),
+fitstats(Richness.MA.model[[mods]])
+fitstats(Yield.MA.model[[mods]])
 
+# test against null model, H0: Moderator does explain the same amount of ES variation than the null model 
+anova.rma(Richness.MA.model[["None"]],Richness.MA.model[["mods"]])
+anova.rma(Yield.MA.model[["None"]],Yield.MA.model[["mods"]])
+     

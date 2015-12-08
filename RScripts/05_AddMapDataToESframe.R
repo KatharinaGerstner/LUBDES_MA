@@ -191,10 +191,10 @@ capital_stock_in_agriculture$rel_capital_stock_in_agriculture <- capital_stock_i
 capital_stock_in_agriculture <- capital_stock_in_agriculture[!is.na(capital_stock_in_agriculture$Country.Code),] ## exclude Country.Code==NA from merging as this produces duplicates
 
 ES.frame <- join(ES.frame,capital_stock_in_agriculture[,c("Country.Code","rel_capital_stock_in_agriculture")],by="Country.Code")
-ES.frame$rel_capital_stock_in_agriculture <- log(ES.frame$rel_capital_stock_in_agriculture)
+ES.frame$rel_capital_stock_in_agriculture <- log10(ES.frame$rel_capital_stock_in_agriculture)
 
 ES.frame.noLU <- join(ES.frame.noLU,capital_stock_in_agriculture[,c("Country.Code","rel_capital_stock_in_agriculture")],by="Country.Code")
-ES.frame.noLU$rel_capital_stock_in_agriculture <- log(ES.frame.noLU$rel_capital_stock_in_agriculture)
+ES.frame.noLU$rel_capital_stock_in_agriculture <- log10(ES.frame.noLU$rel_capital_stock_in_agriculture)
 
 ############################################################################
 ### 05.5. Intersect studies with Agricultural intensity (efficiency) in the neighborhood
@@ -245,7 +245,7 @@ hyde.year.of.first.use <- apply(hyde.extract.year.of.first.use,1,function(x){ife
 kk10.extract.year.of.first.use <- extract(kk10.LUhist.stack,lonlat) 
 names(kk10.extract.year.of.first.use) <- c("-6000","-3000","-1000","0","1000","1500","1750","1900","1950","2000")
 kk10.year.of.first.use <- apply(kk10.extract.year.of.first.use,1,function(x){ifelse(sum(x)>0,as.numeric(names(kk10.extract.year.of.first.use)[min(which(x==1))]),NA)}) # NA if no significant use were detectable
-ES.frame$time.since.first.use <- log(2000-apply(cbind(hyde.year.of.first.use,kk10.year.of.first.use),1,function(x){ifelse(all(is.na(x)),NA,min(x,na.rm=T))})+1)
+ES.frame$time.since.first.use <- log10(2000-apply(cbind(hyde.year.of.first.use,kk10.year.of.first.use),1,function(x){ifelse(all(is.na(x)),NA,min(x,na.rm=T))})+1)
 ES.frame$start.agr.use <- ifelse(ES.frame$time.since.first.use >= 500,"old","young")
 ES.frame$start.agr.use[is.na(ES.frame$start.agr.use)] <- "not yet used"
 
@@ -256,7 +256,7 @@ hyde.year.of.first.use <- apply(hyde.extract.year.of.first.use,1,function(x){ife
 kk10.extract.year.of.first.use <- extract(kk10.LUhist.stack,lonlat.noLU) 
 names(kk10.extract.year.of.first.use) <- c("-6000","-3000","-1000","0","1000","1500","1750","1900","1950","2000")
 kk10.year.of.first.use <- apply(kk10.extract.year.of.first.use,1,function(x){ifelse(sum(x)>0,as.numeric(names(kk10.extract.year.of.first.use)[min(which(x==1))]),NA)}) # NA if no significant use were detectable
-ES.frame.noLU$time.since.first.use <- log(2000-apply(cbind(hyde.year.of.first.use,kk10.year.of.first.use),1,function(x){ifelse(all(is.na(x)),NA,min(x,na.rm=T))})+1)
+ES.frame.noLU$time.since.first.use <- log10(2000-apply(cbind(hyde.year.of.first.use,kk10.year.of.first.use),1,function(x){ifelse(all(is.na(x)),NA,min(x,na.rm=T))})+1)
 ES.frame.noLU$start.agr.use <- ifelse(ES.frame.noLU$time.since.first.use >= 500,"old","young")
 ES.frame.noLU$start.agr.use[is.na(ES.frame.noLU$start.agr.use)] <- "not yet used"
 
@@ -273,9 +273,9 @@ if (file.exists("Population_density.zip")==FALSE){
 
 pop.data <- raster("Population_density/gldens00/glds00ag")
 
-ES.frame$pop.dens.2000 <- log(extract(pop.data,lonlat, buffer=100000, fun=mean)) # consider a buffer of radius=100km² around each dot)
+ES.frame$pop.dens.2000 <- log10(extract(pop.data,lonlat, buffer=100000, fun=mean)) # consider a buffer of radius=100km² around each dot)
 
-ES.frame.noLU$pop.dens.2000 <- log(extract(pop.data,lonlat.noLU, buffer=100000, fun=mean)) # consider a buffer of radius=100km² around each dot)
+ES.frame.noLU$pop.dens.2000 <- log10(extract(pop.data,lonlat.noLU, buffer=100000, fun=mean)) # consider a buffer of radius=100km² around each dot)
 
 ############################################################################
 ### 05.9. Combine LUI classifiers
@@ -286,6 +286,6 @@ ES.frame.noLU$pop.dens.2000 <- log(extract(pop.data,lonlat.noLU, buffer=100000, 
 ############################################################################
 ### remove objectes to save workspace
 ############################################################################
-rm(lonlat, lonlat.noLU,ecoregions,climate_extract,realms_extract,GDP.pc,GDP.pc.2000,annual_mean_radiation,agricultural_area,capital_stock_in_agriculture,habitat_dissimilarity, timeseries.hyde,timeseries.kk10,hyde.LUhist.stack,kk10.LUhist.stack,hyde.extract.year.of.first.use,kk10.extract.year.of.first.use,hyde.year.of.first.use,kk10.year.of.first.use)
+rm(lonlat, lonlat.noLU,ecoregions,climate_extract, climate_zone, realms_extract,GDP.pc,GDP.pc.2000,annual_mean_radiation, npp ,agricultural_area,capital_stock_in_agriculture,habitat_dissimilarity, pop.data,timeseries.hyde,timeseries.kk10,hyde.LUhist.stack,kk10.LUhist.stack,hyde.extract.year.of.first.use,kk10.extract.year.of.first.use,hyde.year.of.first.use,kk10.year.of.first.use)
 
 setwd(path2wd)

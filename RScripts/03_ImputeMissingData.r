@@ -73,22 +73,22 @@ predictorMatrix1 <- matrix(c(rep(0,4),rep(0,4),c(0,1,0,1),rep(0,4)),
 nchains <- 10
 
 ### impute
-imp.richness <- mice(data2imp.richness, predictorMatrix=predictorMatrix1,
-            method = "pmm",
-            m=nchains, maxit =20, printFlag = FALSE)
-temp <- complete(imp.richness, "long")
+temp <- complete(mice(data2imp.richness, predictorMatrix=predictorMatrix1,
+                      method = "pmm",
+                      m=nchains, maxit =20, printFlag = FALSE), 
+                 "long")
 data2imp.richness$richness.SD <- rowMeans(matrix(temp$richness.SD, ncol=nchains, byrow=F))
 
-imp.yield <- mice(data2imp.yield, predictorMatrix=predictorMatrix1,
-                     method = "pmm",
-                     m=nchains, maxit =20, printFlag = FALSE)
-temp <- complete(imp.yield, "long")
+temp <- complete(mice(data2imp.yield, predictorMatrix=predictorMatrix1,
+                      method = "pmm",
+                      m=nchains, maxit =20, printFlag = FALSE), 
+                 "long")
 data2imp.yield$yield.SD <- rowMeans(matrix(temp$yield.SD, ncol=nchains, byrow=F))
 
 dataimp$richness.SD[is.na(dataimp$richness.SD)]<-data2imp.richness$richness.SD[match(dataimp$richnessID[is.na(dataimp$richness.SD)],data2imp.richness$richnessID)]
 dataimp$yield.SD[is.na(dataimp$yield.SD)]<-data2imp.yield$yield.SD[match(dataimp$yieldID[is.na(dataimp$yield.SD)],data2imp.yield$yieldID)]
 
-rm(data2imp.richness, data2imp.yield, temp, predictorMatrix1)
+rm(data2imp.richness, data2imp.yield, temp, predictorMatrix1, nchains)
 ############################################################################
 ### 03.3. impute missing data using mi package
 ###

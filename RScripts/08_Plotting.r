@@ -105,17 +105,7 @@ for(i in 2:nrow(MA.coeffs.cont)){
   ## Transform prediction list from rma to dataframe
   richness.preds.df <- data.frame(slab=preds.richness[[mods]][[1]]$slab, pred.richness=preds.richness[[mods]][[1]]$pred, ci.lb.richness=preds.richness[[mods]][[1]]$ci.lb, ci.ub.richness=preds.richness[[mods]][[1]]$ci.ub)
   yield.preds.df <- data.frame(slab=preds.yield[[mods]][[1]]$slab, pred.yield=preds.yield[[mods]][[1]]$pred, ci.lb.yield=preds.yield[[mods]][[1]]$ci.lb, ci.ub.yield=preds.yield[[mods]][[1]]$ci.ub)
-  
-  ### combine ES.frame with predictions dataframe
-  pred.frame <- subset(ES.frame,Study.Case %in% sapply(as.character(richness.preds.df$slab),function(x) strsplit(x,"_")[[1]][1]))
-  pred.frame$slab <- paste(pred.frame$Study.Case, pred.frame$Low.LUI, pred.frame$High.LUI,sep="_")
-  pred.frame <- join_all(list(pred.frame,richness.preds.df,yield.preds.df),by="slab")
-  
-  ### Transform predictions dataframe so that there is one column Response (Richness, Yield) and in another the corresponding logRR
-  pred.frame.trans <- rbind(pred.frame,pred.frame)
-  pred.frame.trans$Response <- c(rep("Richness",nrow(pred.frame)),rep("Yield",nrow(pred.frame)))
-  pred.frame.trans$Log.RR <- c(pred.frame$Richness.Log.RR,pred.frame$Yield.Log.RR)
-  
+   
   Richness.reg.line <- function(xvar){
     ES.moderator.subset$Richness.intercept+ES.moderator.subset$Richness.slope*xvar
   }
@@ -123,13 +113,14 @@ for(i in 2:nrow(MA.coeffs.cont)){
     ES.moderator.subset$Yield.intercept+ES.moderator.subset$Yield.slope*xvar
   }
   
-  plot1 <- ggplot(data=pred.frame.trans, aes(x=pred.frame.trans[,paste(mods)])) + 
-    geom_point(aes(y=Log.RR, color=Response), size=3.5, alpha=.5) +
-    geom_abline(intercept=ES.moderator.subset$Richness.intercept, slope=ES.moderator.subset$Richness.slope,color="red") +
-    geom_abline(intercept=ES.moderator.subset$Yield.intercept, slope=ES.moderator.subset$Yield.slope,color="blue") +
-    geom_ribbon(aes(ymin=ci.lb.richness,ymax=ci.ub.richness),fill="red",alpha=0.2) +
-    geom_ribbon(aes(ymin=ci.lb.yield,ymax=ci.ub.yield),fill="blue",alpha=0.2) +
-    geom_hline(x=0, linetype="twodash") + 
+  plot1 <- ggplot() + 
+    geom_point(aes(x=ES.frame.richness[,paste(mods)],y=ES.frame.richness$Richness.Log.RR),color="red", size=3.5, alpha=.5) +
+    geom_point(aes(x=ES.frame.yield[,paste(mods)],y=ES.frame.yield$Yield.Log.RR),color="blue", size=3.5, alpha=.5) +
+    geom_abline(x=ES.frame.richness[,paste(mods)],intercept=ES.moderator.subset$Richness.intercept, slope=ES.moderator.subset$Richness.slope,color="red") +
+    geom_abline(aes(x=ES.frame.yield[,paste(mods)]),intercept=ES.moderator.subset$Yield.intercept, slope=ES.moderator.subset$Yield.slope,color="blue") +
+    geom_ribbon(aes(x=ES.frame.richness[!is.na(ES.frame.richness[,paste(mods)]),paste(mods)],ymin=richness.preds.df$ci.lb.richness,ymax=richness.preds.df$ci.ub.richness),fill="red",alpha=0.2) +
+    geom_ribbon(aes(x=ES.frame.yield[!is.na(ES.frame.yield[,paste(mods)]),paste(mods)],ymin=yield.preds.df$ci.lb.yield,ymax=yield.preds.df$ci.ub.yield),fill="blue",alpha=0.2) +
+    geom_hline(y=0, linetype="twodash") + 
     scale_y_continuous(labels=trans_format("exp",comma_format(digits=2))) + 
     scale_colour_manual(values=c("red","blue"),labels=c("Richness","Yield")) +
     ylab("RR")  + xlab(paste(mods)) +

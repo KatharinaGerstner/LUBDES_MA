@@ -52,7 +52,7 @@ Richness.MA.fit <- rma.mv(yi=Richness.Log.RR, V=Richness.Log.RR.Var, mods=~1, ra
 Richness.MA.model[["None"]] <- Richness.MA.fit
 preds.richness[["None"]] <- predict.rma(Richness.MA.fit) 
 
-Yield.MA.fit <- rma.mv(yi=Yield.Log.RR,V=Yield.Log.RR.Var,mods=~1, random = ~factor(Case.ID)|factor(Study.ID), struct="CS", slab=paste(Study.Case, Low.LUI, High.LUI,sep="_"),method="REML", tdist=FALSE, level=95, digits=4,data=ES.frame)#[!duplicated(data[c("Study.ID","LUI.range.level","Product"),])])
+Yield.MA.fit <- rma.mv(yi=Yield.Log.RR,V=Yield.Log.RR.Var,mods=~1, random = ~factor(Case.ID)|factor(Study.ID), struct="CS", slab=paste(Study.Case, Low.LUI, High.LUI,sep="_"),method="REML", tdist=FALSE, level=95, digits=4,data=ES.frame.yield)#[!duplicated(data[c("Study.ID","LUI.range.level","Product"),])])
 Yield.MA.model[["None"]] <- Yield.MA.fit
 preds.yield[["None"]] <- predict.rma(Yield.MA.fit) 
 
