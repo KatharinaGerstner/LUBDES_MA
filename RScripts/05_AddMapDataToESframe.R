@@ -146,7 +146,7 @@ if (file.exists("CM10_1975H_Bio_ASCII_V1.2.zip")==FALSE){
 
 if (file.exists("tn0_all_gcm.asc")==FALSE){
   download.file("https://www.dropbox.com/s/689m9pc5bnejbg9/tn0_all_gcm.asc?dl=1","tn0_all_gcm.asc")
-}
+  }
 
 annual_mean_radiation <- raster("CM10_1975H_Bio_V1.2/CM10_1975H_Bio20_V1.2.txt",crs=CRS("+proj=longlat +datum=WGS84 +no_defs +ellps=WGS84 +towgs84=0,0,0"))
 
@@ -271,7 +271,7 @@ if (file.exists("Population_density.zip")==FALSE){
   unzip ("Population_density.zip")
 }
 
-pop.data <- raster("Population_density/gldens00/glds00ag")
+pop.data <- raster("gldens00/glds00ag")
 
 ES.frame$pop.dens.2000 <- log(extract(pop.data,lonlat, buffer=100000, fun=mean)) # consider a buffer of radius=100km² around each dot)
 
