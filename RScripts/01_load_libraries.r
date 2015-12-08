@@ -33,3 +33,5 @@ library(rgeos) # dependency for rgdal
 library(RColorBrewer) # fancy color schemes for plotting
 library(plyr) # for joining datasets
 library(countrycode) # convert FAO country IDs to ISO3
+library(VennDiagram)
+library(venneuler)
