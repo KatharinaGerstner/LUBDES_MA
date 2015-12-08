@@ -85,7 +85,11 @@ if (cn == "cle162m-10.local")
 } else if (cn == "juro-MacBookPro"){
   path2wd <- "/home/juro/git/LUBDES_MA/RScripts/" #MB
   path2temp <- "/home/juro/tmp/" #MB
-  
+
+} else if (cn == "LEIH-HAL6"){
+  path2wd <- "C:/Users/kambach/Desktop/aktuelle Arbeiten/SESYNC/LUBDES_MA-master/RScripts/" #SK
+  path2temp <- "C:/Users/kambach/Desktop/aktuelle Arbeiten/SESYNC/LUBDES_MA-master/RScripts/" #SK
+    
 }else
 {
   path2wd <- "C:/Users/hoppek/Documents/GitHub/LUBDES_MA/RScripts/" #KG
