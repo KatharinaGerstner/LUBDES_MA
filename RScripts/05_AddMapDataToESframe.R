@@ -277,6 +277,25 @@ ES.frame$pop.dens.2000 <- log10(extract(pop.data,lonlat, buffer=100000, fun=mean
 
 ES.frame.noLU$pop.dens.2000 <- log10(extract(pop.data,lonlat.noLU, buffer=100000, fun=mean)) # consider a buffer of radius=100km² around each dot)
 
+
+############################################################################
+### 05.9. Human Footprint
+############################################################################
+if (file.exists("hfp_global_geo_grid.zip")==FALSE){
+  download.file("https://www.dropbox.com/s/aedwhxiu6mygudo/hfp_global_geo_grid.zip?dl=1", "hfp_global_geo_grid.zip", mode="wb")
+  unzip("hfp_global_geo_grid.zip")
+} else {
+  unzip ("hfp_global_geo_grid.zip")
+}
+
+humanfootprint <- raster("hfp_global_geo_grid/hf_v2geo")
+
+ES.frame$humanfootprint <- log10(extract(humanfootprint,lonlat, buffer=100000, fun=mean)) # consider a buffer of radius=100km² around each dot)
+
+ES.frame.noLU$humanfootprint <- log10(extract(humanfootprint,lonlat.noLU, buffer=100000, fun=mean)) # consider a buffer of radius=100km² around each dot)
+
+
+
 ############################################################################
 ### 05.9. Combine LUI classifiers
 ############################################################################
