@@ -309,15 +309,18 @@ LUI.level.to.plot = LUI.range.level[1]
 
 for(LUI.level.to.plot in LUI.range.level){
   data.to.plot = subset(ES.frame, LUI.range.level %in% LUI.level.to.plot)
-  data.to.plot = data.to.plot[order(data.to.plot$Yield.Log.RR,decreasing=F),]
+  data.to.plot = data.to.plot[order(data.to.plot$Yield.Log.RR,decreasing=T),]
   data.to.plot$uniqueID = factor(paste(data.to.plot$Study.ID,data.to.plot$Case.ID),levels=paste(data.to.plot$Study.ID,data.to.plot$Case.ID))
 
   
   # get axes length to center the plot 
-  if(0 - min(data.to.plot$Richness.Log.RR) > max(data.to.plot$Richness.Log.RR)){
-    y.range.for.plot = c(0 -max(data.to.plot$Richness.Log.RR)-0.5,max(data.to.plot$Richness.Log.RR)+0.5)
+  min.values = sqrt(min(c(data.to.plot$Yield.Log.RR,data.to.plot$Richness.Log.RR))^2)
+  max.values = sqrt(max(c(data.to.plot$Yield.Log.RR,data.to.plot$Richness.Log.RR))^2)
+  
+  if(min.values > max.values){
+    y.range.for.plot = c(0 - min.values -0.5,min.values + 0.5)
   }else{
-    y.range.for.plot = c(min(data.to.plot$Richness.Log.RR)-0.5,0-min(data.to.plot$Richness.Log.RR)+0.5)
+    y.range.for.plot = c(0 - max.values -0.5,max.values + 0.5)
   }
   
   
