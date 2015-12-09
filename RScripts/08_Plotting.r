@@ -159,9 +159,188 @@ for(choose.moderator in as.character(unique(MA.coeffs.noLU$Moderator))[-1]){
   
 }
 
+
+
+############################
+### SK Annapolis WS 2015 ###
+### cross diagramm with only 3 groups: low-low, medium-medium, high-high
+############################
+### ------------------------
+
+# select dataset and moderator grand means to plot
+data.to.plot = ES.frame[which(ES.frame$Low.LUI == ES.frame$High.LUI),]
+moderator.grand.mean.subset = MA.coeffs.cat[which(MA.coeffs.cat$Moderator %in% "LUI.range.level" & MA.coeffs.cat$levels %in% c("low-low","medium-medium","high-high")),]
+
+# order levels of moderators so they are displayed in same colour
+moderator.grand.mean.subset$levels = factor(moderator.grand.mean.subset$levels, levels=c("low-low","medium-medium","high-high"))
+data.to.plot$LUI.range.level = factor(data.to.plot$LUI.range.level, levels=c("low-low","medium-medium","high-high"))
+
+#set colour scheme here ! 3 for points and 3 for crosses
+colours.to.plot = c("#33FF00","#FFCC00","#FF0000","#33FF00","#FFCC00","#FF0000")
+
+# get axes length to center the plot 
+if(0 - min(data.to.plot$Richness.Log.RR) > max(data.to.plot$Richness.Log.RR)){
+  y.range.for.plot = c(0 -max(data.to.plot$Richness.Log.RR)-0.5,max(data.to.plot$Richness.Log.RR)+0.5)
+}else{
+  y.range.for.plot = c(min(data.to.plot$Richness.Log.RR)-0.5,0-min(data.to.plot$Richness.Log.RR)+0.5)
+}
+
+if(0 - min(data.to.plot$Yield.Log.RR) > max(data.to.plot$Yield.Log.RR)){
+  x.range.for.plot = c(0 -max(data.to.plot$Yield.Log.RR) - 0.5,max(data.to.plot$Yield.Log.RR) + 0.5 )
+}else{
+  x.range.for.plot = c(min(data.to.plot$Yield.Log.RR)-0.5,0-min(data.to.plot$Yield.Log.RR) + 0.5)
+}
+
+plot.within.groups.cross.diagramm =  ggplot() + 
+
+  # study cases as points
+  geom_point(data= data.to.plot, aes(x=Yield.Log.RR, y=Richness.Log.RR,colour=LUI.range.level), size=3.5,alpha = 0.5) +
+  
+  #grand mean for moderators
+  geom_pointrange(data=moderator.grand.mean.subset, aes(x=mean.Yield, y=mean.Richness, ymin=mean.Richness	- (1.96*se.Richness), ymax=mean.Richness	+ (1.96*se.Richness),colour=levels), size=1) +
+  geom_segment(data=moderator.grand.mean.subset, aes(x=mean.Yield - (1.96*se.Yield), xend=mean.Yield + (1.96*se.Yield), y = mean.Richness, yend = mean.Richness,colour=levels), size=1) +
+
+  # colouring
+  scale_colour_manual(values=colours.to.plot,
+                      breaks=c("low-low","medium-medium","high-high"),
+                      labels=c("low-low","medium-medium","high-high")) +
+  
+  # lines for zero response rations
+  geom_hline(data=ES.frame, x=0, linetype="twodash",colour="grey") + 
+  geom_vline(data=ES.frame, y=0, linetype="twodash",colour="grey") +
+    
+  #white background
+  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(), 
+        panel.background = element_rect(colour = "black", size=1,fill=NA), axis.line = element_line(colour = "black")) +
+  
+  scale_y_continuous(labels=trans_format("exp", comma_format(digits=2))) + 
+  scale_x_continuous(labels=trans_format("exp", comma_format(digits=2))) +
+  ylab("RR (Species Richness)") + xlab("RR (Yield)") + guides(fill=FALSE) +
+  theme(axis.title = element_text(size = rel(1.5)), axis.text = element_text(size = rel(1.5)),legend.text=element_text(size = rel(1.5)),legend.title=element_text(size = rel(1.5))) +
+
+  #legend
+  theme(legend.position="top",legend.title=element_blank())   +
+
+  # place the zero-zero lines in the middle of the plot
+  coord_cartesian(ylim= y.range.for.plot, xlim=x.range.for.plot)
+
+print(plot.within.groups.cross.diagramm)
+ggsave(plot.within.groups.cross.diagramm, file = paste(path2temp, "/Cross_diagram_within_LUI_range_levels.png",sep=""), width = 20, height = 8, type = "cairo-png")
+
+############################
+### SK Annapolis WS 2015 ###
+### cross diagramm with only 3 groups: low-medium, low-high, medium-high
+############################
+### ------------------------
+
+
+
+# select dataset and moderator grand means to plot
+data.to.plot = ES.frame[which(!(ES.frame$Low.LUI == ES.frame$High.LUI)),]
+moderator.grand.mean.subset = MA.coeffs.cat[which(MA.coeffs.cat$Moderator %in% "LUI.range.level" & MA.coeffs.cat$levels %in% c("low-medium","medium-high","low-high")),]
+
+# order levels of moderators so they are displayed in same colour
+moderator.grand.mean.subset$levels = factor(moderator.grand.mean.subset$levels, levels=c("low-medium","medium-high","low-high"))
+data.to.plot$LUI.range.level = factor(data.to.plot$LUI.range.level, levels=c("low-medium","medium-high","low-high"))
+
+#set colour scheme here ! 3 for points and 3 for crosses
+colours.to.plot = c("#3399FF","#FFCC00","#FF0000","#3399FF","#FFCC00","#FF0000")
+
+# get axes length to center the plot 
+if(0 - min(data.to.plot$Richness.Log.RR) > max(data.to.plot$Richness.Log.RR)){
+  y.range.for.plot = c(0 -max(data.to.plot$Richness.Log.RR)-0.5,max(data.to.plot$Richness.Log.RR)+0.5)
+}else{
+  y.range.for.plot = c(min(data.to.plot$Richness.Log.RR)-0.5,0-min(data.to.plot$Richness.Log.RR)+0.5)
+}
+
+if(0 - min(data.to.plot$Yield.Log.RR) > max(data.to.plot$Yield.Log.RR)){
+  x.range.for.plot = c(0 -max(data.to.plot$Yield.Log.RR) - 0.5,max(data.to.plot$Yield.Log.RR) + 0.5 )
+}else{
+  x.range.for.plot = c(min(data.to.plot$Yield.Log.RR)-0.5,0-min(data.to.plot$Yield.Log.RR) + 0.5)
+}
+
+plot.across.groups.cross.diagramm =  ggplot() + 
+  
+  # study cases as points
+  geom_point(data= data.to.plot, aes(x=Yield.Log.RR, y=Richness.Log.RR,colour=LUI.range.level), size=3.5,alpha = 0.5) +
+  
+  #grand mean for moderators
+  geom_pointrange(data=moderator.grand.mean.subset, aes(x=mean.Yield, y=mean.Richness, ymin=mean.Richness	- (1.96*se.Richness), ymax=mean.Richness	+ (1.96*se.Richness),colour=levels), size=1) +
+  geom_segment(data=moderator.grand.mean.subset, aes(x=mean.Yield - (1.96*se.Yield), xend=mean.Yield + (1.96*se.Yield), y = mean.Richness, yend = mean.Richness,colour=levels), size=1) +
+  
+  # colouring
+  scale_colour_manual(values=colours.to.plot,
+                      breaks=c("low-medium","medium-high","low-high"),
+                      labels=c("low-medium","medium-high","low-high")) +
+  
+  # lines for zero response rations
+  geom_hline(data=ES.frame, x=0, linetype="twodash",colour="grey") + 
+  geom_vline(data=ES.frame, y=0, linetype="twodash",colour="grey") +
+  
+  #white background
+  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(), 
+        panel.background = element_rect(colour = "black", size=1,fill=NA), axis.line = element_line(colour = "black")) +
+  
+  scale_y_continuous(labels=trans_format("exp", comma_format(digits=2))) + 
+  scale_x_continuous(labels=trans_format("exp", comma_format(digits=2))) +
+  ylab("RR (Species Richness)") + xlab("RR (Yield)") + guides(fill=FALSE) +
+  theme(axis.title = element_text(size = rel(1.5)), axis.text = element_text(size = rel(1.5)),legend.text=element_text(size = rel(1.5)),legend.title=element_text(size = rel(1.5))) +
+  
+  #legend
+  theme(legend.position="top",legend.title=element_blank())   +
+  
+  # place the zero-zero lines in the middle of the plot
+  coord_cartesian(ylim= y.range.for.plot, xlim=x.range.for.plot)
+
+print(plot.across.groups.cross.diagramm)
+ggsave(plot.across.groups.cross.diagramm, file = paste(path2temp, "Cross_diagram_across_LUI_range_levels.png",sep=""), width = 20, height = 8, type = "cairo-png")
+
+
+############################
+### SK Annapolis WS 2015 ###
+### forest plots for each LUI-comparison class
+############################
+### ------------------------
+
+LUI.range.level = c("low-low","medium-medium","high-high","low-medium","medium-high","low-high")
+
+
+LUI.level.to.plot = LUI.range.level[1]
+
+for(LUI.level.to.plot in LUI.range.level){
+  data.to.plot = subset(ES.frame, LUI.range.level %in% LUI.level.to.plot)
+  data.to.plot = data.to.plot[order(data.to.plot$Yield.Log.RR,decreasing=F),]
+  data.to.plot$uniqueID = factor(paste(data.to.plot$Study.ID,data.to.plot$Case.ID),levels=paste(data.to.plot$Study.ID,data.to.plot$Case.ID))
+
+  
+  # get axes length to center the plot 
+  if(0 - min(data.to.plot$Richness.Log.RR) > max(data.to.plot$Richness.Log.RR)){
+    y.range.for.plot = c(0 -max(data.to.plot$Richness.Log.RR)-0.5,max(data.to.plot$Richness.Log.RR)+0.5)
+  }else{
+    y.range.for.plot = c(min(data.to.plot$Richness.Log.RR)-0.5,0-min(data.to.plot$Richness.Log.RR)+0.5)
+  }
+  
+  
+plot.forest = ggplot(data=data.to.plot) +
+  
+  geom_pointrange(aes(x=uniqueID, y=Yield.Log.RR, ymin=Yield.Log.RR	- (1.96*Yield.Log.RR.Var), ymax=Yield.Log.RR	+ (1.96*Yield.Log.RR.Var),colour="Yield"), size=1) +
+  geom_pointrange(aes(x=uniqueID, y=Richness.Log.RR, ymin=Richness.Log.RR	- (1.96*Richness.Log.RR.Var), ymax=Richness.Log.RR	+ (1.96*Richness.Log.RR.Var),colour="Species Richness"), size=1) +
+  geom_hline(x=0,linetype ="twodash")  +
+
+  
+  #scale manually to get the legend correct
+  scale_colour_manual(values  =c("#00CC00","#FF6633")) +
+  
+  #white background + flip 90 degrees
+  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(), 
+      panel.background = element_rect(colour = "black", size=1,fill=NA), axis.line = element_line(colour = "black")) +
+  coord_flip(ylim=y.range.for.plot)
+
+  print(plot.forest)
+  ggsave(plot.forest, file = paste(c(path2temp, "Forest_plot_",LUI.level.to.plot,".png"), collapse=""), width = 20, height = 8, type = "cairo-png")
+
+}
+
 ##################
 ### RESTERAMPE ###
 ##################
-
-
-# 
