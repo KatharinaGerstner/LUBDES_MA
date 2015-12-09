@@ -1,15 +1,12 @@
 ############################################################################
 ### Purpose of this skript module 05 is to:
 ###
-### 05.1. Intersect studies with global maps of WWF_REALMs Ecoregions
-### 05.2. Intersect studies with global maps of climate zones (Köppen-Geiger)
-### 05.2. Intersect studies with global maps of GDP per capita
-### 05.3. Intersect studies with annual mean radiation (Climond)
-### 05.4. Intersect studies with gross capital stock in agriculture
-### 05.5. Intersect studies with Agricultural intensity (efficiency) in the neighborhood
-### 05.6. Intersect studies with Global Habitat Heterogeneity, Dissimilarity
-### 05.7. Intersect studies with Land-use history
-### 05.8. Intersect studies with Population density
+### 05.1. Intersect studies with global maps of WWF_REALMs Ecoregions, combine to coarser classes
+### 05.2. Intersect studies with potential NPP
+### 05.3. Intersect studies with gross capital stock in agriculture and agricultural area
+### 05.4. Intersect studies with Global Habitat Heterogeneity, Dissimilarity
+### 05.5. Intersect studies with Land-use history
+### 05.6. Intersect studies with human pressure index
 ###
 ### General comments:
 ### * TO DO: download maps and store them, link global data using coordinates and countries
@@ -67,92 +64,8 @@ ES.frame.noLU <- cbind(ES.frame.noLU,realms_extract$WWF_MHTNAM)
 colnames(ES.frame.noLU)[which(names(ES.frame.noLU) == "realms_extract$WWF_MHTNAM")]<-"BIOME"
 
 ############################################################################
-### 05.2. Intersect studies with global maps of climate zones (Köppen-Geiger)
+### 05.2. Intersect studies with potential NPP
 ############################################################################
-if (file.exists("1976-2000_GIS.zip")==FALSE){
-  download.file("http://koeppen-geiger.vu-wien.ac.at/data/1976-2000_GIS.zip","1976-2000_GIS.zip", mode="wb")
-  unzip("1976-2000_GIS.zip")
-} else {unzip("1976-2000_GIS.zip")}
-climate_zone <- readOGR(dsn=".",layer="1976-2000")
-# Legend(GRIDCODE)
-# 11 ... Af
-# 12 ... Am
-# 13 ... As
-# 14 ... Aw
-# 21 ... BWk
-# 22 ... BWh
-# 26 ... BSk
-# 27 ... BSh
-# 31 ... Cfa
-# 32 ... Cfb
-# 33 ... Cfc
-# 34 ... Csa
-# 35 ... Csb
-# 36 ... Csc
-# 37 ... Cwa
-# 38 ... Cwb
-# 39 ... Cwc
-# 41 ... Dfa
-# 42 ... Dfb
-# 43 ... Dfc
-# 44 ... Dfd
-# 45 ... Dsa
-# 46 ... Dsb
-# 47 ... Dsc
-# 48 ... Dsd
-# 49 ... Dwa
-# 50 ... Dwb
-# 51 ... Dwc
-# 52 ... Dwd
-# 61 ... EF
-# 62 ... ET
-
-# extract ecoregions
-climate_extract <- extract(climate_zone,lonlat)
-ES.frame$main_climate <- cut(climate_extract$GRIDCODE, breaks=c(10,20,30,40,50,60), labels=c("equatorial","arid","warm temperature","snow","polar"))
-
-### for ES.frame.noLU
-climate_extract <- extract(climate_zone,lonlat.noLU)
-ES.frame.noLU$main_climate <- cut(climate_extract$GRIDCODE, breaks=c(10,20,30,40,50,60), labels=c("equatorial","arid","warm temperature","snow","polar"))
-
-############################################################################
-### 01a.2. Intersect studies with global maps of GDP per capita
-############################################################################
-
-if (file.exists("Data_Extract_From_World_Development_Indicators.zip")==FALSE){
-  download.file("https://www.dropbox.com/s/v00kxpmll1pb5fm/Data_Extract_From_World_Development_Indicators.zip?dl=1", "Data_Extract_From_World_Development_Indicators.zip", mode="wb")
-  unzip("Data_Extract_From_World_Development_Indicators.zip")
-} else {
-  unzip("Data_Extract_From_World_Development_Indicators.zip")
-}
-
-GDP.pc <- read.csv("Data_Extract_From_World_Development_Indicators_Data.csv",na.strings="..")
-
-GDP.pc.2000 <- data.frame(Country.Code=GDP.pc$Country.Code,GDP.pc.2000=GDP.pc$X2000)
-
-ES.frame <- join(ES.frame,GDP.pc.2000,by="Country.Code")
-ES.frame.noLU <- join(ES.frame.noLU,GDP.pc.2000,by="Country.Code")
-
-############################################################################
-### 05.3. Intersect studies with annual mean radiation (Climond)
-############################################################################
-
-if (file.exists("CM10_1975H_Bio_ASCII_V1.2.zip")==FALSE){
-  download.file("https://www.dropbox.com/s/me92v7ozmixy75a/CM10_1975H_Bio_ASCII_V1.2.zip?dl=1", "CM10_1975H_Bio_ASCII_V1.2.zip", mode="wb")
-  unzip("CM10_1975H_Bio_ASCII_V1.2.zip")
-} else {
-  unzip("CM10_1975H_Bio_ASCII_V1.2.zip")
-}
-
-if (file.exists("tn0_all_gcm.asc")==FALSE){
-  download.file("https://www.dropbox.com/s/689m9pc5bnejbg9/tn0_all_gcm.asc?dl=1","tn0_all_gcm.asc")
-  }
-
-annual_mean_radiation <- raster("CM10_1975H_Bio_V1.2/CM10_1975H_Bio20_V1.2.txt",crs=CRS("+proj=longlat +datum=WGS84 +no_defs +ellps=WGS84 +towgs84=0,0,0"))
-
-ES.frame$annual_mean_radiation<-extract(annual_mean_radiation,lonlat, buffer=100000, fun=mean) # consider a buffer of radius=100km around each dot
-
-ES.frame.noLU$annual_mean_radiation<-extract(annual_mean_radiation,lonlat.noLU, buffer=100000, fun=mean) # consider a buffer of radius=100km around each dot
 
 npp <- raster("tn0_all_gcm.asc",crs=CRS("+proj=longlat +datum=WGS84 +no_defs +ellps=WGS84 +towgs84=0,0,0"))
 
@@ -161,7 +74,7 @@ ES.frame$npp<-extract(npp,lonlat,buffer=100000,fun=mean)
 ES.frame.noLU$npp<-extract(npp,lonlat.noLU, buffer=100000, fun=mean)
 
 ############################################################################
-### 05.4. Intersect studies with gross capital stock in agriculture
+### 05.3. Intersect studies with gross capital stock in agriculture
 ############################################################################
 
 if (file.exists("Investment_CapitalStock_E_All_Data.zip")==FALSE){
@@ -197,13 +110,7 @@ ES.frame.noLU <- join(ES.frame.noLU,capital_stock_in_agriculture[,c("Country.Cod
 ES.frame.noLU$rel_capital_stock_in_agriculture <- log10(ES.frame.noLU$rel_capital_stock_in_agriculture)
 
 ############################################################################
-### 05.5. Intersect studies with Agricultural intensity (efficiency) in the neighborhood
-############################################################################
-
-### not yet working
-
-############################################################################
-### 05.6. Intersect studies with Global Habitat Heterogeneity, Dissimilarity
+### 05.4. Intersect studies with Global Habitat Heterogeneity, Dissimilarity
 ############################################################################
 
 ### data from http://www.earthenv.org/texture.html
@@ -222,7 +129,7 @@ ES.frame$habitat_dissimilarity<-extract(habitat_dissimilarity,lonlat, buffer=100
 ES.frame.noLU$habitat_dissimilarity<-extract(habitat_dissimilarity,lonlat.noLU, buffer=10000, fun=mean) # consider a buffer of radius=10km² around each dot)
 
 ############################################################################
-### 05.7. Intersect studies with Land-use history
+### 05.5. Intersect studies with Land-use history
 ############################################################################
 
 if (file.exists("ellis_etal_2013_dataset.zip")==FALSE){
@@ -261,31 +168,111 @@ ES.frame.noLU$start.agr.use <- ifelse(ES.frame.noLU$time.since.first.use >= 500,
 ES.frame.noLU$start.agr.use[is.na(ES.frame.noLU$start.agr.use)] <- "not yet used"
 
 ############################################################################
-### 05.8. Intersect studies with Population density
+### 05.6. Intersect studies with human pressure index
 ############################################################################
-
-if (file.exists("Population_density.zip")==FALSE){
-  download.file("https://www.dropbox.com/s/1pgyh8jyvynjlca/Population_density.zip?dl=1", "Population_density.zip", mode="wb")
-  unzip("Population_density.zip")
-} else {
-  unzip ("Population_density.zip")
-}
-
-pop.data <- raster("gldens00/glds00ag")
-
-ES.frame$pop.dens.2000 <- log10(extract(pop.data,lonlat, buffer=100000, fun=mean)) # consider a buffer of radius=100km² around each dot)
-
-ES.frame.noLU$pop.dens.2000 <- log10(extract(pop.data,lonlat.noLU, buffer=100000, fun=mean)) # consider a buffer of radius=100km² around each dot)
-
-############################################################################
-### 05.9. Combine LUI classifiers
-############################################################################
-
-# not yet working
+# TO DO
 
 ############################################################################
 ### remove objectes to save workspace
 ############################################################################
-rm(lonlat, lonlat.noLU,ecoregions,climate_extract, climate_zone, realms_extract,GDP.pc,GDP.pc.2000,annual_mean_radiation, npp ,agricultural_area,capital_stock_in_agriculture,habitat_dissimilarity, pop.data,timeseries.hyde,timeseries.kk10,hyde.LUhist.stack,kk10.LUhist.stack,hyde.extract.year.of.first.use,kk10.extract.year.of.first.use,hyde.year.of.first.use,kk10.year.of.first.use)
+rm(lonlat, lonlat.noLU,ecoregions, realms_extract, npp ,agricultural_area,capital_stock_in_agriculture,habitat_dissimilarity, timeseries.hyde,timeseries.kk10,hyde.LUhist.stack,kk10.LUhist.stack,hyde.extract.year.of.first.use,kk10.extract.year.of.first.use,hyde.year.of.first.use,kk10.year.of.first.use)
 
 setwd(path2wd)
+
+############################################################################
+### Resterampe
+############################################################################
+## climate zones
+# if (file.exists("1976-2000_GIS.zip")==FALSE){
+#   download.file("http://koeppen-geiger.vu-wien.ac.at/data/1976-2000_GIS.zip","1976-2000_GIS.zip", mode="wb")
+#   unzip("1976-2000_GIS.zip")
+# } else {unzip("1976-2000_GIS.zip")}
+# climate_zone <- readOGR(dsn=".",layer="1976-2000")
+# # Legend(GRIDCODE)
+# # 11 ... Af
+# # 12 ... Am
+# # 13 ... As
+# # 14 ... Aw
+# # 21 ... BWk
+# # 22 ... BWh
+# # 26 ... BSk
+# # 27 ... BSh
+# # 31 ... Cfa
+# # 32 ... Cfb
+# # 33 ... Cfc
+# # 34 ... Csa
+# # 35 ... Csb
+# # 36 ... Csc
+# # 37 ... Cwa
+# # 38 ... Cwb
+# # 39 ... Cwc
+# # 41 ... Dfa
+# # 42 ... Dfb
+# # 43 ... Dfc
+# # 44 ... Dfd
+# # 45 ... Dsa
+# # 46 ... Dsb
+# # 47 ... Dsc
+# # 48 ... Dsd
+# # 49 ... Dwa
+# # 50 ... Dwb
+# # 51 ... Dwc
+# # 52 ... Dwd
+# # 61 ... EF
+# # 62 ... ET
+# 
+# # extract ecoregions
+# climate_extract <- extract(climate_zone,lonlat)
+# ES.frame$main_climate <- cut(climate_extract$GRIDCODE, breaks=c(10,20,30,40,50,60), labels=c("equatorial","arid","warm temperature","snow","polar"))
+# 
+# ### for ES.frame.noLU
+# climate_extract <- extract(climate_zone,lonlat.noLU)
+# ES.frame.noLU$main_climate <- cut(climate_extract$GRIDCODE, breaks=c(10,20,30,40,50,60), labels=c("equatorial","arid","warm temperature","snow","polar"))
+
+## solar radiation
+# if (file.exists("CM10_1975H_Bio_ASCII_V1.2.zip")==FALSE){
+#   download.file("https://www.dropbox.com/s/me92v7ozmixy75a/CM10_1975H_Bio_ASCII_V1.2.zip?dl=1", "CM10_1975H_Bio_ASCII_V1.2.zip", mode="wb")
+#   unzip("CM10_1975H_Bio_ASCII_V1.2.zip")
+# } else {
+#   unzip("CM10_1975H_Bio_ASCII_V1.2.zip")
+# }
+# 
+# if (file.exists("tn0_all_gcm.asc")==FALSE){
+#   download.file("https://www.dropbox.com/s/689m9pc5bnejbg9/tn0_all_gcm.asc?dl=1","tn0_all_gcm.asc")
+# }
+# 
+# annual_mean_radiation <- raster("CM10_1975H_Bio_V1.2/CM10_1975H_Bio20_V1.2.txt",crs=CRS("+proj=longlat +datum=WGS84 +no_defs +ellps=WGS84 +towgs84=0,0,0"))
+# 
+# ES.frame$annual_mean_radiation<-extract(annual_mean_radiation,lonlat, buffer=100000, fun=mean) # consider a buffer of radius=100km around each dot
+# 
+# ES.frame.noLU$annual_mean_radiation<-extract(annual_mean_radiation,lonlat.noLU, buffer=100000, fun=mean) # consider a buffer of radius=100km around each dot
+
+## GDP
+# if (file.exists("Data_Extract_From_World_Development_Indicators.zip")==FALSE){
+#   download.file("https://www.dropbox.com/s/v00kxpmll1pb5fm/Data_Extract_From_World_Development_Indicators.zip?dl=1", "Data_Extract_From_World_Development_Indicators.zip", mode="wb")
+#   unzip("Data_Extract_From_World_Development_Indicators.zip")
+# } else {
+#   unzip("Data_Extract_From_World_Development_Indicators.zip")
+# }
+# 
+# GDP.pc <- read.csv("Data_Extract_From_World_Development_Indicators_Data.csv",na.strings="..")
+# 
+# GDP.pc.2000 <- data.frame(Country.Code=GDP.pc$Country.Code,GDP.pc.2000=GDP.pc$X2000)
+# 
+# ES.frame <- join(ES.frame,GDP.pc.2000,by="Country.Code")
+# ES.frame.noLU <- join(ES.frame.noLU,GDP.pc.2000,by="Country.Code")
+# 
+
+## Population density
+# if (file.exists("Population_density.zip")==FALSE){
+#   download.file("https://www.dropbox.com/s/1pgyh8jyvynjlca/Population_density.zip?dl=1", "Population_density.zip", mode="wb")
+#   unzip("Population_density.zip")
+# } else {
+#   unzip ("Population_density.zip")
+# }
+# 
+# pop.data <- raster("gldens00/glds00ag")
+# 
+# ES.frame$pop.dens.2000 <- log10(extract(pop.data,lonlat, buffer=100000, fun=mean)) # consider a buffer of radius=100km² around each dot)
+# 
+# ES.frame.noLU$pop.dens.2000 <- log10(extract(pop.data,lonlat.noLU, buffer=100000, fun=mean)) # consider a buffer of radius=100km² around each dot)

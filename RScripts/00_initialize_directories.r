@@ -38,15 +38,12 @@
 ### 04.2. Compile ES frame
 ### 04.3. Calculate response ratio effect sizes
 ### 05 05_AddMapDataToESframe.R
-### 05.1. Intersect studies with global maps of WWF_REALMs Ecoregions
-### 05.2. Intersect studies with global maps of climate zones (Köppen-Geiger)
-### 05.2. Intersect studies with global maps of GDP per capita
-### 05.3. Intersect studies with annual mean radiation (Climond)
-### 05.4. Intersect studies with gross capital stock in agriculture
-### 05.5. Intersect studies with Agricultural intensity (efficiency) in the neighborhood
-### 05.6. Intersect studies with Global Habitat Heterogeneity, Dissimilarity
-### 05.7. Intersect studies with Land-use history
-### 05.8. Intersect studies with Population density
+### 05.1. Intersect studies with global maps of WWF_REALMs Ecoregions, combine to coarser classes
+### 05.2. Intersect studies with potential NPP
+### 05.3. Intersect studies with gross capital stock in agriculture and agricultural area
+### 05.4. Intersect studies with Global Habitat Heterogeneity, Dissimilarity
+### 05.5. Intersect studies with Land-use history
+### 05.6. Intersect studies with human pressure index
 ### 06 06_DescriptiveStatsOfESFrame.r
 ### 06.1 Protocol structure and summary of variables in the ES.frame
 ### 06.2 Plot Histograms of all variables in the ES.frame 

@@ -20,6 +20,10 @@ setwd(path2temp %+% "/")
 sink('str_summary_ESframe.txt')
 str(ES.frame)
 summary(ES.frame)
+
+### distribution of LUI ranges among landuse/landcover classes
+with(ES.frame,table(Land.use...land.cover,LUI.range.level))
+with(ES.frame,table(Product,LUI.range.level))
 sink()
 
 ############################################################################

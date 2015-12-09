@@ -59,6 +59,8 @@ fitstats(Richness.MA.model[[mods]])
 fitstats(Yield.MA.model[[mods]])
 
 # test against null model, H0: Moderator does explain the same amount of ES variation than the null model 
-anova.rma(Richness.MA.model[["None"]],Richness.MA.model[["mods"]])
-anova.rma(Yield.MA.model[["None"]],Yield.MA.model[["mods"]])
-     
+anova.rma(Richness.MA.model[["None"]],Richness.MA.model[[mods]])
+anova.rma(Yield.MA.model[["None"]],Yield.MA.model[[mods]])
+##Warning message:
+# In anova.rma(Richness.MA.model[["None"]], Richness.MA.model[[mods]]) :
+#   Models with different fixed effects. REML comparisons are not meaningful.     
