@@ -66,7 +66,9 @@ colnames(ES.frame.noLU)[which(names(ES.frame.noLU) == "realms_extract$WWF_MHTNAM
 ############################################################################
 ### 05.2. Intersect studies with potential NPP
 ############################################################################
-
+ if (file.exists("tn0_all_gcm.asc")==FALSE){
+   download.file("https://www.dropbox.com/s/689m9pc5bnejbg9/tn0_all_gcm.asc?dl=1","tn0_all_gcm.asc")
+ }
 npp <- raster("tn0_all_gcm.asc",crs=CRS("+proj=longlat +datum=WGS84 +no_defs +ellps=WGS84 +towgs84=0,0,0"))
 
 ES.frame$npp<-extract(npp,lonlat,buffer=100000,fun=mean)
