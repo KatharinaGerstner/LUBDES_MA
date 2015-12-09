@@ -335,7 +335,7 @@ plot.forest = ggplot(data=data.to.plot) +
   scale_colour_manual(values  =c("#00CC00","#FF6633")) +
   
   #white background + flip 90 degrees
-  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(), 
+  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),legend.title=element_blank(), 
       panel.background = element_rect(colour = "black", size=1,fill=NA), axis.line = element_line(colour = "black")) +
   coord_flip(ylim=y.range.for.plot)
 
