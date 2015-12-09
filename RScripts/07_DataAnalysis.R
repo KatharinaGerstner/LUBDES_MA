@@ -70,7 +70,7 @@ MA.coeffs.cont <- data.frame(Moderator="None",Richness.intercept=Richness.MA.fit
 # moderator.list.cont <- c("GDP.pc.2000","annual_mean_radiation","rel_capital_stock_in_agriculture","habitat_dissimilarity","time.since.first.use", "pop.dens.2000","npp","humanfootprint")
 # =======
 moderator.list.cat <- c("Species.Group","LUI.range.level","Product","BIOME","start.agr.use")
-moderator.list.cont <- c("rel_capital_stock_in_agriculture","habitat_dissimilarity","time.since.first.use","npp")
+moderator.list.cont <- c("rel_capital_stock_in_agriculture","habitat_dissimilarity","time.since.first.use","npp")#, "humanfootprint")
 # >>>>>>> c752287a9cab37b1bf585d8b2e21834d3ab71220
 
 ### run analysis for categorical moderators
@@ -205,3 +205,4 @@ print(MA.coeffs.noLU)
 ## Model selection for MA models
 ## Account for scale dependency in biodiversity data
 ## Effects of various yield indices on the effect sizes (RR vs SMD)
+
