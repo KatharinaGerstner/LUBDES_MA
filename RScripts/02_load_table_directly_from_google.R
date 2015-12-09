@@ -58,6 +58,7 @@ convertAreaUnits <- function(data, type=c("bd", "yield")){
 		new_units <- data$sampled.size.unit
 		new_area <- as.numeric(data$sampled.area)
 		}
+	new_area  <- ifelse(!is.na(new_units) & new_units == "mÂ²", "m²", new_area)
 	
 	new_area  <- ifelse(!is.na(new_units) & new_units == "ha", new_area * 10000, new_area)
 	new_units <- ifelse(!is.na(new_units) & new_units == "ha", "m²", new_units)	
@@ -65,11 +66,11 @@ convertAreaUnits <- function(data, type=c("bd", "yield")){
 	new_area  <- ifelse(!is.na(new_units) & new_units == "cm²", new_area * 0.0001, new_area)
 	new_units <- ifelse(!is.na(new_units) & new_units == "cm²", "m²", new_units)	
 	
-	new_area  <- ifelse(!is.na(new_units) &new_units == "mm²", new_area * 1e-6, new_area)
-	new_units <- ifelse(!is.na(new_units) &new_units == "mm²", "m²", new_units)	
+	new_area  <- ifelse(!is.na(new_units) & new_units == "mm²", new_area * 1e-6, new_area)
+	new_units <- ifelse(!is.na(new_units) & new_units == "mm²", "m²", new_units)	
 	
-	new_area  <- ifelse(!is.na(new_units) &new_units == "km²", new_area * 1000000, new_area)
-	new_units <- ifelse(!is.na(new_units) &new_units == "km²", "m²", new_units)	
+	new_area  <- ifelse(!is.na(new_units) & new_units == "km²", new_area * 1000000, new_area)
+	new_units <- ifelse(!is.na(new_units) & new_units == "km²", "m²", new_units)	
 	
 	if(type == "yield"){
 		data$sampled.size.unit.1 <- new_units
