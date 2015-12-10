@@ -73,18 +73,15 @@ MA.coeffs.cont <- data.frame(Moderator="None",Richness.intercept=Richness.MA.fit
 ############################################################################
 
 ### define list of moderators
-<<<<<<< HEAD
 
 # moderator.list.cat <- c("Land.use...land.cover","Species.Group","Trophic.Level","LUI.range.level","Product", "ES.From.BD","BIOME", "main_climate","start.agr.use")
 # moderator.list.cont <- c("GDP.pc.2000","annual_mean_radiation","rel_capital_stock_in_agriculture","habitat_dissimilarity","time.since.first.use", "pop.dens.2000","npp","humanfootprint")
-# =======
-moderator.list.cat <- c("Species.Group","LUI.range.level","Product","BIOME","start.agr.use")
-moderator.list.cont <- c("rel_capital_stock_in_agriculture","habitat_dissimilarity","time.since.first.use","npp")#, "humanfootprint")
-# >>>>>>> c752287a9cab37b1bf585d8b2e21834d3ab71220
-=======
+
+# moderator.list.cat <- c("Species.Group","LUI.range.level","Product","BIOME","start.agr.use")
+# moderator.list.cont <- c("rel_capital_stock_in_agriculture","habitat_dissimilarity","time.since.first.use","npp")#, "humanfootprint")
+
 moderator.list.cat <- c("Species.Group","LUI.range.level","Product","BIOME")
 moderator.list.cont <- c("rel_capital_stock_in_agriculture","habitat_dissimilarity","time.since.first.use","npp")
->>>>>>> de0381ed29e46f0c762ea28316190983930627dc
 
 moderator.list <- c(moderator.list.cat,moderator.list.cont)
 modelFormula <- as.formula(paste("~",paste(moderator.list,collapse="+"),sep=""))
