@@ -174,6 +174,42 @@ ES.frame.noLU$start.agr.use[is.na(ES.frame.noLU$start.agr.use)] <- "not yet used
 ############################################################################
 # TO DO
 
+############################################################################
+### 05.6. Intersect studies with GLOBCOVER
+############################################################################
+
+if (file.exists("Globcover_V2.2_Global.zip")==FALSE){
+  download.file("https://www.dropbox.com/s/ks3sm60er8mgasd/Globcover_V2.2_Global.zip?dl=1", "Globcover_V2.2_Global.zip", mode="wb")
+  unzip("Globcover_V2.2_Global.zip")
+} else {
+  unzip ("Globcover_V2.2_Global.zip")
+}
+
+globcover <- raster("GLOBCOVER_200412_200606_V2.2_Global_CLA.tif") 
+
+globcover[globcover>30]<- 0
+globcover[globcover<15]<- 1 # reclassify 11 and 14 to 100%
+globcover[globcover==20]<- 0.6 # reclassify 20 to 60%
+globcover[globcover==30]<- 0.35 # reclassify 30 to 35%
+
+writeraster(globcover, paste(path2temp,"/globcover_reclassified.tif",sep=""))
+
+# points<-SpatialPoints(lonlat)
+# 
+# for (i in length(points)){
+#   
+#   pbuf <- gBuffer(points[i], widt=50000)
+#   buf <- mask(globcover, pbuf)
+#   buf[buf>30]<- 0
+#   buf[buf<15]<- 1 # reclassify 11 and 14 to 100%
+#   buf[buf==20]<- 0.6 # reclassify 20 to 60%
+#   buf[buf==30]<- 0.35 # reclassify 30 to 35%
+#   mean(buf)
+# }
+# 
+# pbuf <- gBuffer(points, widt=50000)
+# gobcover.extract$humanfootprint <- extract(globcover,lonlat, buffer=50000, fun=mean) # consider a buffer of radius=100km² around each dot)
+
 
 ############################################################################
 ### 05.9. Human Footprint
