@@ -704,19 +704,18 @@ for(LUI.level.to.plot in LUI.range.level){
       scale_colour_manual(values=c("#FF6633","grey","#00CC00","grey")) +
       scale_x_discrete("Study ID",breaks= as.character(data.to.plot$uniqueID),labels=data.to.plot$axes.naming)  +
       scale_alpha_discrete(range = c(1,0.4)) + 
-      scale_linetype_discrete(c("solid","twodash"),guide="none") +
     
       #white background + flip 90 degrees
       theme(axis.ticks.y = element_blank(),panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
             panel.background = element_rect(colour = "black", size=1,fill=NA), axis.line = element_line(colour = "black"),
-            axis.text.y = element_text(vjust=1)) +
+            axis.text.y = element_text(vjust=1),legend.key.width=unit(3,"line")) +
       coord_flip(ylim=c(0 - max.values,max.values)) +
-      geom_vline(xintercept=seq(from=0.5, to=nrow(data.to.plot)-0.5,by=2),linetype="solid",colour="grey") +
+      geom_vline(xintercept=seq(from=0.5, to=nrow(data.to.plot)-0.5,by=2),colour="grey") +
       
       #axes labels
       xlab("Study ID") +
       ylab("Log Response Ration")+
-      ggtitle(paste("Forest Plot of study case effect sizes\n- ",LUI.level.to.plot))
+      ggtitle(paste("Forest Plot of study case effect sizes\n- ",LUI.level.to.plot)) 
       
     print(plot.forest)
     ggsave(plot.forest, file = paste(c(path2temp, "Forest_plot_",LUI.level.to.plot,".png"), collapse=""), width = 15, height = nrow(data.to.plot) / 5, type = "cairo-png")
