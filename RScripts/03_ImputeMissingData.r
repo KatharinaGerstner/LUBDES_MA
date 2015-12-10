@@ -17,79 +17,79 @@ dataimp <- data
 dataimp$richness.SD[data$richness.SD==0] <- NA
 dataimp$yield.SD[data$yield.SD==0] <- NA
 
-############################################################################
-### 03.1. crude-impute based on average SD/mean ratio
-### 
-############################################################################
+###########################################################################
+## 03.1. crude-impute based on average SD/mean ratio
+## 
+###########################################################################
 
-# dataimp$richness_sd_of_mean<-apply(subset(dataimp, select=c(richness.mean,richness.SD)),1,function(x) (x[2]/x[1]))
-# dataimp$yield_sd_of_mean<-apply(subset(dataimp, select=c(yield.mean,yield.SD)),1,function(x) (x[2]/x[1]))
+dataimp$richness_sd_of_mean<-apply(subset(dataimp, select=c(richness.mean,richness.SD)),1,function(x) (x[2]/x[1]))
+dataimp$yield_sd_of_mean<-apply(subset(dataimp, select=c(yield.mean,yield.SD)),1,function(x) (x[2]/x[1]))
+
+dataimp$richness_sd_of_mean[dataimp$richness_sd_of_mean==Inf]<-NA
+dataimp$yield_sd_of_mean[dataimp$yield_sd_of_mean==Inf]<-NA
+
+mean_richness_sd_of_mean<-mean(dataimp$richness_sd_of_mean,na.rm=TRUE)
+mean_yield_sd_of_mean<-mean(dataimp$yield_sd_of_mean,na.rm=TRUE)
+
+sd_richness_sd_of_mean<-sd(dataimp$richness_sd_of_mean,na.rm=TRUE)
+sd_yield_sd_of_mean<-sd(dataimp$yield_sd_of_mean,na.rm=TRUE)
+
+### choose one of three options
+
+### without SD
+# dataimp$richness.SD[is.na(dataimp$richness.SD)]<-(dataimp$richness.mean[is.na(dataimp$richness.SD)]*mean_richness_sd_of_mean)
+# dataimp$yield.SD[is.na(dataimp$yield.SD)]<-(dataimp$yield.mean[is.na(dataimp$yield.SD)]*mean_yield_sd_of_mean)
+
+### + 1sd
+dataimp$richness.SD[is.na(dataimp$richness.SD)]<-(dataimp$richness.mean[is.na(dataimp$richness.SD)]*(mean_richness_sd_of_mean+sd_richness_sd_of_mean))
+dataimp$yield.SD[is.na(dataimp$yield.SD)]<-(dataimp$yield.mean[is.na(dataimp$yield.SD)]*(mean_yield_sd_of_mean+sd_yield_sd_of_mean))
+
+### -1sd
+#dataimp$richness.SD[is.na(dataimp$richness.SD)]<-(dataimp$richness.mean[is.na(dataimp$richness.SD)]*(mean_richness_sd_of_mean-sd_richness_sd_of_mean))
+#dataimp$yield.SD[is.na(dataimp$yield.SD)]<-(dataimp$yield.mean[is.na(dataimp$yield.SD)]*(mean_yield_sd_of_mean-sd_yield_sd_of_mean))
+
 # 
-# dataimp$richness_sd_of_mean[dataimp$richness_sd_of_mean==Inf]<-NA
-# dataimp$yield_sd_of_mean[dataimp$yield_sd_of_mean==Inf]<-NA
+# ############################################################################
+# ### 03.2. impute missing data using mice package
+# ### 
+# ############################################################################
 # 
-# mean_richness_sd_of_mean<-mean(dataimp$richness_sd_of_mean,na.rm=TRUE)
-# mean_yield_sd_of_mean<-mean(dataimp$yield_sd_of_mean,na.rm=TRUE)
+# dataimp$richnessID <- paste(dataimp$Study.ID,dataimp$richness.mean,dataimp$X..of.samples.for.BD.measure)
+# dataimp$yieldID <- paste(dataimp$Study.ID,dataimp$yield.mean,dataimp$X..of.samples.for.YD.measure)
 # 
-# sd_richness_sd_of_mean<-sd(dataimp$richness_sd_of_mean,na.rm=TRUE)
-# sd_yield_sd_of_mean<-sd(dataimp$yield_sd_of_mean,na.rm=TRUE)
+# ### specify columns necessary for imputation
+# data2imp.richness <- dataimp[,c("richnessID","richness.mean", "richness.SD", "X..of.samples.for.BD.measure")]
+# data2imp.yield <- dataimp[dataimp$Intensity.broad!="no LU",c("yieldID","yield.mean", "yield.SD", "X..of.samples.for.YD.measure")] 
 # 
-# ### choose one of three options
+# ### reduce dataframe, remove duplicates in Study.ID_meanRRs
+# data2imp.richness <- data2imp.richness[!duplicated(data2imp.richness[,"richnessID"]),]
+# data2imp.yield <- data2imp.yield[!duplicated(data2imp.yield[,"yieldID"]),]
 # 
-# ### without SD
-# # dataimp$richness.SD[is.na(dataimp$richness.SD)]<-(dataimp$richness.mean[is.na(dataimp$richness.SD)]*mean_richness_sd_of_mean)
-# # dataimp$yield.SD[is.na(dataimp$yield.SD)]<-(dataimp$yield.mean[is.na(dataimp$yield.SD)]*mean_yield_sd_of_mean)
+# ### specify columns used for prediction
+# ### only impute SDs using the corresponding means and sample.size
+# predictorMatrix1 <- matrix(c(rep(0,4),rep(0,4),c(0,1,0,1),rep(0,4)),
+#                            ncol=4,byrow=T)
 # 
-# ### + 1sd
-# dataimp$richness.SD[is.na(dataimp$richness.SD)]<-(dataimp$richness.mean[is.na(dataimp$richness.SD)]*(mean_richness_sd_of_mean+sd_richness_sd_of_mean))
-# dataimp$yield.SD[is.na(dataimp$yield.SD)]<-(dataimp$yield.mean[is.na(dataimp$yield.SD)]*(mean_yield_sd_of_mean+sd_yield_sd_of_mean))
+# nchains <- 10
 # 
-# ### -1sd
-# #dataimp$richness.SD[is.na(dataimp$richness.SD)]<-(dataimp$richness.mean[is.na(dataimp$richness.SD)]*(mean_richness_sd_of_mean-sd_richness_sd_of_mean))
-# #dataimp$yield.SD[is.na(dataimp$yield.SD)]<-(dataimp$yield.mean[is.na(dataimp$yield.SD)]*(mean_yield_sd_of_mean-sd_yield_sd_of_mean))
-
-
-############################################################################
-### 03.2. impute missing data using mice package
-### 
-############################################################################
-
-dataimp$richnessID <- paste(dataimp$Study.ID,dataimp$richness.mean,dataimp$X..of.samples.for.BD.measure)
-dataimp$yieldID <- paste(dataimp$Study.ID,dataimp$yield.mean,dataimp$X..of.samples.for.YD.measure)
-
-### specify columns necessary for imputation
-data2imp.richness <- dataimp[,c("richnessID","richness.mean", "richness.SD", "X..of.samples.for.BD.measure")]
-data2imp.yield <- dataimp[dataimp$Intensity.broad!="no LU",c("yieldID","yield.mean", "yield.SD", "X..of.samples.for.YD.measure")] 
-
-### reduce dataframe, remove duplicates in Study.ID_meanRRs
-data2imp.richness <- data2imp.richness[!duplicated(data2imp.richness[,"richnessID"]),]
-data2imp.yield <- data2imp.yield[!duplicated(data2imp.yield[,"yieldID"]),]
-
-### specify columns used for prediction
-### only impute SDs using the corresponding means and sample.size
-predictorMatrix1 <- matrix(c(rep(0,4),rep(0,4),c(0,1,0,1),rep(0,4)),
-                           ncol=4,byrow=T)
-
-nchains <- 10
-
-### impute
-temp <- complete(mice(data2imp.richness, predictorMatrix=predictorMatrix1,
-                      method = "pmm",
-                      m=nchains, maxit =20, printFlag = FALSE), 
-                 "long")
-data2imp.richness$richness.SD <- rowMeans(matrix(temp$richness.SD, ncol=nchains, byrow=F))
-
-temp <- complete(mice(data2imp.yield, predictorMatrix=predictorMatrix1,
-                      method = "pmm",
-                      m=nchains, maxit =20, printFlag = FALSE), 
-                 "long")
-data2imp.yield$yield.SD <- rowMeans(matrix(temp$yield.SD, ncol=nchains, byrow=F))
-
-dataimp$richness.SD[is.na(dataimp$richness.SD)]<-data2imp.richness$richness.SD[match(dataimp$richnessID[is.na(dataimp$richness.SD)],data2imp.richness$richnessID)]
-dataimp$yield.SD[is.na(dataimp$yield.SD)]<-data2imp.yield$yield.SD[match(dataimp$yieldID[is.na(dataimp$yield.SD)],data2imp.yield$yieldID)]
-
-rm(data2imp.richness, data2imp.yield, temp, predictorMatrix1, nchains)
-############################################################################
+# ### impute
+# temp <- complete(mice(data2imp.richness, predictorMatrix=predictorMatrix1,
+#                       method = "pmm",
+#                       m=nchains, maxit =20, printFlag = FALSE), 
+#                  "long")
+# data2imp.richness$richness.SD <- rowMeans(matrix(temp$richness.SD, ncol=nchains, byrow=F))
+# 
+# temp <- complete(mice(data2imp.yield, predictorMatrix=predictorMatrix1,
+#                       method = "pmm",
+#                       m=nchains, maxit =20, printFlag = FALSE), 
+#                  "long")
+# data2imp.yield$yield.SD <- rowMeans(matrix(temp$yield.SD, ncol=nchains, byrow=F))
+# 
+# dataimp$richness.SD[is.na(dataimp$richness.SD)]<-data2imp.richness$richness.SD[match(dataimp$richnessID[is.na(dataimp$richness.SD)],data2imp.richness$richnessID)]
+# dataimp$yield.SD[is.na(dataimp$yield.SD)]<-data2imp.yield$yield.SD[match(dataimp$yieldID[is.na(dataimp$yield.SD)],data2imp.yield$yieldID)]
+# 
+# rm(data2imp.richness, data2imp.yield, temp, predictorMatrix1, nchains)
+# ############################################################################
 ### 03.3. impute missing data using mi package
 ###
 ### Currently not working!
