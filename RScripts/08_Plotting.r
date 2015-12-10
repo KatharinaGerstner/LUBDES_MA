@@ -177,12 +177,12 @@ ggplot(data=ES.frame) +
 ############################################################################
 
 modelDataR <- ES.frame.richness[,c('Richness.Log.RR','Richness.Log.RR.Var','Species.Group','LUI.range.level','Product','BIOME',
-                                  'rel_capital_stock_in_agriculture','npp',
+                                  'rel_capital_stock_in_agriculture',
                                   'Case.ID','Study.ID','Study.Case','Low.LUI','High.LUI')]
 modelDataR <- na.omit(modelDataR)
 
 modelDataY <- ES.frame.yield[,c('Yield.Log.RR','Yield.Log.RR.Var','Species.Group','LUI.range.level','Product','BIOME',
-                               'rel_capital_stock_in_agriculture','npp',
+                               'rel_capital_stock_in_agriculture',
                                'Case.ID','Study.ID','Study.Case','Low.LUI','High.LUI')]
 modelDataY <- na.omit(modelDataY)
 
@@ -190,10 +190,9 @@ ES.frame$LUI.range.level <- factor(paste(ES.frame$LUI.range.level),levels=levels
 
 predFrame <- data.frame(Species.Group=factor(levels(modelDataR$Species.Group),levels = levels(modelDataR$Species.Group)),
                         LUI.range.level=factor("high-high",levels=levels(modelDataR$LUI.range.level)),
-                        Product=factor("crop",levels=levels(modelDataR$Product)),
                         BIOME=factor("Tropical Forests",levels=levels(modelDataR$BIOME)))
 
-newMods <- model.matrix(~Species.Group + LUI.range.level + Product + BIOME,data=predFrame)
+newMods <- model.matrix(~Species.Group + LUI.range.level + BIOME,data=predFrame)
 newMods <- newMods[,-which(colnames(newMods)=="(Intercept)")]
 
 predsR <- predict.rma(RichnessModel$model,newmods = newMods)
@@ -221,10 +220,9 @@ ggsave(plot, file = paste(path2temp,"/New_Cross_diagram_Species.Group.png",sep="
 
 predFrame <- data.frame(Species.Group=factor("invertebrates",levels=levels(modelDataR$Species.Group)),
                         LUI.range.level=factor(levels(modelDataR$LUI.range.level),levels=levels(modelDataR$LUI.range.level)),
-                        Product=factor("crop",levels=levels(modelDataR$Product)),
                         BIOME=factor("Tropical Forests",levels=levels(modelDataR$BIOME)))
 
-newMods <- model.matrix(~Species.Group + LUI.range.level + Product + BIOME,data=predFrame)
+newMods <- model.matrix(~Species.Group + LUI.range.level + BIOME,data=predFrame)
 newMods <- newMods[,-which(colnames(newMods)=="(Intercept)")]
 
 predsR <- predict.rma(RichnessModel$model,newmods = newMods)
@@ -255,17 +253,6 @@ plot <- ggplot() +
 print(plot)
 ggsave(plot, file = paste(path2temp,"/New_Cross_diagram_LUI.range.level.png",sep=""), width = 20, height = 8, type = "cairo-png")
 
-predFrame <- data.frame(Species.Group=factor("invertebrates",levels=levels(modelDataR$Species.Group)),
-                        LUI.range.level=factor("medium-medium",levels=levels(modelDataR$LUI.range.level)),
-                        Product=factor(levels(modelDataR$Product),levels=levels(modelDataR$Product)),
-                        BIOME=factor("Tropical Forests",levels=levels(modelDataR$BIOME)))
-
-newMods <- model.matrix(~Species.Group + LUI.range.level + Product + BIOME,data=predFrame)
-newMods <- newMods[,-which(colnames(newMods)=="(Intercept)")]
-
-predsR <- predict.rma(RichnessModel$model,newmods = newMods)
-predsR<-data.frame(pred=predsR$pred,se=predsR$se)
-predsR$Product <- factor(levels(modelDataR$Product),levels = levels(modelDataR$Product))
 
 predFrame <- data.frame(LUI.range.level=factor("medium-medium",levels=levels(modelDataR$LUI.range.level)),
                         Product=factor(levels(modelDataR$Product),levels=levels(modelDataR$Product)))
@@ -276,6 +263,11 @@ newMods <- newMods[,-which(colnames(newMods)=="(Intercept)")]
 predsY <- predict.rma(YieldModel$model,newmods = newMods)
 predsY<-data.frame(pred=predsY$pred,se=predsY$se)
 predsY$Product <- factor(levels(modelDataY$Product),levels = levels(modelDataY$Product))
+
+predsR <- data.frame(pred=rep(coefficients(Richness.MA.fit),dim(predsY)[1]),
+                     se=rep(Richness.MA.fit$se,dim(predsY)[1]))
+predsR$Product <- factor(levels(modelDataR$Product),levels = levels(modelDataR$Product))
+
 
 plot <- ggplot() + 
   geom_point(data=ES.frame, aes(x=Yield.Log.RR, y=Richness.Log.RR, color=as.factor(ES.frame[,'Product'])), size=4, alpha=.5) +
@@ -293,10 +285,9 @@ ggsave(plot, file = paste(path2temp,"/New_Cross_diagram_Product.level.png",sep="
 
 predFrame <- data.frame(Species.Group=factor("invertebrates",levels = levels(modelDataR$Species.Group)),
                         LUI.range.level=factor("high-high",levels=levels(modelDataR$LUI.range.level)),
-                        Product=factor("crop",levels=levels(modelDataR$Product)),
                         BIOME=factor(levels(modelDataR$BIOME),levels=levels(modelDataR$BIOME)))
 
-newMods <- model.matrix(~Species.Group + LUI.range.level + Product + BIOME,data=predFrame)
+newMods <- model.matrix(~Species.Group + LUI.range.level + BIOME,data=predFrame)
 newMods <- newMods[,-which(colnames(newMods)=="(Intercept)")]
 
 predsR <- predict.rma(RichnessModel$model,newmods = newMods)

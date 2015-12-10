@@ -115,12 +115,12 @@ moderator.list <- c(moderator.list.cat,moderator.list.cont)
 #modelFormula <- as.formula(paste("~",paste(moderator.list,collapse="+"),sep=""))
 
 modelData <- ES.frame.richness[,c('Richness.Log.RR','Richness.Log.RR.Var','Species.Group','LUI.range.level','Product','BIOME',
-                         'rel_capital_stock_in_agriculture','habitat_dissimilarity','npp',
+                         'rel_capital_stock_in_agriculture',
                          'Case.ID','Study.ID','Study.Case','Low.LUI','High.LUI')]
 modelData <- na.omit(modelData)
 
 Richness.MA.full <- rma.mv(yi=Richness.Log.RR, V=Richness.Log.RR.Var, mods=~Species.Group + LUI.range.level + Product + BIOME + 
-                            rel_capital_stock_in_agriculture + npp, 
+                            rel_capital_stock_in_agriculture, 
                            random = ~factor(Case.ID)|factor(Study.ID), struct="CS", 
                           slab=paste(Study.Case, Low.LUI, High.LUI,sep="_"),
                           method="ML", tdist=FALSE, level=95, digits=4,data=modelData)
@@ -128,17 +128,19 @@ Richness.MA.full <- rma.mv(yi=Richness.Log.RR, V=Richness.Log.RR.Var, mods=~Spec
 RichnessModel<-RMASelect(Richness.MA.full)
 
 modelData <- ES.frame.yield[,c('Yield.Log.RR','Yield.Log.RR.Var','Species.Group','LUI.range.level','Product','BIOME',
-                                'rel_capital_stock_in_agriculture','habitat_dissimilarity','npp',
+                                'rel_capital_stock_in_agriculture',
                                 'Case.ID','Study.ID','Study.Case','Low.LUI','High.LUI')]
 modelData <- na.omit(modelData)
 
 Yield.MA.full <- try(rma.mv(yi=Yield.Log.RR,V=Yield.Log.RR.Var,mods=~LUI.range.level + Product + BIOME + 
-                              rel_capital_stock_in_agriculture + npp,
+                              rel_capital_stock_in_agriculture,
                             random = ~factor(Study.ID), struct="CS", slab=paste(Study.Case, Low.LUI, High.LUI,sep="_"),
                             method="ML", tdist=FALSE, level=95, digits=4,data=modelData),silent=T)
 
 
 YieldModel <- RMASelect(Yield.MA.full)
+
+save(RichnessModel,YieldModel,file=paste(path2temp,"Models.Rd",sep=""))
 
 # 
 # 
