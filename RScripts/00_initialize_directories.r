@@ -104,6 +104,10 @@ if (cn == "cle162m-10.local")
 ### helper function to combine strings
 "%+%" <- function(x,y)paste(x,y,sep="")
 
+### RMA select
+
+source(path2wd %+% "RMASelect.R")
+
 ############################################################################
 ### 00.3. source all relevant R scripts
 ###

@@ -132,12 +132,12 @@ data<-as.data.frame(data) #some functions don't like the tbl.df data type
 ### check variable types 
 str(data)
 data$X..of.samples.for.BD.measure <- as.integer(data$X..of.samples.for.BD.measure)
-
-## Standardise units
-data <- convertYieldUnits(data)
-data <- convertAreaUnits(data, type = "yield")
-data <- convertAreaUnits(data, type = "bd")
-data <- SortTransectsTraps(data)
+# 
+# ## Standardise units
+# data <- convertYieldUnits(data)
+# data <- convertAreaUnits(data, type = "yield")
+# data <- convertAreaUnits(data, type = "bd")
+# data <- SortTransectsTraps(data)
 
 ### dissmiss studies with missing mean for BD or yield
 data <- data[-(which(is.na(data$richness.mean))),]

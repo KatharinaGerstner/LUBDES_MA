@@ -35,5 +35,5 @@ library(plyr) # for joining datasets
 library(countrycode) # convert FAO country IDs to ISO3
 library(VennDiagram)
 library(venneuler)
-source("RMASelect.R")
+
 library(reshape2)
