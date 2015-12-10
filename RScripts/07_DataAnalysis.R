@@ -28,15 +28,6 @@
 
 ES.frame <- subset(ES.frame, Richness.Log.RR.Var>0 & Yield.Log.RR.Var>0) # restrict analysis to study cases with positive variances
 
-ES.frame$Species.Group<-paste(ES.frame$Species.Group)
-ES.frame$Species.Group[(ES.frame$Species.Group=="arthropods")]<-"invertebrates"
-ES.frame$Species.Group[(ES.frame$Species.Group=="non-arthropod invertebrates")]<-"invertebrates"
-ES.frame$Species.Group[(ES.frame$Species.Group=="fungi")]<-NA
-ES.frame$Species.Group[(ES.frame$Species.Group=="NA")]<-NA
-ES.frame$Species.Group<-factor(ES.frame$Species.Group)
-
-ES.frame$LUI.range.level <- factor(ES.frame$LUI.range.level)
-
 ### Remove pseudo-replicates
 ES.frame.richness <- ES.frame[!duplicated(ES.frame[,c("Study.ID","Case.ID","LUI.range.level","Species.Group")]),]
 ES.frame.yield <- ES.frame[!duplicated(ES.frame[,c("Study.ID","LUI.range.level","Product")]),]
@@ -77,7 +68,6 @@ for(x in unique(ES.frame$Study.Case)){
   }
 }
 
-
 ### store models in a list
 Richness.MA.model <- list() 
 Yield.MA.model <- list()
@@ -109,36 +99,76 @@ MA.coeffs.cont <- data.frame(Moderator="None",Richness.intercept=Richness.MA.fit
 ### define list of moderators
 
 moderator.list.cat <- c("Species.Group","LUI.range.level","Product","BIOME")
-moderator.list.cont <- c("rel_capital_stock_in_agriculture","habitat_dissimilarity","npp")
+moderator.list.cont <- c("rel_capital_stock_in_agriculture","npp")
 
 moderator.list <- c(moderator.list.cat,moderator.list.cont)
-#modelFormula <- as.formula(paste("~",paste(moderator.list,collapse="+"),sep=""))
 
-modelData <- ES.frame.richness[,c('Richness.Log.RR','Richness.Log.RR.Var','Species.Group','LUI.range.level','Product','BIOME',
-                         'rel_capital_stock_in_agriculture','habitat_dissimilarity','npp',
+modelData <- ES.frame.richness[,c('Richness.Log.RR','Richness.Log.RR.Var', paste(moderator.list,sep=","),
                          'Case.ID','Study.ID','Study.Case','Low.LUI','High.LUI')]
 modelData <- na.omit(modelData)
 
-Richness.MA.full <- rma.mv(yi=Richness.Log.RR, V=Richness.Log.RR.Var, mods=~Species.Group + LUI.range.level + Product + BIOME + 
-                            rel_capital_stock_in_agriculture + npp, 
-                           random = ~factor(Case.ID)|factor(Study.ID), struct="CS", 
+Richness.MA.full <- rma.mv(yi=Richness.Log.RR, V=Richness.Log.RR.Var, mods=~Species.Group + LUI.range.level + Product + BIOME + rel_capital_stock_in_agriculture + npp, 
+                          random = ~factor(Case.ID)|factor(Study.ID), struct="CS", 
                           slab=paste(Study.Case, Low.LUI, High.LUI,sep="_"),
                           method="ML", tdist=FALSE, level=95, digits=4,data=modelData)
 
 RichnessModel<-RMASelect(Richness.MA.full)
 
-modelData <- ES.frame.yield[,c('Yield.Log.RR','Yield.Log.RR.Var','Species.Group','LUI.range.level','Product','BIOME',
-                                'rel_capital_stock_in_agriculture','habitat_dissimilarity','npp',
+modelData <- ES.frame.yield[,c('Yield.Log.RR','Yield.Log.RR.Var', paste(moderator.list),
                                 'Case.ID','Study.ID','Study.Case','Low.LUI','High.LUI')]
 modelData <- na.omit(modelData)
 
-Yield.MA.full <- try(rma.mv(yi=Yield.Log.RR,V=Yield.Log.RR.Var,mods=~LUI.range.level + Product + BIOME + 
-                              rel_capital_stock_in_agriculture + npp,
+Yield.MA.full <- try(rma.mv(yi=Yield.Log.RR,V=Yield.Log.RR.Var,mods=~Species.Group + LUI.range.level + Product + BIOME + rel_capital_stock_in_agriculture + npp,
                             random = ~factor(Study.ID), struct="CS", slab=paste(Study.Case, Low.LUI, High.LUI,sep="_"),
                             method="ML", tdist=FALSE, level=95, digits=4,data=modelData),silent=T)
 
-
 YieldModel <- RMASelect(Yield.MA.full)
+
+
+# ############################################################################
+# ### 07.4. Analysis with moderators for no LU vs low/medium/high LU
+# ############################################################################
+# 
+# Richness.MA.model.noLU <- list()
+# 
+# ### Analysis without moderators
+# Richness.MA.fit.noLU <- rma.mv(yi=Richness.Log.RR, V=Richness.Log.RR.Var, mods=~1, random = ~factor(Case.ID)|factor(Study.ID), struct="CS", slab=paste(Study.Case, Low.LUI, High.LUI,sep="_"),method="REML", tdist=FALSE, level=95, digits=4,data=ES.frame.noLU)
+# Richness.MA.model.noLU[["None"]] <- Richness.MA.fit.noLU
+# 
+# ### Store results in table
+# MA.coeffs.noLU <- data.frame(Moderator="None",levels=1,mean.Richness=Richness.MA.fit.noLU$b,se.Richness=Richness.MA.fit.noLU$se)
+# 
+# # define list of moderators
+# moderator.list <- c("Product","Product:High.LUI","Land.use...land.cover","Species.Group","BIOME")
+# 
+# # run analysis
+# for(mods in moderator.list){
+#   print(mods)
+#   ### fit model 
+# #  attach(ES.frame.noLU)
+#   Richness.MA.fit.noLU <- try(rma.mv(yi=Richness.Log.RR,V=Richness.Log.RR.Var,mods=as.formula(paste("~",mods,"-1",sep="")),random = ~factor(Case.ID)|factor(Study.ID), struct="CS", slab=paste(Study.Case, Low.LUI, High.LUI,sep="_"),method="REML", tdist=FALSE, level=95, digits=4,data=ES.frame.noLU.richness),silent=T)
+#   Richness.MA.model.noLU[[mods]] <- Richness.MA.fit.noLU
+#   ### catch errors
+#   if(class(Richness.MA.fit.noLU)[1]=="try-error") {
+#     geterrmessage()
+#     Richness.MA.fit.noLU <- data.frame(b=NA,se=NA)
+#   }
+# #  detach(ES.frame.noLU)
+# 
+#   ### tabularize model parameters  
+#   ifelse(mods=="Product:High.LUI", levels <- unlist(lapply(strsplit(unlist(lapply(strsplit(rownames(Richness.MA.fit.noLU$b),"Product"),function(x)x[[2]])),"High.LUI"),function(y) paste(y[1],y[2],sep=""))), levels <- unlist(lapply(strsplit(rownames(Richness.MA.fit.noLU$b),mods),function(x){x[[2]]})))
+#   MA.coeffs.noLU <- rbind(MA.coeffs.noLU,data.frame(Moderator=rep(mods,length(Richness.MA.fit.noLU$b)),
+#                                                     levels=levels,
+#                                                     mean.Richness=Richness.MA.fit.noLU$b,
+#                                                     se.Richness=Richness.MA.fit.noLU$se))
+# }
+# print(MA.coeffs.noLU)
+# 
+
+
+###########################################################################
+### Resterampe
+### use full model with all levels simultaneously or separate models for each level
 
 # 
 # 
@@ -206,52 +236,6 @@ YieldModel <- RMASelect(Yield.MA.full)
 #   preds.yield[[mods]] <- ifelse(all(is.na(Yield.MA.fit)), list(data.frame(pred = NA, se = NA, ci.lb = NA, ci.ub = NA, cr.lb = NA, cr.ub = NA)), list(predict.rma(Yield.MA.fit))) 
 # }
 # print(MA.coeffs.cont)
-
-############################################################################
-### 07.4. Analysis with moderators for no LU vs low/medium/high LU
-############################################################################
-
-Richness.MA.model.noLU <- list()
-
-### Analysis without moderators
-Richness.MA.fit.noLU <- rma.mv(yi=Richness.Log.RR, V=Richness.Log.RR.Var, mods=~1, random = ~factor(Case.ID)|factor(Study.ID), struct="CS", slab=paste(Study.Case, Low.LUI, High.LUI,sep="_"),method="REML", tdist=FALSE, level=95, digits=4,data=ES.frame.noLU)
-Richness.MA.model.noLU[["None"]] <- Richness.MA.fit.noLU
-
-### Store results in table
-MA.coeffs.noLU <- data.frame(Moderator="None",levels=1,mean.Richness=Richness.MA.fit.noLU$b,se.Richness=Richness.MA.fit.noLU$se)
-
-# define list of moderators
-moderator.list <- c("Product","Product:High.LUI","Land.use...land.cover","Species.Group","BIOME")
-
-# run analysis
-for(mods in moderator.list){
-  print(mods)
-  ### fit model 
-#  attach(ES.frame.noLU)
-  Richness.MA.fit.noLU <- try(rma.mv(yi=Richness.Log.RR,V=Richness.Log.RR.Var,mods=as.formula(paste("~",mods,"-1",sep="")),random = ~factor(Case.ID)|factor(Study.ID), struct="CS", slab=paste(Study.Case, Low.LUI, High.LUI,sep="_"),method="REML", tdist=FALSE, level=95, digits=4,data=ES.frame.noLU.richness),silent=T)
-  Richness.MA.model.noLU[[mods]] <- Richness.MA.fit.noLU
-  ### catch errors
-  if(class(Richness.MA.fit.noLU)[1]=="try-error") {
-    geterrmessage()
-    Richness.MA.fit.noLU <- data.frame(b=NA,se=NA)
-  }
-#  detach(ES.frame.noLU)
-
-  ### tabularize model parameters  
-  ifelse(mods=="Product:High.LUI", levels <- unlist(lapply(strsplit(unlist(lapply(strsplit(rownames(Richness.MA.fit.noLU$b),"Product"),function(x)x[[2]])),"High.LUI"),function(y) paste(y[1],y[2],sep=""))), levels <- unlist(lapply(strsplit(rownames(Richness.MA.fit.noLU$b),mods),function(x){x[[2]]})))
-  MA.coeffs.noLU <- rbind(MA.coeffs.noLU,data.frame(Moderator=rep(mods,length(Richness.MA.fit.noLU$b)),
-                                                    levels=levels,
-                                                    mean.Richness=Richness.MA.fit.noLU$b,
-                                                    se.Richness=Richness.MA.fit.noLU$se))
-}
-print(MA.coeffs.noLU)
-
-
-
-###########################################################################
-### Resterampe
-### use full model with all levels simultaneously or separate models for each level
-
 
 ### LMM.MA.fit function
 # LMM.MA.fit <- function(yi,vi,mods,slab,inner2,outer2){

@@ -232,7 +232,7 @@ ES.frame.noLU$humanfootprint <- log10(extract(humanfootprint,lonlat.noLU, buffer
 ############################################################################
 ### remove objectes to save workspace
 ############################################################################
-#rm(lonlat, lonlat.noLU,ecoregions, realms_extract, npp ,agricultural_area,capital_stock_in_agriculture,habitat_dissimilarity, timeseries.hyde,timeseries.kk10,hyde.LUhist.stack,kk10.LUhist.stack,hyde.extract.year.of.first.use,kk10.extract.year.of.first.use,hyde.year.of.first.use,kk10.year.of.first.use)
+rm(lonlat, lonlat.noLU,ecoregions, realms_extract, npp ,agricultural_area,capital_stock_in_agriculture,habitat_dissimilarity, timeseries.hyde,timeseries.kk10,hyde.LUhist.stack,kk10.LUhist.stack,hyde.extract.year.of.first.use,kk10.extract.year.of.first.use,hyde.year.of.first.use,kk10.year.of.first.use)
 
 setwd(path2wd)
 
