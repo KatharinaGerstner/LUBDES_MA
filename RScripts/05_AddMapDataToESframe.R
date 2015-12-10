@@ -192,6 +192,8 @@ globcover[globcover<15]<- 1 # reclassify 11 and 14 to 100%
 globcover[globcover==20]<- 0.6 # reclassify 20 to 60%
 globcover[globcover==30]<- 0.35 # reclassify 30 to 35%
 
+writeraster(globcover, paste(path2temp,"/globcover_reclassified.tif",sep=""))
+
 # points<-SpatialPoints(lonlat)
 # 
 # for (i in length(points)){
