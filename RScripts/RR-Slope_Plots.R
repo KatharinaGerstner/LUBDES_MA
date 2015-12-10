@@ -1,19 +1,20 @@
 RRslopes_plot <- function(data, YieldorRichness = c("yield", "richness"), one=1, two=5, three=9, alpha=100, covariate ="Product", dataType = c("model", "raw"), model){
 
-	if(dataType = "raw"){		
+	if(dataType == "raw"){		
 		if(YieldorRichness == "yield"){index <- which(names(data) == "Yield.Log.RR")}
 		if(YieldorRichness == "richness"){index <- which(names(data) == "Richness.Log.RR")}
 		newdat <- data.frame(y=rep(1, nrow(data)), logRR = data[,index], low = data$Low.LUI , high = data$High.LUI, range = data$LUI.range.level, covariate=data[,names(data) == covariate])}
 	
-	if(dataType = "model"){
-		if(!(model)){stop("expecting a model as well")}
+	if(dataType == "model"){
+		if(missing(model)){stop("expecting a model as well")}
 		newdat <- expand.grid(LUI.range.level=levels(data$LUI.range.level), BIOME=levels(data$BIOME), Species.Group =levels(data$Species.Group), Product=levels(data$Product), Richness.Log.RR=NA, y=1)
 		
-		newdat <- data.frame(BIOME = factor("Drylands", levels=levels(modelDataRichness$BIOME)), LUI.range.level = factor("low-low", levels=levels(modelDataRichness$LUI.range.level)), Species.Group = factor("invertebrates", levels=levels(modelDataRichness$Species.Group)))
+		# newdat <- data.frame(BIOME = factor("Drylands", levels=levels(modelDataRichness$BIOME)), LUI.range.level = factor("low-low", levels=levels(modelDataRichness$LUI.range.level)), Species.Group = factor("invertebrates", levels=levels(modelDataRichness$Species.Group)))
 		
 		mm <- model.matrix(~as.factor(Species.Group) + as.factor(LUI.range.level) + as.factor(BIOME), data=newdat)
 		mm <- mm[,-which(colnames(mm)=="(Intercept)")]
-		newdat <- predict.rma(model$model, newmods = mm)
+		preds <- predict.rma(model, newmods = mm)
+		newdat$pred <- preds$pred
 	}
 
 	green <-rgb(77,175,74, alpha=alpha, max=255)
