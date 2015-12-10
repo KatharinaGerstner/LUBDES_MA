@@ -309,41 +309,81 @@ LUI.level.to.plot = LUI.range.level[1]
 
 for(LUI.level.to.plot in LUI.range.level){
   data.to.plot = subset(ES.frame, LUI.range.level %in% LUI.level.to.plot)
-  data.to.plot = data.to.plot[order(data.to.plot$Yield.Log.RR,decreasing=T),]
-  data.to.plot$uniqueID = factor(paste(data.to.plot$Study.ID,data.to.plot$Case.ID),levels=paste(data.to.plot$Study.ID,data.to.plot$Case.ID))
-
+  data.to.plot = melt(data.to.plot[,c("Study.ID","Case.ID","LUI.range.level","Richness.Log.RR","Richness.Log.RR.Var","Yield.Log.RR","Yield.Log.RR.Var",
+                                      "Yield.SD.is.imputed.low","Yield.SD.is.imputed.high", "Richness.SD.is.imputed.low","Richness.SD.is.imputed.high")],
+                      id.vars=c("Study.ID","Case.ID","LUI.range.level","Richness.Log.RR.Var","Yield.Log.RR.Var","Yield.SD.is.imputed.low","Yield.SD.is.imputed.high", "Richness.SD.is.imputed.low","Richness.SD.is.imputed.high"),
+                      measure.vars=c("Richness.Log.RR", "Yield.Log.RR"))
+  data.to.plot = data.to.plot[order(data.to.plot$value),]
+  data.to.plot$Richness.Log.RR.Var[which(data.to.plot$variable %in% "Yield.Log.RR")] =   data.to.plot$Yield.Log.RR.Var[which(data.to.plot$variable %in% "Yield.Log.RR")] 
+  data.to.plot = data.to.plot[,-(which(names(data.to.plot) %in% "Yield.Log.RR.Var"))]
+  names(data.to.plot)[which(names(data.to.plot) %in% "Richness.Log.RR.Var")] = "Log.RR.Var"
+  names(data.to.plot)[which(names(data.to.plot) %in% "variable")] = "RR.ID"
+  names(data.to.plot)[which(names(data.to.plot) %in% "value")] = "RR.value"
+  
+  data.to.plot$uniqueID = paste(as.character(data.to.plot$Study.ID),as.character((data.to.plot$Case.ID)))
+  data.to.plot$uniqueID = paste(as.character(data.to.plot$uniqueID),as.character((data.to.plot$RR.ID)))
+  
+  # sort the table so that Yield and Richness of the same study are together
+  data.to.plot.ordered = subset(data.to.plot, RR.ID %in% "Yield.Log.RR")
+  data.to.fill.with.ordered = data.to.plot.ordered[0,]
+  for(sort.run in 1:nrow(data.to.plot.ordered)){
+    data.to.fill.with.ordered = rbind(data.to.fill.with.ordered,data.to.plot.ordered[sort.run,])
+    data.to.fill.with.ordered = rbind(data.to.fill.with.ordered,
+                                      data.to.plot[which(data.to.plot$Study.ID %in% data.to.plot.ordered$Study.ID[sort.run] &
+                                                           data.to.plot$Case.ID %in% data.to.plot.ordered$Case.ID[sort.run] &  
+                                                           data.to.plot$RR.ID %in% "Richness.Log.RR"),])
+    
+  }
+  data.to.plot = data.to.fill.with.ordered
+  data.to.plot$uniqueID = factor(data.to.plot$uniqueID,levels= rev(data.to.plot$uniqueID))
+  
+  
+  #add a column with the study name and case id + remove every second to make axis better readable
+  #data.to.plot$axes.naming = paste(data.to.plot$Study.ID,data.to.plot$Case.ID)
+  data.to.plot$axes.naming = as.character(data.to.plot$uniqueID)
+  data.to.plot$axes.naming[which(seq(1:nrow(data.to.plot)) %% 2 == 0)] = " "
+  
+  #rename Richness.Log.RR and Yield.Log.RR
+  data.to.plot$RR.ID = as.character(data.to.plot$RR.ID)
+  data.to.plot$RR.ID[which(data.to.plot$RR.ID %in% "Yield.Log.RR")] = "Yield"
+  data.to.plot$RR.ID[which(data.to.plot$RR.ID %in% "Richness.Log.RR")] = "Species Richness"
+  data.to.plot$RR.ID = factor(data.to.plot$RR.ID, levels =c("Yield", "Species Richness"))
+  
   
   # get axes length to center the plot 
-  min.values = sqrt(min(c(data.to.plot$Yield.Log.RR,data.to.plot$Richness.Log.RR))^2)
-  max.values = sqrt(max(c(data.to.plot$Yield.Log.RR,data.to.plot$Richness.Log.RR))^2)
+  max.values = sqrt(max(data.to.plot$RR.value^2)) + 0.5
   
-  if(min.values > max.values){
-    y.range.for.plot = c(0 - min.values -0.5,min.values + 0.5)
-  }else{
-    y.range.for.plot = c(0 - max.values -0.5,max.values + 0.5)
+  # create a data is imputed column
+  data.to.plot$is.SD.imputed = "no"
+  data.to.plot$is.SD.imputed[which(data.to.plot$Yield.SD.is.imputed.low %in% "yes")] = "yes"
+  data.to.plot$is.SD.imputed[which(data.to.plot$Yield.SD.is.imputed.high %in% "yes")] = "yes"
+  data.to.plot$is.SD.imputed[which(data.to.plot$Richness.SD.is.imputed.low %in% "yes")] = "yes"
+  data.to.plot$is.SD.imputed[which(data.to.plot$Richness.SD.is.imputed.high %in% "yes")] = "yes"
+  
+  data.to.plot$is.SD.imputed = factor(data.to.plot$is.SD.imputed,levels=c("no","yes"))
+
+    plot.forest =
+      ggplot(data=data.to.plot) +
+      
+      geom_pointrange(aes(x=uniqueID, y=RR.value, ymin=RR.value	- (1.96*Log.RR.Var), ymax=RR.value	+ (1.96*Log.RR.Var),colour=RR.ID,alpha=is.SD.imputed,linetype=is.SD.imputed), size=1) +
+      geom_hline(x=0,linetype ="twodash")  +
+      
+      
+      #scale manually to get the legend correct
+      scale_colour_manual(values  =c("#FF6633","#00CC00")) +
+      scale_x_discrete("Response Ratio",breaks= as.character(data.to.plot$uniqueID),labels=data.to.plot$axes.naming)  +
+      scale_alpha_discrete(range = c(1,0.4)) + 
+      scale_linetype_discrete(c("solid","twodash")) +
+    
+      #white background + flip 90 degrees
+      theme(axis.ticks.y = element_blank(),panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
+            panel.background = element_rect(colour = "black", size=1,fill=NA), axis.line = element_line(colour = "black")) +
+      coord_flip(ylim=c(0 - max.values,max.values))
+    
+    print(plot.forest)
+    ggsave(plot.forest, file = paste(c(path2temp, "Forest_plot_",LUI.level.to.plot,".png"), collapse=""), width = 20, height = 8, type = "cairo-png")
+    
   }
-  
-  
-plot.forest = ggplot(data=data.to.plot) +
-  
-  geom_pointrange(aes(x=uniqueID, y=Yield.Log.RR, ymin=Yield.Log.RR	- (1.96*Yield.Log.RR.Var), ymax=Yield.Log.RR	+ (1.96*Yield.Log.RR.Var),colour="Yield"), size=1) +
-  geom_pointrange(aes(x=uniqueID, y=Richness.Log.RR, ymin=Richness.Log.RR	- (1.96*Richness.Log.RR.Var), ymax=Richness.Log.RR	+ (1.96*Richness.Log.RR.Var),colour="Species Richness"), size=1) +
-  geom_hline(x=0,linetype ="twodash")  +
-
-  
-  #scale manually to get the legend correct
-  scale_colour_manual(values  =c("#00CC00","#FF6633")) +
-  
-  #white background + flip 90 degrees
-  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),legend.title=element_blank(), 
-      panel.background = element_rect(colour = "black", size=1,fill=NA), axis.line = element_line(colour = "black")) +
-  coord_flip(ylim=y.range.for.plot)
-
-  print(plot.forest)
-  ggsave(plot.forest, file = paste(c(path2temp, "Forest_plot_",LUI.level.to.plot,".png"), collapse=""), width = 20, height = 8, type = "cairo-png")
-
-}
-
 ##################
 ### RESTERAMPE ###
 ##################
