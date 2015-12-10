@@ -86,7 +86,8 @@ if (file.exists("Investment_CapitalStock_E_All_Data.zip")==FALSE){
   unzip("Investment_CapitalStock_E_All_Data.zip")
 }
 
-download.file("https://www.dropbox.com/s/fscg314f6kkvbhv/Data_Extract_From_World_Development_Indicators_Data.csv?dl=1", "agricultural_area.csv")
+if (file.exists("agricultural_area.csv") == FALSE){
+	download.file("https://www.dropbox.com/s/fscg314f6kkvbhv/Data_Extract_From_World_Development_Indicators_Data.csv?dl=1", "agricultural_area.csv")}
 agricultural_area <- read.csv("agricultural_area.csv")
 agricultural_area$X2007..YR2007. <- as.numeric(agricultural_area$X2007..YR2007.)
 agricultural_area$CountryCode <- countrycode(agricultural_area$Country.Code,"wb","iso3c")
