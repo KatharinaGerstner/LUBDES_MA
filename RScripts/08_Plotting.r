@@ -50,6 +50,127 @@ p <- ggplot() +
 p 
 ggsave(paste(path2temp, "/CaseDistribution.png",sep=""), width=18, height=10, units="cm")
 
+### plot maps and histograms of covariates
+
+### NPP
+
+#convert the raster to points for plotting
+npp.p <- rasterToPoints(npp)
+
+#Make the points a dataframe for ggplot
+df <- data.frame(npp.p)
+#Make appropriate column headings
+colnames(df) <- c("Longitude", "Latitude", "NPP")
+
+#Call in point data, in this case a fake transect (csv file with lat and lon coordinates)
+#sites <- data.frame(read.csv(“/your/path/to/pointfile.csv”))
+
+#Now make the map
+ggplot(data=df, aes(y=Latitude, x=Longitude)) +
+  geom_raster(aes(fill=NPP)) +
+  #geom_point(data=sites, aes(x=x, y=y), color=”white”, size=3, shape=4) +
+  theme_bw() +
+  coord_equal() +
+  scale_fill_gradient("NPP", limits=c(0,1500)) +
+  theme(axis.title.x = element_text(size=16),
+        axis.title.y = element_text(size=16, angle=90),
+        axis.text.x = element_text(size=14),
+        axis.text.y = element_text(size=14),
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        legend.position = "right",
+#         scale_x_continuous(breaks=c(-90, 0, 90), labels=c("90° W", "0", "90° E")) +
+#         scale_y_continuous(breaks=c(-60, -30, 0, 30, 60), labels=c("60°S", "30°S","0°", "30°N","60°N")),
+        legend.key = element_blank()
+  )
+
+### TODO: add second histogram in background showing distribution of all npp points, also check coordinate of the Zero case
+
+ggplot(data=ES.frame) + 
+  #geom_histogram(aes(x=df$MAP[df$MAP>0]), size=0.4) + 
+  geom_histogram(aes(x=ES.frame$npp), size=0.4) + 
+  xlab("NPP") +
+  ggtitle("NPP") + 
+  theme(axis.title = element_text(size = rel(2)), axis.text = element_text(size = rel(2)),plot.title=element_text(size = rel(2)) , axis.text.x=element_text(angle=45,vjust = 1, hjust=1),legend.text=element_text(size = rel(2)),legend.title=element_text(size = rel(2)))
+#,axis.ticks.length=unit(.4,"cm")
+# print(p)
+# ggsave(p, file = paste(path2temp,"/PlotHist_ESframe_",gsub(".","",colnames(ES.frame[i]),fixed=T),".png",sep=""), width = 20, height = 8, type = "cairo-png")
+
+### Agricultural Stock
+
+# world <- map_data("world")
+# 
+# #world <- spTransform(world, crs=CRS("+proj=longlat +datum=WGS84 +no_defs +ellps=WGS84 +towgs84=0,0,0"))
+# 
+# capitalstock_per_country <- capital_stock_in_agriculture
+# map <- fortify(world, region="region")
+# map$CountryCode <- countrycode(map$region,"country.name","iso3c")
+# 
+# gg <- ggplot()
+# gg <- gg + 
+#   geom_polygon(data=world_map, aes(x=long, y=lat, group=group),fill="white",color="black",lwd=0.2)
+#   
+# gg +
+#   geom_map(data=map, map=map)#,
+#                     aes(x=long, y=lat, map_id=id, group=group),
+#                     fill="#ffffff", color=NA)
+# gg <- gg + geom_map(data=capitalstock_per_country, map=map, color="white", size=0.15,
+#                     aes(fill=CountryCode, group=CountryCode, map_id=CountryCode))
+# #gg <- gg + geom_point(data=c_labs, aes(x=lon, y=lat), size=4)
+# gg <- gg + scale_fill_gradient(low="#f7fcb9", high="#31a354", name="Capital Stock per Country and Agricultural Area")
+# #gg <- gg + labs(title="2013 Population")
+# gg <- gg + coord_equal(ratio=1)
+# #gg <- gg + theme_map()
+# gg <- gg + theme(legend.position="bottom")
+# gg <- gg + theme(legend.key = element_blank())
+# gg <- gg + theme(plot.title=element_text(size=16))
+# gg
+
+### Habitat Heterogeneity
+
+#convert the raster to points for plotting
+habitat_dissimilarity.p <- rasterToPoints(habitat_dissimilarity)
+
+#Make the points a dataframe for ggplot
+df <- data.frame(habitat_dissimilarity.p)
+
+#Make appropriate column headings
+colnames(df) <- c("Longitude", "Latitude", "Heterogeneity")
+df$Heterogeneity[df$Heterogeneity==2147483647]<-NA
+#Call in point data, in this case a fake transect (csv file with lat and lon coordinates)
+#sites <- data.frame(read.csv(“/your/path/to/pointfile.csv”))
+
+#Now make the map
+ggplot(data=df, aes(y=Latitude, x=Longitude)) +
+  geom_raster(aes(fill=Heterogeneity)) +
+  #geom_point(data=sites, aes(x=x, y=y), color=”white”, size=3, shape=4) +
+  theme_bw() +
+  coord_equal() +
+  scale_fill_gradient("Heterogeneity", limits=c(0,130000)) +
+  theme(axis.title.x = element_text(size=16),
+        axis.title.y = element_text(size=16, angle=90),
+        axis.text.x = element_text(size=14),
+        axis.text.y = element_text(size=14),
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        legend.position = "right",
+        #         scale_x_continuous(breaks=c(-90, 0, 90), labels=c("90° W", "0", "90° E")) +
+        #         scale_y_continuous(breaks=c(-60, -30, 0, 30, 60), labels=c("60°S", "30°S","0°", "30°N","60°N")),
+        legend.key = element_blank()
+  )
+
+### TODO: add second histogram in background showing distribution of all npp points, also check coordinate of the Zero case
+ES.frame$habitat_dissimilarity[ES.frame$habitat_dissimilarity==2147483647]<-NA
+ggplot(data=ES.frame) + 
+  #geom_histogram(aes(x=df$MAP[df$MAP>0]), size=0.4) + 
+  geom_histogram(aes(x=ES.frame$habitat_dissimilarity), size=0.4) + 
+  xlab("Habitat Dissimilarity") +
+  ggtitle("Habitat Dissimilarity") + 
+  theme(axis.title = element_text(size = rel(2)), axis.text = element_text(size = rel(2)),plot.title=element_text(size = rel(2)) , axis.text.x=element_text(angle=45,vjust = 1, hjust=1),legend.text=element_text(size = rel(2)),legend.title=element_text(size = rel(2)))
+#,axis.ticks.length=unit(.4,"cm")
+# print(p)
+# ggsave(p, file = paste(path2temp,"/PlotHist_ESframe_",gsub(".","",colnames(ES.frame[i]),fixed=T),".png",sep=""), width = 20, height = 8, type = "cairo-png")
+
 ############################################################################
 ### 08.2. Plot cross-diagrams
 ### 
@@ -491,6 +612,98 @@ ggsave(plot, file = paste(path2temp,"/New_Cross_diagram_BIOME.png",sep=""), widt
 # 
 # }
 
+print(plot.across.groups.cross.diagramm)
+ggsave(plot.across.groups.cross.diagramm, file = paste(path2temp, "Cross_diagram_across_LUI_range_levels.png",sep=""), width = 20, height = 8, type = "cairo-png")
+
+
+############################
+### SK Annapolis WS 2015 ###
+### forest plots for each LUI-comparison class
+############################
+### ------------------------
+
+LUI.range.level = c("low-low","medium-medium","high-high","low-medium","medium-high","low-high")
+
+
+LUI.level.to.plot = LUI.range.level[1]
+
+for(LUI.level.to.plot in LUI.range.level){
+  data.to.plot = subset(ES.frame, LUI.range.level %in% LUI.level.to.plot)
+  data.to.plot = melt(data.to.plot[,c("Study.ID","Case.ID","LUI.range.level","Richness.Log.RR","Richness.Log.RR.Var","Yield.Log.RR","Yield.Log.RR.Var",
+                                      "Yield.SD.is.imputed.low","Yield.SD.is.imputed.high", "Richness.SD.is.imputed.low","Richness.SD.is.imputed.high")],
+                      id.vars=c("Study.ID","Case.ID","LUI.range.level","Richness.Log.RR.Var","Yield.Log.RR.Var","Yield.SD.is.imputed.low","Yield.SD.is.imputed.high", "Richness.SD.is.imputed.low","Richness.SD.is.imputed.high"),
+                      measure.vars=c("Richness.Log.RR", "Yield.Log.RR"))
+  data.to.plot = data.to.plot[order(data.to.plot$value),]
+  data.to.plot$Richness.Log.RR.Var[which(data.to.plot$variable %in% "Yield.Log.RR")] =   data.to.plot$Yield.Log.RR.Var[which(data.to.plot$variable %in% "Yield.Log.RR")] 
+  data.to.plot = data.to.plot[,-(which(names(data.to.plot) %in% "Yield.Log.RR.Var"))]
+  names(data.to.plot)[which(names(data.to.plot) %in% "Richness.Log.RR.Var")] = "Log.RR.Var"
+  names(data.to.plot)[which(names(data.to.plot) %in% "variable")] = "RR.ID"
+  names(data.to.plot)[which(names(data.to.plot) %in% "value")] = "RR.value"
+  
+  data.to.plot$uniqueID = paste(as.character(data.to.plot$Study.ID),as.character((data.to.plot$Case.ID)))
+  data.to.plot$uniqueID = paste(as.character(data.to.plot$uniqueID),as.character((data.to.plot$RR.ID)))
+  
+  # sort the table so that Yield and Richness of the same study are together
+  data.to.plot.ordered = subset(data.to.plot, RR.ID %in% "Yield.Log.RR")
+  data.to.fill.with.ordered = data.to.plot.ordered[0,]
+  for(sort.run in 1:nrow(data.to.plot.ordered)){
+    data.to.fill.with.ordered = rbind(data.to.fill.with.ordered,data.to.plot.ordered[sort.run,])
+    data.to.fill.with.ordered = rbind(data.to.fill.with.ordered,
+                                      data.to.plot[which(data.to.plot$Study.ID %in% data.to.plot.ordered$Study.ID[sort.run] &
+                                                           data.to.plot$Case.ID %in% data.to.plot.ordered$Case.ID[sort.run] &  
+                                                           data.to.plot$RR.ID %in% "Richness.Log.RR"),])
+    
+  }
+  data.to.plot = data.to.fill.with.ordered
+  data.to.plot$uniqueID = factor(data.to.plot$uniqueID,levels= rev(data.to.plot$uniqueID))
+  
+  
+  #add a column with the study name and case id + remove every second to make axis better readable
+  #data.to.plot$axes.naming = paste(data.to.plot$Study.ID,data.to.plot$Case.ID)
+  data.to.plot$axes.naming = as.character(data.to.plot$uniqueID)
+  data.to.plot$axes.naming[which(seq(1:nrow(data.to.plot)) %% 2 == 0)] = " "
+  
+  #rename Richness.Log.RR and Yield.Log.RR
+  data.to.plot$RR.ID = as.character(data.to.plot$RR.ID)
+  data.to.plot$RR.ID[which(data.to.plot$RR.ID %in% "Yield.Log.RR")] = "Yield"
+  data.to.plot$RR.ID[which(data.to.plot$RR.ID %in% "Richness.Log.RR")] = "Species Richness"
+  data.to.plot$RR.ID = factor(data.to.plot$RR.ID, levels =c("Yield", "Species Richness"))
+  
+  
+  # get axes length to center the plot 
+  max.values = sqrt(max(data.to.plot$RR.value^2)) + 0.5
+  
+  # create a data is imputed column
+  data.to.plot$is.SD.imputed = "no"
+  data.to.plot$is.SD.imputed[which(data.to.plot$Yield.SD.is.imputed.low %in% "yes")] = "yes"
+  data.to.plot$is.SD.imputed[which(data.to.plot$Yield.SD.is.imputed.high %in% "yes")] = "yes"
+  data.to.plot$is.SD.imputed[which(data.to.plot$Richness.SD.is.imputed.low %in% "yes")] = "yes"
+  data.to.plot$is.SD.imputed[which(data.to.plot$Richness.SD.is.imputed.high %in% "yes")] = "yes"
+  
+  data.to.plot$is.SD.imputed = factor(data.to.plot$is.SD.imputed,levels=c("no","yes"))
+
+    plot.forest =
+      ggplot(data=data.to.plot) +
+      
+      geom_pointrange(aes(x=uniqueID, y=RR.value, ymin=RR.value	- (1.96*Log.RR.Var), ymax=RR.value	+ (1.96*Log.RR.Var),colour=RR.ID,alpha=is.SD.imputed,linetype=is.SD.imputed), size=1) +
+      geom_hline(x=0,linetype ="twodash")  +
+      
+      
+      #scale manually to get the legend correct
+      scale_colour_manual(values  =c("#FF6633","#00CC00")) +
+      scale_x_discrete("Response Ratio",breaks= as.character(data.to.plot$uniqueID),labels=data.to.plot$axes.naming)  +
+      scale_alpha_discrete(range = c(1,0.4)) + 
+      scale_linetype_discrete(c("solid","twodash")) +
+    
+      #white background + flip 90 degrees
+      theme(axis.ticks.y = element_blank(),panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
+            panel.background = element_rect(colour = "black", size=1,fill=NA), axis.line = element_line(colour = "black")) +
+      coord_flip(ylim=c(0 - max.values,max.values))
+    
+    print(plot.forest)
+    ggsave(plot.forest, file = paste(c(path2temp, "Forest_plot_",LUI.level.to.plot,".png"), collapse=""), width = 20, height = 8, type = "cairo-png")
+    
+  }
 ##################
 ### RESTERAMPE ###
 ##################

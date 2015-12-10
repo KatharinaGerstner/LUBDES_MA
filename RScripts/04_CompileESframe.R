@@ -17,6 +17,7 @@
 
 ### table.sort function to restructure dataimp
 
+
 table.sort = function(dat.low,dat.high,low,high){
   data.frame("Study.ID"=dat.low$Study.ID, "Case.ID" =dat.low$Case.ID, 
              "Low.LUI" = low, "High.LUI" = high,
@@ -43,8 +44,10 @@ table.sort = function(dat.low,dat.high,low,high){
              "Richness.Plot.Size" = as.numeric(dat.low$sampled.area),
              "Richness.Mean.High" = as.numeric(dat.high$richness.mean), "Richness.SD.High" = as.numeric(dat.high$richness.SD), "Richness.N.High" = as.numeric(dat.high$X..of.samples.for.BD.measure),             
              "Yield.Mean.Low" = as.numeric(dat.low$yield.mean), "Yield.SD.Low" = as.numeric(dat.low$yield.SD), "Yield.N.Low" = as.numeric(dat.low$X..of.samples.for.YD.measure),
-             "Yield.Mean.High" = as.numeric(dat.high$yield.mean), "Yield.SD.High" = as.numeric(dat.high$yield.SD), "Yield.N.High" = as.numeric(dat.high$X..of.samples.for.YD.measure))
-}
+             "Yield.Mean.High" = as.numeric(dat.high$yield.mean), "Yield.SD.High" = as.numeric(dat.high$yield.SD), "Yield.N.High" = as.numeric(dat.high$X..of.samples.for.YD.measure),
+             "Yield.SD.is.imputed.low" = dat.low$Yield.SD.is.imputed,"Yield.SD.is.imputed.high" = dat.high$Yield.SD.is.imputed,
+             "Richness.SD.is.imputed.low" = dat.low$Richness.SD.is.imputed,"Richness.SD.is.imputed.high" = dat.high$Richness.SD.is.imputed)
+  }
 
 ############################################################################
 ### 04.2. Compile ES frame
@@ -53,7 +56,7 @@ table.sort = function(dat.low,dat.high,low,high){
 
 ### create empty ES.frame
 
-ES.frame <- data.frame(matrix(ncol=37,nrow=0))
+ES.frame <- data.frame(matrix(ncol=41,nrow=0))
 names(ES.frame) <- c("Study.ID","Case.ID","Low.LUI","High.LUI","Habitat.Type",        
                      "Product","ES.From.BD","Fertilization","Irrigation","Pesticides",          
                      "Grazing","Mowing","Clear.Cut","Selective.Logging","Partial.Logging",     
@@ -61,15 +64,18 @@ names(ES.frame) <- c("Study.ID","Case.ID","Low.LUI","High.LUI","Habitat.Type",
                      "Species.Group","Species.Subgroup","Trophic.Level","Richness.Mean.Low" ,  
                      "Richness.SD.Low","Richness.N.Low","Richness.Plot.Size","Richness.Mean.High","Richness.SD.High",    
                      "Richness.N.High","Yield.Mean.Low","Yield.SD.Low","Yield.N.Low","Yield.Mean.High" ,    
-                     "Yield.SD.High","Yield.N.High")
+                     "Yield.SD.High","Yield.N.High","Yield.SD.is.imputed.low","Yield.SD.is.imputed.high",
+                     "Richness.SD.is.imputed.low","Richness.SD.is.imputed.high")
 
-ES.frame.noLU <- data.frame(matrix(ncol=33,nrow=0))
+
+ES.frame.noLU <- data.frame(matrix(ncol=37,nrow=0))
 names(ES.frame.noLU) <- c("Study.ID","Case.ID","Low.LUI","High.LUI","Habitat.Type",        
                      "Product","ES.From.BD","Fertilization","Irrigation","Pesticides",          
                      "Grazing","Mowing","Clear.Cut","Selective.Logging","Partial.Logging",     
                      "Additional.Treatment", "Date.Start","Date.End","Latitude","Longitude", "Country.Code",          
                      "Species.Group","Species.Subgroup","Trophic.Level","Richness.Mean.Low" ,  
-                     "Richness.SD.Low","Richness.N.Low","Richness.Plot.Size","Richness.Mean.High","Richness.SD.High", "Richness.N.High")
+                     "Richness.SD.Low","Richness.N.Low","Richness.Plot.Size","Richness.Mean.High","Richness.SD.High", "Richness.N.High",
+                     "Yield.SD.is.imputed.low","Yield.SD.is.imputed.high","Richness.SD.is.imputed.low","Richness.SD.is.imputed.high")
 
 # TO DO: remove "pooled within one LUI", change l 83: paste(dataimp$study.case,dataimp$species.group,sep="-") to dataimp$study.case
 
@@ -201,6 +207,8 @@ rm(temp.noLU,temp.lowLU,temp.mediumLU,temp.highLU,
    temp.low.base,temp.medium.base,temp.high.base,
    temp.low.increase,temp.medium.increase,temp.high.increase,
    temp.low,temp.medium,temp.high)
+
+
 
 ###########################################################################
 ### Resterampe
