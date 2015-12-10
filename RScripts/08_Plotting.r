@@ -177,14 +177,16 @@ ggplot(data=ES.frame) +
 ############################################################################
 
 modelDataR <- ES.frame.richness[,c('Richness.Log.RR','Richness.Log.RR.Var','Species.Group','LUI.range.level','Product','BIOME',
-                                  'rel_capital_stock_in_agriculture','habitat_dissimilarity','time.since.first.use','npp',
+                                  'rel_capital_stock_in_agriculture','npp',
                                   'Case.ID','Study.ID','Study.Case','Low.LUI','High.LUI')]
 modelDataR <- na.omit(modelDataR)
 
 modelDataY <- ES.frame.yield[,c('Yield.Log.RR','Yield.Log.RR.Var','Species.Group','LUI.range.level','Product','BIOME',
-                               'rel_capital_stock_in_agriculture','habitat_dissimilarity','time.since.first.use','npp',
+                               'rel_capital_stock_in_agriculture','npp',
                                'Case.ID','Study.ID','Study.Case','Low.LUI','High.LUI')]
 modelDataY <- na.omit(modelDataY)
+
+ES.frame$LUI.range.level <- factor(paste(ES.frame$LUI.range.level),levels=levels(modelDataY$LUI.range.level))
 
 predFrame <- data.frame(Species.Group=factor(levels(modelDataR$Species.Group),levels = levels(modelDataR$Species.Group)),
                         LUI.range.level=factor("high-high",levels=levels(modelDataR$LUI.range.level)),
@@ -236,11 +238,11 @@ newMods <- model.matrix(~LUI.range.level + Product,data=predFrame)
 newMods <- newMods[,-which(colnames(newMods)=="(Intercept)")]
 
 predsY <- predict.rma(YieldModel$model,newmods = newMods)
-predsY<-data.frame(pred=predsY$pred,se=predsR$se)
+predsY<-data.frame(pred=predsY$pred,se=predsY$se)
 predsY$LUI.range.level <- factor(levels(modelDataY$LUI.range.level),levels = levels(modelDataY$LUI.range.level))
 
 plot <- ggplot() + 
-  geom_point(data=ES.frame, aes(x=Yield.Log.RR, y=Richness.Log.RR, color=as.factor(ES.frame[,'LUI.range.level'])), size=4, alpha=.5) +
+  geom_point(data=ES.frame, aes(x=Yield.Log.RR, y=Richness.Log.RR, color=factor(ES.frame[,'LUI.range.level'])), size=4, alpha=.5) +
   geom_pointrange(data=predsR, aes(x=predsY$pred, y=pred, ymin=pred - (1.96*se), 
                                    ymax=pred + (1.96*se),color=LUI.range.level), size=1.5) +
   geom_segment(data=predsY, aes(x=pred - (1.96*se), xend=pred + (1.96*se), y = predsR$pred, yend = predsR$pred, color=LUI.range.level),size=1.5) +
@@ -272,7 +274,7 @@ newMods <- model.matrix(~LUI.range.level + Product,data=predFrame)
 newMods <- newMods[,-which(colnames(newMods)=="(Intercept)")]
 
 predsY <- predict.rma(YieldModel$model,newmods = newMods)
-predsY<-data.frame(pred=predsY$pred,se=predsR$se)
+predsY<-data.frame(pred=predsY$pred,se=predsY$se)
 predsY$Product <- factor(levels(modelDataY$Product),levels = levels(modelDataY$Product))
 
 plot <- ggplot() + 
@@ -671,37 +673,61 @@ for(LUI.level.to.plot in LUI.range.level){
   
   
   # get axes length to center the plot 
-  max.values = sqrt(max(data.to.plot$RR.value^2)) + 0.5
+  max.values = sqrt(max(data.to.plot$RR.value^2,na.rm=TRUE)) + 0.5
   
   # create a data is imputed column
   data.to.plot$is.SD.imputed = "no"
-  data.to.plot$is.SD.imputed[which(data.to.plot$Yield.SD.is.imputed.low %in% "yes")] = "yes"
-  data.to.plot$is.SD.imputed[which(data.to.plot$Yield.SD.is.imputed.high %in% "yes")] = "yes"
-  data.to.plot$is.SD.imputed[which(data.to.plot$Richness.SD.is.imputed.low %in% "yes")] = "yes"
-  data.to.plot$is.SD.imputed[which(data.to.plot$Richness.SD.is.imputed.high %in% "yes")] = "yes"
+  data.to.plot$is.SD.imputed[which(data.to.plot$Yield.SD.is.imputed.low %in% "yes" & data.to.plot$RR.ID %in% "Yield")] = "yes"
+  data.to.plot$is.SD.imputed[which(data.to.plot$Yield.SD.is.imputed.high %in% "yes" & data.to.plot$RR.ID %in% "Yield")] = "yes"
+  data.to.plot$is.SD.imputed[which(data.to.plot$Richness.SD.is.imputed.low %in% "yes"& data.to.plot$RR.ID %in% "Species Richness")] = "yes"
+  data.to.plot$is.SD.imputed[which(data.to.plot$Richness.SD.is.imputed.high %in% "yes" & data.to.plot$RR.ID %in% "Species Richness")] = "yes"
   
-  data.to.plot$is.SD.imputed = factor(data.to.plot$is.SD.imputed,levels=c("no","yes"))
+  #find exact replicated that come from a single imputation
+  data.to.plot$is.duplicate = duplicated(data.to.plot[,c("Study.ID","RR.value","Log.RR.Var","RR.ID")])
+  data.to.plot$is.duplicate[which(data.to.plot$is.duplicate)] = "duplicate"
+  data.to.plot$is.duplicate[which(data.to.plot$is.duplicate %in% "FALSE")] = "value"
+  data.to.plot$is.duplicate = factor(data.to.plot$is.duplicate,levels=c("value","duplicate"))
+  
 
-    plot.forest =
+#### if ervery runs smooth - cut away this plot  
+  #cut away the information of Yield.Log.RR from the unique Study ID to have them not displayed in the graph
+#  data.to.plot$uniqueID.for.axis.lables = seq(nrow(data.to.plot):1)
+#  data.to.plot$uniqueID.for.axis.lables = paste(paste(paste(data.to.plot$uniqueID.for.axis.lables,". ",sep=""),data.to.plot$Study.ID,sep=""),data.to.plot$Case.ID,sep="")
+#  data.to.plot$uniqueID.for.axis.lables = factor(data.to.plot$uniqueID.for.axis.lables,levels=(data.to.plot$uniqueID.for.axis.lables))
+#####
+
+  data.to.plot$uniqueID = factor(data.to.plot$uniqueID,levels=rev(data.to.plot$uniqueID))
+  data.to.plot$axes.naming = gsub(" Yield.Log.RR","",data.to.plot$axes.naming)
+  data.to.plot$colouring = paste(data.to.plot$RR.ID,data.to.plot$is.duplicate)
+  data.to.plot$colouring = factor(data.to.plot$colouring,levels = c("Yield value","Yield duplicate","Species Richness value","Species Richness duplicate"))
+  
+  
+  plot.forest =
       ggplot(data=data.to.plot) +
       
-      geom_pointrange(aes(x=uniqueID, y=RR.value, ymin=RR.value	- (1.96*Log.RR.Var), ymax=RR.value	+ (1.96*Log.RR.Var),colour=RR.ID,alpha=is.SD.imputed,linetype=is.SD.imputed), size=1) +
+      geom_pointrange(aes(x=uniqueID, y=RR.value, ymin=RR.value	- (1.96*Log.RR.Var), ymax=RR.value	+ (1.96*Log.RR.Var),colour=colouring,alpha=is.SD.imputed,linetype=is.SD.imputed), size=1) +
       geom_hline(x=0,linetype ="twodash")  +
-      
-      
+
       #scale manually to get the legend correct
-      scale_colour_manual(values  =c("#FF6633","#00CC00")) +
-      scale_x_discrete("Response Ratio",breaks= as.character(data.to.plot$uniqueID),labels=data.to.plot$axes.naming)  +
+      scale_colour_manual(values=c("#FF6633","grey","#00CC00","grey")) +
+      scale_x_discrete("Study ID",breaks= as.character(data.to.plot$uniqueID),labels=data.to.plot$axes.naming)  +
       scale_alpha_discrete(range = c(1,0.4)) + 
-      scale_linetype_discrete(c("solid","twodash")) +
+      scale_linetype_discrete(c("solid","twodash"),guide="none") +
     
       #white background + flip 90 degrees
       theme(axis.ticks.y = element_blank(),panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
-            panel.background = element_rect(colour = "black", size=1,fill=NA), axis.line = element_line(colour = "black")) +
-      coord_flip(ylim=c(0 - max.values,max.values))
-    
+            panel.background = element_rect(colour = "black", size=1,fill=NA), axis.line = element_line(colour = "black"),
+            axis.text.y = element_text(vjust=1)) +
+      coord_flip(ylim=c(0 - max.values,max.values)) +
+      geom_vline(xintercept=seq(from=0.5, to=nrow(data.to.plot)-0.5,by=2),linetype="solid",colour="grey") +
+      
+      #axes labels
+      xlab("Study ID") +
+      ylab("Log Response Ration")+
+      ggtitle(paste("Forest Plot of study case effect sizes\n- ",LUI.level.to.plot))
+      
     print(plot.forest)
-    ggsave(plot.forest, file = paste(c(path2temp, "Forest_plot_",LUI.level.to.plot,".png"), collapse=""), width = 20, height = 8, type = "cairo-png")
+    ggsave(plot.forest, file = paste(c(path2temp, "Forest_plot_",LUI.level.to.plot,".png"), collapse=""), width = 15, height = nrow(data.to.plot) / 5, type = "cairo-png")
     
   }
 ##################
