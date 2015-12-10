@@ -1,14 +1,17 @@
-RRslopes_plot <- function(data, YieldorRichness = c("yield", "richness"), one=1, two=5, three=9, alpha=0.2, covariate ="Product"){
+RRslopes_plot <- function(data, YieldorRichness = c("yield", "richness"), one=1, two=5, three=9, alpha=100, covariate ="Product"){
 	
 	if(YieldorRichness == "yield"){index <- which(names(data) == "Yield.Log.RR")}
 	if(YieldorRichness == "richness"){index <- which(names(data) == "Richness.Log.RR")}
 
-	green <-rgb(51,102,0, alpha=alpha, max=255)
-	brown <- rgb(139,69,19, alpha=alpha, max=255)
-	yellow <- rgb(204,204,0, alpha=alpha, max=255)
-	cols <- data.frame(covariate = levels(newdat$covariate), colour = c(green, brown, yellow))
-	
 	newdat <- data.frame(y=rep(1, nrow(data)), logRR = data[,index], low = data$Low.LUI , high = data$High.LUI, range = data$LUI.range.level, covariate=data[,names(data) == covariate])
+
+
+	green <-rgb(77,175,74, alpha=alpha, max=255)
+	red <- rgb(228,26,28, alpha=alpha, max=255)
+	blue <- rgb(55,126,184, alpha=alpha, max=255)
+	cols <- data.frame(covariate = levels(newdat$covariate), colour = c(green, red, blue))
+	
+	newdat$Colour <- cols$colour[match(newdat$covariate, cols$covariate)]
 	
 	newdat$y[newdat$low == newdat$high] <- one
 	newdat$y[newdat$low == "low" & newdat$high == "medium"] <- two
@@ -33,8 +36,7 @@ RRslopes_plot <- function(data, YieldorRichness = c("yield", "richness"), one=1,
 	plot(newdat$x1, newdat$y, pch=19, ylim =c(0, max(newdat$h)), xlim=c(1, 6), ylab="", xlab="", xaxt="n", yaxt="n", col="white")
 	abline(v=2.5, b=0, lty=2);abline(v=4.5, b=0, lty=2)
 	points(newdat$x2, newdat$h, pch=19, col="white")
-	segments(newdat$x1, newdat$y,newdat$x2, newdat$h, col=rgb(0, 0, 0, alpha=alpha))
-	# col=cols$colour[match(newdat$covariate, cols$covariate)])
+	segments(newdat$x1, newdat$y,newdat$x2, newdat$h, col=paste(newdat$Colour))
 	axis(1, at=c(1.75, 3.5, 5.50), labels=c("Low", "Medium", "High"), tick = FALSE)
 	axis(2, at=c(one-1, one, one+1, two-1, two, two+1, three-1, three, three+1), labels = c(rep(c(0, 1, 2), time=3)), tick=FALSE, las=2)
 	abline(h=(one+two)/2, lty=3)
