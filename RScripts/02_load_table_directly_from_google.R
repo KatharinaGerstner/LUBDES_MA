@@ -41,6 +41,17 @@ convertYieldUnits <- function(data){
 	
 	data$yield.unit <- new_units
 	data$yield.mean <- new_means
+	
+	data$Yield.Unit.Type <- NA
+	counts <- c("% conifer", "% fruit set", "% of trees of original volume removed","fruit/sq.m.", "treecover (%)", "trees/ha", "trees/year")
+	mass <- c("g", "kg / animal / day", "kg/tree", "t/ha")
+	volume <- c("m³/ha")
+	area <- c("m", "m²/ha" )
+	data$Yield.Unit.Type[data$yield.unit %in% counts] <- "Count/area"
+	data$Yield.Unit.Type[data$yield.unit %in% mass] <- "Mass/area"
+	data$Yield.Unit.Type[data$yield.unit %in% volume] <- "Volume/area"
+	data$Yield.Unit.Type[data$yield.unit %in% area] <- "Area/area"
+
 	return(data)
 }
 
