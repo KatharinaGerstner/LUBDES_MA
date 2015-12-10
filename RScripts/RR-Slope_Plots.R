@@ -1,4 +1,4 @@
-RRslopes_plot <- function(data, YieldorRichness = c("yield", "richness"), one=1, two=5, three=9, alpha=100, covariate ="Product", dataType = c("model", "raw"), model){
+CatsWhiskers_plot <- function(data, YieldorRichness = c("yield", "richness"), one=1, two=5, three=9, alpha=100, covariate ="Product", dataType = c("model", "raw"), model){
 
 	if(dataType == "raw"){		
 		if(YieldorRichness == "yield"){index <- which(names(data) == "Yield.Log.RR")}
@@ -7,15 +7,16 @@ RRslopes_plot <- function(data, YieldorRichness = c("yield", "richness"), one=1,
 	
 	if(dataType == "model"){
 		if(missing(model)){stop("expecting a model as well")}
-		newdat <- expand.grid(LUI.range.level=levels(data$LUI.range.level), BIOME=levels(data$BIOME), Species.Group =levels(data$Species.Group), Product=levels(data$Product), Richness.Log.RR=NA, y=1)
-		
-		# newdat <- data.frame(BIOME = factor("Drylands", levels=levels(modelDataRichness$BIOME)), LUI.range.level = factor("low-low", levels=levels(modelDataRichness$LUI.range.level)), Species.Group = factor("invertebrates", levels=levels(modelDataRichness$Species.Group)))
-		
+		newdat <- expand.grid(LUI.range.level=levels(data$LUI.range.level), BIOME=levels(data$BIOME), Species.Group =levels(data$Species.Group), covariate=levels(data$Product), logRR=NA, y=1)
+			
 		mm <- model.matrix(~as.factor(Species.Group) + as.factor(LUI.range.level) + as.factor(BIOME), data=newdat)
 		mm <- mm[,-which(colnames(mm)=="(Intercept)")]
 		preds <- predict.rma(model, newmods = mm)
-		newdat$pred <- preds$pred
+		newdat$logRR <- preds$pred
+		names(newdat)[names(newdat) == "LUI.range.level"] <- "range"
 	}
+	
+	
 
 	green <-rgb(77,175,74, alpha=alpha, max=255)
 	red <- rgb(228,26,28, alpha=alpha, max=255)
