@@ -7,13 +7,15 @@ CatsWhiskers_plot <- function(data, YieldorRichness = c("yield", "richness"), on
 	
 	if(dataType == "model"){
 		if(missing(model)){stop("expecting a model as well")}
-		newdat <- expand.grid(LUI.range.level=levels(data$LUI.range.level), BIOME=levels(data$BIOME), Species.Group =levels(data$Species.Group), covariate=levels(data$Product), logRR=NA, y=1)
+		newdat <- expand.grid(LUI.range.level=levels(data$LUI.range.level), BIOME=levels(data$BIOME), Species.Group =levels(data$Species.Group), Product=levels(data$Product), logRR=NA, y=1)
 			
-		mm <- model.matrix(~as.factor(Species.Group) + as.factor(LUI.range.level) + as.factor(BIOME), data=newdat)
+		mm <- model.matrix(model$call$mods, data=newdat)
 		mm <- mm[,-which(colnames(mm)=="(Intercept)")]
 		preds <- predict.rma(model, newmods = mm)
 		newdat$logRR <- preds$pred
 		names(newdat)[names(newdat) == "LUI.range.level"] <- "range"
+		names(newdat)[names(newdat) == "Product"] <- "covariate"
+		
 	}
 	
 	
@@ -61,11 +63,3 @@ CatsWhiskers_plot <- function(data, YieldorRichness = c("yield", "richness"), on
 	
 }
 
-
-pdf("/Users/Helen/tmp/richness.pdf")
-RRslopes_plot(ES.frame, YieldorRichness = c("richness"), one=1, two=5, three=9, alpha=0.2)
-dev.off()
-
-pdf("/Users/Helen/tmp/yield.pdf")
-RRslopes_plot(ES.frame, YieldorRichness = c("yield"), one=1, two=5, three=9, alpha=0.2)
-dev.off()
