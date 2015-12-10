@@ -705,9 +705,10 @@ for(LUI.level.to.plot in LUI.range.level){
   plot.forest =
       ggplot(data=data.to.plot) +
       
-      geom_pointrange(aes(x=uniqueID, y=RR.value, ymin=RR.value	- (1.96*Log.RR.Var), ymax=RR.value	+ (1.96*Log.RR.Var),colour=colouring,alpha=is.SD.imputed,linetype=is.SD.imputed), size=1) +
+      geom_linerange(aes(x=uniqueID,ymin=RR.value	- (1.96*Log.RR.Var), ymax=RR.value	+ (1.96*Log.RR.Var),colour=colouring,alpha=is.SD.imputed,linetype=is.SD.imputed),size=1.5) +
+      geom_point(aes(x=uniqueID, y=RR.value,colour=colouring),size=5) +
       geom_hline(x=0,linetype ="twodash")  +
-
+      
       #scale manually to get the legend correct
       scale_colour_manual(values=c("#FF6633","grey","#00CC00","grey")) +
       scale_x_discrete("Study ID",breaks= as.character(data.to.plot$uniqueID),labels=data.to.plot$axes.naming)  +
@@ -729,7 +730,7 @@ for(LUI.level.to.plot in LUI.range.level){
     print(plot.forest)
     ggsave(plot.forest, file = paste(c(path2temp, "Forest_plot_",LUI.level.to.plot,".png"), collapse=""), width = 15, height = nrow(data.to.plot) / 5, type = "cairo-png")
     
-  }
+}
 ##################
 ### RESTERAMPE ###
 ##################
