@@ -45,6 +45,6 @@ RMASelect <- function(model){
   stats$df[is.na(stats$df)] <- dfs[match(stats$terms[is.na(stats$df)],currentTerms)]
   stats$P[is.na(stats$P)] <- Ps[match(stats$terms[is.na(stats$P)],currentTerms)]
   
-  return(stats)
+  return(list(model=currentModel,stats=stats))
   
 }

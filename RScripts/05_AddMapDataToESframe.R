@@ -34,7 +34,7 @@ if (file.exists("terr-ecoregions-TNC.zip")==FALSE){
   unzip("terr-ecoregions-TNC.zip")
   } else {unzip("terr-ecoregions-TNC.zip")}
 
-ecoregions <- readOGR(".","tnc_terr_ecoregions")
+ecoregions <- readOGR(".","tnc_terr_ecoregions",verbose = FALSE)
 
 # extract ecoregions
 realms_extract <- extract(ecoregions,lonlat)
