@@ -87,12 +87,12 @@ if (cn == "cle162m-10.local")
   path2wd <- "C:/Users/kambach/Desktop/aktuelle Arbeiten/SESYNC/LUBDES_MA-master/RScripts/" #SK
   path2temp <- "C:/Users/kambach/Desktop/aktuelle Arbeiten/SESYNC/LUBDES_MA-master/RScripts/" #SK
     
-}else
-{
+} else if (cn == "Helen-Phillipss-MacBook-Pro.local"){
+	path2wd <- "/Users/Helen/LUBDES_MA/RScripts/"
+	path2temp <- "/Users/Helen/tmp/" ##HP
+} else {
   path2wd <- "C:/Users/hoppek/Documents/GitHub/LUBDES_MA/RScripts/" #KG
-  path2temp <- "C:/Users/hoppek/Documents/temp" #KG
-  
-  
+  path2temp <- "C:/Users/hoppek/Documents/temp" #KG 
 }
 
 ############################################################################
