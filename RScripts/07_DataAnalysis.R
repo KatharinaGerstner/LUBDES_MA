@@ -29,12 +29,20 @@
 ES.frame <- subset(ES.frame, Richness.Log.RR.Var>0 & Yield.Log.RR.Var>0) # restrict analysis to study cases with positive variances
 #ES.frame$LUI.range <- factor(ES.frame$LUI.range)
 
+ES.frame$Species.Group<-paste(ES.frame$Species.Group)
+ES.frame$Species.Group[(ES.frame$Species.Group=="arthropods")]<-"invertebrates"
+ES.frame$Species.Group[(ES.frame$Species.Group=="non-arthropod invertebrates")]<-"invertebrates"
+ES.frame$Species.Group[(ES.frame$Species.Group=="fungi")]<-NA
+ES.frame$Species.Group<-factor(ES.frame$Species.Group)
+
+
 ### Remove pseudo-replicates
 ES.frame.richness <- ES.frame[!duplicated(ES.frame[,c("Study.ID","Case.ID","LUI.range.level","Species.Group")]),]
 ES.frame.yield <- ES.frame[!duplicated(ES.frame[,c("Study.ID","LUI.range.level","Product")]),]
 
 ES.frame.noLU <- subset(ES.frame.noLU, Richness.Log.RR.Var>0) # restrict analysis to study cases with positive variances
 ES.frame.noLU.richness <- ES.frame.noLU[!duplicated(ES.frame.noLU[,c("Study.Case","High.LUI","Species.Group")]),]
+
 
 ### store models in a list
 Richness.MA.model <- list() 
@@ -65,6 +73,7 @@ MA.coeffs.cont <- data.frame(Moderator="None",Richness.intercept=Richness.MA.fit
 ############################################################################
 
 ### define list of moderators
+<<<<<<< HEAD
 
 # moderator.list.cat <- c("Land.use...land.cover","Species.Group","Trophic.Level","LUI.range.level","Product", "ES.From.BD","BIOME", "main_climate","start.agr.use")
 # moderator.list.cont <- c("GDP.pc.2000","annual_mean_radiation","rel_capital_stock_in_agriculture","habitat_dissimilarity","time.since.first.use", "pop.dens.2000","npp","humanfootprint")
@@ -72,6 +81,26 @@ MA.coeffs.cont <- data.frame(Moderator="None",Richness.intercept=Richness.MA.fit
 moderator.list.cat <- c("Species.Group","LUI.range.level","Product","BIOME","start.agr.use")
 moderator.list.cont <- c("rel_capital_stock_in_agriculture","habitat_dissimilarity","time.since.first.use","npp")#, "humanfootprint")
 # >>>>>>> c752287a9cab37b1bf585d8b2e21834d3ab71220
+=======
+moderator.list.cat <- c("Species.Group","LUI.range.level","Product","BIOME")
+moderator.list.cont <- c("rel_capital_stock_in_agriculture","habitat_dissimilarity","time.since.first.use","npp")
+>>>>>>> de0381ed29e46f0c762ea28316190983930627dc
+
+moderator.list <- c(moderator.list.cat,moderator.list.cont)
+modelFormula <- as.formula(paste("~",paste(moderator.list,collapse="+"),sep=""))
+
+modelData <- ES.frame.richness[,c('Richness.Log.RR','Richness.Log.RR.Var','Species.Group','LUI.range.level','Product','BIOME',
+                         'rel_capital_stock_in_agriculture','habitat_dissimilarity','time.since.first.use','npp',
+                         'Case.ID','Study.ID','Study.Case','Low.LUI','High.LUI')]
+modelData <- na.omit(modelData)
+
+Richness.MA.fit <- rma.mv(yi=Richness.Log.RR, V=Richness.Log.RR.Var, mods=~Species.Group + LUI.range.level + Product + BIOME + 
+                            rel_capital_stock_in_agriculture + habitat_dissimilarity + 
+                            time.since.first.use + npp, random = ~factor(Case.ID)|factor(Study.ID), struct="CS", 
+                          slab=paste(Study.Case, Low.LUI, High.LUI,sep="_"),
+                          method="ML", tdist=FALSE, level=95, digits=4,data=modelData)
+
+stats<-RMASelect(Richness.MA.fit)
 
 ### run analysis for categorical moderators
 for(mods in moderator.list.cat){
