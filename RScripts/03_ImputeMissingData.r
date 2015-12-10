@@ -17,12 +17,12 @@ dataimp <- data
 dataimp$richness.SD[data$richness.SD==0] <- NA
 dataimp$yield.SD[data$yield.SD==0] <- NA
 
-<<<<<<< HEAD
+
 ###########################################################################
 ## 03.1. crude-impute based on average SD/mean ratio
 ## 
 ###########################################################################
-=======
+
 ##########################################
 # SK: save which results were imputed
 dataimp$Yield.SD.is.imputed = "no"
@@ -60,7 +60,6 @@ dataimp$Richness.SD.is.imputed[which(is.na(dataimp$richness.SD))] = "yes"
 # ### -1sd
 # #dataimp$richness.SD[is.na(dataimp$richness.SD)]<-(dataimp$richness.mean[is.na(dataimp$richness.SD)]*(mean_richness_sd_of_mean-sd_richness_sd_of_mean))
 # #dataimp$yield.SD[is.na(dataimp$yield.SD)]<-(dataimp$yield.mean[is.na(dataimp$yield.SD)]*(mean_yield_sd_of_mean-sd_yield_sd_of_mean))
->>>>>>> de0381ed29e46f0c762ea28316190983930627dc
 
 dataimp$richness_sd_of_mean<-apply(subset(dataimp, select=c(richness.mean,richness.SD)),1,function(x) (x[2]/x[1]))
 dataimp$yield_sd_of_mean<-apply(subset(dataimp, select=c(yield.mean,yield.SD)),1,function(x) (x[2]/x[1]))
