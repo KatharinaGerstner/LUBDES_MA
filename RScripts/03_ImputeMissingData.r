@@ -23,12 +23,12 @@ dataimp$yield.SD[data$yield.SD==0] <- NA
 ## 
 ###########################################################################
 # 
-# ##########################################
-# # SK: save which results were imputed
-# dataimp$Yield.SD.is.imputed = "no"
-# dataimp$Yield.SD.is.imputed[which(is.na(dataimp$yield.SD))] = "yes"
-# dataimp$Richness.SD.is.imputed = "no"
-# dataimp$Richness.SD.is.imputed[which(is.na(dataimp$richness.SD))] = "yes"
+##########################################
+# SK: save which results were imputed
+dataimp$Yield.SD.is.imputed = "no"
+dataimp$Yield.SD.is.imputed[which(is.na(dataimp$yield.SD))] = "yes"
+dataimp$Richness.SD.is.imputed = "no"
+dataimp$Richness.SD.is.imputed[which(is.na(dataimp$richness.SD))] = "yes"
 # 
 ############################################################################
 ### 03.1. crude-impute based on average SD/mean ratio
