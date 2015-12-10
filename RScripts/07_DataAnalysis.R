@@ -28,6 +28,13 @@
 
 ES.frame <- subset(ES.frame, Richness.Log.RR.Var>0 & Yield.Log.RR.Var>0) # restrict analysis to study cases with positive variances
 
+ES.frame$Species.Group<-paste(ES.frame$Species.Group)
+ES.frame$Species.Group[(ES.frame$Species.Group=="arthropods")]<-"invertebrates"
+ES.frame$Species.Group[(ES.frame$Species.Group=="non-arthropod invertebrates")]<-"invertebrates"
+ES.frame$Species.Group[(ES.frame$Species.Group=="fungi")]<-NA
+ES.frame$Species.Group<-factor(ES.frame$Species.Group)
+
+
 ### Remove pseudo-replicates
 ES.frame.richness <- ES.frame[!duplicated(ES.frame[,c("Study.ID","Case.ID","LUI.range.level","Species.Group")]),]
 ES.frame.yield <- ES.frame[!duplicated(ES.frame[,c("Study.ID","LUI.range.level","Product")]),]
@@ -59,12 +66,12 @@ for(x in unique(ES.frame$Study.Case)){
   if (all(c("low-medium","low-high") %in% unique(subset.richness$LUI.range.level))){
     row.1 <- which(ES.frame.richness$Study.Case==x & ES.frame.richness$LUI.range.level=="low-medium")
     col.1 <- which(ES.frame.richness$Study.Case==x & ES.frame.richness$LUI.range.level=="low-high")
-    Var.Richness[row.1,col.1] <- Var.Richness[col.1,row.1] <- subset.richness$Richness.SD.Low[which(subset.richness$LUI.range.level=="low-medium")]^2/(subset.richness$Richness.N.Low[which(subset.richness$LUI.range.level=="low-medium")]*subset.richness$Richness.Mean.Low[which(subset.richness$LUI.range.level=="low-medium")]) ## sd_cÂ²/(n_c*mean(X_c)Â²), cf. Lajeunesse (2011) Ecology
+    Var.Richness[row.1,col.1] <- Var.Richness[col.1,row.1] <- subset.richness$Richness.SD.Low[which(subset.richness$LUI.range.level=="low-medium")]^2/(subset.richness$Richness.N.Low[which(subset.richness$LUI.range.level=="low-medium")]*subset.richness$Richness.Mean.Low[which(subset.richness$LUI.range.level=="low-medium")]) ## sd_c²/(n_c*mean(X_c)²), cf. Lajeunesse (2011) Ecology
   }
   if (all(c("low-medium","low-high") %in% unique(subset.yield$LUI.range.level))){
     row.1 <- which(ES.frame.yield$Study.Case==x & ES.frame.yield$LUI.range.level=="low-medium")
     col.1 <- which(ES.frame.yield$Study.Case==x & ES.frame.yield$LUI.range.level=="low-high")
-    Var.Yield[row.1,col.1] <- Var.Yield[col.1,row.1] <- subset.yield$Yield.SD.Low[which(subset.yield$LUI.range.level=="low-medium")]^2/(subset.yield$Yield.N.Low[which(subset.yield$LUI.range.level=="low-medium")]*subset.yield$Yield.Mean.Low[which(subset.yield$LUI.range.level=="low-medium")]) ## sd_cÂ²/(n_c*mean(X_c)Â²), cf. Lajeunesse (2011) Ecology
+    Var.Yield[row.1,col.1] <- Var.Yield[col.1,row.1] <- subset.yield$Yield.SD.Low[which(subset.yield$LUI.range.level=="low-medium")]^2/(subset.yield$Yield.N.Low[which(subset.yield$LUI.range.level=="low-medium")]*subset.yield$Yield.Mean.Low[which(subset.yield$LUI.range.level=="low-medium")]) ## sd_c²/(n_c*mean(X_c)²), cf. Lajeunesse (2011) Ecology
   }
 }
 
@@ -100,6 +107,22 @@ MA.coeffs.cont <- data.frame(Moderator="None",Richness.intercept=Richness.MA.fit
 ### define list of moderators
 moderator.list.cat <- c("Species.Group","LUI.range.level","Product","BIOME")
 moderator.list.cont <- c("rel_capital_stock_in_agriculture","habitat_dissimilarity","time.since.first.use","npp")
+
+moderator.list <- c(moderator.list.cat,moderator.list.cont)
+modelFormula <- as.formula(paste("~",paste(moderator.list,collapse="+"),sep=""))
+
+modelData <- ES.frame.richness[,c('Richness.Log.RR','Richness.Log.RR.Var','Species.Group','LUI.range.level','Product','BIOME',
+                         'rel_capital_stock_in_agriculture','habitat_dissimilarity','time.since.first.use','npp',
+                         'Case.ID','Study.ID','Study.Case','Low.LUI','High.LUI')]
+modelData <- na.omit(modelData)
+
+Richness.MA.fit <- rma.mv(yi=Richness.Log.RR, V=Richness.Log.RR.Var, mods=~Species.Group + LUI.range.level + Product + BIOME + 
+                            rel_capital_stock_in_agriculture + habitat_dissimilarity + 
+                            time.since.first.use + npp, random = ~factor(Case.ID)|factor(Study.ID), struct="CS", 
+                          slab=paste(Study.Case, Low.LUI, High.LUI,sep="_"),
+                          method="ML", tdist=FALSE, level=95, digits=4,data=modelData)
+
+stats<-RMASelect(Richness.MA.fit)
 
 ### run analysis for categorical moderators
 for(mods in moderator.list.cat){
