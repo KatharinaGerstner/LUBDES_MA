@@ -103,27 +103,32 @@ moderator.list.cont <- c("rel_capital_stock_in_agriculture","npp")
 
 moderator.list <- c(moderator.list.cat,moderator.list.cont)
 
-modelData <- ES.frame.richness[,c('Richness.Log.RR','Richness.Log.RR.Var', paste(moderator.list,sep=","),
+modelData <- ES.frame.richness[,c('Richness.Log.RR','Richness.Log.RR.Var','Species.Group','LUI.range.level','Product','BIOME',
+                         'rel_capital_stock_in_agriculture',
                          'Case.ID','Study.ID','Study.Case','Low.LUI','High.LUI')]
 modelData <- na.omit(modelData)
 
-Richness.MA.full <- rma.mv(yi=Richness.Log.RR, V=Richness.Log.RR.Var, mods=~Species.Group + LUI.range.level + Product + BIOME + rel_capital_stock_in_agriculture + npp, 
-                          random = ~factor(Case.ID)|factor(Study.ID), struct="CS", 
+Richness.MA.full <- rma.mv(yi=Richness.Log.RR, V=Richness.Log.RR.Var, mods=~Species.Group + LUI.range.level + Product + BIOME + 
+                            rel_capital_stock_in_agriculture, 
+                           random = ~factor(Case.ID)|factor(Study.ID), struct="CS", 
                           slab=paste(Study.Case, Low.LUI, High.LUI,sep="_"),
                           method="ML", tdist=FALSE, level=95, digits=4,data=modelData)
 
 RichnessModel<-RMASelect(Richness.MA.full)
 
-modelData <- ES.frame.yield[,c('Yield.Log.RR','Yield.Log.RR.Var', paste(moderator.list),
+modelData <- ES.frame.yield[,c('Yield.Log.RR','Yield.Log.RR.Var','Species.Group','LUI.range.level','Product','BIOME',
+                                'rel_capital_stock_in_agriculture',
                                 'Case.ID','Study.ID','Study.Case','Low.LUI','High.LUI')]
 modelData <- na.omit(modelData)
 
-Yield.MA.full <- try(rma.mv(yi=Yield.Log.RR,V=Yield.Log.RR.Var,mods=~Species.Group + LUI.range.level + Product + BIOME + rel_capital_stock_in_agriculture + npp,
+Yield.MA.full <- try(rma.mv(yi=Yield.Log.RR,V=Yield.Log.RR.Var,mods=~LUI.range.level + Product + BIOME + 
+                              rel_capital_stock_in_agriculture,
                             random = ~factor(Study.ID), struct="CS", slab=paste(Study.Case, Low.LUI, High.LUI,sep="_"),
                             method="ML", tdist=FALSE, level=95, digits=4,data=modelData),silent=T)
 
 YieldModel <- RMASelect(Yield.MA.full)
 
+save(RichnessModel,YieldModel,file=paste(path2temp,"Models.Rd",sep=""))
 
 # ############################################################################
 # ### 07.4. Analysis with moderators for no LU vs low/medium/high LU
