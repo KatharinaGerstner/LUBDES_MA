@@ -66,18 +66,6 @@ ES.frame.noLU <- cbind(ES.frame.noLU,realms_extract$WWF_MHTNAM)
 colnames(ES.frame.noLU)[which(names(ES.frame.noLU) == "realms_extract$WWF_MHTNAM")]<-"BIOME"
 
 ############################################################################
-### 05.2. Intersect studies with potential NPP
-############################################################################
-#  if (file.exists("tn0_all_gcm.asc")==FALSE){
-#    download.file("https://www.dropbox.com/s/689m9pc5bnejbg9/tn0_all_gcm.asc?dl=1","tn0_all_gcm.asc")
-#  }
-# npp <- raster("tn0_all_gcm.asc",crs=CRS("+proj=longlat +datum=WGS84 +no_defs +ellps=WGS84 +towgs84=0,0,0"))
-# 
-# ES.frame$npp<-extract(npp,lonlat,buffer=100000,fun=mean)
-# 
-# ES.frame.noLU$npp<-extract(npp,lonlat.noLU, buffer=100000, fun=mean)
-# 
-############################################################################
 ### 05.3. Intersect studies with gross capital stock in agriculture
 ############################################################################
 
@@ -242,6 +230,17 @@ setwd(path2wd)
 ############################################################################
 ### Resterampe
 ############################################################################
+## npp
+#  if (file.exists("tn0_all_gcm.asc")==FALSE){
+#    download.file("https://www.dropbox.com/s/689m9pc5bnejbg9/tn0_all_gcm.asc?dl=1","tn0_all_gcm.asc")
+#  }
+# npp <- raster("tn0_all_gcm.asc",crs=CRS("+proj=longlat +datum=WGS84 +no_defs +ellps=WGS84 +towgs84=0,0,0"))
+# 
+# ES.frame$npp<-extract(npp,lonlat,buffer=100000,fun=mean)
+# 
+# ES.frame.noLU$npp<-extract(npp,lonlat.noLU, buffer=100000, fun=mean)
+# 
+
 ## climate zones
 # if (file.exists("1976-2000_GIS.zip")==FALSE){
 #   download.file("http://koeppen-geiger.vu-wien.ac.at/data/1976-2000_GIS.zip","1976-2000_GIS.zip", mode="wb")
