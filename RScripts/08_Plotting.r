@@ -30,6 +30,9 @@ modelDataY <- ES.frame.yield[,c('Yield.Log.RR','Yield.Log.RR.Var','Species.Group
                                'Case.ID','Study.ID','Study.Case','Low.LUI','High.LUI')]
 modelDataY <- na.omit(modelDataY)
 
+modelDataR$LUI.range.level <- factor(modelDataR$LUI.range.level)
+modelDataY$LUI.range.level <- factor(modelDataY$LUI.range.level)
+
 ES.frame$LUI.range.level <- factor(paste(ES.frame$LUI.range.level),levels=levels(modelDataY$LUI.range.level))
 
 predFrame <- data.frame(Species.Group=factor(levels(modelDataR$Species.Group),levels = levels(modelDataR$Species.Group)),

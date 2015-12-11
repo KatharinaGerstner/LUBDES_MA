@@ -1,10 +1,24 @@
-RRslopes_plot <- function(data, YieldorRichness = c("yield", "richness"), one=1, two=5, three=9, alpha=100, covariate ="Product"){
+CatsWhiskers_plot <- function(data, YieldorRichness = c("yield", "richness"), one=1, two=5, three=9, alpha=100, covariate ="Product", dataType = c("model", "raw"), model){
+
+	if(dataType == "raw"){		
+		if(YieldorRichness == "yield"){index <- which(names(data) == "Yield.Log.RR")}
+		if(YieldorRichness == "richness"){index <- which(names(data) == "Richness.Log.RR")}
+		newdat <- data.frame(y=rep(1, nrow(data)), logRR = data[,index], low = data$Low.LUI , high = data$High.LUI, range = data$LUI.range.level, covariate=data[,names(data) == covariate])}
 	
-	if(YieldorRichness == "yield"){index <- which(names(data) == "Yield.Log.RR")}
-	if(YieldorRichness == "richness"){index <- which(names(data) == "Richness.Log.RR")}
-
-	newdat <- data.frame(y=rep(1, nrow(data)), logRR = data[,index], low = data$Low.LUI , high = data$High.LUI, range = data$LUI.range.level, covariate=data[,names(data) == covariate])
-
+	if(dataType == "model"){
+		if(missing(model)){stop("expecting a model as well")}
+		newdat <- expand.grid(LUI.range.level=levels(data$LUI.range.level), BIOME=levels(data$BIOME), Species.Group =levels(data$Species.Group), Product=levels(data$Product), logRR=NA, y=1)
+			
+		mm <- model.matrix(model$call$mods, data=newdat)
+		mm <- mm[,-which(colnames(mm)=="(Intercept)")]
+		preds <- predict.rma(model, newmods = mm)
+		newdat$logRR <- preds$pred
+		names(newdat)[names(newdat) == "LUI.range.level"] <- "range"
+		names(newdat)[names(newdat) == "Product"] <- "covariate"
+		
+	}
+	
+	
 
 	green <-rgb(77,175,74, alpha=alpha, max=255)
 	red <- rgb(228,26,28, alpha=alpha, max=255)
@@ -12,11 +26,13 @@ RRslopes_plot <- function(data, YieldorRichness = c("yield", "richness"), one=1,
 	cols <- data.frame(covariate = levels(newdat$covariate), colour = c(green, red, blue))
 	
 	newdat$Colour <- cols$colour[match(newdat$covariate, cols$covariate)]
-	
-	newdat$y[newdat$low == newdat$high] <- one
-	newdat$y[newdat$low == "low" & newdat$high == "medium"] <- two
-	newdat$y[newdat$low == "medium" & newdat$high == "high"] <- two
-	newdat$y[newdat$low == "low" & newdat$high == "high"] <- three
+		
+	newdat$y[newdat$range == "low-low"] <- one
+	newdat$y[newdat$range == "medium-medium"] <- one
+	newdat$y[newdat$range == "high-high"] <- one
+	newdat$y[newdat$range == "low-medium"] <- two
+	newdat$y[newdat$range == "medium-high"] <- two
+	newdat$y[newdat$range == "low-high"] <- three
 	
 	newdat$x1[newdat$range == "low-low"] <- 1
 	newdat$x2[newdat$range == "low-low"] <- 2
@@ -47,12 +63,3 @@ RRslopes_plot <- function(data, YieldorRichness = c("yield", "richness"), one=1,
 	
 }
 
-
-
-pdf("/Users/Helen/tmp/richness.pdf")
-RRslopes_plot(ES.frame, YieldorRichness = c("richness"), one=1, two=5, three=9, alpha=0.2)
-dev.off()
-
-pdf("/Users/Helen/tmp/yield.pdf")
-RRslopes_plot(ES.frame, YieldorRichness = c("yield"), one=1, two=5, three=9, alpha=0.2)
-dev.off()
