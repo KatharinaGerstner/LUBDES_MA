@@ -99,7 +99,7 @@ MA.coeffs.cont <- data.frame(Moderator="None",Richness.intercept=Richness.MA.fit
 ### define list of moderators
 
 moderator.list.cat <- c("Species.Group","LUI.range.level","Product","BIOME")
-moderator.list.cont <- c("rel_capital_stock_in_agriculture","npp")
+moderator.list.cont <- c("rel_capital_stock_in_agriculture")
 
 moderator.list <- c(moderator.list.cat,moderator.list.cont)
 
@@ -108,8 +108,7 @@ modelDataRichness <- ES.frame.richness[,c('Richness.Log.RR','Richness.Log.RR.Var
                          'Case.ID','Study.ID','Study.Case','Low.LUI','High.LUI')]
 modelDataRichness <- na.omit(modelDataRichness)
 
-Richness.MA.full <- rma.mv(yi=Richness.Log.RR, V=Richness.Log.RR.Var, mods=~Species.Group + LUI.range.level + Product + BIOME + 
-                            rel_capital_stock_in_agriculture, 
+Richness.MA.full <- rma.mv(yi=Richness.Log.RR, V=Richness.Log.RR.Var, mods=~Species.Group + LUI.range.level + Product + BIOME,# +                      rel_capital_stock_in_agriculture, 
                            random = ~factor(Case.ID)|factor(Study.ID), struct="CS", 
                           slab=paste(Study.Case, Low.LUI, High.LUI,sep="_"),
                           method="ML", tdist=FALSE, level=95, digits=4,data=modelDataRichness)

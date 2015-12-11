@@ -14,43 +14,61 @@
 ### show current working directory and check if its local
 getwd()
 
-
 ############################################################################
 ### 08.2. Plot cross-diagrams
 ### 
 ############################################################################
 
-modelDataR <- ES.frame.richness[,c('Richness.Log.RR','Richness.Log.RR.Var','Species.Group','LUI.range.level','Product','BIOME',
-                                  'rel_capital_stock_in_agriculture',
-                                  'Case.ID','Study.ID','Study.Case','Low.LUI','High.LUI')]
-modelDataR <- na.omit(modelDataR)
+### Define predFrame for all possible combinations of one varying covariable m and all other fixed
+sign.terms <- RichnessModel$stats$terms[RichnessModel$stats$P<0.05]
+print(sign.terms)
+comb.terms <- levels(factor(paste(modelDataR[,paste(sign.terms[1])],modelDataR[,paste(sign.terms[2])],modelDataR[,paste(sign.terms[3])],sep="/")))
 
-modelDataY <- ES.frame.yield[,c('Yield.Log.RR','Yield.Log.RR.Var','Species.Group','LUI.range.level','Product','BIOME',
-                               'rel_capital_stock_in_agriculture',
-                               'Case.ID','Study.ID','Study.Case','Low.LUI','High.LUI')]
-modelDataY <- na.omit(modelDataY)
+div.terms <- sapply(comb.terms,function(x){strsplit(x,"/")})
+predFrameR <- data.frame(Species.Group=unlist(lapply(div.terms,function(x) x[1])), 
+                        LUI.range.level=unlist(lapply(div.terms,function(x) x[2])),
+                        BIOME=unlist(lapply(div.terms,function(x) x[3])))
 
 modelDataR$LUI.range.level <- factor(modelDataR$LUI.range.level)
 modelDataY$LUI.range.level <- factor(modelDataY$LUI.range.level)
 
 ES.frame$LUI.range.level <- factor(paste(ES.frame$LUI.range.level),levels=levels(modelDataY$LUI.range.level))
 
-predFrame <- data.frame(Species.Group=factor(levels(modelDataR$Species.Group),levels = levels(modelDataR$Species.Group)),
-                        LUI.range.level=factor("high-high",levels=levels(modelDataR$LUI.range.level)),
-                        BIOME=factor("Tropical Forests",levels=levels(modelDataR$BIOME)))
+predsR <- predict.rma(RichnessModel$model,newmods = newMods)
+predFrameR <- cbind(predFrameR,predsR=predsR$pred,predsR.se=predsR$se)
 
-newMods <- model.matrix(~Species.Group + LUI.range.level + BIOME,data=predFrame)
+
+### Define predFrame for all possible combinations of one varying covariable m and all other fixed
+sign.terms <- YieldModel$stats$terms[YieldModel$stats$P<0.05]
+print(sign.terms)
+comb.terms <- levels(factor(paste(modelDataY[,paste(sign.terms[1])],modelDataY[,paste(sign.terms[2])],sep="/")))
+
+div.terms <- sapply(comb.terms,function(x){strsplit(x,"/")})
+predFrameY <- data.frame(LUI.range.level=unlist(lapply(div.terms,function(x) x[1])), 
+                         Product=unlist(lapply(div.terms,function(x) x[2])))
+
+newMods <- model.matrix(~ LUI.range.level + Product, data=predFrameY)
 newMods <- newMods[,-which(colnames(newMods)=="(Intercept)")]
 
-predsR <- predict.rma(RichnessModel$model,newmods = newMods)
-predsR<-data.frame(pred=predsR$pred,se=predsR$se)
-predsR$Species.Group <- factor(levels(modelDataR$Species.Group),levels = levels(modelDataR$Species.Group))
+predsY <- predict.rma(YieldModel$model,newmods = newMods)
+predFrameY <- cbind(predFrameY,predsY=predsY$pred,predsY.se=predsY$se)
 
-predsY <- data.frame(pred=rep(coefficients(Yield.MA.fit),dim(predsR)[1]),
-                     se=rep(Yield.MA.fit$se,dim(predsR)[1]))
+predFrame <- join(predFrameR,predFrameY,type="full")
 
-predsY$Species.Group <- factor(levels(modelDataR$Species.Group),levels = levels(modelDataR$Species.Group))
-
+for (lui in levels(predFrameR$LUI.range.level){
+  predFrame.subset <- subset(predFrame, LUI.range.level == lui)
+  predFrame.subset$Class <- paste(predFrame.subset$Species.Group,predFrame.subset$BIOME,predFrame.subset$Product,sep="/")
+  plot.lui <- ggplot(data=predFrame.subset) +
+    geom_pointrange(aes(x=predsY, y=predsR, ymin=predsR - (1.96*predsR.se), ymax=predsR + (1.96*predsR.se), color=Class), size=1.5) +
+    geom_segment(aes(x=predsY - (1.96*predsY.se), xend=predsY + (1.96*predsY.se), y = predsR, yend = predsR, color=Class),size=1.5) +
+    geom_hline(x=0, linetype="twodash") + geom_vline(y=0, linetype="twodash") +
+    scale_y_continuous(labels=trans_format("exp",comma_format(digits=2))) + 
+    scale_x_continuous(labels=trans_format("exp",comma_format(digits=2))) +
+    scale_colour_brewer(palette="Set1",labels=paste(predFrame.subset$Class)) +
+    ylab("RR (Species Richness)") + xlab("RR (Yield)") + labs(color=paste(lui)) +
+    theme(axis.title = element_text(size = rel(1.5)), axis.text = element_text(size = rel(1.5)),legend.text=element_text(size = rel(1.5)),legend.title=element_text(size = rel(1.5)))
+  save
+}
 plot <- ggplot() + 
   geom_point(data=ES.frame, aes(x=Yield.Log.RR, y=Richness.Log.RR, color=as.factor(ES.frame[,'Species.Group'])), size=4, alpha=.5) +
   geom_pointrange(data=predsR, aes(x=predsY$pred, y=pred, ymin=pred - (1.96*se), 

@@ -41,19 +41,21 @@ realms_extract <- extract(ecoregions,lonlat)
 ES.frame <- cbind(ES.frame,realms_extract$WWF_MHTNAM)
 colnames(ES.frame)[which(names(ES.frame) == "realms_extract$WWF_MHTNAM")]<-"BIOME"
 
+### reclassify Biomes in coarse classes
 ES.frame$BIOME <- paste(ES.frame$BIOME)
-ES.frame$BIOME[(ES.frame$BIOME=="Tropical and Subtropical Moist Broadleaf Forests")]<-"Tropical Forests"
-ES.frame$BIOME[(ES.frame$BIOME=="Tropical and Subtropical Dry Broadleaf Forests")]<-"Tropical Forests"
-ES.frame$BIOME[(ES.frame$BIOME=="Tropical and Subtropical Coniferous Forests")]<-"Tropical Forests"
-ES.frame$BIOME[(ES.frame$BIOME=="Temperate Broadleaf and Mixed Forests")]<-"Temperate_Boreal Forests"
-ES.frame$BIOME[(ES.frame$BIOME=="Temperate Conifer Forests")]<-"Temperate_Boreal Forests"
-ES.frame$BIOME[(ES.frame$BIOME=="Boreal Forests/Taiga")]<-"Temperate_Boreal Forests"
-ES.frame$BIOME[(ES.frame$BIOME=="Mediterranean Forests, Woodlands and Scrub")]<-"Drylands"
-ES.frame$BIOME[(ES.frame$BIOME=="Deserts and Xeric Shrublands")]<-"Drylands"
-ES.frame$BIOME[(ES.frame$BIOME=="Tropical and Subtropical Grasslands, Savannas and Shrublands")]<-"Tropical Grasslands"
-ES.frame$BIOME[(ES.frame$BIOME=="Flooded Grasslands and Savannas")]<-"Tropical Grasslands"
-ES.frame$BIOME[(ES.frame$BIOME=="Temperate Grasslands, Savannas and Shrublands")]<-"Temperate_Montane Grasslands"
-ES.frame$BIOME[(ES.frame$BIOME=="Montane Grasslands and Shrublands")]<-"Temperate_Montane Grasslands"
+ES.frame$BIOME[(ES.frame$BIOME %in% c("Tropical and Subtropical Moist Broadleaf Forests",
+                                      "Tropical and Subtropical Dry Broadleaf Forests",
+                                      "Tropical and Subtropical Coniferous Forests",
+                                      "Tropical and Subtropical Coniferous Forests"))] <- "Tropical_Forests"
+ES.frame$BIOME[(ES.frame$BIOME %in% c("Temperate Broadleaf and Mixed Forests",
+                                      "Temperate Conifer Forests",
+                                      "Boreal Forests/Taiga"))] <- "Temperate_Boreal_Forests"
+ES.frame$BIOME[(ES.frame$BIOME %in% c("Mediterranean Forests, Woodlands and Scrub",
+                                      "Deserts and Xeric Shrublands"))] <- "Drylands"
+ES.frame$BIOME[(ES.frame$BIOME %in% c("Tropical and Subtropical Grasslands, Savannas and Shrublands",
+                                      "Flooded Grasslands and Savannas"))] <- "Tropical_Grasslands"
+ES.frame$BIOME[(ES.frame$BIOME %in% c("Temperate Grasslands, Savannas and Shrublands",
+                                      "Montane Grasslands and Shrublands"))]<-"Temperate_Montane_Grasslands"
 ES.frame$BIOME[(ES.frame$BIOME=="NA")]<-NA
 ES.frame$BIOME <- factor(ES.frame$BIOME)
 
@@ -155,7 +157,7 @@ hyde.year.of.first.use <- apply(hyde.extract.year.of.first.use,1,function(x){ife
 kk10.extract.year.of.first.use <- extract(kk10.LUhist.stack,lonlat) 
 names(kk10.extract.year.of.first.use) <- c("-6000","-3000","-1000","0","1000","1500","1750","1900","1950","2000")
 kk10.year.of.first.use <- apply(kk10.extract.year.of.first.use,1,function(x){ifelse(sum(x)>0,as.numeric(names(kk10.extract.year.of.first.use)[min(which(x==1))]),NA)}) # NA if no significant use were detectable
-ES.frame$time.since.first.use <- log10(2000-apply(cbind(hyde.year.of.first.use,kk10.year.of.first.use),1,function(x){ifelse(all(is.na(x)),NA,min(x,na.rm=T))})+1)
+ES.frame$time.since.first.use <- log10(2000-apply(cbind(hyde.year.of.first.use,kk10.year.of.first.use),1,function(x){ifelse(all(is.na(x)),2000,min(x,na.rm=T))})+1) # set not yet used land to log10(1)=0
 ES.frame$start.agr.use <- ifelse(ES.frame$time.since.first.use >= 500,"old","young")
 ES.frame$start.agr.use[is.na(ES.frame$start.agr.use)] <- "not yet used"
 
@@ -166,7 +168,7 @@ hyde.year.of.first.use <- apply(hyde.extract.year.of.first.use,1,function(x){ife
 kk10.extract.year.of.first.use <- extract(kk10.LUhist.stack,lonlat.noLU) 
 names(kk10.extract.year.of.first.use) <- c("-6000","-3000","-1000","0","1000","1500","1750","1900","1950","2000")
 kk10.year.of.first.use <- apply(kk10.extract.year.of.first.use,1,function(x){ifelse(sum(x)>0,as.numeric(names(kk10.extract.year.of.first.use)[min(which(x==1))]),NA)}) # NA if no significant use were detectable
-ES.frame.noLU$time.since.first.use <- log10(2000-apply(cbind(hyde.year.of.first.use,kk10.year.of.first.use),1,function(x){ifelse(all(is.na(x)),NA,min(x,na.rm=T))})+1)
+ES.frame.noLU$time.since.first.use <- log10(2000-apply(cbind(hyde.year.of.first.use,kk10.year.of.first.use),1,function(x){ifelse(all(is.na(x)),2000,min(x,na.rm=T))})+1) # set not yet used land to log10(1)=0
 ES.frame.noLU$start.agr.use <- ifelse(ES.frame.noLU$time.since.first.use >= 500,"old","young")
 ES.frame.noLU$start.agr.use[is.na(ES.frame.noLU$start.agr.use)] <- "not yet used"
 
@@ -233,7 +235,7 @@ ES.frame.noLU$humanfootprint <- log10(extract(humanfootprint,lonlat.noLU, buffer
 ############################################################################
 ### remove objectes to save workspace
 ############################################################################
-rm(lonlat, lonlat.noLU,ecoregions, realms_extract, npp ,agricultural_area,capital_stock_in_agriculture,habitat_dissimilarity, timeseries.hyde,timeseries.kk10,hyde.LUhist.stack,kk10.LUhist.stack,hyde.extract.year.of.first.use,kk10.extract.year.of.first.use,hyde.year.of.first.use,kk10.year.of.first.use)
+rm(lonlat, lonlat.noLU,ecoregions, realms_extract, npp ,agricultural_area,capital_stock_in_agriculture,habitat_dissimilarity, timeseries.hyde,timeseries.kk10,hyde.LUhist.stack,kk10.LUhist.stack,hyde.extract.year.of.first.use,kk10.extract.year.of.first.use,hyde.year.of.first.use,kk10.year.of.first.use,humanfootprint)
 
 setwd(path2wd)
 

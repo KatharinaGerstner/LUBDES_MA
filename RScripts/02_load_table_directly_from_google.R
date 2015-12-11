@@ -157,9 +157,6 @@ data <- data[-(which(is.na(data$yield.mean))),]
 ### create study-case identifier
 data$study.case <- factor(paste(data$Study.ID,data$Case.ID,sep="_"))
 
-
-
-
 ###########################################################################
 ### Resterampe
 
