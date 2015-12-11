@@ -144,12 +144,19 @@ for(i in unique(dataimp$study.case)){
 
 }
 
-ES.frame$LUI.range.level <- paste(ES.frame$Low.LUI,ES.frame$High.LUI,sep="-")
+ES.frame$LUI.range.level <- factor(paste(ES.frame$Low.LUI,ES.frame$High.LUI,sep="-"))
 
 ES.frame$LUI.range <- NA
 ES.frame$LUI.range[ES.frame$LUI.range.level %in% c("low-low","medium-medium","high-high")] <- 0
 ES.frame$LUI.range[ES.frame$LUI.range.level %in% c("low-medium","medium-high")] <- 1
 ES.frame$LUI.range[ES.frame$LUI.range.level %in% c("low-high")] <- 2
+
+ES.frame$Species.Group<-paste(ES.frame$Species.Group)
+ES.frame$Species.Group[(ES.frame$Species.Group=="arthropods")]<-"invertebrates"
+ES.frame$Species.Group[(ES.frame$Species.Group=="non-arthropod invertebrates")]<-"invertebrates"
+ES.frame$Species.Group[(ES.frame$Species.Group=="fungi")]<-NA
+ES.frame$Species.Group[(ES.frame$Species.Group=="NA")]<-NA
+ES.frame$Species.Group<-factor(ES.frame$Species.Group)
 
 ES.frame$Study.Case <- paste(ES.frame$Study.ID,ES.frame$Case.ID,sep="-")
 ES.frame.noLU$Study.Case <- paste(ES.frame.noLU$Study.ID,ES.frame.noLU$Case.ID,sep="-")
