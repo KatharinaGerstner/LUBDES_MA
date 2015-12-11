@@ -42,10 +42,10 @@ for(x in unique(ES.frame$Study.Case)){
   subset.yield <- subset(ES.frame.yield,Study.Case==x)
   ## remove redundant cases
   if (all(c("low-medium","low-high","medium-high") %in% unique(subset.richness$LUI.range.level))){
-    ES.frame.richness <- ES.frame.richness[!(ES.frame.richness$Study.Case==x & ES.frame.richness$LUI.range.level=="medium-high"),]
+    ES.frame.richness <- ES.frame.richness[!(ES.frame.richness$Study.Case==x & ES.frame.richness$LUI.range.level=="low-high"),]
   }
   if (all(c("low-medium","low-high","medium-high") %in% unique(subset.yield$LUI.range.level))){
-    ES.frame.yield <- ES.frame.yield[!(ES.frame.yield$Study.Case==x & ES.frame.yield$LUI.range.level=="medium-high"),]
+    ES.frame.yield <- ES.frame.yield[!(ES.frame.yield$Study.Case==x & ES.frame.yield$LUI.range.level=="low-high"),]
   }
 }  
 
@@ -55,18 +55,19 @@ for(x in unique(ES.frame$Study.Case)){
 Var.Richness <- diag(ES.frame.richness$Richness.Log.RR.Var)
 Var.Yield <- diag(ES.frame.yield$Yield.Log.RR.Var)
 ## calculate covariance of shared control and store it on the off-diagonal 
-for(x in unique(ES.frame$Study.Case)){
-  if (all(c("low-medium","low-high") %in% unique(subset.richness$LUI.range.level))){
-    row.1 <- which(ES.frame.richness$Study.Case==x & ES.frame.richness$LUI.range.level=="low-medium")
-    col.1 <- which(ES.frame.richness$Study.Case==x & ES.frame.richness$LUI.range.level=="low-high")
-    Var.Richness[row.1,col.1] <- Var.Richness[col.1,row.1] <- subset.richness$Richness.SD.Low[which(subset.richness$LUI.range.level=="low-medium")]^2/(subset.richness$Richness.N.Low[which(subset.richness$LUI.range.level=="low-medium")]*subset.richness$Richness.Mean.Low[which(subset.richness$LUI.range.level=="low-medium")]) ## sd_c?/(n_c*mean(X_c)?), cf. Lajeunesse (2011) Ecology
-  }
-  if (all(c("low-medium","low-high") %in% unique(subset.yield$LUI.range.level))){
-    row.1 <- which(ES.frame.yield$Study.Case==x & ES.frame.yield$LUI.range.level=="low-medium")
-    col.1 <- which(ES.frame.yield$Study.Case==x & ES.frame.yield$LUI.range.level=="low-high")
-    Var.Yield[row.1,col.1] <- Var.Yield[col.1,row.1] <- subset.yield$Yield.SD.Low[which(subset.yield$LUI.range.level=="low-medium")]^2/(subset.yield$Yield.N.Low[which(subset.yield$LUI.range.level=="low-medium")]*subset.yield$Yield.Mean.Low[which(subset.yield$LUI.range.level=="low-medium")]) ## sd_c?/(n_c*mean(X_c)?), cf. Lajeunesse (2011) Ecology
-  }
-}
+## TO DO: calculate covariance for cases with (low-medium, medium-high), (low-low, low-medium, low-high), (medium-medium, medium- high), (high-high, medium-high) -> ask Wolfagang Viechtbauer for advice
+# for(x in unique(ES.frame$Study.Case)){
+#   if (all(c("low-medium","medium-high") %in% unique(subset.richness$LUI.range.level))){
+#     row.1 <- which(ES.frame.richness$Study.Case==x & ES.frame.richness$LUI.range.level=="low-medium")
+#     col.1 <- which(ES.frame.richness$Study.Case==x & ES.frame.richness$LUI.range.level=="low-high")
+#     Var.Richness[row.1,col.1] <- Var.Richness[col.1,row.1] <- subset.richness$Richness.SD.Low[which(subset.richness$LUI.range.level=="low-medium")]^2/(subset.richness$Richness.N.Low[which(subset.richness$LUI.range.level=="low-medium")]*subset.richness$Richness.Mean.Low[which(subset.richness$LUI.range.level=="low-medium")]) ## sd_c?/(n_c*mean(X_c)?), cf. Lajeunesse (2011) Ecology
+#   }
+#   if (all(c("low-medium","medium-high") %in% unique(subset.yield$LUI.range.level))){
+#     row.1 <- which(ES.frame.yield$Study.Case==x & ES.frame.yield$LUI.range.level=="low-medium")
+#     col.1 <- which(ES.frame.yield$Study.Case==x & ES.frame.yield$LUI.range.level=="low-high")
+#     Var.Yield[row.1,col.1] <- Var.Yield[col.1,row.1] <- subset.yield$Yield.SD.Low[which(subset.yield$LUI.range.level=="low-medium")]^2/(subset.yield$Yield.N.Low[which(subset.yield$LUI.range.level=="low-medium")]*subset.yield$Yield.Mean.Low[which(subset.yield$LUI.range.level=="low-medium")]) ## sd_c?/(n_c*mean(X_c)?), cf. Lajeunesse (2011) Ecology
+#   }
+# }
 
 ### store models in a list
 Richness.MA.model <- list() 
@@ -99,35 +100,34 @@ MA.coeffs.cont <- data.frame(Moderator="None",Richness.intercept=Richness.MA.fit
 ### define list of moderators
 
 moderator.list.cat <- c("Species.Group","LUI.range.level","Product","BIOME")
-moderator.list.cont <- c("rel_capital_stock_in_agriculture")
+moderator.list.cont <- c("rel_capital_stock_in_agriculture", "time.since.first.use")
 
 moderator.list <- c(moderator.list.cat,moderator.list.cont)
 
-modelDataRichness <- ES.frame.richness[,c('Richness.Log.RR','Richness.Log.RR.Var','Species.Group','LUI.range.level','Product','BIOME',
-                         'rel_capital_stock_in_agriculture',
+modelDataRichness <- ES.frame.richness[,c('Richness.Log.RR','Richness.Log.RR.Var',paste(moderator.list,sep=","),
                          'Case.ID','Study.ID','Study.Case','Low.LUI','High.LUI')]
 modelDataRichness <- na.omit(modelDataRichness)
 
-Richness.MA.full <- rma.mv(yi=Richness.Log.RR, V=Richness.Log.RR.Var, mods=~Species.Group + LUI.range.level + Product + BIOME,# +                      rel_capital_stock_in_agriculture, 
+Richness.MA.model[["full"]] <- rma.mv(yi=Richness.Log.RR, V=Richness.Log.RR.Var, mods=~Species.Group + LUI.range.level + Product + BIOME + 
+                             rel_capital_stock_in_agriculture + time.since.first.use, 
                            random = ~factor(Case.ID)|factor(Study.ID), struct="CS", 
                           slab=paste(Study.Case, Low.LUI, High.LUI,sep="_"),
                           method="ML", tdist=FALSE, level=95, digits=4,data=modelDataRichness)
 
-RichnessModel<-RMASelect(Richness.MA.full)
+Richness.MA.model[["select"]]<-RMASelect(Richness.MA.model[["full"]])
 
-modelDataYield <- ES.frame.yield[,c('Yield.Log.RR','Yield.Log.RR.Var','Species.Group','LUI.range.level','Product','BIOME',
-                                'rel_capital_stock_in_agriculture',
+modelDataYield <- ES.frame.yield[,c('Yield.Log.RR','Yield.Log.RR.Var',paste(moderator.list,sep=","),
                                 'Case.ID','Study.ID','Study.Case','Low.LUI','High.LUI')]
 modelDataYield <- na.omit(modelDataYield)
 
-Yield.MA.full <- try(rma.mv(yi=Yield.Log.RR,V=Yield.Log.RR.Var,mods=~LUI.range.level + Product + BIOME + 
-                              rel_capital_stock_in_agriculture,
+Yield.MA.model[["full"]] <- try(rma.mv(yi=Yield.Log.RR,V=Yield.Log.RR.Var,mods=~LUI.range.level + Product + BIOME + 
+                              time.since.first.use + rel_capital_stock_in_agriculture,
                             random = ~factor(Study.ID), struct="CS", slab=paste(Study.Case, Low.LUI, High.LUI,sep="_"),
                             method="ML", tdist=FALSE, level=95, digits=4,data=modelDataYield),silent=T)
 
-YieldModel <- RMASelect(Yield.MA.full)
+Yield.MA.model[["select"]] <- RMASelect(Yield.MA.model[["full"]])
 
-save(RichnessModel,YieldModel,modelDataRichness,modelDataYield,file=paste(path2temp,"Models.Rd",sep=""))
+save(Richness.MA.model,Yield.MA.model,modelDataRichness,modelDataYield,file=paste(path2temp,"Models.Rd",sep=""))
 
 # ############################################################################
 # ### 07.4. Analysis with moderators for no LU vs low/medium/high LU

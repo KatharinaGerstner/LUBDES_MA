@@ -68,15 +68,15 @@ colnames(ES.frame.noLU)[which(names(ES.frame.noLU) == "realms_extract$WWF_MHTNAM
 ############################################################################
 ### 05.2. Intersect studies with potential NPP
 ############################################################################
- if (file.exists("tn0_all_gcm.asc")==FALSE){
-   download.file("https://www.dropbox.com/s/689m9pc5bnejbg9/tn0_all_gcm.asc?dl=1","tn0_all_gcm.asc")
- }
-npp <- raster("tn0_all_gcm.asc",crs=CRS("+proj=longlat +datum=WGS84 +no_defs +ellps=WGS84 +towgs84=0,0,0"))
-
-ES.frame$npp<-extract(npp,lonlat,buffer=100000,fun=mean)
-
-ES.frame.noLU$npp<-extract(npp,lonlat.noLU, buffer=100000, fun=mean)
-
+#  if (file.exists("tn0_all_gcm.asc")==FALSE){
+#    download.file("https://www.dropbox.com/s/689m9pc5bnejbg9/tn0_all_gcm.asc?dl=1","tn0_all_gcm.asc")
+#  }
+# npp <- raster("tn0_all_gcm.asc",crs=CRS("+proj=longlat +datum=WGS84 +no_defs +ellps=WGS84 +towgs84=0,0,0"))
+# 
+# ES.frame$npp<-extract(npp,lonlat,buffer=100000,fun=mean)
+# 
+# ES.frame.noLU$npp<-extract(npp,lonlat.noLU, buffer=100000, fun=mean)
+# 
 ############################################################################
 ### 05.3. Intersect studies with gross capital stock in agriculture
 ############################################################################
@@ -119,20 +119,20 @@ ES.frame.noLU$rel_capital_stock_in_agriculture <- log10(ES.frame.noLU$rel_capita
 ############################################################################
 
 ### data from http://www.earthenv.org/texture.html
-
-if (file.exists("habitat_dissimilarity.tif")==FALSE){
-  download.file("https://www.dropbox.com/s/bwpzna0y4e1t77e/Dissimilarity_01_05_25km_uint32.tif?dl=1", "habitat_dissimilarity.tif", mode="wb")
-  habitat_dissimilarity <- raster("habitat_dissimilarity.tif")
-} else {
-  habitat_dissimilarity <- raster("habitat_dissimilarity.tif")
-}
-  
-habitat_dissimilarity <- raster("habitat_dissimilarity.tif")
-
-ES.frame$habitat_dissimilarity<-extract(habitat_dissimilarity,lonlat, buffer=10000, fun=mean) # consider a buffer of radius=10km² around each dot)
-
-ES.frame.noLU$habitat_dissimilarity<-extract(habitat_dissimilarity,lonlat.noLU, buffer=10000, fun=mean) # consider a buffer of radius=10km² around each dot)
-
+# 
+# if (file.exists("habitat_dissimilarity.tif")==FALSE){
+#   download.file("https://www.dropbox.com/s/bwpzna0y4e1t77e/Dissimilarity_01_05_25km_uint32.tif?dl=1", "habitat_dissimilarity.tif", mode="wb")
+#   habitat_dissimilarity <- raster("habitat_dissimilarity.tif")
+# } else {
+#   habitat_dissimilarity <- raster("habitat_dissimilarity.tif")
+# }
+#   
+# habitat_dissimilarity <- raster("habitat_dissimilarity.tif")
+# 
+# ES.frame$habitat_dissimilarity<-extract(habitat_dissimilarity,lonlat, buffer=10000, fun=mean) # consider a buffer of radius=10km² around each dot)
+# 
+# ES.frame.noLU$habitat_dissimilarity<-extract(habitat_dissimilarity,lonlat.noLU, buffer=10000, fun=mean) # consider a buffer of radius=10km² around each dot)
+# 
 ############################################################################
 ### 05.5. Intersect studies with Land-use history
 ############################################################################
@@ -217,25 +217,25 @@ ES.frame.noLU$start.agr.use[is.na(ES.frame.noLU$start.agr.use)] <- "not yet used
 ############################################################################
 ### 05.9. Human Footprint
 ############################################################################
-if (file.exists("hfp_global_geo_grid.zip")==FALSE){
-  download.file("https://www.dropbox.com/s/aedwhxiu6mygudo/hfp_global_geo_grid.zip?dl=1", "hfp_global_geo_grid.zip", mode="wb")
-  unzip("hfp_global_geo_grid.zip")
-} else {
-  unzip ("hfp_global_geo_grid.zip")
-}
-
-humanfootprint <- raster("hfp_global_geo_grid/hf_v2geo")
-
-ES.frame$humanfootprint <- log10(extract(humanfootprint,lonlat, buffer=100000, fun=mean)) # consider a buffer of radius=100km² around each dot)
-
-ES.frame.noLU$humanfootprint <- log10(extract(humanfootprint,lonlat.noLU, buffer=100000, fun=mean)) # consider a buffer of radius=100km² around each dot)
-
-
-
-############################################################################
-### remove objectes to save workspace
-############################################################################
-rm(lonlat, lonlat.noLU,ecoregions, realms_extract, npp ,agricultural_area,capital_stock_in_agriculture,habitat_dissimilarity, timeseries.hyde,timeseries.kk10,hyde.LUhist.stack,kk10.LUhist.stack,hyde.extract.year.of.first.use,kk10.extract.year.of.first.use,hyde.year.of.first.use,kk10.year.of.first.use,humanfootprint)
+# if (file.exists("hfp_global_geo_grid.zip")==FALSE){
+#   download.file("https://www.dropbox.com/s/aedwhxiu6mygudo/hfp_global_geo_grid.zip?dl=1", "hfp_global_geo_grid.zip", mode="wb")
+#   unzip("hfp_global_geo_grid.zip")
+# } else {
+#   unzip ("hfp_global_geo_grid.zip")
+# }
+# 
+# humanfootprint <- raster("hfp_global_geo_grid/hf_v2geo")
+# 
+# ES.frame$humanfootprint <- log10(extract(humanfootprint,lonlat, buffer=100000, fun=mean)) # consider a buffer of radius=100km² around each dot)
+# 
+# ES.frame.noLU$humanfootprint <- log10(extract(humanfootprint,lonlat.noLU, buffer=100000, fun=mean)) # consider a buffer of radius=100km² around each dot)
+# 
+# 
+# 
+# ############################################################################
+# ### remove objectes to save workspace
+# ############################################################################
+# rm(lonlat, lonlat.noLU,ecoregions, realms_extract, npp ,agricultural_area,capital_stock_in_agriculture,habitat_dissimilarity, timeseries.hyde,timeseries.kk10,hyde.LUhist.stack,kk10.LUhist.stack,hyde.extract.year.of.first.use,kk10.extract.year.of.first.use,hyde.year.of.first.use,kk10.year.of.first.use,humanfootprint)
 
 setwd(path2wd)
 

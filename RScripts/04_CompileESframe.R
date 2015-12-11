@@ -210,7 +210,7 @@ ES.frame.noLU[,c("Richness.SMD","Richness.SMD.Var")] =
 
 ############################################################
 ### remove objects from workspace
-rm(temp.noLU,temp.lowLU,temp.mediumLU,temp.highLU,
+rm(i, data.temp, temp.noLU,temp.lowLU,temp.mediumLU,temp.highLU,
    temp.low.base,temp.medium.base,temp.high.base,
    temp.low.increase,temp.medium.increase,temp.high.increase,
    temp.low,temp.medium,temp.high)
