@@ -3,10 +3,14 @@
 ###
 ### 08.1. Plot map of studies
 ### 08.2. Plot cross-diagrams
+### 08.2.1 Plot cross-diagrams by species
+### 08.1.2 6 map by intensity classes
 ### 08.4. Forest plots for noLU vs low/medium/high LU
-### 08.5. CatWhiskerPlots 
+### 08.5  Forest plots for all data
+### 08.6. CatWhiskerPlots 
 ###
 ### General comments:
+### * TO DO: This needs cleanin, lots of importnat fingures are gone, some need to be recoded!
 ### * TO DO: change palette for scale_color_brewer() to get rid of the warning "In RColorBrewer::brewer.pal(n, pal) : n too large, allowed maximum for palette Set1 is 9 Returning the palette you asked for with that many colors"
 ###
 ### Authors: KG, MB, SK ...
@@ -15,9 +19,9 @@
 ### show current working directory and check if its local
 getwd()
 
-
 ############################################################################
-### 08a.1. Plot map of studies
+### 08.1. Plot map of studies
+### 08.1.1 full map        
 ### 
 ############################################################################
 
@@ -31,7 +35,10 @@ p <- ggplot() +
 p 
 ggsave(paste(path2temp, "/CaseDistributionAll.png",sep=""), width=18, height=10, units="cm")
 
-### plot study locations using fancy ggplot
+############################################################################
+### 08.1.2 6 map by intensity classes
+############################################################################
+
 world_map <- map_data("world")
 ES.frame <- within(ES.frame, LUI.range.level <- factor(LUI.range.level, levels = c("low-low","low-medium","low-high","medium-medium","medium-high","high-high"))) # resort levels for plotting
 p <- ggplot() +
@@ -117,7 +124,6 @@ ggsave(paste(path2temp, "/CaseDistribution.png",sep=""), width=18, height=10, un
 
 modelDataR <- modelDataRichness
 modelDataY <- modelDataYield
-
 
 
 predFrame <- data.frame(Species.Group=factor("invertebrates",levels=levels(modelDataR$Species.Group)),
@@ -510,12 +516,12 @@ ggsave(plot, file = paste(path2temp,"/New_Cross_diagram_BIOME.png",sep=""), widt
 # print(plot.across.groups.cross.diagramm)
 # ggsave(plot.across.groups.cross.diagramm, file = paste(path2temp, "Cross_diagram_across_LUI_range_levels.png",sep=""), width = 20, height = 8, type = "cairo-png")
 
+############################################################################
+### 08.4. forest plots for each LUI-comparison class
+### 
+### Stefan Kambach, Annapolis Workshop
+############################################################################
 
-############################
-### SK Annapolis WS 2015 ###
-### forest plots for each LUI-comparison class
-############################
-### ------------------------
 
 LUI.range.level = c("low-low","medium-medium","high-high","low-medium","medium-high","low-high")
 
@@ -639,13 +645,4 @@ for(LUI.level.to.plot in LUI.range.level){
 source("RR-slope_Plots.R")
 
 CatsWhiskers_plot(data=ES.frame.yield, dataType="raw", YieldorRichness = "yield")
-dev.flush()
 CatsWhiskers_plot(data=ES.frame.richness, dataType="raw", YieldorRichness = "richness")
-dev.flush()
-
-
-
-
-##################
-### RESTERAMPE ###
-##################
