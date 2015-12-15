@@ -71,7 +71,7 @@
 
 cn <- Sys.info()["nodename"]
 
-if (cn == "cle162m-10.local")
+if (cn == "cle162m-10.intranet.ufz.de")
 {
   path2temp <- "/Users/rseppelt/Documents/Projekte/LU-BD-ES (SESYNC, Ralf)/Temp" 
   path2wd <- "/Users/rseppelt/Documents/git/LUBDES_MA/RScripts/" 
