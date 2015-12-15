@@ -14,3 +14,7 @@ source("RR-slope_Plots.R")
 
 CatsWhiskers_plot(data=ES.frame.yield, dataType="raw", YieldorRichness = "yield")
 CatsWhiskers_plot(data=ES.frame.richness, dataType="raw", YieldorRichness = "richness")
+
+
+
+dev.new()
