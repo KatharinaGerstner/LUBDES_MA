@@ -69,9 +69,9 @@
 ### needs to be adjusted individually
 ############################################################################
 
-cn <- Sys.info()["nodename"]
+cn <- Sys.info()["user"]
 
-if (cn == "cle162m-10.intranet.ufz.de")
+if (cn == "rseppelt")
 {
   path2temp <- "/Users/rseppelt/Documents/Projekte/LU-BD-ES (SESYNC, Ralf)/Temp" 
   path2wd <- "/Users/rseppelt/Documents/git/LUBDES_MA/RScripts/" 
