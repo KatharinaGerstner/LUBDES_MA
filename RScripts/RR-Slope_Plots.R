@@ -1,3 +1,7 @@
+# code copied to 08.2.
+# depricated.
+
+
 CatsWhiskers_plot <- function(data, YieldorRichness = c("yield", "richness"), one=1, two=5, three=9, alpha=100, covariate ="Product", dataType = c("model", "raw"), model){
 
 	if(dataType == "raw"){		

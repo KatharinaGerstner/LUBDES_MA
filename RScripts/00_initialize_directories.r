@@ -53,9 +53,10 @@
 ### 07.1. Prepare data analysis
 ### 07.2. Analysis without moderators
 ### 07.3. Analysis with moderators
-### 08 08_Plotting.r
+### 08   Plotting.r (seperated in differnet .r-scripts)
+###       withing: Cros-Diagrams
 ### 08.1. Plot map of studies
-### 08.2. Plot cross-diagrams
+### 08.2. Plot Cat-Whisker Plots
 ### 08.3. Forest plots for noLU vs low/medium/high LU
 ### 09 09_ModelDiagnostics.r
 ### 10 10_UncertaintyAnalysis.R
@@ -69,9 +70,10 @@
 ### needs to be adjusted individually
 ############################################################################
 
-cn <- Sys.info()["user"]
+cu <- Sys.info()["user"]
+cn <- Sys.info()["nodename"]
 
-if (cn == "rseppelt")
+if (cu == "rseppelt")
 {
   path2temp <- "/Users/rseppelt/Documents/Projekte/LU-BD-ES (SESYNC, Ralf)/Temp" 
   path2wd <- "/Users/rseppelt/Documents/git/LUBDES_MA/RScripts/" 
