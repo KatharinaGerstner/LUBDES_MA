@@ -24,21 +24,29 @@
 ############################################################################
 ### Plot figure for Main Paper
 ###
-
 ### Figure 1 
+### Text in paper: "cross-diagram including the grand mean + one covariate 
+### (e.g. species group), photos in each quadrant fitting to ++,--,+-,-+ (maybe 
+### only 3 and put legend in 4th position)
+
 ### missing
 
 ### Figure 2: cat Whisker-Plois
+### TExt in paper: cat-whisker plot, two panels (BD, ES) without showing the 
+### low-high. greyed-out uncertainty area + grand mean thick lines for products (rgb) 
 source(path2wd %+% "08.2_plotting.r")
 
 ############################################################################
 ### Plot figure for Appendix
 ###
 
-### Figure SA.1: World Map
+### Figure SA.1: enn Diagram showing the numbers of manually screened study 
+### abstracts. (Michael)
+
+### Figure SA.4: World Map
 source(path2wd %+% "08.1_plotting.r")
 
-### Figure SA.x: Forets Plots
+### Figure SA.5: Forets Plots
 source(path2wd %+% "08.3_plotting.r")
 
 

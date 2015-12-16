@@ -75,3 +75,7 @@ CatsWhiskers_plot <- function(data, YieldorRichness = c("yield", "richness"), on
 
 CatsWhiskers_plot(data=ES.frame.yield, dataType="raw", YieldorRichness = "yield")
 CatsWhiskers_plot(data=ES.frame.richness, dataType="raw", YieldorRichness = "richness")
+<<<<<<< HEAD
+=======
+
+>>>>>>> a78392935c8dbc005efebf3e47d24168c5e77de4

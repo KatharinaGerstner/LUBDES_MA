@@ -117,17 +117,19 @@ ES.frame.noLU$rel_capital_stock_in_agriculture <- log10(ES.frame.noLU$rel_capita
 # 
 # ### reclassify everything except croplands to 0
 # 
-# m<-c(11,15,1,19,21,0.6,29,31,0.35,31,240,0)
+# m<-c(11,14,100,20,20,60,30,30,35,40,230,0)
 # rclmat<-matrix(m,ncol=3,byrow=TRUE)
 # 
 # beginCluster()
-# rc1 <- clusterR(globcover, reclassify, args=list(rcl=rclmat))
+# rc1 <- clusterR(globcover, reclassify, args=list(rcl=rclmat,right=NA))
 # endCluster()
 # writeRaster(rc1, "globcover_rc.tif",format="GTiff",overwrite=TRUE)
+# 
+# globcover.rc<-raster("globcover_rc.tif")
+# 
+# ES.frame$globcover<-extract(globcover.rc,lonlat, buffer=50000, fun=mean) # consider a buffer of radius=50km² around each dot)
+# 
 
-globcover.rc<-raster("globcover_rc.tif")
-
-ES.frame$globcover<-extract(globcover.rc,lonlat, buffer=50000, fun=mean) # consider a buffer of radius=50km² around each dot)
 
 ############################################################################
 ### 05.4. Intersect studies with Global Habitat Heterogeneity, Dissimilarity
