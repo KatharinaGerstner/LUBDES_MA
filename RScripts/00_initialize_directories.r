@@ -69,7 +69,7 @@
 ### needs to be adjusted individually
 ############################################################################
 
-cn <- Sys.info()["user"]
+cn <- Sys.info()["nodename"]
 
 if (cn == "rseppelt")
 {

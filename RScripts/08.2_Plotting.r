@@ -10,7 +10,7 @@
 ############################################################################
 
 # load Helens code
-source("RR-slope_Plots.R")
+source("RR-Slope_Plots.R")
 
 CatsWhiskers_plot(data=ES.frame.yield, dataType="raw", YieldorRichness = "yield")
 CatsWhiskers_plot(data=ES.frame.richness, dataType="raw", YieldorRichness = "richness")

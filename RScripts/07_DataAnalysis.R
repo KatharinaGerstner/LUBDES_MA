@@ -100,7 +100,7 @@ MA.coeffs.cont <- data.frame(Moderator="None",Richness.intercept=Richness.MA.fit
 ### define list of moderators
 
 moderator.list.cat <- c("Species.Group","LUI.range.level","Product","BIOME")
-moderator.list.cont <- c("rel_capital_stock_in_agriculture", "time.since.first.use")
+moderator.list.cont <- c("rel_capital_stock_in_agriculture")#, "time.since.first.use")
 
 moderator.list <- c(moderator.list.cat,moderator.list.cont)
 
@@ -109,7 +109,7 @@ modelDataRichness <- ES.frame.richness[,c('Richness.Log.RR','Richness.Log.RR.Var
 modelDataRichness <- na.omit(modelDataRichness)
 
 Richness.MA.model[["full"]] <- rma.mv(yi=Richness.Log.RR, V=Richness.Log.RR.Var, mods=~Species.Group + LUI.range.level + Product + BIOME + 
-                             rel_capital_stock_in_agriculture + time.since.first.use, 
+                             rel_capital_stock_in_agriculture, #+ time.since.first.use, 
                            random = ~factor(Case.ID)|factor(Study.ID), struct="CS", 
                           slab=paste(Study.Case, Low.LUI, High.LUI,sep="_"),
                           method="ML", tdist=FALSE, level=95, digits=4,data=modelDataRichness)
@@ -121,7 +121,7 @@ modelDataYield <- ES.frame.yield[,c('Yield.Log.RR','Yield.Log.RR.Var',paste(mode
 modelDataYield <- na.omit(modelDataYield)
 
 Yield.MA.model[["full"]] <- try(rma.mv(yi=Yield.Log.RR,V=Yield.Log.RR.Var,mods=~LUI.range.level + Product + BIOME + 
-                              time.since.first.use + rel_capital_stock_in_agriculture,
+                              rel_capital_stock_in_agriculture, #+time.since.first.use,
                             random = ~factor(Study.ID), struct="CS", slab=paste(Study.Case, Low.LUI, High.LUI,sep="_"),
                             method="ML", tdist=FALSE, level=95, digits=4,data=modelDataYield),silent=T)
 

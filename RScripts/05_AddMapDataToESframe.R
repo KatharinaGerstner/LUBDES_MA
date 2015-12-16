@@ -103,6 +103,31 @@ ES.frame.noLU <- join(ES.frame.noLU,capital_stock_in_agriculture[,c("Country.Cod
 ES.frame.noLU$rel_capital_stock_in_agriculture <- log10(ES.frame.noLU$rel_capital_stock_in_agriculture)
 
 ############################################################################
+### 05.4. Intersect studies with GLOBCOVER
+############################################################################
+
+if (file.exists("Globcover_V2.2_Global.zip")==FALSE){
+  download.file("https://www.dropbox.com/s/ks3sm60er8mgasd/Globcover_V2.2_Global.zip?dl=1", "Globcover_V2.2_Global.zip", mode="wb")
+  unzip("Globcover_V2.2_Global.zip")
+} else {
+  unzip("Globcover_V2.2_Global.zip")
+}
+
+globcover<-raster("GLOBCOVER_200412_200606_V2.2_Global_CLA.tif")
+
+### reclassify everything except croplands to 0
+
+m<-c(11,15,1,19,21,0.6,29,31,0.35,31,240,0)
+rclmat<-matrix(m,ncol=3,byrow=TRUE)
+
+beginCluster()
+rc1 <- clusterR(globcover, reclassify, args=list(rcl=rclmat))
+endCluster()
+writeRaster(rc1, "globcover_rc.tif",format="GTiff",overwrite=TRUE)
+
+globcover.rc<-raster("globcover_rc.tif")
+
+############################################################################
 ### 05.4. Intersect studies with Global Habitat Heterogeneity, Dissimilarity
 ############################################################################
 
@@ -125,40 +150,40 @@ ES.frame.noLU$rel_capital_stock_in_agriculture <- log10(ES.frame.noLU$rel_capita
 ### 05.5. Intersect studies with Land-use history
 ############################################################################
 
-if (file.exists("ellis_etal_2013_dataset.zip")==FALSE){
-  download.file("https://www.dropbox.com/s/6qkr58sjimclpst/ellis_etal_2013_dataset.zip?dl=1", "ellis_etal_2013_dataset.zip", mode="wb")
-  unzip("ellis_etal_2013_dataset.zip")
-} else {
-  unzip ("ellis_etal_2013_dataset.zip")
-}
-
-timeseries.hyde <- list("sus_hbc6000","sus_hbc3000","sus_hbc1000","sus_had0","sus_had1000","sus_had1500","sus_had1750","sus_had1900","sus_had1950","sus_had2000")
-timeseries.kk10 <- list("sus_kbc6000","sus_kbc3000","sus_kbc1000","sus_kad0","sus_kad1000","sus_kad1500","sus_kad1750","sus_kad1900","sus_kad1950","sus_kad2000")
-
-hyde.LUhist.stack <- stack(lapply(timeseries.hyde,function(x) raster("hyde/sus_use/" %+% x)))
-kk10.LUhist.stack <- stack(lapply(timeseries.kk10,function(x) raster("kk10/sus_use/" %+% x)))
-
-## ES.frame
-hyde.extract.year.of.first.use <- extract(hyde.LUhist.stack,lonlat) 
-names(hyde.extract.year.of.first.use) <- c("-6000","-3000","-1000","0","1000","1500","1750","1900","1950","2000")
-hyde.year.of.first.use <- apply(hyde.extract.year.of.first.use,1,function(x){ifelse(sum(x)>0,as.numeric(names(hyde.extract.year.of.first.use)[min(which(x==1))]),NA)}) # NA if no significant use were detectable
-kk10.extract.year.of.first.use <- extract(kk10.LUhist.stack,lonlat) 
-names(kk10.extract.year.of.first.use) <- c("-6000","-3000","-1000","0","1000","1500","1750","1900","1950","2000")
-kk10.year.of.first.use <- apply(kk10.extract.year.of.first.use,1,function(x){ifelse(sum(x)>0,as.numeric(names(kk10.extract.year.of.first.use)[min(which(x==1))]),NA)}) # NA if no significant use were detectable
-ES.frame$time.since.first.use <- log10(2000-apply(cbind(hyde.year.of.first.use,kk10.year.of.first.use),1,function(x){ifelse(all(is.na(x)),2000,min(x,na.rm=T))})+1) # set not yet used land to log10(1)=0
-ES.frame$start.agr.use <- ifelse(ES.frame$time.since.first.use >= 500,"old","young")
-ES.frame$start.agr.use[is.na(ES.frame$start.agr.use)] <- "not yet used"
-
-## ES.frame.noLU
-hyde.extract.year.of.first.use <- extract(hyde.LUhist.stack,lonlat.noLU) 
-names(hyde.extract.year.of.first.use) <- c("-6000","-3000","-1000","0","1000","1500","1750","1900","1950","2000")
-hyde.year.of.first.use <- apply(hyde.extract.year.of.first.use,1,function(x){ifelse(sum(x)>0,as.numeric(names(hyde.extract.year.of.first.use)[min(which(x==1))]),NA)}) # NA if no significant use were detectable
-kk10.extract.year.of.first.use <- extract(kk10.LUhist.stack,lonlat.noLU) 
-names(kk10.extract.year.of.first.use) <- c("-6000","-3000","-1000","0","1000","1500","1750","1900","1950","2000")
-kk10.year.of.first.use <- apply(kk10.extract.year.of.first.use,1,function(x){ifelse(sum(x)>0,as.numeric(names(kk10.extract.year.of.first.use)[min(which(x==1))]),NA)}) # NA if no significant use were detectable
-ES.frame.noLU$time.since.first.use <- log10(2000-apply(cbind(hyde.year.of.first.use,kk10.year.of.first.use),1,function(x){ifelse(all(is.na(x)),2000,min(x,na.rm=T))})+1) # set not yet used land to log10(1)=0
-ES.frame.noLU$start.agr.use <- ifelse(ES.frame.noLU$time.since.first.use >= 500,"old","young")
-ES.frame.noLU$start.agr.use[is.na(ES.frame.noLU$start.agr.use)] <- "not yet used"
+# if (file.exists("ellis_etal_2013_dataset.zip")==FALSE){
+#   download.file("https://www.dropbox.com/s/6qkr58sjimclpst/ellis_etal_2013_dataset.zip?dl=1", "ellis_etal_2013_dataset.zip", mode="wb")
+#   unzip("ellis_etal_2013_dataset.zip")
+# } else {
+#   unzip ("ellis_etal_2013_dataset.zip")
+# }
+# 
+# timeseries.hyde <- list("sus_hbc6000","sus_hbc3000","sus_hbc1000","sus_had0","sus_had1000","sus_had1500","sus_had1750","sus_had1900","sus_had1950","sus_had2000")
+# timeseries.kk10 <- list("sus_kbc6000","sus_kbc3000","sus_kbc1000","sus_kad0","sus_kad1000","sus_kad1500","sus_kad1750","sus_kad1900","sus_kad1950","sus_kad2000")
+# 
+# hyde.LUhist.stack <- stack(lapply(timeseries.hyde,function(x) raster("hyde/sus_use/" %+% x)))
+# kk10.LUhist.stack <- stack(lapply(timeseries.kk10,function(x) raster("kk10/sus_use/" %+% x)))
+# 
+# ## ES.frame
+# hyde.extract.year.of.first.use <- extract(hyde.LUhist.stack,lonlat) 
+# names(hyde.extract.year.of.first.use) <- c("-6000","-3000","-1000","0","1000","1500","1750","1900","1950","2000")
+# hyde.year.of.first.use <- apply(hyde.extract.year.of.first.use,1,function(x){ifelse(sum(x)>0,as.numeric(names(hyde.extract.year.of.first.use)[min(which(x==1))]),NA)}) # NA if no significant use were detectable
+# kk10.extract.year.of.first.use <- extract(kk10.LUhist.stack,lonlat) 
+# names(kk10.extract.year.of.first.use) <- c("-6000","-3000","-1000","0","1000","1500","1750","1900","1950","2000")
+# kk10.year.of.first.use <- apply(kk10.extract.year.of.first.use,1,function(x){ifelse(sum(x)>0,as.numeric(names(kk10.extract.year.of.first.use)[min(which(x==1))]),NA)}) # NA if no significant use were detectable
+# ES.frame$time.since.first.use <- log10(2000-apply(cbind(hyde.year.of.first.use,kk10.year.of.first.use),1,function(x){ifelse(all(is.na(x)),2000,min(x,na.rm=T))})+1) # set not yet used land to log10(1)=0
+# ES.frame$start.agr.use <- ifelse(ES.frame$time.since.first.use >= 500,"old","young")
+# ES.frame$start.agr.use[is.na(ES.frame$start.agr.use)] <- "not yet used"
+# 
+# ## ES.frame.noLU
+# hyde.extract.year.of.first.use <- extract(hyde.LUhist.stack,lonlat.noLU) 
+# names(hyde.extract.year.of.first.use) <- c("-6000","-3000","-1000","0","1000","1500","1750","1900","1950","2000")
+# hyde.year.of.first.use <- apply(hyde.extract.year.of.first.use,1,function(x){ifelse(sum(x)>0,as.numeric(names(hyde.extract.year.of.first.use)[min(which(x==1))]),NA)}) # NA if no significant use were detectable
+# kk10.extract.year.of.first.use <- extract(kk10.LUhist.stack,lonlat.noLU) 
+# names(kk10.extract.year.of.first.use) <- c("-6000","-3000","-1000","0","1000","1500","1750","1900","1950","2000")
+# kk10.year.of.first.use <- apply(kk10.extract.year.of.first.use,1,function(x){ifelse(sum(x)>0,as.numeric(names(kk10.extract.year.of.first.use)[min(which(x==1))]),NA)}) # NA if no significant use were detectable
+# ES.frame.noLU$time.since.first.use <- log10(2000-apply(cbind(hyde.year.of.first.use,kk10.year.of.first.use),1,function(x){ifelse(all(is.na(x)),2000,min(x,na.rm=T))})+1) # set not yet used land to log10(1)=0
+# ES.frame.noLU$start.agr.use <- ifelse(ES.frame.noLU$time.since.first.use >= 500,"old","young")
+# ES.frame.noLU$start.agr.use[is.na(ES.frame.noLU$start.agr.use)] <- "not yet used"
 
 ############################################################################
 ### 05.6. Intersect studies with human pressure index
