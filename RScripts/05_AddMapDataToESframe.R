@@ -106,26 +106,28 @@ ES.frame.noLU$rel_capital_stock_in_agriculture <- log10(ES.frame.noLU$rel_capita
 ### 05.4. Intersect studies with GLOBCOVER
 ############################################################################
 
-if (file.exists("Globcover_V2.2_Global.zip")==FALSE){
-  download.file("https://www.dropbox.com/s/ks3sm60er8mgasd/Globcover_V2.2_Global.zip?dl=1", "Globcover_V2.2_Global.zip", mode="wb")
-  unzip("Globcover_V2.2_Global.zip")
-} else {
-  unzip("Globcover_V2.2_Global.zip")
-}
-
-globcover<-raster("GLOBCOVER_200412_200606_V2.2_Global_CLA.tif")
-
-### reclassify everything except croplands to 0
-
-m<-c(11,15,1,19,21,0.6,29,31,0.35,31,240,0)
-rclmat<-matrix(m,ncol=3,byrow=TRUE)
-
-beginCluster()
-rc1 <- clusterR(globcover, reclassify, args=list(rcl=rclmat))
-endCluster()
-writeRaster(rc1, "globcover_rc.tif",format="GTiff",overwrite=TRUE)
+# if (file.exists("Globcover_V2.2_Global.zip")==FALSE){
+#   download.file("https://www.dropbox.com/s/ks3sm60er8mgasd/Globcover_V2.2_Global.zip?dl=1", "Globcover_V2.2_Global.zip", mode="wb")
+#   unzip("Globcover_V2.2_Global.zip")
+# } else {
+#   unzip("Globcover_V2.2_Global.zip")
+# }
+# 
+# globcover<-raster("GLOBCOVER_200412_200606_V2.2_Global_CLA.tif")
+# 
+# ### reclassify everything except croplands to 0
+# 
+# m<-c(11,15,1,19,21,0.6,29,31,0.35,31,240,0)
+# rclmat<-matrix(m,ncol=3,byrow=TRUE)
+# 
+# beginCluster()
+# rc1 <- clusterR(globcover, reclassify, args=list(rcl=rclmat))
+# endCluster()
+# writeRaster(rc1, "globcover_rc.tif",format="GTiff",overwrite=TRUE)
 
 globcover.rc<-raster("globcover_rc.tif")
+
+ES.frame$globcover<-extract(globcover.rc,lonlat, buffer=50000, fun=mean) # consider a buffer of radius=50km² around each dot)
 
 ############################################################################
 ### 05.4. Intersect studies with Global Habitat Heterogeneity, Dissimilarity

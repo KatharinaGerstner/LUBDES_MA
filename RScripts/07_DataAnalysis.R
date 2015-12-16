@@ -127,7 +127,7 @@ Yield.MA.model[["full"]] <- try(rma.mv(yi=Yield.Log.RR,V=Yield.Log.RR.Var,mods=~
 
 Yield.MA.model[["select"]] <- RMASelect(Yield.MA.model[["full"]])
 
-save(Richness.MA.model,Yield.MA.model,modelDataRichness,modelDataYield,file=paste(path2temp,"Models.Rd",sep=""))
+save(Richness.MA.model,Yield.MA.model,modelDataRichness,modelDataYield,file=paste(path2temp,"Models.Rdata",sep=""))
 
 # ############################################################################
 # ### 07.4. Analysis with moderators for no LU vs low/medium/high LU
