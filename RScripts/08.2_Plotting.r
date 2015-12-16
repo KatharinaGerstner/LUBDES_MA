@@ -69,8 +69,8 @@ CatsWhiskers_plot <- function(data, YieldorRichness = c("yield", "richness"), on
   axis(2, at=c(one-1, one, one+1, two-1, two, two+1, three-1, three, three+1), labels = c(rep(c(0, 1, 2), time=3)), tick=FALSE, las=2)
   abline(h=(one+two)/2, lty=3)
   abline(h=(three+two)/2, lty=3)
-  if(YieldorRichness == "yield"){title("log-RR - Yield")}
-  if(YieldorRichness == "richness"){title("log-RR - Richness")}
+  if(YieldorRichness == "yield"){title("log-RR - Yield ("%+%dataType%+%")")}
+  if(YieldorRichness == "richness"){title("log-RR - Richness ("%+%dataType%+%")")}
 }
 
 CatsWhiskers_plot(data=ES.frame.yield, dataType="raw", YieldorRichness = "yield")
