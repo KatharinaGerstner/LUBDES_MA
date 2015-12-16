@@ -13,7 +13,33 @@
 ### * TO DO: change palette for scale_color_brewer() to get rid of the warning "In RColorBrewer::brewer.pal(n, pal) : n too large, allowed maximum for palette Set1 is 9 Returning the palette you asked for with that many colors"
 ###
 ### Authors: KG, MB, SK ...
+###
+### Ralf: I suggest using 08_Plotting.r in as main scrtipt for plotting, calling 
+### various scripts which generate figures we need for 
+### - Main Paper
+### - Appendix
+### and other analysis, what ever we need.
+
+
 ############################################################################
+### Plot figure for Main Paper
+###
+
+### Figure 1 
+### missing
+
+### Figure 2: cat Whisker-Plois
+source(path2wd %+% "08.2_plotting.r")
+
+############################################################################
+### Plot figure for Appendix
+###
+
+### Figure SA.1: World Map
+source(path2wd %+% "08.1_plotting.r")
+
+### Figure SA.x: Forets Plots
+source(path2wd %+% "08.3_plotting.r")
 
 
 ############################################################################
