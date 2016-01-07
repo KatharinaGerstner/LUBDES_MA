@@ -128,7 +128,7 @@ source(path2wd %+% "05_AddMapDataToESframe.R")
 #source(path2wd %+% "06_DescriptiveStatsOfESframe.r")
 source(path2wd %+% "07_DataAnalysis.R")
 source(path2wd %+% "08.1_Plot_maps.r")
-source(path2wd %+% "08.2_Plot_CatWhiskers.rr")
+source(path2wd %+% "08.2_Plot_CatWhiskers.r")
 source(path2wd %+% "08.3_Plot_forest_plots.r")
 #source(path2wd %+% "09_ModelDiagnostics.R") # not yet working
 #source(path2wd %+% "10_UncertaintyAnalysis.R") # not yet working
