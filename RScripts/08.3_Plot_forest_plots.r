@@ -1,10 +1,14 @@
 ############################################################################
-### 08.3. forest plots for each LUI-comparison class
-### 
-### Stefan Kambach, Annapolis Workshop
-### Ralf Seppelt: generated seperate r-file
+### Purpose of this skript module 08.3 is to:
+###
+### 08.3.1. plot forest plots for each LUI-comparison class
+###
+### General comments:
+### * written during WS#5
+### * needs to be commented
+###
+### Authors: SK, RS ...
 ############################################################################
-
 
 LUI.range.level = c("low-low","medium-medium","high-high","low-medium","medium-high","low-high")
 

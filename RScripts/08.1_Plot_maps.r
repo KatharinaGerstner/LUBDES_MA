@@ -1,17 +1,21 @@
 ############################################################################
-### Purpose of this skript module 08 is to:
+### Purpose of this skript module 08.1 is to:
 ###
-### 08.1. Plot map of studies
+### 08.1.1. Plot map of studies (full map)
+### 08.1.2. Plot six maps by intensity classes
+### 
+### General comments:
+### * this is planned as Figure SA.4: World Map
 ###
 ### Authors: KG, MB, SK ...
 ############################################################################
 
-### show current working directory and check if its local
-getwd()
+### set wd to local temp to save outputs
+setwd(path2temp)
 
 ############################################################################
-### 08.1. Plot map of studies
-### 08.1.1 full map        
+### 08.1.1. Plot map of studies (full map)
+### 
 ### 
 ############################################################################
 
@@ -26,7 +30,9 @@ p
 ggsave(paste(path2temp, "/CaseDistributionAll.png",sep=""), width=18, height=10, units="cm")
 
 ############################################################################
-### 08.1.2 6 map by intensity classes
+### 08.1.2. Plot six maps by intensity classes
+### 
+### 
 ############################################################################
 
 world_map <- map_data("world")

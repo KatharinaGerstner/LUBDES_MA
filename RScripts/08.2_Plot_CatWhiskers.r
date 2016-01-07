@@ -1,16 +1,27 @@
 ############################################################################
-### 08.2. Cat Whisker Plots
-### 
-### added by Ralf, no clue how to use the models data or 
-### originates from helens RR-Slope_Plots.R skirp, which is now deprictates, 
+### Purpose of this skript module 08.2 is to:
 ###
-### suggestions for modifications:
-### - separate by producs
-### - use model data
-### - use ggplot
+### 08.2.1. Plot CatWhisker plots
+###
+### General comments:
+### * added by Ralf, no clue how to use the models data 
+### * originates from helens RR-Slope_Plots.R skript, which is now deprictates
+### * suggestions for modifications:
+###   - separate by producs
+###   - use model data
+###   - use ggplot
+###   - dissolve function into easier manipulated code
+###
+### Authors: HP, RS ...
 ############################################################################
 
-# load Helens code
+############################################################################
+### 08.2.1 Plot CatWhisker plots
+### 
+### 
+############################################################################
+
+# load HP's CatWhisker code
 
 CatsWhiskers_plot <- function(data, YieldorRichness = c("yield", "richness"), one=1, two=5, three=9, alpha=100, covariate ="Product", dataType = c("model", "raw"), model){
   
@@ -75,7 +86,4 @@ CatsWhiskers_plot <- function(data, YieldorRichness = c("yield", "richness"), on
 
 CatsWhiskers_plot(data=ES.frame.yield, dataType="raw", YieldorRichness = "yield")
 CatsWhiskers_plot(data=ES.frame.richness, dataType="raw", YieldorRichness = "richness")
-<<<<<<< HEAD
-=======
 
->>>>>>> a78392935c8dbc005efebf3e47d24168c5e77de4

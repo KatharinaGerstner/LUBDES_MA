@@ -31,7 +31,7 @@ predFrameR <- data.frame(Species.Group=unlist(lapply(div.terms,function(x) x[1])
 
 
 newMods <- model.matrix(~ LUI.range.level + Species.Group + BIOME, data=predFrameR)
-newMods <- newMods[,-which(colnames(newMods)=="(Intercept)")]
+#newMods <- newMods[,-which(colnames(newMods)=="(Intercept)")]
 
 predsR <- predict.rma(Richness.MA.model[["select"]]$model,newmods = newMods)
 predFrameR <- cbind(predFrameR,predsR=predsR$pred,predsR.se=predsR$se)

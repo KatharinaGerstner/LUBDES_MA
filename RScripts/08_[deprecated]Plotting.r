@@ -43,11 +43,11 @@ source(path2wd %+% "08.2_plotting.r")
 ### Figure SA.1: enn Diagram showing the numbers of manually screened study 
 ### abstracts. (Michael)
 
-### Figure SA.4: World Map
-source(path2wd %+% "08.1_plotting.r")
-
-### Figure SA.5: Forets Plots
-source(path2wd %+% "08.3_plotting.r")
+# ### Figure SA.4: World Map
+# source(path2wd %+% "08.1_plotting.r")
+# 
+# ### Figure SA.5: Forets Plots
+# source(path2wd %+% "08.3_plotting.r")
 
 
 ############################################################################

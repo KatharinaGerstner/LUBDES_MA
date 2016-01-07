@@ -1,9 +1,8 @@
 ############################################################################
 ### Purpose of this skript module 04 is to:
 ###
-### 04.1. table.sort function
-### 04.2. Compile ES frame
-### 04.3. Calculate response ratio effect sizes
+### 04.1. Compile ES frame
+### 04.2. Calculate response ratio effect sizes
 ###
 ### General comments:
 ###
@@ -11,46 +10,7 @@
 ############################################################################
 
 ############################################################################
-### 04.1. table.sort function
-### 
-############################################################################
-
-### table.sort function to restructure dataimp
-
-
-table.sort = function(dat.low,dat.high,low,high){
-  data.frame("Study.ID"=dat.low$Study.ID, "Case.ID" =dat.low$Case.ID, 
-             "Low.LUI" = low, "High.LUI" = high,
-             "Land.use...land.cover" = dat.low$Land.use...land.cover, "Product" = dat.low$Product, "ES.From.BD" =dat.low$ES.measured.from.BD.,
-             
-             "Fertilization" = paste(dat.low$Fertilization, dat.high$Fertilization, sep="_"), 
-             "Irrigation" =paste(dat.low$Irrigation, dat.high$Irrigation, sep="_"),
-             "Pesticides" = paste(dat.low$Pesticides, dat.high$Pesticides, sep="_"),
-             "Grazing" =paste(dat.low$Grazing, dat.high$Grazing, sep="_"), 
-             "Mowing" = paste(dat.low$Mowing, dat.high$Mowing, sep="_"), 
-             "Clear.Cut" =paste(dat.low$Clear.Cut.y.n., dat.high$Clear.Cut.y.n., sep="_"),
-             "Selective.Logging" = paste(dat.low$Selective.Logging.y.n., dat.high$Selective.Logging.y.n., sep="_"),
-             "Partial.Logging" = paste(dat.low$Partial.Logging.y.n., dat.high$Partial.Logging.y.n., sep="_"), 
-             "Additional.Treatment" =dat.high$Additional.Treatment,
-             
-             "Date.Start" =dat.low$Date.of.study..start, "Date.End" =dat.low$Date.of.study..end, 
-             "Latitude" =as.numeric(dat.low$latitude..N..S.), "Longitude" =as.numeric(dat.low$longitude..E..W.),
-             "Country.Code" = dat.low$Country,
-             
-             "Species.Group" =dat.low$species.group, "Species.Subgroup" =dat.low$species.subgroup.if.provided, "Trophic.Level" =dat.low$trophic.level..species.guild,
-             #"Product" = dat.low$product,
-             
-             "Richness.Mean.Low" = as.numeric(dat.low$richness.mean), "Richness.SD.Low" =as.numeric(dat.low$richness.SD), "Richness.N.Low" =as.numeric(dat.low$X..of.samples.for.BD.measure), 
-             "Richness.Plot.Size" = as.numeric(dat.low$sampled.area),
-             "Richness.Mean.High" = as.numeric(dat.high$richness.mean), "Richness.SD.High" = as.numeric(dat.high$richness.SD), "Richness.N.High" = as.numeric(dat.high$X..of.samples.for.BD.measure),             
-             "Yield.Mean.Low" = as.numeric(dat.low$yield.mean), "Yield.SD.Low" = as.numeric(dat.low$yield.SD), "Yield.N.Low" = as.numeric(dat.low$X..of.samples.for.YD.measure),
-             "Yield.Mean.High" = as.numeric(dat.high$yield.mean), "Yield.SD.High" = as.numeric(dat.high$yield.SD), "Yield.N.High" = as.numeric(dat.high$X..of.samples.for.YD.measure),
-             "Yield.SD.is.imputed.low" = dat.low$Yield.SD.is.imputed,"Yield.SD.is.imputed.high" = dat.high$Yield.SD.is.imputed,
-             "Richness.SD.is.imputed.low" = dat.low$Richness.SD.is.imputed,"Richness.SD.is.imputed.high" = dat.high$Richness.SD.is.imputed)
-  }
-
-############################################################################
-### 04.2. Compile ES frame
+### 04.1. Compile ES frame
 ### 
 ############################################################################
 
@@ -76,8 +36,6 @@ names(ES.frame.noLU) <- c("Study.ID","Case.ID","Low.LUI","High.LUI","Habitat.Typ
                      "Species.Group","Species.Subgroup","Trophic.Level","Richness.Mean.Low" ,  
                      "Richness.SD.Low","Richness.N.Low","Richness.Plot.Size","Richness.Mean.High","Richness.SD.High", "Richness.N.High",
                      "Yield.SD.is.imputed.low","Yield.SD.is.imputed.high","Richness.SD.is.imputed.low","Richness.SD.is.imputed.high")
-
-# TO DO: remove "pooled within one LUI", change l 83: paste(dataimp$study.case,dataimp$species.group,sep="-") to dataimp$study.case
 
 ### re-build dataimp to ES.frame using table.sort function
 
@@ -162,7 +120,7 @@ ES.frame$Study.Case <- paste(ES.frame$Study.ID,ES.frame$Case.ID,sep="-")
 ES.frame.noLU$Study.Case <- paste(ES.frame.noLU$Study.ID,ES.frame.noLU$Case.ID,sep="-")
 
 ############################################################################
-### 04.3. Calculate response ratio effect sizes
+### 04.2. Calculate response ratio effect sizes
 ### 
 ############################################################################
 

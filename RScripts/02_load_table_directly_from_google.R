@@ -4,115 +4,11 @@
 ### 02.1. load data directly from google docs
 ### 02.2. adapt data structure
 ###
+### General comments:
+### * standardization of units is not applied atm, check why its not working
+###
 ### Authors: MB, KG
 ############################################################################
-
-############################################################################
-##
-## Additional Functions for standardisation
-##
-############################################################################
-convertYieldUnits <- function(data){
-	if(!("yield.unit" %in% names(data))){stop("There must be a column called 'yield.unit'")}
-	if(!("yield.mean" %in% names(data))){stop("There must be a column called 'yield.mean'")}
-	
-	new_units <- data$yield.unit	
-	new_means <- data$yield.mean
-	
-	## getting rid of inconsistencies with names
-	new_units <- ifelse(!is.na(new_units) & new_units == "cm grass height", "cm", new_units)
-	new_units <- ifelse(!is.na(new_units) & new_units == "Mg/ha", "t/ha", new_units)
-	new_units <- ifelse(!is.na(new_units) & new_units == "m³/ha/year", "m³/ha", new_units)
-
-
-	new_means  <- ifelse(!is.na(new_units) & new_units == "cm", new_means/100, new_means)
-	new_units <- ifelse(!is.na(new_units) & new_units == "cm", "m", new_units)	
-	
-	new_means  <- ifelse(!is.na(new_units) & new_units == "kg/hm²a", new_means*10000, new_means)
-	new_units <- ifelse(!is.na(new_units) & new_units == "kg/hm²a", "kg/m²", new_units)
-	
-	new_means  <- ifelse(!is.na(new_units) & new_units == "m³/0.01 ha", new_means*100, new_means)
-	new_units <- ifelse(!is.na(new_units) & new_units == "m³/0.01 ha", "m³/ha", new_units)
-	
-	new_means  <- ifelse(!is.na(new_units) & new_units == "g/m²", new_means/1000, new_means)
-	new_units <- ifelse(!is.na(new_units) & new_units == "g/m²", "kg/m²", new_units)
-	new_means  <- ifelse(!is.na(new_units) & new_units == "kg/m²", new_means*10, new_means)
-	new_units <- ifelse(!is.na(new_units) & new_units == "kg/m²", "t/ha", new_units)
-	
-	data$yield.unit <- new_units
-	data$yield.mean <- new_means
-	
-	data$Yield.Unit.Type <- NA
-	counts <- c("% conifer", "% fruit set", "% of trees of original volume removed","fruit/sq.m.", "treecover (%)", "trees/ha", "trees/year")
-	mass <- c("g", "kg / animal / day", "kg/tree", "t/ha")
-	volume <- c("m³/ha")
-	area <- c("m", "m²/ha" )
-	data$Yield.Unit.Type[data$yield.unit %in% counts] <- "Count/area"
-	data$Yield.Unit.Type[data$yield.unit %in% mass] <- "Mass/area"
-	data$Yield.Unit.Type[data$yield.unit %in% volume] <- "Volume/area"
-	data$Yield.Unit.Type[data$yield.unit %in% area] <- "Area/area"
-
-	return(data)
-}
-
-convertAreaUnits <- function(data, type=c("bd", "yield")){
-	if(type == "yield"){
-		if(!("sampled.size.area" %in% names(data))){stop("There must be a column called 'sampled.size.area'")}
-		if(!("sampled.size.unit.1" %in% names(data))){stop("There must be a column called 'sampled.size.unit.1'")}
-		new_units <- data$sampled.size.unit.1
-		new_area <- as.numeric(data$sampled.size.area)
-		}
-	
-	if(type == "bd"){
-		if(!("sampled.area" %in% names(data))){stop("There must be a column called 'sampled.area'")}
-		if(!("sampled.size.unit" %in% names(data))){stop("There must be a column called 'sampled.size.unit'")}
-		new_units <- data$sampled.size.unit
-		new_area <- as.numeric(data$sampled.area)
-		}
-	new_area  <- ifelse(!is.na(new_units) & new_units == "mÂ²", "m²", new_area)
-	
-	new_area  <- ifelse(!is.na(new_units) & new_units == "ha", new_area * 10000, new_area)
-	new_units <- ifelse(!is.na(new_units) & new_units == "ha", "m²", new_units)	
-	
-	new_area  <- ifelse(!is.na(new_units) & new_units == "cm²", new_area * 0.0001, new_area)
-	new_units <- ifelse(!is.na(new_units) & new_units == "cm²", "m²", new_units)	
-	
-	new_area  <- ifelse(!is.na(new_units) & new_units == "mm²", new_area * 1e-6, new_area)
-	new_units <- ifelse(!is.na(new_units) & new_units == "mm²", "m²", new_units)	
-	
-	new_area  <- ifelse(!is.na(new_units) & new_units == "km²", new_area * 1000000, new_area)
-	new_units <- ifelse(!is.na(new_units) & new_units == "km²", "m²", new_units)	
-	
-	if(type == "yield"){
-		data$sampled.size.unit.1 <- new_units
-		data$sampled.size.area <- as.numeric(new_area)
-		}
-	if(type == "bd"){
-		data$sampled.size.unit <- new_units
-		data$sampled.area <- as.numeric(new_area)
-		}
-	return(data)
-}
-
-SortTransectsTraps <- function(data){
-	if(!("sampled.size.unit" %in% names(data))){stop("There must be a column called 'sampled.size.unit'")}
-	
-	new_units <- data$sampled.size.unit
-	new_area <- as.numeric(data$sampled.area)
-	
-	transects <- c("points/transect", "transect", "transect (km)","transect (m)")
-	new_units <- ifelse(new_units %in% transects, "transects", new_units)	
-	new_area <- ifelse(new_units %in% transects, NA, new_area)
-	
-	traps <- c("traps", "traps (mistnets)")
-	new_units <- ifelse(new_units %in% traps, "traps", new_units)	
-	new_area <- ifelse(new_units %in% traps, NA, new_area)
-	
-	data$sampled.size.unit <- new_units
-	data$sampled.area <- new_area
-
-	return(data)
-}
 
 ############################################################################
 ### 02.1. load data directly from google docs
@@ -143,8 +39,9 @@ data<-as.data.frame(data) #some functions don't like the tbl.df data type
 ### check variable types 
 str(data)
 data$X..of.samples.for.BD.measure <- as.integer(data$X..of.samples.for.BD.measure)
-# 
-# ## Standardise units
+
+
+## Standardise units
 # data <- convertYieldUnits(data)
 # data <- convertAreaUnits(data, type = "yield")
 # data <- convertAreaUnits(data, type = "bd")
