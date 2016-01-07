@@ -43,11 +43,6 @@ for(i in unique(dataimp$study.case)){
   
   print(i)
   
-  ### remove some studies from further analysis as these cause error as they have same study.case and species group but diff. species subgroups. TO DO: Decide how to deal with that issue.
-#  if(i %in% c("8235-Norvez2013_1","8002-Lohmus2013_1",paste("9078-Hautier2014_",1:12,sep=""),"516-Higgins1999_1",paste("4212-Kembel2008_",1:3,sep=""))){
-#    print("ERROR. Omit from analysis.")
-#    next}
-
   data.temp = subset(dataimp, dataimp$study.case %in% i)
 
   ### for nu LUI

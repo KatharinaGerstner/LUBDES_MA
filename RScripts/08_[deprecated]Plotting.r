@@ -122,20 +122,29 @@ source(path2wd %+% "08.2_plotting.r")
 modelDataR <- modelDataRichness
 modelDataY <- modelDataYield
 
+RichnessModel<- Richness.MA.model[["select"]]
+YieldModel<- Yield.MA.model[["select"]]
+
+# richness
 
 predFrame <- data.frame(Species.Group=factor("invertebrates",levels=levels(modelDataR$Species.Group)),
                         LUI.range.level=factor(levels(modelDataR$LUI.range.level),levels=levels(modelDataR$LUI.range.level)),
                         BIOME=factor("Tropical_Forests",levels=levels(modelDataR$BIOME)))
 
-newMods <- model.matrix(~Species.Group + LUI.range.level + BIOME,data=predFrame)
+newMods <- model.matrix(~ LUI.range.level,data=predFrame)
 newMods <- newMods[,-which(colnames(newMods)=="(Intercept)")]
 
-predsR <- predict.rma(RichnessModel$model,newmods = newMods)
+predsR <- predict.rma(RichnessModel$model,newmods = newMods,intercept=F)
 predsR<-data.frame(pred=predsR$pred,se=predsR$se)
 predsR$LUI.range.level <- factor(levels(modelDataR$LUI.range.level),levels = levels(modelDataR$LUI.range.level))
 
-predFrame <- data.frame(LUI.range.level=factor(levels(modelDataR$LUI.range.level),levels=levels(modelDataR$LUI.range.level)),
-                        Product=factor("crop",levels=levels(modelDataR$Product)))
+
+
+# yield
+
+
+predFrame <- data.frame(LUI.range.level=factor(levels(modelDataY$LUI.range.level),levels=levels(modelDataY$LUI.range.level)),
+                        Product=factor("crop",levels=levels(modelDataY$Product)))
 
 newMods <- model.matrix(~LUI.range.level + Product,data=predFrame)
 newMods <- newMods[,-which(colnames(newMods)=="(Intercept)")]
@@ -143,6 +152,9 @@ newMods <- newMods[,-which(colnames(newMods)=="(Intercept)")]
 predsY <- predict.rma(YieldModel$model,newmods = newMods)
 predsY<-data.frame(pred=predsY$pred,se=predsY$se)
 predsY$LUI.range.level <- factor(levels(modelDataY$LUI.range.level),levels = levels(modelDataY$LUI.range.level))
+
+
+# plot
 
 plot <- ggplot() + 
   geom_point(data=ES.frame, aes(x=Yield.Log.RR, y=Richness.Log.RR, color=factor(ES.frame[,'LUI.range.level'])), size=4, alpha=.5) +
@@ -157,6 +169,8 @@ plot <- ggplot() +
   theme(axis.title = element_text(size = rel(1.5)), axis.text = element_text(size = rel(1.5)),legend.text=element_text(size = rel(1.5)),legend.title=element_text(size = rel(1.5)))
 print(plot)
 ggsave(plot, file = paste(path2temp,"/New_Cross_diagram_LUI.range.level.png",sep=""), width = 20, height = 8, type = "cairo-png")
+
+
 
 
 predFrame <- data.frame(LUI.range.level=factor("medium-medium",levels=levels(modelDataR$LUI.range.level)),
@@ -187,6 +201,9 @@ plot <- ggplot() +
   theme(axis.title = element_text(size = rel(1.5)), axis.text = element_text(size = rel(1.5)),legend.text=element_text(size = rel(1.5)),legend.title=element_text(size = rel(1.5)))
 print(plot)
 ggsave(plot, file = paste(path2temp,"/New_Cross_diagram_Product.level.png",sep=""), width = 20, height = 8, type = "cairo-png")
+
+
+
 
 predFrame <- data.frame(Species.Group=factor("invertebrates",levels = levels(modelDataR$Species.Group)),
                         LUI.range.level=factor("high-high",levels=levels(modelDataR$LUI.range.level)),
