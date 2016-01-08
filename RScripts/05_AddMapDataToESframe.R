@@ -1,13 +1,14 @@
 ############################################################################
 ### Purpose of this skript module 05 is to:
 ###
-### 05.1. Intersect studies with global maps of WWF_REALMs Ecoregions, combine to coarser classes
-### 05.2. Intersect studies with potential NPP
-### 05.3. Intersect studies with gross capital stock in agriculture and agricultural area
-### 05.4. Intersect studies with Global Habitat Heterogeneity, Dissimilarity
-### 05.5. Intersect studies with Land-use history
-### 05.6. Intersect studies with human pressure index
-###
+### 05.1. Intersect studies with global maps of WWF_REALMs Ecoregions, combine to coarser classes - YES, USE ONLY REDUCED 
+### 05.2. Intersect studies with potential NPP - KEEP, TEST BUT KICK OUT?
+### #05.3. Intersect studies with gross capital stock in agriculture and agricultural area - OUT
+### #05.4. Intersect studies with Global Habitat Heterogeneity, Dissimilarity - OUT
+### 05.5. TODO: Intersect studies with Land-use history - USE KK10 data only (better according to peter)
+### #05.6. Intersect studies with human pressure index - OUT
+### 05.7. IIASA hybrid
+### 05.8. TODO: IIASA fieldsize
 ### General comments:
 ### * TO DO: download maps and store them, link global data using coordinates and countries
 ###   for continuous data such as NPP (londcover dependence?), PAR as alternative to solar radiation
@@ -68,39 +69,39 @@ colnames(ES.frame.noLU)[which(names(ES.frame.noLU) == "realms_extract$WWF_MHTNAM
 ############################################################################
 ### 05.3. Intersect studies with gross capital stock in agriculture
 ############################################################################
-
-if (file.exists("Investment_CapitalStock_E_All_Data.zip")==FALSE){
-  download.file("https://www.dropbox.com/s/xgqrmyiqx2lqvyl/Investment_CapitalStock_E_All_Data.zip?dl=1", "Investment_CapitalStock_E_All_Data.zip", mode="wb")
-  unzip("Investment_CapitalStock_E_All_Data.zip")
-} else {
-  unzip("Investment_CapitalStock_E_All_Data.zip")
-}
-
-if (file.exists("agricultural_area.csv") == FALSE){
-	download.file("https://www.dropbox.com/s/fscg314f6kkvbhv/Data_Extract_From_World_Development_Indicators_Data.csv?dl=1", "agricultural_area.csv")}
-agricultural_area <- read.csv("agricultural_area.csv")
-agricultural_area$X2007..YR2007. <- as.numeric(agricultural_area$X2007..YR2007.)
-agricultural_area$CountryCode <- countrycode(agricultural_area$Country.Code,"wb","iso3c")
-agricultural_area <- data.frame(Country.Code = agricultural_area$CountryCode,
-                                agricultural_area = agricultural_area$X2007..YR2007.)
-ES.frame$agricultural_area <- agricultural_area$agricultural_area[(match(ES.frame$Country.Code,agricultural_area$Country.Code))]
-
-capital_stock_in_agriculture <- read.csv("Investment_CapitalStock_E_All_Data.csv")
-capital_stock_in_agriculture <- subset(capital_stock_in_agriculture, Item == "Capital Stock + (Total)" & Element == "Gross Capital Stock (constant 2005 prices)" & Year == 2007)
-
-# convert fao codes into iso3c codes
-capital_stock_in_agriculture$CountryCode <- countrycode(capital_stock_in_agriculture$CountryCode,"fao","iso3c")
-capital_stock_in_agriculture <- data.frame(Country.Code = capital_stock_in_agriculture$CountryCode,
-                                           capital_millionUSD = capital_stock_in_agriculture$Value)
-capital_stock_in_agriculture$agricultural_area <- agricultural_area$agricultural_area[(match(capital_stock_in_agriculture$Country.Code,agricultural_area$Country.Code))]
-capital_stock_in_agriculture$rel_capital_stock_in_agriculture <- capital_stock_in_agriculture$capital_millionUSD/capital_stock_in_agriculture$agricultural_area
-capital_stock_in_agriculture <- capital_stock_in_agriculture[!is.na(capital_stock_in_agriculture$Country.Code),] ## exclude Country.Code==NA from merging as this produces duplicates
-
-ES.frame <- join(ES.frame,capital_stock_in_agriculture[,c("Country.Code","rel_capital_stock_in_agriculture")],by="Country.Code")
-ES.frame$rel_capital_stock_in_agriculture <- log10(ES.frame$rel_capital_stock_in_agriculture)
-
-ES.frame.noLU <- join(ES.frame.noLU,capital_stock_in_agriculture[,c("Country.Code","rel_capital_stock_in_agriculture")],by="Country.Code")
-ES.frame.noLU$rel_capital_stock_in_agriculture <- log10(ES.frame.noLU$rel_capital_stock_in_agriculture)
+# 
+# if (file.exists("Investment_CapitalStock_E_All_Data.zip")==FALSE){
+#   download.file("https://www.dropbox.com/s/xgqrmyiqx2lqvyl/Investment_CapitalStock_E_All_Data.zip?dl=1", "Investment_CapitalStock_E_All_Data.zip", mode="wb")
+#   unzip("Investment_CapitalStock_E_All_Data.zip")
+# } else {
+#   unzip("Investment_CapitalStock_E_All_Data.zip")
+# }
+# 
+# if (file.exists("agricultural_area.csv") == FALSE){
+# 	download.file("https://www.dropbox.com/s/fscg314f6kkvbhv/Data_Extract_From_World_Development_Indicators_Data.csv?dl=1", "agricultural_area.csv")}
+# agricultural_area <- read.csv("agricultural_area.csv")
+# agricultural_area$X2007..YR2007. <- as.numeric(agricultural_area$X2007..YR2007.)
+# agricultural_area$CountryCode <- countrycode(agricultural_area$Country.Code,"wb","iso3c")
+# agricultural_area <- data.frame(Country.Code = agricultural_area$CountryCode,
+#                                 agricultural_area = agricultural_area$X2007..YR2007.)
+# ES.frame$agricultural_area <- agricultural_area$agricultural_area[(match(ES.frame$Country.Code,agricultural_area$Country.Code))]
+# 
+# capital_stock_in_agriculture <- read.csv("Investment_CapitalStock_E_All_Data.csv")
+# capital_stock_in_agriculture <- subset(capital_stock_in_agriculture, Item == "Capital Stock + (Total)" & Element == "Gross Capital Stock (constant 2005 prices)" & Year == 2007)
+# 
+# # convert fao codes into iso3c codes
+# capital_stock_in_agriculture$CountryCode <- countrycode(capital_stock_in_agriculture$CountryCode,"fao","iso3c")
+# capital_stock_in_agriculture <- data.frame(Country.Code = capital_stock_in_agriculture$CountryCode,
+#                                            capital_millionUSD = capital_stock_in_agriculture$Value)
+# capital_stock_in_agriculture$agricultural_area <- agricultural_area$agricultural_area[(match(capital_stock_in_agriculture$Country.Code,agricultural_area$Country.Code))]
+# capital_stock_in_agriculture$rel_capital_stock_in_agriculture <- capital_stock_in_agriculture$capital_millionUSD/capital_stock_in_agriculture$agricultural_area
+# capital_stock_in_agriculture <- capital_stock_in_agriculture[!is.na(capital_stock_in_agriculture$Country.Code),] ## exclude Country.Code==NA from merging as this produces duplicates
+# 
+# ES.frame <- join(ES.frame,capital_stock_in_agriculture[,c("Country.Code","rel_capital_stock_in_agriculture")],by="Country.Code")
+# ES.frame$rel_capital_stock_in_agriculture <- log10(ES.frame$rel_capital_stock_in_agriculture)
+# 
+# ES.frame.noLU <- join(ES.frame.noLU,capital_stock_in_agriculture[,c("Country.Code","rel_capital_stock_in_agriculture")],by="Country.Code")
+# ES.frame.noLU$rel_capital_stock_in_agriculture <- log10(ES.frame.noLU$rel_capital_stock_in_agriculture)
 
 ############################################################################
 ### 05.4. Intersect studies with GLOBCOVER
@@ -132,7 +133,7 @@ ES.frame.noLU$rel_capital_stock_in_agriculture <- log10(ES.frame.noLU$rel_capita
 
 
 ############################################################################
-### 05.4. Intersect studies with cropland hybrid
+### 05.4. Intersect studies with cropland hybrid IIASA
 ############################################################################
 
 cropland.hybrid<-raster("Hybrid_10042015v9.img")
