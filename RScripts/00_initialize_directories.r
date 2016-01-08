@@ -119,6 +119,9 @@ if (cu == "rseppelt")
 ### 
 ############################################################################
 
+### helper function to combine strings
+"%+%" <- function(x,y)paste(x,y,sep="")
+
 #source(path2wd %+% "-01_load+analyse_screeningtable.r")
 source(path2wd %+% "01_load_libraries_and_functions.r")
 source(path2wd %+% "02_load_table_directly_from_google.R")
