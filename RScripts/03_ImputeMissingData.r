@@ -37,6 +37,9 @@ data2imp.richness <- data2imp.richness[!duplicated(data2imp.richness[,"richnessI
 data2imp.yield <- data2imp.yield[!duplicated(data2imp.yield[,"yieldID"]),]
 
 ### specify columns used for prediction
+### check whether mean/sd ratio for yield differ according to yield units
+#boxplot(yield.mean/yield.SD~Yield.Unit.Type,data=data) # no, they don't
+
 ### only impute SDs using the corresponding means and sample.size
 predictorMatrix1 <- matrix(c(rep(0,4),rep(0,4),c(0,1,0,1),rep(0,4)),
                            ncol=4,byrow=T)
@@ -50,6 +53,10 @@ temp <- complete(mice(data2imp.richness, predictorMatrix=predictorMatrix1,
                  "long")
 data2imp.richness$richness.SD <- rowMeans(matrix(temp$richness.SD, ncol=nchains, byrow=F))
 
+temp.richness <- data.frame(matrix(temp$richness.SD, ncol=nchains, byrow=F))
+temp.richness$mean <- rowMeans(temp.richness[,1:nchains])
+temp.richness$sd <- apply(temp.richness[,1:nchains],1,sd)
+
 temp <- complete(mice(data2imp.yield, predictorMatrix=predictorMatrix1,
                       method = "pmm",
                       m=nchains, maxit =20, printFlag = FALSE), 
@@ -59,10 +66,27 @@ data2imp.yield$yield.SD <- rowMeans(matrix(temp$yield.SD, ncol=nchains, byrow=F)
 dataimp$richness.SD[is.na(dataimp$richness.SD)]<-data2imp.richness$richness.SD[match(dataimp$richnessID[is.na(dataimp$richness.SD)],data2imp.richness$richnessID)]
 dataimp$yield.SD[is.na(dataimp$yield.SD)]<-data2imp.yield$yield.SD[match(dataimp$yieldID[is.na(dataimp$yield.SD)],data2imp.yield$yieldID)]
 
-rm(data2imp.richness, data2imp.yield, temp, predictorMatrix1, nchains)
+### check variability of imputation
+temp.yield <- data.frame(matrix(temp$yield.SD, ncol=nchains, byrow=F))
+temp.yield$mean <- rowMeans(temp.yield[,1:nchains])
+temp.yield$sd <- apply(temp.yield[,1:nchains],1,sd)
 
+par(mfrow=c(2,2))
+hist(temp.richness$mean)
+hist(temp.richness$sd)
+hist(temp.yield$mean)
+hist(temp.yield$sd)
+par(mfrow=c(1,1))
 
-###########################################################################
+p.yield <- ggplot(dataimp) +
+  geom_point(aes(x=yield.mean, y=yield.SD, color=Yield.SD.is.imputed, size=4, alpha=.5)) +
+  xlim(range(dataimp$yield.mean[dataimp$Yield.SD.is.imputed=="yes"],na.rm=T)) +
+  ylim(range(dataimp$yield.SD[dataimp$Yield.SD.is.imputed=="yes"],na.rm=T))
+p.yield
+
+rm(data2imp.richness, data2imp.yield, temp, temp.yield, temp.richness, predictorMatrix1, nchains)
+             
+  ###########################################################################
 ### Resterampe
 
 
