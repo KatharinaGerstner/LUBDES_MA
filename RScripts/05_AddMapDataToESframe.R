@@ -82,6 +82,11 @@ ES.frame.noLU$npp<-extract(npp,lonlat.noLU, buffer=100000, fun=mean)
 ### 05.3. Intersect studies with cropland hybrid IIASA
 ############################################################################
 
+if (file.exists("Hybrid.zip")==FALSE){
+  download.file("https://www.dropbox.com/s/rr3qx2ogomegqxo/Hybrid.zip?dl=1", "Hybrid.zip", mode="wb")
+  unzip("Hybrid.zip")
+} else {unzip("Hybrid.zip")}
+
 cropland.hybrid<-raster("Hybrid_10042015v9.img")
 ES.frame$cropcover<-extract(cropland.hybrid,lonlat, buffer=50000, fun=mean) # consider a buffer of radius=50km² around each dot)
 
