@@ -87,3 +87,5 @@ CatsWhiskers_plot <- function(data, YieldorRichness = c("yield", "richness"), on
 CatsWhiskers_plot(data=ES.frame.yield, dataType="raw", YieldorRichness = "yield")
 CatsWhiskers_plot(data=ES.frame.richness, dataType="raw", YieldorRichness = "richness")
 
+# CatsWhiskers_plot(data=ES.frame.yield, dataType="model", YieldorRichness = "yield", model=Yield.MA.model[["select"]])
+# CatsWhiskers_plot(data=ES.frame.richness, dataType="raw", YieldorRichness = "richness")

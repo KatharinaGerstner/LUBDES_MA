@@ -40,7 +40,6 @@ data<-as.data.frame(data) #some functions don't like the tbl.df data type
 str(data)
 data$X..of.samples.for.BD.measure <- as.integer(data$X..of.samples.for.BD.measure)
 
-
 ## Standardise units
 # data <- convertYieldUnits(data)
 # data <- convertAreaUnits(data, type = "yield")

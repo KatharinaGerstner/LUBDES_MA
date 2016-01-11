@@ -1,16 +1,13 @@
 ############################################################################
 ### Purpose of this skript module 05 is to:
 ###
-### 05.1. Intersect studies with global maps of WWF_REALMs Ecoregions, combine to coarser classes
-### 05.2. Intersect studies with potential NPP
-### 05.3. Intersect studies with gross capital stock in agriculture and agricultural area
-### 05.4. Intersect studies with Global Habitat Heterogeneity, Dissimilarity
-### 05.5. Intersect studies with Land-use history
-### 05.6. Intersect studies with human pressure index
-###
+### 05.1. Intersect studies with global maps of WWF_REALMs Ecoregions, reduce them to five main regions
+### 05.2. Intersect studies with NPP
+### 05.3. Intersect studies with cropland hybrid IIASA
+### 05.4. Intersect studies with Land-use history
+### 05.5. TODO: IIASA fieldsize
 ### General comments:
-### * TO DO: download maps and store them, link global data using coordinates and countries
-###   for continuous data such as NPP (londcover dependence?), PAR as alternative to solar radiation
+### * 
 ###
 ### Authors: MB, KG, RS ...
 ############################################################################
@@ -26,7 +23,7 @@ ES.frame.noLU <- ES.frame.noLU[!is.na(ES.frame.noLU$Longitude+ES.frame.noLU$Lati
 lonlat.noLU <- cbind(ES.frame.noLU$Longitude,ES.frame.noLU$Latitude)
 
 ############################################################################
-### 05.1. Intersect studies with global maps of WWF_REALMs Ecoregions
+### 05.1. Intersect studies with global maps of WWF_REALMs Ecoregions, reduce them to five main regions
 ############################################################################
 
 if (file.exists("terr-ecoregions-TNC.zip")==FALSE){
@@ -65,100 +62,31 @@ realms_extract <- extract(ecoregions,lonlat.noLU)
 ES.frame.noLU <- cbind(ES.frame.noLU,realms_extract$WWF_MHTNAM)
 colnames(ES.frame.noLU)[which(names(ES.frame.noLU) == "realms_extract$WWF_MHTNAM")]<-"BIOME"
 
+
 ############################################################################
-### 05.3. Intersect studies with gross capital stock in agriculture
+### 05.2. Intersect studies with NPP
 ############################################################################
 
-if (file.exists("Investment_CapitalStock_E_All_Data.zip")==FALSE){
-  download.file("https://www.dropbox.com/s/xgqrmyiqx2lqvyl/Investment_CapitalStock_E_All_Data.zip?dl=1", "Investment_CapitalStock_E_All_Data.zip", mode="wb")
-  unzip("Investment_CapitalStock_E_All_Data.zip")
-} else {
-  unzip("Investment_CapitalStock_E_All_Data.zip")
+if (file.exists("tn0_all_gcm.asc")==FALSE){
+  download.file("https://www.dropbox.com/s/689m9pc5bnejbg9/tn0_all_gcm.asc?dl=1","tn0_all_gcm.asc")
 }
+npp <- raster("tn0_all_gcm.asc",crs=CRS("+proj=longlat +datum=WGS84 +no_defs +ellps=WGS84 +towgs84=0,0,0"))
 
-if (file.exists("agricultural_area.csv") == FALSE){
-	download.file("https://www.dropbox.com/s/fscg314f6kkvbhv/Data_Extract_From_World_Development_Indicators_Data.csv?dl=1", "agricultural_area.csv")}
-agricultural_area <- read.csv("agricultural_area.csv")
-agricultural_area$X2007..YR2007. <- as.numeric(agricultural_area$X2007..YR2007.)
-agricultural_area$CountryCode <- countrycode(agricultural_area$Country.Code,"wb","iso3c")
-agricultural_area <- data.frame(Country.Code = agricultural_area$CountryCode,
-                                agricultural_area = agricultural_area$X2007..YR2007.)
-ES.frame$agricultural_area <- agricultural_area$agricultural_area[(match(ES.frame$Country.Code,agricultural_area$Country.Code))]
+ES.frame$npp<-extract(npp,lonlat,buffer=100000,fun=mean)
 
-capital_stock_in_agriculture <- read.csv("Investment_CapitalStock_E_All_Data.csv")
-capital_stock_in_agriculture <- subset(capital_stock_in_agriculture, Item == "Capital Stock + (Total)" & Element == "Gross Capital Stock (constant 2005 prices)" & Year == 2007)
+ES.frame.noLU$npp<-extract(npp,lonlat.noLU, buffer=100000, fun=mean)
 
-# convert fao codes into iso3c codes
-capital_stock_in_agriculture$CountryCode <- countrycode(capital_stock_in_agriculture$CountryCode,"fao","iso3c")
-capital_stock_in_agriculture <- data.frame(Country.Code = capital_stock_in_agriculture$CountryCode,
-                                           capital_millionUSD = capital_stock_in_agriculture$Value)
-capital_stock_in_agriculture$agricultural_area <- agricultural_area$agricultural_area[(match(capital_stock_in_agriculture$Country.Code,agricultural_area$Country.Code))]
-capital_stock_in_agriculture$rel_capital_stock_in_agriculture <- capital_stock_in_agriculture$capital_millionUSD/capital_stock_in_agriculture$agricultural_area
-capital_stock_in_agriculture <- capital_stock_in_agriculture[!is.na(capital_stock_in_agriculture$Country.Code),] ## exclude Country.Code==NA from merging as this produces duplicates
-
-ES.frame <- join(ES.frame,capital_stock_in_agriculture[,c("Country.Code","rel_capital_stock_in_agriculture")],by="Country.Code")
-ES.frame$rel_capital_stock_in_agriculture <- log10(ES.frame$rel_capital_stock_in_agriculture)
-
-ES.frame.noLU <- join(ES.frame.noLU,capital_stock_in_agriculture[,c("Country.Code","rel_capital_stock_in_agriculture")],by="Country.Code")
-ES.frame.noLU$rel_capital_stock_in_agriculture <- log10(ES.frame.noLU$rel_capital_stock_in_agriculture)
-
-############################################################################
-### 05.4. Intersect studies with GLOBCOVER
-############################################################################
-
-# if (file.exists("Globcover_V2.2_Global.zip")==FALSE){
-#   download.file("https://www.dropbox.com/s/ks3sm60er8mgasd/Globcover_V2.2_Global.zip?dl=1", "Globcover_V2.2_Global.zip", mode="wb")
-#   unzip("Globcover_V2.2_Global.zip")
-# } else {
-#   unzip("Globcover_V2.2_Global.zip")
-# }
-# 
-# globcover<-raster("GLOBCOVER_200412_200606_V2.2_Global_CLA.tif")
-# 
-# ### reclassify everything except croplands to 0
-# 
-# m<-c(11,14,100,20,20,60,30,30,35,40,230,0)
-# rclmat<-matrix(m,ncol=3,byrow=TRUE)
-# 
-# beginCluster()
-# rc1 <- clusterR(globcover, reclassify, args=list(rcl=rclmat,right=NA))
-# endCluster()
-# writeRaster(rc1, "globcover_rc.tif",format="GTiff",overwrite=TRUE)
-# 
-# globcover.rc<-raster("globcover_rc.tif")
-# 
-# ES.frame$globcover<-extract(globcover.rc,lonlat, buffer=50000, fun=mean) # consider a buffer of radius=50km² around each dot)
-# 
 
 
 ############################################################################
-### 05.4. Intersect studies with cropland hybrid
+### 05.3. Intersect studies with cropland hybrid IIASA
 ############################################################################
 
 cropland.hybrid<-raster("Hybrid_10042015v9.img")
 ES.frame$cropcover<-extract(cropland.hybrid,lonlat, buffer=50000, fun=mean) # consider a buffer of radius=50km² around each dot)
 
 ############################################################################
-### 05.4. Intersect studies with Global Habitat Heterogeneity, Dissimilarity
-############################################################################
-
-### data from http://www.earthenv.org/texture.html
-# 
-# if (file.exists("habitat_dissimilarity.tif")==FALSE){
-#   download.file("https://www.dropbox.com/s/bwpzna0y4e1t77e/Dissimilarity_01_05_25km_uint32.tif?dl=1", "habitat_dissimilarity.tif", mode="wb")
-#   habitat_dissimilarity <- raster("habitat_dissimilarity.tif")
-# } else {
-#   habitat_dissimilarity <- raster("habitat_dissimilarity.tif")
-# }
-#   
-# habitat_dissimilarity <- raster("habitat_dissimilarity.tif")
-# 
-# ES.frame$habitat_dissimilarity<-extract(habitat_dissimilarity,lonlat, buffer=10000, fun=mean) # consider a buffer of radius=10km² around each dot)
-# 
-# ES.frame.noLU$habitat_dissimilarity<-extract(habitat_dissimilarity,lonlat.noLU, buffer=10000, fun=mean) # consider a buffer of radius=10km² around each dot)
-# 
-############################################################################
-### 05.5. Intersect studies with Land-use history
+### 05.4. Intersect studies with Land-use history
 ############################################################################
 
 if (file.exists("ellis_etal_2013_dataset.zip")==FALSE){
@@ -195,6 +123,13 @@ kk10.year.of.first.use <- apply(kk10.extract.year.of.first.use,1,function(x){ife
 ES.frame.noLU$time.since.first.use <- log10(2000-apply(cbind(hyde.year.of.first.use,kk10.year.of.first.use),1,function(x){ifelse(all(is.na(x)),2000,min(x,na.rm=T))})+1) # set not yet used land to log10(1)=0
 ES.frame.noLU$start.agr.use <- ifelse(ES.frame.noLU$time.since.first.use >= 500,"old","young")
 ES.frame.noLU$start.agr.use[is.na(ES.frame.noLU$start.agr.use)] <- "not yet used"
+
+
+############################################################################
+### Resterampe
+############################################################################
+
+
 
 ############################################################################
 ### 05.6. Intersect studies with human pressure index
@@ -263,18 +198,94 @@ ES.frame.noLU$start.agr.use[is.na(ES.frame.noLU$start.agr.use)] <- "not yet used
 
 #setwd(path2wd)
 
-############################################################################
-### Resterampe
-############################################################################
-# npp
- if (file.exists("tn0_all_gcm.asc")==FALSE){
-   download.file("https://www.dropbox.com/s/689m9pc5bnejbg9/tn0_all_gcm.asc?dl=1","tn0_all_gcm.asc")
- }
-npp <- raster("tn0_all_gcm.asc",crs=CRS("+proj=longlat +datum=WGS84 +no_defs +ellps=WGS84 +towgs84=0,0,0"))
 
-ES.frame$npp<-extract(npp,lonlat,buffer=100000,fun=mean)
 
-ES.frame.noLU$npp<-extract(npp,lonlat.noLU, buffer=100000, fun=mean)
+############################################################################
+### 05.4. Intersect studies with Global Habitat Heterogeneity, Dissimilarity
+############################################################################
+
+### data from http://www.earthenv.org/texture.html
+# 
+# if (file.exists("habitat_dissimilarity.tif")==FALSE){
+#   download.file("https://www.dropbox.com/s/bwpzna0y4e1t77e/Dissimilarity_01_05_25km_uint32.tif?dl=1", "habitat_dissimilarity.tif", mode="wb")
+#   habitat_dissimilarity <- raster("habitat_dissimilarity.tif")
+# } else {
+#   habitat_dissimilarity <- raster("habitat_dissimilarity.tif")
+# }
+#   
+# habitat_dissimilarity <- raster("habitat_dissimilarity.tif")
+# 
+# ES.frame$habitat_dissimilarity<-extract(habitat_dissimilarity,lonlat, buffer=10000, fun=mean) # consider a buffer of radius=10km² around each dot)
+# 
+# ES.frame.noLU$habitat_dissimilarity<-extract(habitat_dissimilarity,lonlat.noLU, buffer=10000, fun=mean) # consider a buffer of radius=10km² around each dot)
+# 
+
+
+############################################################################
+### 05.3. Intersect studies with gross capital stock in agriculture
+############################################################################
+# 
+# if (file.exists("Investment_CapitalStock_E_All_Data.zip")==FALSE){
+#   download.file("https://www.dropbox.com/s/xgqrmyiqx2lqvyl/Investment_CapitalStock_E_All_Data.zip?dl=1", "Investment_CapitalStock_E_All_Data.zip", mode="wb")
+#   unzip("Investment_CapitalStock_E_All_Data.zip")
+# } else {
+#   unzip("Investment_CapitalStock_E_All_Data.zip")
+# }
+# 
+# if (file.exists("agricultural_area.csv") == FALSE){
+# 	download.file("https://www.dropbox.com/s/fscg314f6kkvbhv/Data_Extract_From_World_Development_Indicators_Data.csv?dl=1", "agricultural_area.csv")}
+# agricultural_area <- read.csv("agricultural_area.csv")
+# agricultural_area$X2007..YR2007. <- as.numeric(agricultural_area$X2007..YR2007.)
+# agricultural_area$CountryCode <- countrycode(agricultural_area$Country.Code,"wb","iso3c")
+# agricultural_area <- data.frame(Country.Code = agricultural_area$CountryCode,
+#                                 agricultural_area = agricultural_area$X2007..YR2007.)
+# ES.frame$agricultural_area <- agricultural_area$agricultural_area[(match(ES.frame$Country.Code,agricultural_area$Country.Code))]
+# 
+# capital_stock_in_agriculture <- read.csv("Investment_CapitalStock_E_All_Data.csv")
+# capital_stock_in_agriculture <- subset(capital_stock_in_agriculture, Item == "Capital Stock + (Total)" & Element == "Gross Capital Stock (constant 2005 prices)" & Year == 2007)
+# 
+# # convert fao codes into iso3c codes
+# capital_stock_in_agriculture$CountryCode <- countrycode(capital_stock_in_agriculture$CountryCode,"fao","iso3c")
+# capital_stock_in_agriculture <- data.frame(Country.Code = capital_stock_in_agriculture$CountryCode,
+#                                            capital_millionUSD = capital_stock_in_agriculture$Value)
+# capital_stock_in_agriculture$agricultural_area <- agricultural_area$agricultural_area[(match(capital_stock_in_agriculture$Country.Code,agricultural_area$Country.Code))]
+# capital_stock_in_agriculture$rel_capital_stock_in_agriculture <- capital_stock_in_agriculture$capital_millionUSD/capital_stock_in_agriculture$agricultural_area
+# capital_stock_in_agriculture <- capital_stock_in_agriculture[!is.na(capital_stock_in_agriculture$Country.Code),] ## exclude Country.Code==NA from merging as this produces duplicates
+# 
+# ES.frame <- join(ES.frame,capital_stock_in_agriculture[,c("Country.Code","rel_capital_stock_in_agriculture")],by="Country.Code")
+# ES.frame$rel_capital_stock_in_agriculture <- log10(ES.frame$rel_capital_stock_in_agriculture)
+# 
+# ES.frame.noLU <- join(ES.frame.noLU,capital_stock_in_agriculture[,c("Country.Code","rel_capital_stock_in_agriculture")],by="Country.Code")
+# ES.frame.noLU$rel_capital_stock_in_agriculture <- log10(ES.frame.noLU$rel_capital_stock_in_agriculture)
+
+############################################################################
+### 05.4. Intersect studies with GLOBCOVER
+############################################################################
+
+# if (file.exists("Globcover_V2.2_Global.zip")==FALSE){
+#   download.file("https://www.dropbox.com/s/ks3sm60er8mgasd/Globcover_V2.2_Global.zip?dl=1", "Globcover_V2.2_Global.zip", mode="wb")
+#   unzip("Globcover_V2.2_Global.zip")
+# } else {
+#   unzip("Globcover_V2.2_Global.zip")
+# }
+# 
+# globcover<-raster("GLOBCOVER_200412_200606_V2.2_Global_CLA.tif")
+# 
+# ### reclassify everything except croplands to 0
+# 
+# m<-c(11,14,100,20,20,60,30,30,35,40,230,0)
+# rclmat<-matrix(m,ncol=3,byrow=TRUE)
+# 
+# beginCluster()
+# rc1 <- clusterR(globcover, reclassify, args=list(rcl=rclmat,right=NA))
+# endCluster()
+# writeRaster(rc1, "globcover_rc.tif",format="GTiff",overwrite=TRUE)
+# 
+# globcover.rc<-raster("globcover_rc.tif")
+# 
+# ES.frame$globcover<-extract(globcover.rc,lonlat, buffer=50000, fun=mean) # consider a buffer of radius=50km² around each dot)
+# 
+
 
 
 ## climate zones
