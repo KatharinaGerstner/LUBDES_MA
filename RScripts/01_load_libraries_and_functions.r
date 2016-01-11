@@ -47,10 +47,14 @@ library(reshape2)
 ### 
 ############################################################################
 
+############################################################################
 ### helper function to combine strings
+############################################################################
 "%+%" <- function(x,y)paste(x,y,sep="")
 
-### RMA select function by HP and TN
+############################################################################
+### RMA select function (by HP and TN)
+############################################################################
 
 RMASelect <- function(model){
   
@@ -103,13 +107,17 @@ RMASelect <- function(model){
 }
 
 
-### standardize yield units
+############################################################################
+### standardize yield units (by HP, KG)
+############################################################################
+
 convertYieldUnits <- function(data){
   if(!("yield.unit" %in% names(data))){stop("There must be a column called 'yield.unit'")}
   if(!("yield.mean" %in% names(data))){stop("There must be a column called 'yield.mean'")}
   
   new_units <- data$yield.unit	
   new_means <- data$yield.mean
+  new_sd <- data$yield.SD
   
   ## getting rid of inconsistencies with names
   new_units <- ifelse(!is.na(new_units) & new_units == "cm grass height", "cm", new_units)
@@ -118,17 +126,22 @@ convertYieldUnits <- function(data){
   
   
   new_means  <- ifelse(!is.na(new_units) & new_units == "cm", new_means/100, new_means)
+  new_SD <- ifelse(!is.na(new_units) & new_units == "cm", new_SD/100, new_SD)
   new_units <- ifelse(!is.na(new_units) & new_units == "cm", "m", new_units)	
   
   new_means  <- ifelse(!is.na(new_units) & new_units == "kg/hm²a", new_means*10000, new_means)
+  new_SD <- ifelse(!is.na(new_units) & new_units == "kg/hm²a", new_SD*10000, new_SD)
   new_units <- ifelse(!is.na(new_units) & new_units == "kg/hm²a", "kg/m²", new_units)
   
   new_means  <- ifelse(!is.na(new_units) & new_units == "m³/0.01 ha", new_means*100, new_means)
+  new_SD  <- ifelse(!is.na(new_units) & new_units == "m³/0.01 ha", new_SD*100, new_SD)
   new_units <- ifelse(!is.na(new_units) & new_units == "m³/0.01 ha", "m³/ha", new_units)
   
   new_means  <- ifelse(!is.na(new_units) & new_units == "g/m²", new_means/1000, new_means)
+  new_SD  <- ifelse(!is.na(new_units) & new_units == "g/m²", new_SD/1000, new_SD)
   new_units <- ifelse(!is.na(new_units) & new_units == "g/m²", "kg/m²", new_units)
   new_means  <- ifelse(!is.na(new_units) & new_units == "kg/m²", new_means*10, new_means)
+  new_SD  <- ifelse(!is.na(new_units) & new_units == "kg/m²", new_SD*10, new_SD)
   new_units <- ifelse(!is.na(new_units) & new_units == "kg/m²", "t/ha", new_units)
   
   data$yield.unit <- new_units
@@ -147,7 +160,9 @@ convertYieldUnits <- function(data){
   return(data)
 }
 
+############################################################################
 ### standardize area units
+############################################################################
 
 convertAreaUnits <- function(data, type=c("bd", "yield")){
   if(type == "yield"){
@@ -209,11 +224,11 @@ SortTransectsTraps <- function(data){
   return(data)
 }
 
+############################################################################
 ### table.sort function
+############################################################################
 
 ### table.sort function to restructure dataimp
-
-
 table.sort = function(dat.low,dat.high,low,high){
   data.frame("Study.ID"=dat.low$Study.ID, "Case.ID" =dat.low$Case.ID, 
              "Low.LUI" = low, "High.LUI" = high,
