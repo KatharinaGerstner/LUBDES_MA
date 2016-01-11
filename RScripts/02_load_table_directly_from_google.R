@@ -45,6 +45,11 @@ data$X..of.samples.for.BD.measure <- as.integer(data$X..of.samples.for.BD.measur
 # data <- convertAreaUnits(data, type = "yield")
 # data <- convertAreaUnits(data, type = "bd")
 # data <- SortTransectsTraps(data)
+data$Yield.Unit.Type <- NA
+data$Yield.Unit.Type[data$yield.unit %in% c("% conifer", "% fruit set", "% of trees of original volume removed","fruit/sq.m.", "treecover (%)", "trees/ha", "trees/year")] <- "Count/area"
+data$Yield.Unit.Type[data$yield.unit %in% c("g", "kg / animal / day", "kg/tree", "g/m²", "kg/m²", "kg/ha","kg/hm²a","kg/ha/year","t/ha", "Mg/ha")] <- "Mass/area"
+data$Yield.Unit.Type[data$yield.unit %in% c("m³/ha","m³/0.01 ha","m³/ha/year")] <- "Volume/area"
+data$Yield.Unit.Type[data$yield.unit %in% c("cm","cm grass height","m", "m²/ha" )] <- "Area/area"
 
 ### dissmiss studies with missing mean for BD or yield
 data <- data[-(which(is.na(data$richness.mean))),]
