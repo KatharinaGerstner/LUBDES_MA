@@ -8,7 +8,7 @@
 ### Authors: KG, MB, SK ...
 ############################################################################
 
-dataimp <- data[data$richness.mean>0 & data$yield.mean>0,] # restrict imputation to zero mean cases, i.e. zero richness is weird, zero yield only happens in no LU cases
+dataimp <- data
 
 ### impute also zero SD's as we can't work with that in the analysis
 dataimp$richness.SD[dataimp$richness.SD==0] <- NA
@@ -20,17 +20,17 @@ dataimp$yield.SD[dataimp$yield.SD==0] <- NA
 ############################################################################
 
 # save which results were imputed
-dataimp$yield.SD.is.imputed = "no"
-dataimp$yield.SD.is.imputed[which(is.na(dataimp$yield.SD))] = "yes"
-dataimp$richness.SD.is.imputed = "no"
-dataimp$richness.SD.is.imputed[which(is.na(dataimp$richness.SD))] = "yes"
+dataimp$Yield.SD.is.imputed = "no"
+dataimp$Yield.SD.is.imputed[which(is.na(dataimp$yield.SD))] = "yes"
+dataimp$Richness.SD.is.imputed = "no"
+dataimp$Richness.SD.is.imputed[which(is.na(dataimp$richness.SD))] = "yes"
 
 dataimp$richnessID <- paste(dataimp$Study.ID,dataimp$richness.mean,dataimp$X..of.samples.for.BD.measure)
 dataimp$yieldID <- paste(dataimp$Study.ID,dataimp$yield.mean,dataimp$X..of.samples.for.YD.measure)
 
-### reduce dataframe, remove duplicates in Study.ID_meanRRs
-data2imp.richness <- dataimp[!duplicated(dataimp[,"richnessID"]),]
-data2imp.yield <- dataimp[!duplicated(dataimp[,"yieldID"]),]
+### reduce dataframe, remove duplicates in Study.ID_meanRRs and restrict imputation to non-zero mean cases
+data2imp.richness <- dataimp[!duplicated(dataimp[,"richnessID"]) & dataimp$richness.mean>0,]
+data2imp.yield <- dataimp[!duplicated(dataimp[,"yieldID"]) & dataimp$yield.mean>0,]
 # dataimp$richness.mean.n <- dataimp$richness.mean*dataimp$X..of.samples.for.BD.measure
 # dataimp$yield.mean.n <- dataimp$yield.mean*dataimp$X..of.samples.for.YD.measure
 
@@ -41,7 +41,7 @@ data2imp.richness$richness.SD[is.na(data2imp.richness$richness.SD)] <- exp(predi
 dataimp$richness.SD[is.na(dataimp$richness.SD)]<-data2imp.richness$richness.SD[match(dataimp$richnessID[is.na(dataimp$richness.SD)],data2imp.richness$richnessID)]
 
 p.richness <- ggplot(dataimp) +
-  geom_point(aes(x=richness.mean, y=richness.SD, color=richness.SD.is.imputed, size=4, alpha=.5)) #+
+  geom_point(aes(x=richness.mean, y=richness.SD, color=Richness.SD.is.imputed, size=4, alpha=.5)) #+
 #   xlim(range(dataimp$richness.mean[dataimp$richness.SD.is.imputed=="yes"],na.rm=T)) +
 #   ylim(range(dataimp$richness.SD[dataimp$richness.SD.is.imputed=="yes"],na.rm=T)) 
 p.richness
@@ -53,7 +53,7 @@ data2imp.yield$yield.SD[is.na(data2imp.yield$yield.SD)] <- exp(predict(imp.yield
 dataimp$yield.SD[is.na(dataimp$yield.SD)] <- data2imp.yield$yield.SD[match(dataimp$yieldID[is.na(dataimp$yield.SD)],data2imp.yield$yieldID)]
 
 p.yield <- ggplot(dataimp) +
-  geom_point(aes(x=yield.mean, y=yield.SD, color=yield.SD.is.imputed, size=4, alpha=.5)) #+
+  geom_point(aes(x=yield.mean, y=yield.SD, color=Yield.SD.is.imputed, size=4, alpha=.5)) #+
 #   xlim(range(dataimp$yield.mean[dataimp$yield.SD.is.imputed=="yes"],na.rm=T)) +
 #   ylim(range(dataimp$yield.SD[dataimp$yield.SD.is.imputed=="yes"],na.rm=T)) 
 p.yield
