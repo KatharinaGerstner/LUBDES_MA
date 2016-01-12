@@ -8,83 +8,116 @@
 ### Authors: KG, MB, SK ...
 ############################################################################
 
-dataimp <- data
+dataimp <- data[data$richness.mean>0 & data$yield.mean>0,] # restrict imputation to zero mean cases, i.e. zero richness is weird, zero yield only happens in no LU cases
 
 ### impute also zero SD's as we can't work with that in the analysis
-dataimp$richness.SD[data$richness.SD==0] <- NA
-dataimp$yield.SD[data$yield.SD==0] <- NA
+dataimp$richness.SD[dataimp$richness.SD==0] <- NA
+dataimp$yield.SD[dataimp$yield.SD==0] <- NA
+
+############################################################################
+### 03.1. impute missing sd data using linear regression with means and number of samples
+### 
+############################################################################
+
+# save which results were imputed
+dataimp$yield.SD.is.imputed = "no"
+dataimp$yield.SD.is.imputed[which(is.na(dataimp$yield.SD))] = "yes"
+dataimp$richness.SD.is.imputed = "no"
+dataimp$richness.SD.is.imputed[which(is.na(dataimp$richness.SD))] = "yes"
+
+dataimp$richnessID <- paste(dataimp$Study.ID,dataimp$richness.mean,dataimp$X..of.samples.for.BD.measure)
+dataimp$yieldID <- paste(dataimp$Study.ID,dataimp$yield.mean,dataimp$X..of.samples.for.YD.measure)
+
+### reduce dataframe, remove duplicates in Study.ID_meanRRs
+data2imp.richness <- dataimp[!duplicated(dataimp[,"richnessID"]),]
+data2imp.yield <- dataimp[!duplicated(dataimp[,"yieldID"]),]
+# dataimp$richness.mean.n <- dataimp$richness.mean*dataimp$X..of.samples.for.BD.measure
+# dataimp$yield.mean.n <- dataimp$yield.mean*dataimp$X..of.samples.for.YD.measure
+
+imp.richness.lm <- step(lm(log(richness.SD)~log(richness.mean)*log(X..of.samples.for.BD.measure),data=data2imp.richness[!is.na(data2imp.richness$richness.SD),]))
+# summary(imp.richness.lm)
+# plot(imp.richness.lm) # diagnostic plots, look ok!
+data2imp.richness$richness.SD[is.na(data2imp.richness$richness.SD)] <- exp(predict(imp.richness.lm, newdata=data2imp.richness[is.na(data2imp.richness$richness.SD),]))
+dataimp$richness.SD[is.na(dataimp$richness.SD)]<-data2imp.richness$richness.SD[match(dataimp$richnessID[is.na(dataimp$richness.SD)],data2imp.richness$richnessID)]
+
+p.richness <- ggplot(dataimp) +
+  geom_point(aes(x=richness.mean, y=richness.SD, color=richness.SD.is.imputed, size=4, alpha=.5)) #+
+#   xlim(range(dataimp$richness.mean[dataimp$richness.SD.is.imputed=="yes"],na.rm=T)) +
+#   ylim(range(dataimp$richness.SD[dataimp$richness.SD.is.imputed=="yes"],na.rm=T)) 
+p.richness
+
+imp.yield.lm <- step(lm(log(yield.SD)~log(yield.mean)*log(X..of.samples.for.YD.measure),data=data2imp.yield[!is.na(data2imp.yield$yield.SD),]))
+# summary(imp.yield.lm)
+# plot(imp.yield.lm) # diagnostic plots, look ok!
+data2imp.yield$yield.SD[is.na(data2imp.yield$yield.SD)] <- exp(predict(imp.yield.lm, newdata=data2imp.yield[is.na(data2imp.yield$yield.SD),]))
+dataimp$yield.SD[is.na(dataimp$yield.SD)] <- data2imp.yield$yield.SD[match(dataimp$yieldID[is.na(dataimp$yield.SD)],data2imp.yield$yieldID)]
+
+p.yield <- ggplot(dataimp) +
+  geom_point(aes(x=yield.mean, y=yield.SD, color=yield.SD.is.imputed, size=4, alpha=.5)) #+
+#   xlim(range(dataimp$yield.mean[dataimp$yield.SD.is.imputed=="yes"],na.rm=T)) +
+#   ylim(range(dataimp$yield.SD[dataimp$yield.SD.is.imputed=="yes"],na.rm=T)) 
+p.yield
+
+rm(data2imp.richness,data2imp.yield, imp.richness.lm, imp.yield.lm, p.richness, p.yield)
+
 
 ############################################################################
 ### 03.1. impute missing data using mice package
 ### 
 ############################################################################
-
-# save which results were imputed
-dataimp$Yield.SD.is.imputed = "no"
-dataimp$Yield.SD.is.imputed[which(is.na(dataimp$yield.SD))] = "yes"
-dataimp$Richness.SD.is.imputed = "no"
-dataimp$Richness.SD.is.imputed[which(is.na(dataimp$richness.SD))] = "yes"
-
-dataimp$richnessID <- paste(dataimp$Study.ID,dataimp$richness.mean,dataimp$X..of.samples.for.BD.measure)
-dataimp$yieldID <- paste(dataimp$Study.ID,dataimp$yield.mean,dataimp$X..of.samples.for.YD.measure)
-
 ### specify columns necessary for imputation
-data2imp.richness <- dataimp[,c("richnessID","richness.mean", "richness.SD", "X..of.samples.for.BD.measure")]
-data2imp.yield <- dataimp[dataimp$Intensity.broad!="no LU",c("yieldID","yield.mean", "yield.SD", "X..of.samples.for.YD.measure")] 
-
-### reduce dataframe, remove duplicates in Study.ID_meanRRs
-data2imp.richness <- data2imp.richness[!duplicated(data2imp.richness[,"richnessID"]),]
-data2imp.yield <- data2imp.yield[!duplicated(data2imp.yield[,"yieldID"]),]
+#data2imp.richness <- dataimp[,c("richnessID","richness.mean", "richness.SD", "X..of.samples.for.BD.measure")]
+#data2imp.yield <- dataimp[dataimp$Intensity.broad!="no LU",c("yieldID","yield.mean", "yield.SD", "X..of.samples.for.YD.measure")] 
 
 ### specify columns used for prediction
 ### check whether mean/sd ratio for yield differ according to yield units
 #boxplot(yield.mean/yield.SD~Yield.Unit.Type,data=data) # no, they don't
 
 ### only impute SDs using the corresponding means and sample.size
-predictorMatrix1 <- matrix(c(rep(0,4),rep(0,4),c(0,1,0,1),rep(0,4)),
-                           ncol=4,byrow=T)
-
-nchains <- 10
-
-### impute
-temp <- complete(mice(data2imp.richness, predictorMatrix=predictorMatrix1,
-                      method = "pmm",
-                      m=nchains, maxit =20, printFlag = FALSE), 
-                 "long")
-data2imp.richness$richness.SD <- rowMeans(matrix(temp$richness.SD, ncol=nchains, byrow=F))
-
-temp.richness <- data.frame(matrix(temp$richness.SD, ncol=nchains, byrow=F))
-temp.richness$mean <- rowMeans(temp.richness[,1:nchains])
-temp.richness$sd <- apply(temp.richness[,1:nchains],1,sd)
-
-temp <- complete(mice(data2imp.yield, predictorMatrix=predictorMatrix1,
-                      method = "pmm",
-                      m=nchains, maxit =20, printFlag = FALSE), 
-                 "long")
-data2imp.yield$yield.SD <- rowMeans(matrix(temp$yield.SD, ncol=nchains, byrow=F))
-
-dataimp$richness.SD[is.na(dataimp$richness.SD)]<-data2imp.richness$richness.SD[match(dataimp$richnessID[is.na(dataimp$richness.SD)],data2imp.richness$richnessID)]
-dataimp$yield.SD[is.na(dataimp$yield.SD)]<-data2imp.yield$yield.SD[match(dataimp$yieldID[is.na(dataimp$yield.SD)],data2imp.yield$yieldID)]
-
-### check variability of imputation
-temp.yield <- data.frame(matrix(temp$yield.SD, ncol=nchains, byrow=F))
-temp.yield$mean <- rowMeans(temp.yield[,1:nchains])
-temp.yield$sd <- apply(temp.yield[,1:nchains],1,sd)
-
-par(mfrow=c(2,2))
-hist(temp.richness$mean)
-hist(temp.richness$sd)
-hist(temp.yield$mean)
-hist(temp.yield$sd)
-par(mfrow=c(1,1))
-
-p.yield <- ggplot(dataimp) +
-  geom_point(aes(x=yield.mean, y=yield.SD, color=Yield.SD.is.imputed, size=4, alpha=.5)) +
-  xlim(range(dataimp$yield.mean[dataimp$Yield.SD.is.imputed=="yes"],na.rm=T)) +
-  ylim(range(dataimp$yield.SD[dataimp$Yield.SD.is.imputed=="yes"],na.rm=T))
-p.yield
-
-rm(data2imp.richness, data2imp.yield, temp, temp.yield, temp.richness, predictorMatrix1, nchains)
+# predictorMatrix1 <- matrix(c(rep(0,4),rep(0,4),c(0,1,0,1),rep(0,4)),
+#                            ncol=4,byrow=T)
+# 
+# nchains <- 10
+# 
+# ### impute
+# temp <- complete(mice(data2imp.richness, predictorMatrix=predictorMatrix1,
+#                       method = "pmm",
+#                       m=nchains, maxit =20, printFlag = FALSE), 
+#                  "long")
+# data2imp.richness$richness.SD <- rowMeans(matrix(temp$richness.SD, ncol=nchains, byrow=F))
+# 
+# temp.richness <- data.frame(matrix(temp$richness.SD, ncol=nchains, byrow=F))
+# temp.richness$mean <- rowMeans(temp.richness[,1:nchains])
+# temp.richness$sd <- apply(temp.richness[,1:nchains],1,sd)
+# 
+# temp <- complete(mice(data2imp.yield, predictorMatrix=predictorMatrix1,
+#                       method = "pmm",
+#                       m=nchains, maxit =20, printFlag = FALSE), 
+#                  "long")
+# data2imp.yield$yield.SD <- rowMeans(matrix(temp$yield.SD, ncol=nchains, byrow=F))
+# 
+# dataimp$richness.SD[is.na(dataimp$richness.SD)]<-data2imp.richness$richness.SD[match(dataimp$richnessID[is.na(dataimp$richness.SD)],data2imp.richness$richnessID)]
+# dataimp$yield.SD[is.na(dataimp$yield.SD)]<-data2imp.yield$yield.SD[match(dataimp$yieldID[is.na(dataimp$yield.SD)],data2imp.yield$yieldID)]
+# 
+# ### check variability of imputation
+# temp.yield <- data.frame(matrix(temp$yield.SD, ncol=nchains, byrow=F))
+# temp.yield$mean <- rowMeans(temp.yield[,1:nchains])
+# temp.yield$sd <- apply(temp.yield[,1:nchains],1,sd)
+# 
+# par(mfrow=c(2,2))
+# hist(temp.richness$mean)
+# hist(temp.richness$sd)
+# hist(temp.yield$mean)
+# hist(temp.yield$sd)
+# par(mfrow=c(1,1))
+# 
+# p.yield <- ggplot(dataimp) +
+#   geom_point(aes(x=yield.mean, y=yield.SD, color=Yield.SD.is.imputed, size=4, alpha=.5)) +
+#   xlim(range(dataimp$yield.mean[dataimp$Yield.SD.is.imputed=="yes"],na.rm=T)) +
+#   ylim(range(dataimp$yield.SD[dataimp$Yield.SD.is.imputed=="yes"],na.rm=T))
+# p.yield
+# 
+# rm(data2imp.richness, data2imp.yield, temp, temp.yield, temp.richness, predictorMatrix1, nchains)
              
   ###########################################################################
 ### Resterampe
