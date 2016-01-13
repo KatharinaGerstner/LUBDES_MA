@@ -129,12 +129,17 @@ ES.frame.noLU$time.since.first.use <- log10(2000-apply(cbind(hyde.year.of.first.
 ES.frame.noLU$start.agr.use <- ifelse(ES.frame.noLU$time.since.first.use >= 500,"old","young")
 ES.frame.noLU$start.agr.use[is.na(ES.frame.noLU$start.agr.use)] <- "not yet used"
 
+############################################################################
+### remove objectes to save workspace
+############################################################################
+rm(lonlat, lonlat.noLU,ecoregions, realms_extract, npp, cropland.hybrid,timeseries.hyde,timeseries.kk10,hyde.LUhist.stack,kk10.LUhist.stack,hyde.extract.year.of.first.use,kk10.extract.year.of.first.use,hyde.year.of.first.use,kk10.year.of.first.use)
+
+setwd(path2wd)
+
 
 ############################################################################
 ### Resterampe
 ############################################################################
-
-
 
 ############################################################################
 ### 05.6. Intersect studies with human pressure index
@@ -196,13 +201,6 @@ ES.frame.noLU$start.agr.use[is.na(ES.frame.noLU$start.agr.use)] <- "not yet used
 # 
 # 
 # 
-# ############################################################################
-# ### remove objectes to save workspace
-# ############################################################################
-# rm(lonlat, lonlat.noLU,ecoregions, realms_extract, npp ,agricultural_area,capital_stock_in_agriculture,habitat_dissimilarity, timeseries.hyde,timeseries.kk10,hyde.LUhist.stack,kk10.LUhist.stack,hyde.extract.year.of.first.use,kk10.extract.year.of.first.use,hyde.year.of.first.use,kk10.year.of.first.use,humanfootprint)
-
-#setwd(path2wd)
-
 
 
 ############################################################################
