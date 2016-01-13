@@ -90,14 +90,14 @@ Yield.MA.model[["None"]] <- rma.mv(yi=Yield.Log.RR,V=Yield.Log.RR.Var,mods=~1, r
 ### define list of moderators
 
 moderator.list <- c("Species.Group","LUI.range.level","Product","BIOME",
-                    "cropcover","time.since.first.use", "npp", "rel_capital_stock_in_agriculture")
+                    "cropcover","time.since.first.use", "npp")
 
 modelDataRichness <- ES.frame.richness[,c('Richness.Log.RR','Richness.Log.RR.Var',paste(moderator.list,sep=","),
                          'Case.ID','Study.ID','Study.Case','Low.LUI','High.LUI')]
 modelDataRichness <- na.omit(modelDataRichness)
 
 Richness.MA.model[["full"]] <- rma.mv(yi=Richness.Log.RR, V=Richness.Log.RR.Var, 
-                                      mods=~Species.Group + LUI.range.level + Product + BIOME + cropcover+ npp,# +rel_capital_stock_in_agriculture,time.since.first.use+
+                                      mods=~Species.Group + LUI.range.level + Product + BIOME + cropcover+ npp + time.since.first.use,
                                       random = ~factor(Case.ID)|factor(Study.ID), struct="CS", 
                                       slab=paste(Study.Case, Low.LUI, High.LUI,sep="_"),
                                       method="ML", tdist=FALSE, level=95, digits=4,data=modelDataRichness)
@@ -109,7 +109,7 @@ modelDataYield <- ES.frame.yield[,c('Yield.Log.RR','Yield.Log.RR.Var',paste(mode
 modelDataYield <- na.omit(modelDataYield)
 
 Yield.MA.model[["full"]] <- rma.mv(yi=Yield.Log.RR,V=Yield.Log.RR.Var,
-                                   mods=~ LUI.range.level + Product + BIOME + cropcover +npp,#+ rel_capital_stock_in_agriculture,+time.since.first.use
+                                   mods=~ LUI.range.level + Product + BIOME + cropcover +npp +time.since.first.use,
                                    random = ~factor(Study.ID), struct="CS", slab=paste(Study.Case, Low.LUI, High.LUI,sep="_"),
                                    method="ML", tdist=FALSE, level=95, digits=4,data=modelDataYield)
 
