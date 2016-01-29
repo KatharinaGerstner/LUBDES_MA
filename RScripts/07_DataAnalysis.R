@@ -72,6 +72,7 @@ Var.Yield <- diag(ES.frame.yield$Yield.Log.RR.Var)
 # }
 
 ### store models in a list
+### Model results will be in here!
 Richness.MA.model <- list() 
 Yield.MA.model <- list()
 

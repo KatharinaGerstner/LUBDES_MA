@@ -55,7 +55,6 @@ library(reshape2)
 ############################################################################
 ### RMA select function (by HP and TN)
 ############################################################################
-
 RMASelect <- function(model){
   
   allTerms <- trim(strsplit(paste(model$call$mods)[2],'[+]')[[1]])
@@ -73,7 +72,8 @@ RMASelect <- function(model){
     t<-1
     for (term in currentTerms){
       
-      newModel<-update(currentModel,paste("~.-",term,sep=""))
+      #newModel<-update(currentModel,paste("~.-",term,sep=""))
+      newModel <- update(currentModel,paste("~.-",term,sep=""))
       
       an <- anova(currentModel,newModel)
       
@@ -93,6 +93,7 @@ RMASelect <- function(model){
     stats$df[which(stats$terms==dropTerm)]<-dfs[which(currentTerms==dropTerm)]
     stats$P[which(stats$terms==dropTerm)]<-Ps[which(currentTerms==dropTerm)]
     
+    #currentModel <- update(currentModel,paste("~.-",dropTerm,sep=""))
     currentModel <- update(currentModel,paste("~.-",dropTerm,sep=""))
     currentTerms <- currentTerms[-dropTermPos]
     
