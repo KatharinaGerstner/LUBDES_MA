@@ -142,6 +142,7 @@ load(file=path2temp %+% "SavedData.Rdata")
 ### RMASelect would need to be reloaded (cf. 01_load_libraries_and_functions.r)
 
 source(path2wd %+% "07_DataAnalysis.R")
+source(path2wd %+% "08_Plotting.r")
 source(path2wd %+% "08.1_Plot_maps.r")
 source(path2wd %+% "08.2_Plot_CatWhiskers.r")
 source(path2wd %+% "08.3_Plot_forest_plots.r")
