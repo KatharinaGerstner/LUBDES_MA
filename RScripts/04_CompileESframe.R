@@ -28,15 +28,6 @@ names(ES.frame) <- c("Study.ID","Case.ID","Low.LUI","High.LUI","Habitat.Type",
                      "Richness.SD.is.imputed.low","Richness.SD.is.imputed.high")
 
 
-ES.frame.noLU <- data.frame(matrix(ncol=37,nrow=0))
-names(ES.frame.noLU) <- c("Study.ID","Case.ID","Low.LUI","High.LUI","Habitat.Type",        
-                     "Product","ES.From.BD","Fertilization","Irrigation","Pesticides",          
-                     "Grazing","Mowing","Clear.Cut","Selective.Logging","Partial.Logging",     
-                     "Additional.Treatment", "Date.Start","Date.End","Latitude","Longitude", "Country.Code",          
-                     "Species.Group","Species.Subgroup","Trophic.Level","Richness.Mean.Low" ,  
-                     "Richness.SD.Low","Richness.N.Low","Richness.Plot.Size","Richness.Mean.High","Richness.SD.High", "Richness.N.High",
-                     "Yield.SD.is.imputed.low","Yield.SD.is.imputed.high","Richness.SD.is.imputed.low","Richness.SD.is.imputed.high")
-
 ### re-build dataimp to ES.frame using table.sort function
 
 for(i in unique(dataimp$study.case)){
@@ -112,7 +103,6 @@ ES.frame$Species.Group[(ES.frame$Species.Group=="NA")]<-NA
 ES.frame$Species.Group<-factor(ES.frame$Species.Group)
 
 ES.frame$Study.Case <- paste(ES.frame$Study.ID,ES.frame$Case.ID,sep="-")
-ES.frame.noLU$Study.Case <- paste(ES.frame.noLU$Study.ID,ES.frame.noLU$Case.ID,sep="-")
 
 ############################################################################
 ### 04.2. Calculate response ratio effect sizes
@@ -147,19 +137,6 @@ ES.frame[,c("Yield.SMD","Yield.SMD.Var")] =
          sd2i = Yield.SD.Low, sd1i = Yield.SD.High,
          n2i = Yield.N.Low, n1i = Yield.N.High)
 
-############################################################
-
-ES.frame.noLU[,c("Richness.Log.RR","Richness.Log.RR.Var")] = 
-  escalc("ROM", data= ES.frame.noLU, append =F,
-         m2i = Richness.Mean.Low, m1i = Richness.Mean.High,
-         sd2i = Richness.SD.Low, sd1i = Richness.SD.High,
-         n2i = Richness.N.Low, n1i = Richness.N.High)
-
-ES.frame.noLU[,c("Richness.SMD","Richness.SMD.Var")] =
-  escalc("SMD", data= ES.frame.noLU, append =F,
-         m2i = Richness.Mean.Low, m1i = Richness.Mean.High,
-         sd2i = Richness.SD.Low, sd1i = Richness.SD.High,
-         n2i = Richness.N.Low, n1i = Richness.N.High)
 
 ############################################################
 ### remove objects from workspace
@@ -173,6 +150,30 @@ rm(i, data.temp, temp.noLU,temp.lowLU,temp.mediumLU,temp.highLU,
 ###########################################################################
 ### Resterampe
 
+# ES.frame.noLU <- data.frame(matrix(ncol=37,nrow=0))
+# names(ES.frame.noLU) <- c("Study.ID","Case.ID","Low.LUI","High.LUI","Habitat.Type",        
+#                           "Product","ES.From.BD","Fertilization","Irrigation","Pesticides",          
+#                           "Grazing","Mowing","Clear.Cut","Selective.Logging","Partial.Logging",     
+#                           "Additional.Treatment", "Date.Start","Date.End","Latitude","Longitude", "Country.Code",          
+#                           "Species.Group","Species.Subgroup","Trophic.Level","Richness.Mean.Low" ,  
+#                           "Richness.SD.Low","Richness.N.Low","Richness.Plot.Size","Richness.Mean.High","Richness.SD.High", "Richness.N.High",
+#                           "Yield.SD.is.imputed.low","Yield.SD.is.imputed.high","Richness.SD.is.imputed.low","Richness.SD.is.imputed.high")
+# 
+# ES.frame.noLU$Study.Case <- paste(ES.frame.noLU$Study.ID,ES.frame.noLU$Case.ID,sep="-")
+############################################################
+# 
+# ES.frame.noLU[,c("Richness.Log.RR","Richness.Log.RR.Var")] = 
+#   escalc("ROM", data= ES.frame.noLU, append =F,
+#          m2i = Richness.Mean.Low, m1i = Richness.Mean.High,
+#          sd2i = Richness.SD.Low, sd1i = Richness.SD.High,
+#          n2i = Richness.N.Low, n1i = Richness.N.High)
+# 
+# # ES.frame.noLU[,c("Richness.SMD","Richness.SMD.Var")] =
+#   escalc("SMD", data= ES.frame.noLU, append =F,
+#          m2i = Richness.Mean.Low, m1i = Richness.Mean.High,
+#          sd2i = Richness.SD.Low, sd1i = Richness.SD.High,
+#          n2i = Richness.N.Low, n1i = Richness.N.High)
+# 
 ### merge baseline and increased LUI per study ID, case ID
 ### reformat table to store baseline and increased in one row
 

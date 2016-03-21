@@ -109,7 +109,7 @@ if (cu == "rseppelt")
 	path2temp <- "/Users/Helen/tmp/" ##HP
 } else {
   path2wd <- "C:/Users/hoppek/Documents/GitHub/LUBDES_MA/RScripts/" #KG
-  path2temp <- "C:/Users/hoppek/Documents/temp" #KG 
+  path2temp <- "C:/Users/hoppek/Documents/temp/" #KG 
 }
 
 
@@ -119,6 +119,7 @@ if (cu == "rseppelt")
 ### 
 ############################################################################
 
+### DATA PREPARATION
 ### helper function to combine strings
 "%+%" <- function(x,y)paste(x,y,sep="")
 
@@ -129,6 +130,17 @@ source(path2wd %+% "03_ImputeMissingData.r")
 source(path2wd %+% "04_CompileESframe.R")
 source(path2wd %+% "05_AddMapDataToESframe.R")
 #source(path2wd %+% "06_DescriptiveStatsOfESframe.r")
+
+save(data,dataimp,ES.frame,ES.frame.noLU,path2wd,path2temp,file=path2temp %+% "SavedData.Rdata")
+rm(list=objects()) # empty workspace, keep libraries loaded
+
+###  DATA ANALYSIS
+### reload required data and functions
+### helper function to combine strings
+"%+%" <- function(x,y)paste(x,y,sep="")
+load(file=path2temp %+% "SavedData.Rdata")
+### RMASelect would need to be reloaded (cf. 01_load_libraries_and_functions.r)
+
 source(path2wd %+% "07_DataAnalysis.R")
 source(path2wd %+% "08.1_Plot_maps.r")
 source(path2wd %+% "08.2_Plot_CatWhiskers.r")

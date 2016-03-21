@@ -3,9 +3,7 @@
 ###
 ### 05.1. Intersect studies with global maps of WWF_REALMs Ecoregions, reduce them to five main regions
 ### 05.2. Intersect studies with NPP
-### 05.3. Intersect studies with cropland hybrid IIASA
-### 05.4. Intersect studies with Land-use history
-### 05.5. TODO: IIASA fieldsize
+### 05.3. Intersect studies with Land-use history
 ### General comments:
 ### * 
 ###
@@ -25,6 +23,7 @@ lonlat.noLU <- cbind(ES.frame.noLU$Longitude,ES.frame.noLU$Latitude)
 ############################################################################
 ### 05.1. Intersect studies with global maps of WWF_REALMs Ecoregions, reduce them to five main regions
 ############################################################################
+print("Intersect studies with BIOMES")
 
 if (file.exists("terr-ecoregions-TNC.zip")==FALSE){
   download.file("https://www.dropbox.com/s/ihivf2ie98wxvee/terr-ecoregions-TNC.zip?dl=1", "terr-ecoregions-TNC.zip", mode="wb")
@@ -58,14 +57,16 @@ ES.frame$BIOME <- factor(ES.frame$BIOME)
 
 ### for ES.frame.noLU
 # extract ecoregions
-realms_extract <- extract(ecoregions,lonlat.noLU)
-ES.frame.noLU <- cbind(ES.frame.noLU,realms_extract$WWF_MHTNAM)
-colnames(ES.frame.noLU)[which(names(ES.frame.noLU) == "realms_extract$WWF_MHTNAM")]<-"BIOME"
-
+if(nrow(ES.frame.noLU) >0){
+  realms_extract <- extract(ecoregions,lonlat.noLU)
+  ES.frame.noLU <- cbind(ES.frame.noLU,realms_extract$WWF_MHTNAM)
+  colnames(ES.frame.noLU)[which(names(ES.frame.noLU) == "realms_extract$WWF_MHTNAM")]<-"BIOME"
+}
 
 ############################################################################
 ### 05.2. Intersect studies with NPP
 ############################################################################
+print("Intersect studies with NPP")
 
 if (file.exists("tn0_all_gcm.asc")==FALSE){
   download.file("https://www.dropbox.com/s/689m9pc5bnejbg9/tn0_all_gcm.asc?dl=1","tn0_all_gcm.asc")
@@ -74,25 +75,13 @@ npp <- raster("tn0_all_gcm.asc",crs=CRS("+proj=longlat +datum=WGS84 +no_defs +el
 
 ES.frame$npp<-extract(npp,lonlat,buffer=100000,fun=mean)
 
-ES.frame.noLU$npp<-extract(npp,lonlat.noLU, buffer=100000, fun=mean)
-
-
-
+if(nrow(ES.frame.noLU) >0){
+  ES.frame.noLU$npp<-extract(npp,lonlat.noLU, buffer=100000, fun=mean)
+}
 ############################################################################
-### 05.3. Intersect studies with cropland hybrid IIASA
+### 05.3. Intersect studies with Land-use history
 ############################################################################
-
-if (file.exists("Hybrid.zip")==FALSE){
-  download.file("https://www.dropbox.com/s/rr3qx2ogomegqxo/Hybrid.zip?dl=1", "Hybrid.zip", mode="wb")
-  unzip("Hybrid.zip")
-} else {unzip("Hybrid.zip")}
-
-cropland.hybrid<-raster("Hybrid_10042015v9.img")
-ES.frame$cropcover<-extract(cropland.hybrid,lonlat, buffer=50000, fun=mean) # consider a buffer of radius=50km² around each dot)
-
-############################################################################
-### 05.4. Intersect studies with Land-use history
-############################################################################
+print("Intersect studies with LAND-USE HISTORY")
 
 if (file.exists("ellis_etal_2013_dataset.zip")==FALSE){
   download.file("https://www.dropbox.com/s/6qkr58sjimclpst/ellis_etal_2013_dataset.zip?dl=1", "ellis_etal_2013_dataset.zip", mode="wb")
@@ -119,27 +108,34 @@ ES.frame$start.agr.use <- ifelse(ES.frame$time.since.first.use >= 500,"old","you
 ES.frame$start.agr.use[is.na(ES.frame$start.agr.use)] <- "not yet used"
 
 ## ES.frame.noLU
-hyde.extract.year.of.first.use <- extract(hyde.LUhist.stack,lonlat.noLU) 
-names(hyde.extract.year.of.first.use) <- c("-6000","-3000","-1000","0","1000","1500","1750","1900","1950","2000")
-hyde.year.of.first.use <- apply(hyde.extract.year.of.first.use,1,function(x){ifelse(sum(x)>0,as.numeric(names(hyde.extract.year.of.first.use)[min(which(x==1))]),NA)}) # NA if no significant use were detectable
-kk10.extract.year.of.first.use <- extract(kk10.LUhist.stack,lonlat.noLU) 
-names(kk10.extract.year.of.first.use) <- c("-6000","-3000","-1000","0","1000","1500","1750","1900","1950","2000")
-kk10.year.of.first.use <- apply(kk10.extract.year.of.first.use,1,function(x){ifelse(sum(x)>0,as.numeric(names(kk10.extract.year.of.first.use)[min(which(x==1))]),NA)}) # NA if no significant use were detectable
-ES.frame.noLU$time.since.first.use <- log10(2000-apply(cbind(hyde.year.of.first.use,kk10.year.of.first.use),1,function(x){ifelse(all(is.na(x)),2000,min(x,na.rm=T))})+1) # set not yet used land to log10(1)=0
-ES.frame.noLU$start.agr.use <- ifelse(ES.frame.noLU$time.since.first.use >= 500,"old","young")
-ES.frame.noLU$start.agr.use[is.na(ES.frame.noLU$start.agr.use)] <- "not yet used"
-
-############################################################################
-### remove objectes to save workspace
-############################################################################
-rm(lonlat, lonlat.noLU,ecoregions, realms_extract, npp, cropland.hybrid,timeseries.hyde,timeseries.kk10,hyde.LUhist.stack,kk10.LUhist.stack,hyde.extract.year.of.first.use,kk10.extract.year.of.first.use,hyde.year.of.first.use,kk10.year.of.first.use)
-
+if(nrow(ES.frame.noLU) >0){
+  hyde.extract.year.of.first.use <- extract(hyde.LUhist.stack,lonlat.noLU) 
+  names(hyde.extract.year.of.first.use) <- c("-6000","-3000","-1000","0","1000","1500","1750","1900","1950","2000")
+  hyde.year.of.first.use <- apply(hyde.extract.year.of.first.use,1,function(x){ifelse(sum(x)>0,as.numeric(names(hyde.extract.year.of.first.use)[min(which(x==1))]),NA)}) # NA if no significant use were detectable
+  kk10.extract.year.of.first.use <- extract(kk10.LUhist.stack,lonlat.noLU) 
+  names(kk10.extract.year.of.first.use) <- c("-6000","-3000","-1000","0","1000","1500","1750","1900","1950","2000")
+  kk10.year.of.first.use <- apply(kk10.extract.year.of.first.use,1,function(x){ifelse(sum(x)>0,as.numeric(names(kk10.extract.year.of.first.use)[min(which(x==1))]),NA)}) # NA if no significant use were detectable
+  ES.frame.noLU$time.since.first.use <- log10(2000-apply(cbind(hyde.year.of.first.use,kk10.year.of.first.use),1,function(x){ifelse(all(is.na(x)),2000,min(x,na.rm=T))})+1) # set not yet used land to log10(1)=0
+  ES.frame.noLU$start.agr.use <- ifelse(ES.frame.noLU$time.since.first.use >= 500,"old","young")
+  ES.frame.noLU$start.agr.use[is.na(ES.frame.noLU$start.agr.use)] <- "not yet used"
+}
 setwd(path2wd)
 
 
 ############################################################################
 ### Resterampe
 ############################################################################
+############################################################################
+### 05.3. Intersect studies with cropland hybrid IIASA
+############################################################################
+
+# if (file.exists("Hybrid.zip")==FALSE){
+#   download.file("https://www.dropbox.com/s/rr3qx2ogomegqxo/Hybrid.zip?dl=1", "Hybrid.zip", mode="wb")
+#   unzip("Hybrid.zip")
+# } else {unzip("Hybrid.zip")}
+# 
+# cropland.hybrid<-raster("Hybrid_10042015v9.img")
+# ES.frame$cropcover<-extract(cropland.hybrid,lonlat, buffer=50000, fun=mean) # consider a buffer of radius=50km² around each dot)
 
 ############################################################################
 ### 05.6. Intersect studies with human pressure index

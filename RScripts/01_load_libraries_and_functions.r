@@ -13,44 +13,38 @@
 ###
 ############################################################################
 
-### first timers should run:
-# install.packages("devtools","mice","mi","metafor","ggplot2","scales")
-# library(devtools)
-# devtools::install_github("jennybc/googlesheets") # documentation at:http://htmlpreview.github.io/?https://raw.githubusercontent.com/jennybc/googlesheets/master/vignettes/basic-usage.html and https://github.com/jennybc/googlesheets
+needed_libs <- c("devtools",# needed for library googlesheets
+                 "googlesheets",# for loading data directly from google
+                 "metafor",# for meta analysis
+                 "ggplot2",# For plotting
+                 "scales", # for transformation of axes labels
+#                 "maps",
+#                 "rworldmap",
+                 "raster",# for adding map data
+                 "rgdal", # for loading map data
+                 "rgeos",# dependency for rgdal
+                 "RColorBrewer",# fancy color schemes for plotting
+                 "plyr",# for joining datasets
+                 "countrycode",# convert FAO country IDs to ISO3
+                 "VennDiagram",
+                 "reshape2",
+                 "rjags", # for running bayesian models
+                 "xtable"  # for saving tables as .doc
+)
+usePackage <- function(p) {
+  if (!is.element(p, installed.packages()[,1]))
+    install.packages(p, dep = TRUE)
+  require(p, character.only = TRUE)
+}
+sapply(needed_libs,usePackage)
 
-library(devtools) # needed for library googlesheets
-library(googlesheets) # for loading data directly from google
-library(mice) # for imputation
-#library(mi) # for imputation
-library(metafor) # for meta analysis
-library(ggplot2) # For plotting
-library(scales) # ?
-library(maps) # still needed? #For map data
-library(rworldmap) # still needed?
-#library(geosphere)
-library(raster) # for adding map data
-#library(shapefiles)
-#library(sp)
-require(rgdal) # for loading map data
-library(rgeos) # dependency for rgdal
-library(RColorBrewer) # fancy color schemes for plotting
-library(plyr) # for joining datasets
-library(countrycode) # convert FAO country IDs to ISO3
-library(VennDiagram)
-# library(venneuler)
-library(reshape2)
-
+rm(needed_libs)
 
 ############################################################################
 ### 01.2. load all self-written functions needed for subsequent analysis
 ###
 ### 
 ############################################################################
-
-############################################################################
-### helper function to combine strings
-############################################################################
-"%+%" <- function(x,y)paste(x,y,sep="")
 
 ############################################################################
 ### RMA select function (by HP and TN)
@@ -232,8 +226,7 @@ SortTransectsTraps <- function(data){
 table.sort = function(dat.low,dat.high,low,high){
   data.frame("Study.ID"=dat.low$Study.ID, "Case.ID" =dat.low$Case.ID, 
              "Low.LUI" = low, "High.LUI" = high,
-             "Land.use...land.cover" = dat.low$Land.use...land.cover, "Product" = dat.low$Product, "ES.From.BD" =dat.low$ES.measured.from.BD.,
-             
+             "Land.use...land.cover" = dat.low$Land.use...land.cover, "Product" = dat.low$Product, "ES.and.BD" =dat.low$ES.and.BD, "LU.definition.and.ES"=dat.low$LU.definition.and.ES,             
              "Fertilization" = paste(dat.low$Fertilization, dat.high$Fertilization, sep="_"), 
              "Irrigation" =paste(dat.low$Irrigation, dat.high$Irrigation, sep="_"),
              "Pesticides" = paste(dat.low$Pesticides, dat.high$Pesticides, sep="_"),
@@ -243,19 +236,17 @@ table.sort = function(dat.low,dat.high,low,high){
              "Selective.Logging" = paste(dat.low$Selective.Logging.y.n., dat.high$Selective.Logging.y.n., sep="_"),
              "Partial.Logging" = paste(dat.low$Partial.Logging.y.n., dat.high$Partial.Logging.y.n., sep="_"), 
              "Additional.Treatment" =dat.high$Additional.Treatment,
-             
              "Date.Start" =dat.low$Date.of.study..start, "Date.End" =dat.low$Date.of.study..end, 
              "Latitude" =as.numeric(dat.low$latitude..N..S.), "Longitude" =as.numeric(dat.low$longitude..E..W.),
-             "Country.Code" = dat.low$Country,
-             
+             "Country.Code" = dat.low$Country,             
              "Species.Group" =dat.low$species.group, "Species.Subgroup" =dat.low$species.subgroup.if.provided, "Trophic.Level" =dat.low$trophic.level..species.guild,
-             #"Product" = dat.low$product,
-             
+             #"Product" = dat.low$product,             
              "Richness.Mean.Low" = as.numeric(dat.low$richness.mean), "Richness.SD.Low" =as.numeric(dat.low$richness.SD), "Richness.N.Low" =as.numeric(dat.low$X..of.samples.for.BD.measure), 
-             "Richness.Plot.Size" = as.numeric(dat.low$sampled.area),
              "Richness.Mean.High" = as.numeric(dat.high$richness.mean), "Richness.SD.High" = as.numeric(dat.high$richness.SD), "Richness.N.High" = as.numeric(dat.high$X..of.samples.for.BD.measure),             
+             "Richness.Plot.Size" = as.numeric(dat.low$reported.area.of.BD),
              "Yield.Mean.Low" = as.numeric(dat.low$yield.mean), "Yield.SD.Low" = as.numeric(dat.low$yield.SD), "Yield.N.Low" = as.numeric(dat.low$X..of.samples.for.YD.measure),
              "Yield.Mean.High" = as.numeric(dat.high$yield.mean), "Yield.SD.High" = as.numeric(dat.high$yield.SD), "Yield.N.High" = as.numeric(dat.high$X..of.samples.for.YD.measure),
-             "Yield.SD.is.imputed.low" = dat.low$Yield.SD.is.imputed,"Yield.SD.is.imputed.high" = dat.high$Yield.SD.is.imputed,
-             "Richness.SD.is.imputed.low" = dat.low$Richness.SD.is.imputed,"Richness.SD.is.imputed.high" = dat.high$Richness.SD.is.imputed)
+             "Yield.SD.is.imputed.low" = dat.low$yield.SD.is.imputed,"Yield.SD.is.imputed.high" = dat.high$yield.SD.is.imputed,
+             "Richness.SD.is.imputed.low" = dat.low$richness.SD.is.imputed,"Richness.SD.is.imputed.high" = dat.high$richness.SD.is.imputed)
 }
+

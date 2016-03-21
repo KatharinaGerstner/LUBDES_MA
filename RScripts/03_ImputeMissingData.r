@@ -1,7 +1,7 @@
 ############################################################################
 ### Purpose of this skript module 03 is to:
 ###
-### 03.1. impute missing data using mice package
+### 03.1. impute missing sd data using linear regression with means and number of samples
 ### 
 ### General comments:
 ### 
@@ -10,55 +10,139 @@
 
 dataimp <- data
 
-### impute also zero SD's as we can't work with that in the analysis
-dataimp$richness.SD[dataimp$richness.SD==0] <- NA
-dataimp$yield.SD[dataimp$yield.SD==0] <- NA
-
-############################################################################
-### 03.1. impute missing sd data using linear regression with means and number of samples
-### 
-############################################################################
-
 # save which results were imputed
-dataimp$Yield.SD.is.imputed = "no"
-dataimp$Yield.SD.is.imputed[which(is.na(dataimp$yield.SD))] = "yes"
-dataimp$Richness.SD.is.imputed = "no"
-dataimp$Richness.SD.is.imputed[which(is.na(dataimp$richness.SD))] = "yes"
+dataimp$yield.SD.is.imputed <- ifelse(is.na(dataimp$yield.SD),"yes","no")
+dataimp$richness.SD.is.imputed <- ifelse(is.na(dataimp$richness.SD),"yes","no")
 
+# ensure that same mean and n combinations are imputed identically
 dataimp$richnessID <- paste(dataimp$Study.ID,dataimp$richness.mean,dataimp$X..of.samples.for.BD.measure)
 dataimp$yieldID <- paste(dataimp$Study.ID,dataimp$yield.mean,dataimp$X..of.samples.for.YD.measure)
 
-### reduce dataframe, remove duplicates in Study.ID_meanRRs and restrict imputation to non-zero mean cases
-data2imp.richness <- dataimp[!duplicated(dataimp[,"richnessID"]) & dataimp$richness.mean>0,]
-data2imp.yield <- dataimp[!duplicated(dataimp[,"yieldID"]) & dataimp$yield.mean>0,]
-# dataimp$richness.mean.n <- dataimp$richness.mean*dataimp$X..of.samples.for.BD.measure
-# dataimp$yield.mean.n <- dataimp$yield.mean*dataimp$X..of.samples.for.YD.measure
+### reduce dataframe, remove duplicates in Study.ID_meanRRs and restrict imputation to non-zero mean and SD cases
+data4imp.richness <- subset(dataimp,!duplicated(dataimp[,"richnessID"]) & dataimp$richness.mean>0 & dataimp$richness.SD>0)
+data4imp.richness[,c("richness.mean","X..of.samples.for.BD.measure")] <- scale(data4imp.richness[,c("richness.mean","X..of.samples.for.BD.measure")])
+data4imp.yield <- subset(dataimp,!duplicated(dataimp[,"yieldID"]) & dataimp$yield.mean>0 & dataimp$yield.SD>0)
+data4imp.yield[,c("yield.mean","X..of.samples.for.YD.measure")] <- scale(data4imp.yield[,c("yield.mean","X..of.samples.for.YD.measure")])
 
-imp.richness.lm <- step(lm(log(richness.SD)~log(richness.mean)*log(X..of.samples.for.BD.measure),data=data2imp.richness[!is.na(data2imp.richness$richness.SD),]))
-# summary(imp.richness.lm)
-# plot(imp.richness.lm) # diagnostic plots, look ok!
-data2imp.richness$richness.SD[is.na(data2imp.richness$richness.SD)] <- exp(predict(imp.richness.lm, newdata=data2imp.richness[is.na(data2imp.richness$richness.SD),]))
-dataimp$richness.SD[is.na(dataimp$richness.SD)]<-data2imp.richness$richness.SD[match(dataimp$richnessID[is.na(dataimp$richness.SD)],data2imp.richness$richnessID)]
+############################################################################
+### the bayes model
+############################################################################
+
+library(rjags)
+
+cat("
+      model
+      {
+        # priors
+        beta0 ~ dnorm(0,0.001)
+        beta1 ~ dnorm(0,0.001)
+        beta2 ~ dnorm(0,0.001)
+        sigma ~ dunif(0,100)
+        tau <- pow(sigma,-2)
+        # likelihood
+        for(i in 1:N.obs)
+        {
+        log.sd[i] ~ dnorm(mu[i],tau)
+        mu[i] <- beta0 + beta1*mean[i] + beta2*n.sample[i]
+        # this part is here in order to make nice prediction curves:
+        prediction[i] ~ dnorm(mu[i],tau)
+        }
+      }
+  ", file="imputation.model.txt")
+
+############################################################################
+### imputation for richness SD
+############################################################################
+jags.data <- list(N.obs = nrow(data4imp.richness), mean = data4imp.richness$richness.mean, log.sd=log(data4imp.richness$richness.SD),n.sample=data4imp.richness$X..of.samples.for.BD.measure)
+
+jm <- jags.model("imputation.model.txt", data = jags.data, n.chains = 3, n.adapt = 1000)
+params <- c("beta0", "beta1", "beta2","mu","tau", "prediction")
+update(jm, n.iter = 1000) # throw away the initial samples (the so-called “burn-in” phase)
+jm.sample <- jags.samples(jm, variable.names = params, n.iter = 1000, thin = 1)
+sapply(c("beta0", "beta1", "beta2"),function(x) plot(as.mcmc.list(jm.sample[[x]]),main=paste(x))) # check convergence
+
+### plot predictions
+predictions <- summary(as.mcmc.list(jm.sample$prediction))
+prds <- data.frame(mean = data4imp.richness$richness.mean, predictions$quantiles)
+prds <- prds[order(prds[, 1]), ]
+plot(log(richness.SD) ~ richness.mean, cex = 1, col = "lightgrey", pch = 1,lwd = 2, ylab = "log(SD)", xlab = "Scaled Mean",data=data4imp.richness)
+points(prds[, 1], prds[, 4], pch=1, lwd = 2, col = "red")
+legend("bottomright",legend=c("original Data", "Imputed Data"),col=c("lightgrey","red"),pch=1,lwd=2,title="Richness")
+
+### impute 
+data2imp.richness <- dataimp[which(dataimp$richness.SD.is.imputed=="yes"),]
+data2imp.richness$richness.SD <- exp(mean(jm.sample[["beta0"]]) + mean(jm.sample[["beta1"]])*scale(data2imp.richness$richness.mean) + mean(jm.sample[["beta2"]])*scale(data2imp.richness$X..of.samples.for.BD.measure))
+dataimp$richness.SD[which(dataimp$richness.SD.is.imputed=="yes")] <- data2imp.richness$richness.SD[match(dataimp$richnessID[which(dataimp$richness.SD.is.imputed=="yes")],data2imp.richness$richnessID)]
 
 p.richness <- ggplot(dataimp) +
-  geom_point(aes(x=richness.mean, y=richness.SD, color=Richness.SD.is.imputed, size=4, alpha=.5)) #+
-#   xlim(range(dataimp$richness.mean[dataimp$richness.SD.is.imputed=="yes"],na.rm=T)) +
-#   ylim(range(dataimp$richness.SD[dataimp$richness.SD.is.imputed=="yes"],na.rm=T)) 
-p.richness
+  geom_point(aes(x=richness.mean, y=log(richness.SD), color=richness.SD.is.imputed, size=4, alpha=.5)) 
+print(p.richness)
 
-imp.yield.lm <- step(lm(log(yield.SD)~log(yield.mean)*log(X..of.samples.for.YD.measure),data=data2imp.yield[!is.na(data2imp.yield$yield.SD),]))
-# summary(imp.yield.lm)
-# plot(imp.yield.lm) # diagnostic plots, look ok!
-data2imp.yield$yield.SD[is.na(data2imp.yield$yield.SD)] <- exp(predict(imp.yield.lm, newdata=data2imp.yield[is.na(data2imp.yield$yield.SD),]))
-dataimp$yield.SD[is.na(dataimp$yield.SD)] <- data2imp.yield$yield.SD[match(dataimp$yieldID[is.na(dataimp$yield.SD)],data2imp.yield$yieldID)]
+############################################################################
+### imputation for yield SD
+############################################################################
+jags.data <- list(N.obs = nrow(data4imp.yield), mean = data4imp.yield$yield.mean, log.sd=log(data4imp.yield$yield.SD),n.sample=data4imp.yield$X..of.samples.for.YD.measure)
 
-p.yield <- ggplot(dataimp) +
-  geom_point(aes(x=yield.mean, y=yield.SD, color=Yield.SD.is.imputed, size=4, alpha=.5)) #+
-#   xlim(range(dataimp$yield.mean[dataimp$yield.SD.is.imputed=="yes"],na.rm=T)) +
-#   ylim(range(dataimp$yield.SD[dataimp$yield.SD.is.imputed=="yes"],na.rm=T)) 
-p.yield
+jm <- jags.model("imputation.model.txt", data = jags.data, n.chains = 3, n.adapt = 1000)
+params <- c("beta0", "beta1", "beta2","mu","tau", "prediction")
+update(jm, n.iter = 1000) # throw away the initial samples (the so-called “burn-in” phase)
+jm.sample <- jags.samples(jm, variable.names = params, n.iter = 1000, thin = 1)
+sapply(c("beta0", "beta1", "beta2"),function(x) plot(as.mcmc.list(jm.sample[[x]]),main=paste(x))) # check convergence
 
-rm(data2imp.richness,data2imp.yield, imp.richness.lm, imp.yield.lm, p.richness, p.yield)
+### plot predictions
+predictions <- summary(as.mcmc.list(jm.sample$prediction))
+prds <- data.frame(mean = data4imp.yield$yield.mean, predictions$quantiles)
+prds <- prds[order(prds[, 1]), ]
+plot(log(yield.SD) ~ yield.mean, cex = 1, col = "lightgrey", pch = 1,lwd=2, ylab = "log(SD)", xlab = "Scaled Mean",data=data4imp.yield)
+points(prds[, 1], prds[, 4], pch=1, lwd = 2, col = "red")
+legend("bottomright",legend=c("original Data", "Imputed Data"),col=c("lightgrey","red"),pch=1,lwd=2,title="Yield")
+
+### impute 
+data2imp.yield <- dataimp[which(dataimp$yield.SD.is.imputed=="yes"),]
+data2imp.yield$yield.SD <- exp(mean(jm.sample[["beta0"]]) + mean(jm.sample[["beta1"]])*scale(data2imp.yield$yield.mean) + mean(jm.sample[["beta2"]])*scale(data2imp.yield$X..of.samples.for.YD.measure))
+dataimp$yield.SD[which(dataimp$yield.SD.is.imputed=="yes")] <- data2imp.yield$yield.SD[match(dataimp$yieldID[which(dataimp$yield.SD.is.imputed=="yes")],data2imp.yield$yieldID)]
+
+# p.yield <- ggplot(dataimp) +
+#   geom_point(aes(x=yield.mean, y=log(yield.SD), color=yield.SD.is.imputed, size=4, alpha=.5)) 
+# print(p.yield)
+
+
+
+### Resterampe
+
+# data2imp.yield <- subset(dataimp,!duplicated(dataimp[,"yieldID"]) & dataimp$yield.mean>0)
+# data2imp.yield <- data2imp.yield[-which(data2imp.yield$yield.SD==0),]
+# # dataimp$richness.mean.n <- dataimp$richness.mean*dataimp$X..of.samples.for.BD.measure
+# # dataimp$yield.mean.n <- dataimp$yield.mean*dataimp$X..of.samples.for.YD.measure
+# 
+# imp.richness.glm1 <- glm(richness.SD ~ richness.mean*X..of.samples.for.BD.measure+I(richness.mean)^2+I(X..of.samples.for.BD.measure)^2,data=data2imp.richness[!is.na(data2imp.richness$richness.SD),],family=gaussian(link="log"))
+# imp.richness.glm2 <- stepAIC(imp.richness.glm1, k=2)
+# summary(imp.richness.glm2)
+# plot(imp.richness.glm2) # diagnostic plots, look ok!
+# 
+# ### fill NAs in original dataframe
+# data2imp.richness$richness.SD[is.na(data2imp.richness$richness.SD)] <- predict(imp.richness.glm2, type="response", newdata=data2imp.richness[is.na(data2imp.richness$richness.SD),])
+# dataimp$richness.SD[dataimp$Richness.SD.is.imputed=="yes"] <- data2imp.richness$richness.SD[match(dataimp$richnessID[dataimp$Richness.SD.is.imputed=="yes"],data2imp.richness$richnessID)]
+# 
+# p.richness <- ggplot(dataimp) +
+#   geom_point(aes(x=richness.mean, y=richness.SD, color=Richness.SD.is.imputed, size=4, alpha=.5)) #+
+# #   xlim(range(dataimp$richness.mean[dataimp$richness.SD.is.imputed=="yes"],na.rm=T)) +
+# #   ylim(range(dataimp$richness.SD[dataimp$richness.SD.is.imputed=="yes"],na.rm=T)) 
+# print(p.richness)
+# 
+# imp.yield.lm <- step(lm(log(yield.SD)~log(yield.mean)*log(X..of.samples.for.YD.measure),data=data2imp.yield[!is.na(data2imp.yield$yield.SD),]))
+# # summary(imp.yield.lm)
+# # plot(imp.yield.lm) # diagnostic plots, look ok!
+# data2imp.yield$yield.SD[is.na(data2imp.yield$yield.SD)] <- exp(predict(imp.yield.lm, newdata=data2imp.yield[is.na(data2imp.yield$yield.SD),]))
+# dataimp$yield.SD[is.na(dataimp$yield.SD)] <- data2imp.yield$yield.SD[match(dataimp$yieldID[is.na(dataimp$yield.SD)],data2imp.yield$yieldID)]
+# 
+# p.yield <- ggplot(dataimp) +
+#   geom_point(aes(x=yield.mean, y=yield.SD, color=Yield.SD.is.imputed, size=4, alpha=.5)) #+
+# #   xlim(range(dataimp$yield.mean[dataimp$yield.SD.is.imputed=="yes"],na.rm=T)) +
+# #   ylim(range(dataimp$yield.SD[dataimp$yield.SD.is.imputed=="yes"],na.rm=T)) 
+# print(p.yield)
+# 
+# rm(data2imp.richness,data2imp.yield, imp.richness.lm, imp.yield.lm, p.richness, p.yield)
 
 
 ############################################################################
@@ -119,10 +203,6 @@ rm(data2imp.richness,data2imp.yield, imp.richness.lm, imp.yield.lm, p.richness, 
 # 
 # rm(data2imp.richness, data2imp.yield, temp, temp.yield, temp.richness, predictorMatrix1, nchains)
              
-  ###########################################################################
-### Resterampe
-
-
 ############################################################################
 ### crude-impute based on average SD/mean ratio
 ### 
