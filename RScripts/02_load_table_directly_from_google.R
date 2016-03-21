@@ -26,7 +26,16 @@ gs_ls() #once authorized, this will list the files you have in GS
 ### load LUBDES  coding table
 LUBDES_gsheet<- gs_title("LUBDES coding table v2") #this crashes sometimes but seems to work as of April 22 2015
 data <- gs_read(LUBDES_gsheet, ws = "1. Coding Table version 2") #consume data from sheet 1
+<<<<<<< HEAD
 data <- as.data.frame(data) #some functions don't like the tbl.df data type
+=======
+
+#LUBDES_gsheet<- gs_title("codingtest") #this crashes sometimes but seems to work as of April 22 2015
+#data <- gs_read(LUBDES_gsheet, ws = "Sheet1") #consume data from sheet 1
+
+data<-as.data.frame(data) #some functions don't like the tbl.df data type
+
+>>>>>>> b466c3ff6b204aa3998d57fd0e57ca2f345f5497
 
 ############################################################################
 ### 02.2. adapt data structure
