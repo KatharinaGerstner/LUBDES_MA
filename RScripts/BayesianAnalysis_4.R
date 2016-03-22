@@ -1,49 +1,51 @@
 ###########################################################################
-### Bayesian Analysis with fixed effects and random study- and study-case effects
+### Bayesian Analysis with fixed effects and random study- and study-case effects 
+### and non-independence from relatedness of LUI comparisons within one study-case
 ##########################################################################
 
-## define the model
+### MODEL SELECTION
+# fixed effects with Variable selection based on random effects and a prior on the inclusion probability (Kuo & Mallick, cf. O'Hara & Sillanpää 2009)
 cat("model{
-  ### 1. priors 
-  # study-case-specific effects 
-  for(i in 1:N.Case){
+    ### 1. priors 
+    # variances and covariances between related sub-cases within the same study-case due to multiple LUI comparisons
+    for(i in 1:N.obs){
+    sigma.a[i] ~ dunif(0,5)
+    }
+    
+    # study-case-specific effects 
+    for(i in 1:N.Case){
     sigma.v[i] ~ dunif(0,5)  
-  }
-  
-  # study-specific effects
-  for(i in 1:N.Study){
+    }
+    
+    # study-specific effects
+    for(i in 1:N.Study){
     sigma.u[i] ~ dunif(0,5)
-  }
-  
-  # fixed effects
-  for(i in 1:N.colX){  
-    beta[i] ~ dnorm(0,0.001)
-  }
-  
-  ### 2. likelihood (cf. Koricheva et al. (2013) eqn 11.3)
-  for(i in 1:N.obs){
-    var.sum[i] <- Log.RR.Var[i] + pow(sigma.u[Study[i]],2) + pow(sigma.v[Study.Case[i]],2) # sum of within- + between-sample variance, cf. Nakagawa & Santos (2012) eqn 31
+    }
+    
+    # fixed effects with Variable selection based on random effects and a prior on the inclusion probability (Kuo & Mallick, cf. O'Hara & Sillanpää 2009)   
+    for(i in 1:N.colX){  
+    ind[i] ~ dbern(pind)   # model inclusion probability for coeff i
+    betaT[i] ~ dnorm(0,taub)
+    beta[i] <- ind[i]*betaT[i]
+    }   
+    
+    ### 2. likelihood
+    for(i in 1:N.obs){
+    var.sum[i] <- Log.RR.Var[i] + sum(pow(sigma.a[i],2) * A[i,]) + pow(sigma.u[Study[i]],2) + pow(sigma.v[Study.Case[i]],2) # sum of within- + between-sample variance, cf. Nakagawa & Santos (2012) eqn 31
     tau[i] <- pow(var.sum[i],-1)
     Log.RR[i] ~ dnorm(mu[i], tau[i])
     mu[i] <- X[i,] %*% beta
-  }
-  
-  ### 3. # Assess model fit using a sums-of-squares-type discrepancy (cf. p 106 Kery&Royle)
-  for(i in 1:N.obs){
+    }
+    
+    ### 3. # Assess model fit using a sums-of-squares-type discrepancy (cf. p 106 Kery&Royle)
+    for(i in 1:N.obs){
     residuals[i] <- Log.RR[i]-mu[i] # Residuals for observed data
     predictions[i] <- mu[i] # Predicted values
-    sq.res[i] <- pow(residuals[i],2) # Squared residuals for observed data
-    Log.RR.new[i] ~ dnorm(mu[i],tau[i]) # one new data set at each MCMC iteration
-    sq.res.new[i] <- pow(Log.RR.new[i]-predictions[i],2) # Squared residuals for new data
-  }    
-  SSR <- sum(sq.res) # Sum of squared residuals for actual data set
-  SSR.new <- sum(sq.res.new) # Sum of squared residuals for new data set
-  test <- step(SSR-SSR.new) # Test whether new data set more extreme, step() tests for x ≥ 0
-  bpvalue <- mean(test) # Bayesian p-value, cf. Kery (2010) Introduction to WinBUGS for ecologists, p106ff 
-}",file=path2temp %+% "bayesianMA_2.txt")
+    }
+}",file=path2temp %+% "bayesianMA_4.txt")
 
 run.analysis <- function(model.name,X.matrix,ES.frame.richness,long.names){
-
+  
   print("Prepare the data")
   dat2fit.richness <- list(
     Log.RR=ES.frame.richness$Log.RR, 
@@ -53,14 +55,15 @@ run.analysis <- function(model.name,X.matrix,ES.frame.richness,long.names){
     N.Study = nlevels(ES.frame.richness$Study.ID), # number of studies
     N.Case = nlevels(ES.frame.richness$Study.Case), # number of cases within studies
     N.obs = nrow(ES.frame.richness),
+    A = M.matrix(ES.frame.richness),
     X = X.matrix,
     N.colX = ncol(X.matrix))
   
   print(str(dat2fit.richness))
-
+  
   print("Fit the model")
-  params2monitor <- c("beta", "sigma.u", "sigma.v","bpvalue", "predictions","residuals")
-  model.fit <- jags.model(data=dat2fit.richness, file=path2temp %+% "bayesianMA_2.txt", 
+  params2monitor <- c("beta","betaT","ind", "sigma.a","sigma.u", "sigma.v", "predictions","residuals")
+  model.fit <- jags.model(data=dat2fit.richness, file=path2temp %+% "bayesianMA_3.txt", 
                           n.chains = 3, n.adapt=1000) # n.adapt for sampling the parameter space and conclude on one value
   update(model.fit, n.iter=2000) # start from this value
   samps <- vector("list",length(params2monitor))
@@ -69,7 +72,7 @@ run.analysis <- function(model.name,X.matrix,ES.frame.richness,long.names){
     print("Monitor " %+% i)
     samps[[i]] <- coda.samples(model.fit, i, n.iter=8000, thin=4) # coda controls the chains, saves the samples  
   }
-
+  
   print("Estimate goodness-of-fit")
   #  R2.LMM <- round(mean(1- unlist(lapply(samps[["residuals"]], function(x) mean(apply(x,1,var)))) / var(dat2fit.richness$Log.RR)),digits=3) # cf. Gelman, A. & Hill, J. (2007) Data Analysis Using Regression and Multilevel/Hierarchical Models
   var.f <- mean(unlist(lapply(samps[["predictions"]], function(x) apply(x,1,var))))
@@ -86,16 +89,16 @@ run.analysis <- function(model.name,X.matrix,ES.frame.richness,long.names){
   
   print("Check convergence")
   pdf(file=path2temp %+% "TracePlot" %+% model.name %+% ".pdf")
-  for(i in c("beta","sigma.u", "sigma.v")){
+  for(i in c("beta","betaT","ind", "sigma.a","sigma.u", "sigma.v")){
     plot(samps[[i]]) ### check convergence visually
   }  
   dev.off()
-
+  
   print("Posterior predictive check")
   residuals.mean <- summary(samps[["residuals"]])$statistics[,"Mean"]
   predictions.mean <- summary(samps[["predictions"]])$statistics[,"Mean"]
   plot(residuals.mean~predictions.mean, main=paste(model.name)) # should look like the sky at night
-     
+  
   print("Caterpillar plot")
   if(dat2fit.richness$N.colX==1){
     beta.mean <- summary(samps[["beta"]])$statistics["Mean"]
@@ -126,29 +129,9 @@ run.analysis <- function(model.name,X.matrix,ES.frame.richness,long.names){
   return(list(model.name,model.fit,samps))
 }
 
-### 1. within-study intensification
-model.name <- "GrandMean2"
-X.matrix <- as.data.frame(model.matrix(Log.RR ~ 1, data=ES.frame.richness))
-GrandMeanMA <- run.analysis(model.name,X.matrix,ES.frame.richness,"Grand Mean")
-
-### 2. Analysis with corvariates
-# remove cases with NA in covariates
-ES.frame.richness <- ES.frame.richness[complete.cases(ES.frame.richness),] 
-ES.frame.richness$Study.ID <- ES.frame.richness$Study.ID[drop=T] # drop unused study levels
-ES.frame.richness$Study.Case <- ES.frame.richness$Study.Case[drop=T] # drop unused study levels
-
-### LUI.RANGE.LEVEL
-model.name <- "LUI.range.level2"
-X.matrix <- as.data.frame(model.matrix(Log.RR ~ LUI.range.level-1, data=ES.frame.richness))
-names(X.matrix) <- levels(ES.frame.richness$LUI.range.level)
-long.names <- colnames(X.matrix)
-LUIMA <- run.analysis(model.name,X.matrix,ES.frame.richness,long.names)
-
 ### FULL MODEL
-model.name <- "FullModel2"
+model.name <- "FullModel4"
 X.matrix <- as.data.frame(model.matrix(Log.RR ~ LUI.range.level * (Species.Group + Product + BIOME -1), data=ES.frame.richness))
 #names(X.matrix) <- c(levels(ES.frame.richness$LUI.range.level), levels(ES.frame.richness$Species.Group), levels(ES.frame.richness$Product), levels(ES.frame.richness$BIOME))# add interactions 
 long.names <- colnames(X.matrix)
 FullMA <- run.analysis(model.name,X.matrix,ES.frame.richness,long.names)
-
-                                                                                                                                                

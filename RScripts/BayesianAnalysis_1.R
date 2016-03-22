@@ -1,49 +1,7 @@
-﻿###########################################################################
+###########################################################################
 ### Bayesian Analysis with fixed effects only
 ##########################################################################
 
-
-###########################################################################
-### Data Preparation
-##########################################################################
-
-ES.frame <- subset(ES.frame, Richness.Log.RR.Var>0 & Yield.Log.RR.Var>0) # restrict analysis to study cases with positive variances
-### Remove pseudo-replicates
-ES.frame.richness <- ES.frame[!duplicated(ES.frame[,c("Study.ID","Case.ID","LUI.range.level","Species.Group")]),]
-ES.frame.yield <- ES.frame[!duplicated(ES.frame[,c("Study.ID","LUI.range.level","Product")]),]
-
-### remove redundant cases, cases low-high are removed if all three comparisons are available
-for(x in unique(ES.frame$Study.Case)){
-  subset.richness <- subset(ES.frame.richness,Study.Case==x)
-  subset.yield <- subset(ES.frame.yield,Study.Case==x)
-  ## remove redundant cases
-  if (all(c("low-medium","low-high","medium-high") %in% unique(subset.richness$LUI.range.level))){
-    ES.frame.richness <- ES.frame.richness[!(ES.frame.richness$Study.Case==x & ES.frame.richness$LUI.range.level=="low-high"),]
-  }
-  if (all(c("low-medium","low-high","medium-high") %in% unique(subset.yield$LUI.range.level))){
-    ES.frame.yield <- ES.frame.yield[!(ES.frame.yield$Study.Case==x & ES.frame.yield$LUI.range.level=="low-high"),]
-  }
-}  
-
-### remove columns not needed for the analysis, unify names
-ES.frame.richness <- ES.frame.richness[,c("Richness.Log.RR","Richness.Log.RR.Var","LUI.range.level","Study.ID","Study.Case","Species.Group","Product","BIOME","npp","time.since.first.use")]
-names(ES.frame.richness)[1:2] <- c("Log.RR","Log.RR.Var")
-ES.frame.yield <- ES.frame.yield[,c("Yield.Log.RR","Yield.Log.RR.Var","LUI.range.level","Study.ID","Study.Case","Species.Group","Product","BIOME","npp","time.since.first.use")]
-names(ES.frame.yield)[1:2] <- c("Log.RR","Log.RR.Var")
-
-ES.frame.richness$LUI.range.level <- factor(ES.frame.richness$LUI.range.level,levels=c("low-low","low-medium","low-high","medium-medium","medium-high","high-high")) # reorder factor levels
-ES.frame.richness$Study.ID <- factor(ES.frame.richness$Study.ID)[drop=T] # drop unused study levels
-ES.frame.richness$Study.Case <- factor(ES.frame.richness$Study.Case)[drop=T] # drop unused study levels
-
-### Scale continuous covariates to reduce the influence of extremes
-ES.frame.richness$npp <- scale(ES.frame.richness$npp)
-ES.frame.richness$time.since.first.use <- scale(ES.frame.richness$time.since.first.use)
-ES.frame.yield$npp <- scale(ES.frame.yield$npp)
-ES.frame.yield$time.since.first.use <- scale(ES.frame.yield$time.since.first.use)
-
-###########################################################################
-### run a bayesian model without random effects
-##########################################################################
 ## define the model
 
 cat("model{
@@ -53,7 +11,7 @@ cat("model{
     beta[i] ~ dnorm(0,0.001)
     }
     
-    ### 2. likelihood
+    ### 2. likelihood (cf. Koricheva et al. (2013) eqn 11.3)
     for(i in 1:N.obs){
     tau[i] <- pow(Log.RR.Var[i],-1)
     Log.RR[i] ~ dnorm(mu[i], tau[i])
@@ -65,15 +23,14 @@ cat("model{
     residuals[i] <- Log.RR[i]-mu[i] # Residuals for observed data
     predictions[i] <- mu[i] # Predicted values
     sq.res[i] <- pow(residuals[i],2) # Squared residuals for observed data
-    Log.RR.tau[i] <- pow(Log.RR.Var[i],-1)
-    Log.RR.new[i] ~ dnorm(mu[i],Log.RR.tau[i]) # one new data set at each MCMC iteration
+    Log.RR.new[i] ~ dnorm(mu[i],tau[i]) # one new data set at each MCMC iteration
     sq.res.new[i] <- pow(Log.RR.new[i]-predictions[i],2) # Squared residuals for new data
     }    
     SSR <- sum(sq.res) # Sum of squared residuals for actual data set
     SSR.new <- sum(sq.res.new) # Sum of squared residuals for new data set
     test <- step(SSR-SSR.new) # Test whether new data set more extreme, step() tests for x ≥ 0
     bpvalue <- mean(test) # Bayesian p-value, cf. Kery (2010) Introduction to WinBUGS for ecologists, p106ff 
-    }",file=path2temp %+% "bayesianMA_Nakagawa1.txt")
+  }",file=path2temp %+% "bayesianMA_1.txt")
 
 run.analysis <- function(model.name,X.matrix,ES.frame.richness,long.names){
 
@@ -89,7 +46,7 @@ run.analysis <- function(model.name,X.matrix,ES.frame.richness,long.names){
 
   print("Fit the model")
   params2monitor <- c("beta","bpvalue", "predictions","residuals")
-  model.fit <- jags.model(data=dat2fit.richness, file=path2temp %+% "bayesianMA_Nakagawa1.txt", 
+  model.fit <- jags.model(data=dat2fit.richness, file=path2temp %+% "bayesianMA_1.txt", 
                           n.chains = 3, n.adapt=1000) # n.adapt for sampling the parameter space and conclude on one value
   update(model.fit, n.iter=2000) # start from this value
   samps <- vector("list",length(params2monitor))
@@ -100,12 +57,16 @@ run.analysis <- function(model.name,X.matrix,ES.frame.richness,long.names){
   }
 
   print("Estimate goodness-of-fit")
-  R2.LMM <- round(mean(1- unlist(lapply(samps[["residuals"]], function(x) mean(apply(x,1,var)))) / var(dat2fit.richness$Log.RR)),digits=3) # cf. Gelman, A. & Hill, J. (2007) Data Analysis Using Regression and Multilevel/Hierarchical Models
+  #  R2.LMM <- round(mean(1- unlist(lapply(samps[["residuals"]], function(x) mean(apply(x,1,var)))) / var(dat2fit.richness$Log.RR)),digits=3) # cf. Gelman, A. & Hill, J. (2007) Data Analysis Using Regression and Multilevel/Hierarchical Models
+  var.f <- mean(unlist(lapply(samps[["predictions"]], function(x) apply(x,1,var))))
+  sigma.a <- mean(unlist(lapply(samps[["sigma.a"]], function(x) apply(x,1,mean))))
+  sigma.u <- mean(unlist(lapply(samps[["sigma.u"]], function(x) apply(x,1,mean))))
+  sigma.v <- mean(unlist(lapply(samps[["sigma.v"]], function(x) apply(x,1,mean))))
+  R2.LMM <- round(var.f / (var.f + sigma.a^2 + sigma.u^2 + sigma.v^2),digits=3) # cf. Nakagawa & Schielzeth (2012) eqn 26  
   dic.samps <- dic.samples(model.fit, n.iter=8000,thin=4)
-  DIC <- round(sum(dic.samps[["deviance"]]),digits=3) # model deviance
-  AIC <- round(2*DIC + 2*dat2fit.richness$N.colX,digits=3)
+  DIC <- round(sum(dic.samps[["deviance"]]) + sum(dic.samps[["penalty"]]),digits=3) # model deviance information criterion "deviance"=mean deviance, "penalty" = 2*pD
   bpvalue <- round(mean(unlist(samps[["bpvalue"]])),digits=3)
-  goodness.of.fit <- list(DIC=DIC,AIC=AIC,R2.LMM=R2.LMM,bpvalue=bpvalue)
+  goodness.of.fit <- list(DIC=DIC,R2.LMM=R2.LMM,bpvalue=bpvalue)
   print(xtable(goodness.of.fit), type = "html", file=path2temp %+% model.name %+% "goodness.of.fit.doc") # save the HTML table as a .doc file
   save(model.name,model.fit,samps,goodness.of.fit, file=path2temp %+% model.name %+% ".Rdata")
   
@@ -116,7 +77,7 @@ run.analysis <- function(model.name,X.matrix,ES.frame.richness,long.names){
   }  
   dev.off()
 
-  print("Check goodness-of-fit")
+  print("Posterior predictive check")
   residuals.mean <- summary(samps[["residuals"]])$statistics[,"Mean"]
   predictions.mean <- summary(samps[["predictions"]])$statistics[,"Mean"]
   plot(residuals.mean~predictions.mean, main=paste(model.name)) # should look like the sky at night
