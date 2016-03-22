@@ -85,33 +85,35 @@
 ### checks for nodename (or username in case of RS) and sets directories accordingly
 ############################################################################
 
-cu <- Sys.info()["user"]
-cn <- Sys.info()["nodename"]
-
-if (cu == "rseppelt")
-{
-  path2temp <- "/Users/rseppelt/Documents/Projekte/Synthese & Netzwerke/LU-BD-ES/Temp" 
-  path2wd <- "/Users/rseppelt/Documents/git/LUBDES_MA/RScripts/" 
-} else if (cn == "UCBTTNE-LT"){
-  path2wd <- "C:/Users/Tim/Documents/LUBDES_MA/RScripts/" #TN
-  path2temp <- "C:/Users/Tim/Documents/LUBDES_MA_Out/" #TN
+.setwdntemp <- function(){
+  cu <- Sys.info()["user"]
+  cn <- Sys.info()["nodename"]
   
-} else if (cn == "juro-MacBookPro"){
-  path2wd <- "/home/juro/git/LUBDES_MA/RScripts/" #MB
-  path2temp <- "/home/juro/tmp/" #MB
-
-} else if (cn == "LEIH-HAL6"){
-  path2wd <- "C:/Users/kambach/Desktop/aktuelle Arbeiten/SESYNC/LUBDES_MA-master/RScripts/" #SK
-  path2temp <- "C:/Users/kambach/Desktop/aktuelle Arbeiten/SESYNC/LUBDES_MA-master/RScripts/" #SK
+  if (cu == "rseppelt")
+  {
+    path2temp <- "/Users/rseppelt/Documents/Projekte/Synthese & Netzwerke/LU-BD-ES/Temp" 
+    path2wd <- "/Users/rseppelt/Documents/git/LUBDES_MA/RScripts/" 
+  } else if (cn == "UCBTTNE-LT"){
+    path2wd <- "C:/Users/Tim/Documents/LUBDES_MA/RScripts/" #TN
+    path2temp <- "C:/Users/Tim/Documents/LUBDES_MA_Out/" #TN
     
-} else if (cn == "Helen-Phillipss-MacBook-Pro.local"){
-	path2wd <- "/Users/Helen/LUBDES_MA/RScripts/"
-	path2temp <- "/Users/Helen/tmp/" ##HP
-} else {
-  path2wd <- "C:/Users/hoppek/Documents/GitHub/LUBDES_MA/RScripts/" #KG
-  path2temp <- "C:/Users/hoppek/Documents/temp/" #KG 
+  } else if (cn == "juro-MacBookPro"){
+    path2wd <- "/home/juro/git/LUBDES_MA/RScripts/" #MB
+    path2temp <- "/home/juro/tmp/" #MB
+    
+  } else if (cn == "LEIH-HAL6"){
+    path2wd <- "C:/Users/kambach/Desktop/aktuelle Arbeiten/SESYNC/LUBDES_MA-master/RScripts/" #SK
+    path2temp <- "C:/Users/kambach/Desktop/aktuelle Arbeiten/SESYNC/LUBDES_MA-master/RScripts/" #SK
+    
+  } else if (cn == "Helen-Phillipss-MacBook-Pro.local"){
+    path2wd <- "/Users/Helen/LUBDES_MA/RScripts/"
+    path2temp <- "/Users/Helen/tmp/" ##HP
+  } else {
+    path2wd <- "C:/Users/hoppek/Documents/GitHub/LUBDES_MA/RScripts/" #KG
+    path2temp <- "C:/Users/hoppek/Documents/temp/" #KG 
+  }  
+  return(list(path2temp,path2wd))
 }
-
 
 ############################################################################
 ### 00.2. source all relevant R scripts
@@ -119,7 +121,13 @@ if (cu == "rseppelt")
 ### 
 ############################################################################
 
+############################################################################
 ### DATA PREPARATION
+############################################################################
+set.list <-  .setwdntemp()
+path2temp <- set.list[[1]]
+path2wd <- set.list[[2]]
+
 ### helper function to combine strings
 "%+%" <- function(x,y)paste(x,y,sep="")
 
@@ -131,16 +139,28 @@ source(path2wd %+% "04_CompileESframe.R")
 source(path2wd %+% "05_AddMapDataToESframe.R")
 #source(path2wd %+% "06_DescriptiveStatsOfESframe.r")
 
-save(data,dataimp,ES.frame,ES.frame.noLU,path2wd,path2temp,file=path2temp %+% "SavedData.Rdata")
+save(data,dataimp,ES.frame,ES.frame.noLU,file=path2temp %+% "SavedData.Rdata")
 rm(list=objects()) # empty workspace, keep libraries loaded
 
+############################################################################
 ###  DATA ANALYSIS
-### reload required data and functions
-### helper function to combine strings
-"%+%" <- function(x,y)paste(x,y,sep="")
-load(file=path2temp %+% "SavedData.Rdata")
-### RMASelect would need to be reloaded (cf. 01_load_libraries_and_functions.r)
+############################################################################
 
+### reload required data and functions
+set.list <-  .setwdntemp()
+path2temp <- set.list[[1]]
+path2wd <- set.list[[2]]
+"%+%" <- function(x,y)paste(x,y,sep="")
+source(path2wd %+% "01_load_libraries_and_functions.r")
+load(file=path2temp %+% "SavedData.Rdata")
+
+### BAYESIAN ANALYSIS
+source(path2wd %+% "08_DataPreparation4BayesianAnalysis.R")
+source(path2wd %+% "BayesianAnalysis_1.R") # fixed effects only
+source(path2wd %+% "BayesianAnalysis_2.R") # fixed and random effects of study and study-case
+source(path2wd %+% "BayesianAnalysis_3.R") # fixed and random effects of study and study-case, and non-independence from relatedness of LUI comparisons within one study-case
+
+### FREQUENTIST ANALYSIS
 source(path2wd %+% "07_DataAnalysis.R")
 source(path2wd %+% "08_Plotting.r")
 source(path2wd %+% "08.1_Plot_maps.r")
