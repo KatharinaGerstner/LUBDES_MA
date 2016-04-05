@@ -21,9 +21,9 @@ for(x in unique(ES.frame$Study.Case)){
 }  
 
 ### remove columns not needed for the analysis, unify names
-ES.frame.richness <- ES.frame.richness[,c("Richness.Log.RR","Richness.Log.RR.Var","LUI.range.level","Study.ID","Study.Case","Species.Group","Product","BIOME","npp","time.since.first.use")]
+ES.frame.richness <- ES.frame.richness[,c("Richness.Log.RR","Richness.Log.RR.Var","LUI.range.level","Low.LUI","High.LUI","Study.ID","Case.ID","Study.Case","Species.Group","Product","BIOME","npp","time.since.first.use")]
 names(ES.frame.richness)[1:2] <- c("Log.RR","Log.RR.Var")
-ES.frame.yield <- ES.frame.yield[,c("Yield.Log.RR","Yield.Log.RR.Var","LUI.range.level","Study.ID","Study.Case","Species.Group","Product","BIOME","npp","time.since.first.use")]
+ES.frame.yield <- ES.frame.yield[,c("Yield.Log.RR","Yield.Log.RR.Var","LUI.range.level","Low.LUI","High.LUI","Study.ID","Study.Case","Case.ID","Species.Group","Product","BIOME","npp","time.since.first.use")]
 names(ES.frame.yield)[1:2] <- c("Log.RR","Log.RR.Var")
 
 ES.frame.richness$LUI.range.level <- factor(ES.frame.richness$LUI.range.level,levels=c("low-low","low-medium","low-high","medium-medium","medium-high","high-high")) # reorder factor levels
@@ -37,7 +37,6 @@ ES.frame.yield$npp <- scale(ES.frame.yield$npp)
 ES.frame.yield$time.since.first.use <- scale(ES.frame.yield$time.since.first.use)
 
 ### save rawdata as table in a word doc
-library(xtable)
 print(xtable(ES.frame.richness), type = "html", file=path2temp %+% "ES.frame.richness.doc") # save the HTML table as a .doc file
 print(xtable(ES.frame.yield), type = "html", file=path2temp %+% "ES.frame.yield.doc") # save the HTML table as a .doc file
 
@@ -62,3 +61,4 @@ M.matrix <- function(dat){
   }
   return(M)
 }  
+
