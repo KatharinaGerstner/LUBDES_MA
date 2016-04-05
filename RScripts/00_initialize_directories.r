@@ -131,13 +131,20 @@ path2wd <- set.list[[2]]
 ### helper function to combine strings
 "%+%" <- function(x,y)paste(x,y,sep="")
 
+### load libraries, functions and google sheets 
 #source(path2wd %+% "-01_load+analyse_screeningtable.r")
 source(path2wd %+% "01_load_libraries_and_functions.r")
 source(path2wd %+% "02_load_table_directly_from_google.R")
+
+### Compile raw data
 source(path2wd %+% "03_ImputeMissingData.r")
 source(path2wd %+% "04_CompileESframe.R")
 source(path2wd %+% "05_AddMapDataToESframe.R")
-#source(path2wd %+% "06_DescriptiveStatsOfESframe.r")
+
+### Describe and plot the raw data
+#source(path2wd %+% "06.1_DescriptiveStatsOfESframe.r")
+#source(path2wd %+% "06.2_Plot_forest_plots.r")
+#source(path2wd %+% "06.3_Plot_maps.r")
 
 save(data,dataimp,ES.frame,file=path2temp %+% "SavedData.Rdata")
 rm(list=objects()) # empty workspace, keep libraries loaded
@@ -163,10 +170,9 @@ source(path2wd %+% "BMASelect.R") # fixed and random effects of study and study-
 
 ### FREQUENTIST ANALYSIS
 source(path2wd %+% "07_DataAnalysis.R")
-source(path2wd %+% "08_Plotting.r")
-source(path2wd %+% "08.1_Plot_maps.r")
-source(path2wd %+% "08.2_Plot_CatWhiskers.r")
-source(path2wd %+% "08.3_Plot_forest_plots.r")
+#source(path2wd %+% "08_Plotting.r")
+#source(path2wd %+% "08.2_Plot_CatWhiskers.r")
+source(path2wd %+% "08.4_Plot_model_coeffs.r") # cross plots for LUI range level and forest plots for model coefficients
 #source(path2wd %+% "09_ModelDiagnostics.R") # not yet working
 #source(path2wd %+% "10_UncertaintyAnalysis.R") # not yet working
 
