@@ -139,7 +139,7 @@ source(path2wd %+% "04_CompileESframe.R")
 source(path2wd %+% "05_AddMapDataToESframe.R")
 #source(path2wd %+% "06_DescriptiveStatsOfESframe.r")
 
-save(data,dataimp,ES.frame,ES.frame.noLU,file=path2temp %+% "SavedData.Rdata")
+save(data,dataimp,ES.frame,file=path2temp %+% "SavedData.Rdata")
 rm(list=objects()) # empty workspace, keep libraries loaded
 
 ############################################################################
@@ -153,12 +153,13 @@ path2wd <- set.list[[2]]
 "%+%" <- function(x,y)paste(x,y,sep="")
 source(path2wd %+% "01_load_libraries_and_functions.r")
 load(file=path2temp %+% "SavedData.Rdata")
+source(path2wd %+% "07a_DataPreparation4Analysis.R")
 
 ### BAYESIAN ANALYSIS
-source(path2wd %+% "08_DataPreparation4BayesianAnalysis.R")
 source(path2wd %+% "BayesianAnalysis_1.R") # fixed effects only
 source(path2wd %+% "BayesianAnalysis_2.R") # fixed and random effects of study and study-case
 source(path2wd %+% "BayesianAnalysis_3.R") # fixed and random effects of study and study-case, and non-independence from relatedness of LUI comparisons within one study-case
+source(path2wd %+% "BMASelect.R") # fixed and random effects of study and study-case, and non-independence from relatedness of LUI comparisons within one study-case AND bayesian model selection using DIC
 
 ### FREQUENTIST ANALYSIS
 source(path2wd %+% "07_DataAnalysis.R")

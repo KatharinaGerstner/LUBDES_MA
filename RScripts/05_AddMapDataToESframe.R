@@ -17,8 +17,8 @@ setwd(path2temp %+% "/")
 ES.frame <- ES.frame[!is.na(ES.frame$Longitude+ES.frame$Latitude),] # remove NA lonlat
 lonlat <- cbind(ES.frame$Longitude,ES.frame$Latitude)
 
-ES.frame.noLU <- ES.frame.noLU[!is.na(ES.frame.noLU$Longitude+ES.frame.noLU$Latitude),] # remove NA lonlat
-lonlat.noLU <- cbind(ES.frame.noLU$Longitude,ES.frame.noLU$Latitude)
+# ES.frame.noLU <- ES.frame.noLU[!is.na(ES.frame.noLU$Longitude+ES.frame.noLU$Latitude),] # remove NA lonlat
+# lonlat.noLU <- cbind(ES.frame.noLU$Longitude,ES.frame.noLU$Latitude)
 
 ############################################################################
 ### 05.1. Intersect studies with global maps of WWF_REALMs Ecoregions, reduce them to five main regions
@@ -57,11 +57,11 @@ ES.frame$BIOME <- factor(ES.frame$BIOME)
 
 ### for ES.frame.noLU
 # extract ecoregions
-if(nrow(ES.frame.noLU) >0){
-  realms_extract <- extract(ecoregions,lonlat.noLU)
-  ES.frame.noLU <- cbind(ES.frame.noLU,realms_extract$WWF_MHTNAM)
-  colnames(ES.frame.noLU)[which(names(ES.frame.noLU) == "realms_extract$WWF_MHTNAM")]<-"BIOME"
-}
+# if(nrow(ES.frame.noLU) >0){
+#   realms_extract <- extract(ecoregions,lonlat.noLU)
+#   ES.frame.noLU <- cbind(ES.frame.noLU,realms_extract$WWF_MHTNAM)
+#   colnames(ES.frame.noLU)[which(names(ES.frame.noLU) == "realms_extract$WWF_MHTNAM")]<-"BIOME"
+# }
 
 ############################################################################
 ### 05.2. Intersect studies with NPP
@@ -75,9 +75,9 @@ npp <- raster("tn0_all_gcm.asc",crs=CRS("+proj=longlat +datum=WGS84 +no_defs +el
 
 ES.frame$npp<-extract(npp,lonlat,buffer=100000,fun=mean)
 
-if(nrow(ES.frame.noLU) >0){
-  ES.frame.noLU$npp<-extract(npp,lonlat.noLU, buffer=100000, fun=mean)
-}
+# if(nrow(ES.frame.noLU) >0){
+#   ES.frame.noLU$npp<-extract(npp,lonlat.noLU, buffer=100000, fun=mean)
+# }
 ############################################################################
 ### 05.3. Intersect studies with Land-use history
 ############################################################################
@@ -108,17 +108,17 @@ ES.frame$start.agr.use <- ifelse(ES.frame$time.since.first.use >= 500,"old","you
 ES.frame$start.agr.use[is.na(ES.frame$start.agr.use)] <- "not yet used"
 
 ## ES.frame.noLU
-if(nrow(ES.frame.noLU) >0){
-  hyde.extract.year.of.first.use <- extract(hyde.LUhist.stack,lonlat.noLU) 
-  names(hyde.extract.year.of.first.use) <- c("-6000","-3000","-1000","0","1000","1500","1750","1900","1950","2000")
-  hyde.year.of.first.use <- apply(hyde.extract.year.of.first.use,1,function(x){ifelse(sum(x)>0,as.numeric(names(hyde.extract.year.of.first.use)[min(which(x==1))]),NA)}) # NA if no significant use were detectable
-  kk10.extract.year.of.first.use <- extract(kk10.LUhist.stack,lonlat.noLU) 
-  names(kk10.extract.year.of.first.use) <- c("-6000","-3000","-1000","0","1000","1500","1750","1900","1950","2000")
-  kk10.year.of.first.use <- apply(kk10.extract.year.of.first.use,1,function(x){ifelse(sum(x)>0,as.numeric(names(kk10.extract.year.of.first.use)[min(which(x==1))]),NA)}) # NA if no significant use were detectable
-  ES.frame.noLU$time.since.first.use <- log10(2000-apply(cbind(hyde.year.of.first.use,kk10.year.of.first.use),1,function(x){ifelse(all(is.na(x)),2000,min(x,na.rm=T))})+1) # set not yet used land to log10(1)=0
-  ES.frame.noLU$start.agr.use <- ifelse(ES.frame.noLU$time.since.first.use >= 500,"old","young")
-  ES.frame.noLU$start.agr.use[is.na(ES.frame.noLU$start.agr.use)] <- "not yet used"
-}
+# if(nrow(ES.frame.noLU) >0){
+#   hyde.extract.year.of.first.use <- extract(hyde.LUhist.stack,lonlat.noLU) 
+#   names(hyde.extract.year.of.first.use) <- c("-6000","-3000","-1000","0","1000","1500","1750","1900","1950","2000")
+#   hyde.year.of.first.use <- apply(hyde.extract.year.of.first.use,1,function(x){ifelse(sum(x)>0,as.numeric(names(hyde.extract.year.of.first.use)[min(which(x==1))]),NA)}) # NA if no significant use were detectable
+#   kk10.extract.year.of.first.use <- extract(kk10.LUhist.stack,lonlat.noLU) 
+#   names(kk10.extract.year.of.first.use) <- c("-6000","-3000","-1000","0","1000","1500","1750","1900","1950","2000")
+#   kk10.year.of.first.use <- apply(kk10.extract.year.of.first.use,1,function(x){ifelse(sum(x)>0,as.numeric(names(kk10.extract.year.of.first.use)[min(which(x==1))]),NA)}) # NA if no significant use were detectable
+#   ES.frame.noLU$time.since.first.use <- log10(2000-apply(cbind(hyde.year.of.first.use,kk10.year.of.first.use),1,function(x){ifelse(all(is.na(x)),2000,min(x,na.rm=T))})+1) # set not yet used land to log10(1)=0
+#   ES.frame.noLU$start.agr.use <- ifelse(ES.frame.noLU$time.since.first.use >= 500,"old","young")
+#   ES.frame.noLU$start.agr.use[is.na(ES.frame.noLU$start.agr.use)] <- "not yet used"
+# }
 setwd(path2wd)
 
 

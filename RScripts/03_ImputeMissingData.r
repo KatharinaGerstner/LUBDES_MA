@@ -19,92 +19,181 @@ dataimp$richnessID <- paste(dataimp$Study.ID,dataimp$richness.mean,dataimp$X..of
 dataimp$yieldID <- paste(dataimp$Study.ID,dataimp$yield.mean,dataimp$X..of.samples.for.YD.measure)
 
 ### reduce dataframe, remove duplicates in Study.ID_meanRRs and restrict imputation to non-zero mean and SD cases
-data4imp.richness <- subset(dataimp,!duplicated(dataimp[,"richnessID"]) & dataimp$richness.mean>0 & dataimp$richness.SD>0)
-data4imp.richness[,c("richness.mean","X..of.samples.for.BD.measure")] <- scale(data4imp.richness[,c("richness.mean","X..of.samples.for.BD.measure")])
-data4imp.yield <- subset(dataimp,!duplicated(dataimp[,"yieldID"]) & dataimp$yield.mean>0 & dataimp$yield.SD>0)
-data4imp.yield[,c("yield.mean","X..of.samples.for.YD.measure")] <- scale(data4imp.yield[,c("yield.mean","X..of.samples.for.YD.measure")])
+data4imp.richness <- subset(dataimp,!duplicated(dataimp[,"richnessID"]) & dataimp$richness.mean>0 & dataimp$richness.SD>0 & dataimp$X..of.samples.for.BD.measure > 1)
+#data4imp.richness[,c("richness.mean","richness.SD")] <- scale(data4imp.richness[,c("richness.mean","richness.SD")])
+data4imp.yield <- subset(dataimp,!duplicated(dataimp[,"yieldID"]) & dataimp$yield.mean>0 & dataimp$yield.SD>0 & dataimp$X..of.samples.for.YD.measure > 1)
+#data4imp.yield[,c("yield.mean","yield.SD")] <- scale(data4imp.yield[,c("yield.mean","yield.SD")])
 
 ############################################################################
 ### the bayes model
 ############################################################################
 
-library(rjags)
+cat("model{ # cf. Stevens (2011) Pharmaceutical Statistics
+  for(i in 1:N.obs){
+  # Normal likelihood for sample means
+    mean[i] ~ dnorm(mu[i], tau[i])
+    tau[i] <- n[i]/(sigma*sigma)
 
-cat("
-      model
-      {
-        # priors
-        beta0 ~ dnorm(0,0.001)
-        beta1 ~ dnorm(0,0.001)
-        beta2 ~ dnorm(0,0.001)
-        sigma ~ dunif(0,100)
-        tau <- pow(sigma,-2)
-        # likelihood
-        for(i in 1:N.obs)
-        {
-        log.sd[i] ~ dnorm(mu[i],tau)
-        mu[i] <- beta0 + beta1*mean[i] + beta2*n.sample[i]
-        # this part is here in order to make nice prediction curves:
-        prediction[i] ~ dnorm(mu[i],tau)
-        }
-      }
-  ", file="imputation.model.txt")
+  # Gamma likelihood for sample variances
+    sd2[i] ~ dgamma(a[i],b[i])
+    a[i] <- (n[i]-1)/2
+    b[i] <- (n[i]-1)/(2*sigma*sigma)
+  }
+
+  # Weak prior for population standard deviation
+  log(sigma) <- logsigma
+  logsigma ~ dunif(-10,10)
+    
+  # prior for fixed effects
+  for (i in 1:N.obs){
+    mu[i] ~ dnorm(0, 0.001)
+  }
+
+  # derived quantities
+  for (i in 1:N.obs){
+    dev[i] <- (mean[i] - mu[i])*(mean[i] - mu[i])*tau[i]
+  }
+
+  resdev <- sum(dev[])
+    
+}",file=path2temp %+% "imputation.model.Stevens.txt")
 
 ############################################################################
 ### imputation for richness SD
 ############################################################################
-jags.data <- list(N.obs = nrow(data4imp.richness), mean = data4imp.richness$richness.mean, log.sd=log(data4imp.richness$richness.SD),n.sample=data4imp.richness$X..of.samples.for.BD.measure)
+jags.data <- list(N.obs = nrow(data4imp.richness), mean = data4imp.richness$richness.mean, sd2=(data4imp.richness$richness.SD)^2,n=data4imp.richness$X..of.samples.for.BD.measure)
 
-jm <- jags.model("imputation.model.txt", data = jags.data, n.chains = 3, n.adapt = 1000)
-params <- c("beta0", "beta1", "beta2","mu","tau", "prediction")
+jm <- jags.model(path2temp %+% "imputation.model.Stevens.txt", data = jags.data, n.chains = 3, n.adapt = 1000)
 update(jm, n.iter = 1000) # throw away the initial samples (the so-called “burn-in” phase)
-jm.sample <- jags.samples(jm, variable.names = params, n.iter = 1000, thin = 1)
-sapply(c("beta0", "beta1", "beta2"),function(x) plot(as.mcmc.list(jm.sample[[x]]),main=paste(x))) # check convergence
+jm.sample <- jags.samples(jm, variable.names = c("a", "b", "mu","sigma","tau","dev", "resdev"), n.iter = 2000, thin = 2)
+# pdf(path2temp %+% "TracePlot_Imputation_Richness.pdf")
+# sapply(c("a", "b", "mu","tau"),function(x) plot(as.mcmc.list(jm.sample[[x]]),main=paste(x))) # check convergence
+# dev.off()
 
 ### plot predictions
-predictions <- summary(as.mcmc.list(jm.sample$prediction))
-prds <- data.frame(mean = data4imp.richness$richness.mean, predictions$quantiles)
-prds <- prds[order(prds[, 1]), ]
-plot(log(richness.SD) ~ richness.mean, cex = 1, col = "lightgrey", pch = 1,lwd = 2, ylab = "log(SD)", xlab = "Scaled Mean",data=data4imp.richness)
-points(prds[, 1], prds[, 4], pch=1, lwd = 2, col = "red")
-legend("bottomright",legend=c("original Data", "Imputed Data"),col=c("lightgrey","red"),pch=1,lwd=2,title="Richness")
+tau.summary <- summary(as.mcmc.list(jm.sample$tau))$statistics
+tau.mean <- tau.summary[,"Mean"]
+sd.mean <- 1/sqrt(tau.mean)
+plot.range <- range(sd.mean,sqrt(jags.data$sd2))
+plot(sd.mean~sqrt(jags.data$sd2), cex = 1, col = "lightgrey", pch = 1,lwd = 2, xlab = "original SD", ylab="predicted SD",xlim=plot.range,ylim=plot.range,main="Richness")
+abline(0,1)
 
 ### impute 
 data2imp.richness <- dataimp[which(dataimp$richness.SD.is.imputed=="yes"),]
-data2imp.richness$richness.SD <- exp(mean(jm.sample[["beta0"]]) + mean(jm.sample[["beta1"]])*scale(data2imp.richness$richness.mean) + mean(jm.sample[["beta2"]])*scale(data2imp.richness$X..of.samples.for.BD.measure))
+nm1 <- (data2imp.richness$X..of.samples.for.BD.measure-1)
+data2imp.richness$richness.SD <- sqrt(dgamma(nm1/2,nm1/(2*mean(jm.sample$sigma)^2)))
 dataimp$richness.SD[which(dataimp$richness.SD.is.imputed=="yes")] <- data2imp.richness$richness.SD[match(dataimp$richnessID[which(dataimp$richness.SD.is.imputed=="yes")],data2imp.richness$richnessID)]
-
-p.richness <- ggplot(dataimp) +
-  geom_point(aes(x=richness.mean, y=log(richness.SD), color=richness.SD.is.imputed, size=4, alpha=.5)) 
-print(p.richness)
 
 ############################################################################
 ### imputation for yield SD
 ############################################################################
-jags.data <- list(N.obs = nrow(data4imp.yield), mean = data4imp.yield$yield.mean, log.sd=log(data4imp.yield$yield.SD),n.sample=data4imp.yield$X..of.samples.for.YD.measure)
+jags.data <- list(N.obs = nrow(data4imp.yield), mean = data4imp.yield$yield.mean, sd2=(data4imp.yield$yield.SD)^2,n=data4imp.yield$X..of.samples.for.YD.measure)
 
-jm <- jags.model("imputation.model.txt", data = jags.data, n.chains = 3, n.adapt = 1000)
-params <- c("beta0", "beta1", "beta2","mu","tau", "prediction")
+jm <- jags.model(path2temp %+% "imputation.model.Stevens.txt", data = jags.data, n.chains = 3, n.adapt = 1000)
 update(jm, n.iter = 1000) # throw away the initial samples (the so-called “burn-in” phase)
-jm.sample <- jags.samples(jm, variable.names = params, n.iter = 1000, thin = 1)
-sapply(c("beta0", "beta1", "beta2"),function(x) plot(as.mcmc.list(jm.sample[[x]]),main=paste(x))) # check convergence
+jm.sample <- jags.samples(jm, variable.names = c("a", "b", "mu","sigma","tau","dev", "resdev"), n.iter = 2000, thin = 2)
+# pdf(path2temp %+% "TracePlot_Imputation_Yield.pdf")
+# sapply(c("a", "b", "mu","tau"),function(x) plot(as.mcmc.list(jm.sample[[x]]),main=paste(x))) # check convergence
+# dev.off()
 
 ### plot predictions
-predictions <- summary(as.mcmc.list(jm.sample$prediction))
-prds <- data.frame(mean = data4imp.yield$yield.mean, predictions$quantiles)
-prds <- prds[order(prds[, 1]), ]
-plot(log(yield.SD) ~ yield.mean, cex = 1, col = "lightgrey", pch = 1,lwd=2, ylab = "log(SD)", xlab = "Scaled Mean",data=data4imp.yield)
-points(prds[, 1], prds[, 4], pch=1, lwd = 2, col = "red")
-legend("bottomright",legend=c("original Data", "Imputed Data"),col=c("lightgrey","red"),pch=1,lwd=2,title="Yield")
+tau.summary <- summary(as.mcmc.list(jm.sample$tau))$statistics
+tau.mean <- tau.summary[,"Mean"]
+sd.mean <- 1/sqrt(tau.mean)
+plot.range <- range(sd.mean,sqrt(jags.data$sd2))
+plot(sd.mean~sqrt(jags.data$sd2), cex = 1, col = "lightgrey", pch = 1,lwd = 2, xlab = "original SD", ylab="predicted SD",xlim=plot.range,ylim=plot.range,main="Yield")
+abline(0,1)
 
 ### impute 
 data2imp.yield <- dataimp[which(dataimp$yield.SD.is.imputed=="yes"),]
-data2imp.yield$yield.SD <- exp(mean(jm.sample[["beta0"]]) + mean(jm.sample[["beta1"]])*scale(data2imp.yield$yield.mean) + mean(jm.sample[["beta2"]])*scale(data2imp.yield$X..of.samples.for.YD.measure))
+nm1 <- (data2imp.yield$X..of.samples.for.YD.measure-1)
+data2imp.yield$yield.SD <- sqrt(dgamma(nm1/2,nm1/(2*mean(jm.sample$sigma)^2)))
 dataimp$yield.SD[which(dataimp$yield.SD.is.imputed=="yes")] <- data2imp.yield$yield.SD[match(dataimp$yieldID[which(dataimp$yield.SD.is.imputed=="yes")],data2imp.yield$yieldID)]
 
-# p.yield <- ggplot(dataimp) +
-#   geom_point(aes(x=yield.mean, y=log(yield.SD), color=yield.SD.is.imputed, size=4, alpha=.5)) 
-# print(p.yield)
+# ###########
+# cat("
+#       model
+#       {
+#         # priors
+#         beta0 ~ dnorm(0,0.001)
+#         beta1 ~ dnorm(0,0.001)
+#         beta2 ~ dnorm(0,0.001)
+#         sigma ~ dunif(0,100)
+#         tau <- pow(sigma,-2)
+#         # likelihood
+#         for(i in 1:N.obs)
+#         {
+#         log.sd[i] ~ dnorm(mu[i],tau)
+#         mu[i] <- beta0 + beta1*mean[i] + beta2*n.sample[i]
+#         # this part is here in order to make nice prediction curves:
+#         prediction[i] ~ dnorm(mu[i],tau)
+#         }
+#         
+#         # derived quantities
+#         for (i in 1:N.obs){
+#           dev[i] <- (log.sd[i] - mu[i])*(log.sd[i] - mu[i])*tau
+#         }
+#       
+#         resdev <- sum(dev[])
+#       }
+#   ", file=path2temp %+% "imputation.model.txt")
+# 
+# ############################################################################
+# ### imputation for richness SD
+# ############################################################################
+# jags.data <- list(N.obs = nrow(data4imp.richness), mean = data4imp.richness$richness.mean, log.sd=log(data4imp.richness$richness.SD),n.sample=data4imp.richness$X..of.samples.for.BD.measure)
+# 
+# jm <- jags.model(path2temp %+% "imputation.model.txt", data = jags.data, n.chains = 3, n.adapt = 1000)
+# params <- c("beta0", "beta1", "beta2","mu","tau", "prediction","resdev")
+# update(jm, n.iter = 1000) # throw away the initial samples (the so-called “burn-in” phase)
+# jm.sample <- jags.samples(jm, variable.names = params, n.iter = 2000, thin = 2)
+# sapply(c("beta0", "beta1", "beta2"),function(x) plot(as.mcmc.list(jm.sample[[x]]),main=paste(x))) # check convergence
+# 
+# ### plot predictions
+# predictions <- summary(as.mcmc.list(jm.sample$prediction))
+# prds <- data.frame(mean = data4imp.richness$richness.mean, predictions$statistics)
+# prds <- prds[order(prds[, 1]), ]
+# plot(log(data4imp.richness$richness.SD), prds$Mean, cex = 1, col = "lightgrey", pch = 1,lwd = 2, xlab = "original log(SD)", ylab="predicted log(SD)",xlim=range(c(range(log(data4imp.richness$richness.SD)),range(prds$Mean))),ylim=range(c(range(log(data4imp.richness$richness.SD)),range(prds$Mean))),main="Richness")
+# # points(prds[, 1], prds[, 4], pch=1, lwd = 2, col = "red")
+# # legend("bottomright",legend=c("original Data", "Imputed Data"),col=c("lightgrey","red"),pch=1,lwd=2,title="Richness")
+# 
+# ### impute 
+# data2imp.richness <- dataimp[which(dataimp$richness.SD.is.imputed=="yes"),]
+# data2imp.richness$richness.SD <- exp(mean(jm.sample[["beta0"]]) + mean(jm.sample[["beta1"]])*scale(data2imp.richness$richness.mean) + mean(jm.sample[["beta2"]])*scale(data2imp.richness$X..of.samples.for.BD.measure))
+# dataimp$richness.SD[which(dataimp$richness.SD.is.imputed=="yes")] <- data2imp.richness$richness.SD[match(dataimp$richnessID[which(dataimp$richness.SD.is.imputed=="yes")],data2imp.richness$richnessID)]
+# 
+# # p.richness <- ggplot(dataimp) +
+# #   geom_point(aes(x=richness.mean, y=log(richness.SD), color=richness.SD.is.imputed, size=4, alpha=.5)) 
+# # print(p.richness)
+# 
+# ############################################################################
+# ### imputation for yield SD
+# ############################################################################
+# jags.data <- list(N.obs = nrow(data4imp.yield), mean = data4imp.yield$yield.mean, log.sd=log(data4imp.yield$yield.SD),n.sample=data4imp.yield$X..of.samples.for.YD.measure)
+# 
+# jm <- jags.model("imputation.model.txt", data = jags.data, n.chains = 3, n.adapt = 1000)
+# params <- c("beta0", "beta1", "beta2","mu","tau", "prediction")
+# update(jm, n.iter = 1000) # throw away the initial samples (the so-called “burn-in” phase)
+# jm.sample <- jags.samples(jm, variable.names = params, n.iter = 2000, thin = 2)
+# sapply(c("beta0", "beta1", "beta2"),function(x) plot(as.mcmc.list(jm.sample[[x]]),main=paste(x))) # check convergence
+# 
+# ### plot predictions
+# predictions <- summary(as.mcmc.list(jm.sample$prediction))
+# prds <- data.frame(mean = data4imp.yield$yield.mean, predictions$statistics)
+# prds <- prds[order(prds[, 1]), ]
+# plot(log(data4imp.yield$yield.SD), prds$Mean, cex = 1, col = "lightgrey", pch = 1,lwd = 2, xlab = "original log(SD)", ylab="predicted log(SD)",xlim=range(c(range(log(data4imp.yield$yield.SD)),range(prds$Mean))),ylim=range(c(range(log(data4imp.yield$yield.SD)),range(prds$Mean))),main="Yield")
+# # plot(log(yield.SD) ~ yield.mean, cex = 1, col = "lightgrey", pch = 1,lwd=2, ylab = "log(SD)", xlab = "Scaled Mean",data=data4imp.yield)
+# # points(prds[, 1], prds[, 2], pch=1, lwd = 2, col = "red")
+# # legend("bottomright",legend=c("original Data", "Imputed Data"),col=c("lightgrey","red"),pch=1,lwd=2,title="Yield")
+# 
+# ### impute 
+# data2imp.yield <- dataimp[which(dataimp$yield.SD.is.imputed=="yes"),]
+# data2imp.yield$yield.SD <- exp(mean(jm.sample[["beta0"]]) + mean(jm.sample[["beta1"]])*scale(data2imp.yield$yield.mean) + mean(jm.sample[["beta2"]])*scale(data2imp.yield$X..of.samples.for.YD.measure))
+# dataimp$yield.SD[which(dataimp$yield.SD.is.imputed=="yes")] <- data2imp.yield$yield.SD[match(dataimp$yieldID[which(dataimp$yield.SD.is.imputed=="yes")],data2imp.yield$yieldID)]
+# 
+# # p.yield <- ggplot(dataimp) +
+# #   geom_point(aes(x=yield.mean, y=log(yield.SD), color=yield.SD.is.imputed, size=4, alpha=.5)) 
+# # print(p.yield)
 
 
 
