@@ -22,12 +22,10 @@ cat("model{
     sigma.u[i] ~ dunif(0,5)
     }
     
-    # fixed effects with Variable selection based on random effects and a prior on the inclusion probability (Kuo & Mallick, cf. O'Hara & Sillanpää 2009)   
+    # fixed effects
     for(i in 1:N.colX){  
-    ind[i] ~ dbern(pind)   # model inclusion probability for coeff i
-    betaT[i] ~ dnorm(0,taub)
-    beta[i] <- ind[i]*betaT[i]
-    }   
+      beta[i] ~ dnorm(0,0.001)
+    }
     
     ### 2. likelihood
     for(i in 1:N.obs){
@@ -63,7 +61,7 @@ run.analysis <- function(model.name,X.matrix,ES.frame.richness,long.names){
   
   print("Fit the model")
   params2monitor <- c("beta","betaT","ind", "sigma.a","sigma.u", "sigma.v", "predictions","residuals")
-  model.fit <- jags.model(data=dat2fit.richness, file=path2temp %+% "bayesianMA_3.txt", 
+  model.fit <- jags.model(data=dat2fit.richness, file=path2temp %+% "bayesianMA_4.txt", 
                           n.chains = 3, n.adapt=1000) # n.adapt for sampling the parameter space and conclude on one value
   update(model.fit, n.iter=2000) # start from this value
   samps <- vector("list",length(params2monitor))
@@ -83,7 +81,7 @@ run.analysis <- function(model.name,X.matrix,ES.frame.richness,long.names){
   dic.samps <- dic.samples(model.fit, n.iter=8000,thin=4)
   DIC <- round(sum(dic.samps[["deviance"]]) + sum(dic.samps[["penalty"]]),digits=3) # model deviance information criterion "deviance"=mean deviance, "penalty" = 2*pD
   bpvalue <- round(mean(unlist(samps[["bpvalue"]])),digits=3)
-  goodness.of.fit <- list(DIC=DIC,R2.LMM=R2.LMM,bpvalue=bpvalue)
+  goodness.of.fit <- data.frame(DIC=DIC,R2.LMM=R2.LMM,bpvalue=bpvalue)
   print(xtable(goodness.of.fit), type = "html", file=path2temp %+% model.name %+% "goodness.of.fit.doc") # save the HTML table as a .doc file
   save(model.name,model.fit,samps,goodness.of.fit, file=path2temp %+% model.name %+% ".Rdata")
   

@@ -10,11 +10,6 @@ cat("model{
     sigma.v[i] ~ dunif(0,5)  
   }
   
-  # study-specific effects
-  for(i in 1:N.Study){
-    sigma.u[i] ~ dunif(0,5)
-  }
-  
   # fixed effects
   for(i in 1:N.colX){  
     beta[i] ~ dnorm(0,0.001)
@@ -22,7 +17,7 @@ cat("model{
   
   ### 2. likelihood (cf. Koricheva et al. (2013) eqn 11.3)
   for(i in 1:N.obs){
-    var.sum[i] <- Log.RR.Var[i] + pow(sigma.u[Study[i]],2) + pow(sigma.v[Study.Case[i]],2) # sum of within- + between-sample variance, cf. Nakagawa & Santos (2012) eqn 31
+    var.sum[i] <- Log.RR.Var[i] + pow(sigma.v[Study.Case[i]],2) # sum of within- + between-sample variance, cf. Nakagawa & Santos (2012) eqn 31
     tau[i] <- pow(var.sum[i],-1)
     Log.RR[i] ~ dnorm(mu[i], tau[i])
     mu[i] <- X[i,] %*% beta
@@ -38,7 +33,7 @@ cat("model{
   }    
   SSR <- sum(sq.res) # Sum of squared residuals for actual data set
   SSR.new <- sum(sq.res.new) # Sum of squared residuals for new data set
-  test <- step(SSR-SSR.new) # Test whether new data set more extreme, step() tests for x ≥ 0
+  test <- step(SSR-SSR.new) # Test whether new data set more extreme, step() tests for x > 0
   bpvalue <- mean(test) # Bayesian p-value, cf. Kery (2010) Introduction to WinBUGS for ecologists, p106ff 
 }",file=path2temp %+% "bayesianMA_2.txt")
 
@@ -48,9 +43,7 @@ run.analysis <- function(model.name,X.matrix,ES.frame.richness,long.names){
   dat2fit.richness <- list(
     Log.RR=ES.frame.richness$Log.RR, 
     Log.RR.Var=ES.frame.richness$Log.RR.Var,
-    Study = ES.frame.richness$Study.ID, 
     Study.Case = ES.frame.richness$Study.Case,
-    N.Study = nlevels(ES.frame.richness$Study.ID), # number of studies
     N.Case = nlevels(ES.frame.richness$Study.Case), # number of cases within studies
     N.obs = nrow(ES.frame.richness),
     X = X.matrix,
@@ -59,7 +52,7 @@ run.analysis <- function(model.name,X.matrix,ES.frame.richness,long.names){
   print(str(dat2fit.richness))
 
   print("Fit the model")
-  params2monitor <- c("beta", "sigma.u", "sigma.v","bpvalue", "predictions","residuals")
+  params2monitor <- c("beta", "sigma.v","bpvalue", "predictions","residuals")
   model.fit <- jags.model(data=dat2fit.richness, file=path2temp %+% "bayesianMA_2.txt", 
                           n.chains = 3, n.adapt=1000) # n.adapt for sampling the parameter space and conclude on one value
   update(model.fit, n.iter=2000) # start from this value
@@ -67,26 +60,24 @@ run.analysis <- function(model.name,X.matrix,ES.frame.richness,long.names){
   names(samps) <- params2monitor
   for(i in params2monitor){
     print("Monitor " %+% i)
-    samps[[i]] <- coda.samples(model.fit, i, n.iter=8000, thin=4) # coda controls the chains, saves the samples  
+    samps[[i]] <- coda.samples(model.fit, i, n.iter=10000, thin=4) # coda controls the chains, saves the samples  
   }
 
   print("Estimate goodness-of-fit")
   #  R2.LMM <- round(mean(1- unlist(lapply(samps[["residuals"]], function(x) mean(apply(x,1,var)))) / var(dat2fit.richness$Log.RR)),digits=3) # cf. Gelman, A. & Hill, J. (2007) Data Analysis Using Regression and Multilevel/Hierarchical Models
   var.f <- mean(unlist(lapply(samps[["predictions"]], function(x) apply(x,1,var))))
-  sigma.a <- mean(unlist(lapply(samps[["sigma.a"]], function(x) apply(x,1,mean))))
-  sigma.u <- mean(unlist(lapply(samps[["sigma.u"]], function(x) apply(x,1,mean))))
   sigma.v <- mean(unlist(lapply(samps[["sigma.v"]], function(x) apply(x,1,mean))))
-  R2.LMM <- round(var.f / (var.f + sigma.a^2 + sigma.u^2 + sigma.v^2),digits=3) # cf. Nakagawa & Schielzeth (2012) eqn 26  
-  dic.samps <- dic.samples(model.fit, n.iter=8000,thin=4)
+  R2.LMM <- round(var.f / (var.f + sigma.v^2),digits=3) # cf. Nakagawa & Schielzeth (2012) eqn 26  
+  dic.samps <- dic.samples(model.fit, n.iter=10000,thin=4)
   DIC <- round(sum(dic.samps[["deviance"]]) + sum(dic.samps[["penalty"]]),digits=3) # model deviance information criterion "deviance"=mean deviance, "penalty" = 2*pD
   bpvalue <- round(mean(unlist(samps[["bpvalue"]])),digits=3)
-  goodness.of.fit <- list(DIC=DIC,R2.LMM=R2.LMM,bpvalue=bpvalue)
+  goodness.of.fit <- data.frame(DIC=DIC,R2.LMM=R2.LMM,bpvalue=bpvalue)
   print(xtable(goodness.of.fit), type = "html", file=path2temp %+% model.name %+% "goodness.of.fit.doc") # save the HTML table as a .doc file
   save(model.name,model.fit,samps,goodness.of.fit, file=path2temp %+% model.name %+% ".Rdata")
   
   print("Check convergence")
   pdf(file=path2temp %+% "TracePlot" %+% model.name %+% ".pdf")
-  for(i in c("beta","sigma.u", "sigma.v")){
+  for(i in c("beta", "sigma.v")){
     plot(samps[[i]]) ### check convergence visually
   }  
   dev.off()

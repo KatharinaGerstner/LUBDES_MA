@@ -28,7 +28,7 @@ cat("model{
     }    
     SSR <- sum(sq.res) # Sum of squared residuals for actual data set
     SSR.new <- sum(sq.res.new) # Sum of squared residuals for new data set
-    test <- step(SSR-SSR.new) # Test whether new data set more extreme, step() tests for x ≥ 0
+    test <- step(SSR-SSR.new) # Test whether new data set more extreme, step() tests for x > 0
     bpvalue <- mean(test) # Bayesian p-value, cf. Kery (2010) Introduction to WinBUGS for ecologists, p106ff 
   }",file=path2temp %+% "bayesianMA_1.txt")
 
@@ -53,20 +53,20 @@ run.analysis <- function(model.name,X.matrix,ES.frame.richness,long.names){
   names(samps) <- params2monitor
   for(i in params2monitor){
     print("Monitor " %+% i)
-    samps[[i]] <- coda.samples(model.fit, i, n.iter=8000, thin=4) # coda controls the chains, saves the samples  
+    samps[[i]] <- coda.samples(model.fit, i, n.iter=10000, thin=4) # coda controls the chains, saves the samples  
   }
 
   print("Estimate goodness-of-fit")
-  #  R2.LMM <- round(mean(1- unlist(lapply(samps[["residuals"]], function(x) mean(apply(x,1,var)))) / var(dat2fit.richness$Log.RR)),digits=3) # cf. Gelman, A. & Hill, J. (2007) Data Analysis Using Regression and Multilevel/Hierarchical Models
-  var.f <- mean(unlist(lapply(samps[["predictions"]], function(x) apply(x,1,var))))
-  sigma.a <- mean(unlist(lapply(samps[["sigma.a"]], function(x) apply(x,1,mean))))
-  sigma.u <- mean(unlist(lapply(samps[["sigma.u"]], function(x) apply(x,1,mean))))
-  sigma.v <- mean(unlist(lapply(samps[["sigma.v"]], function(x) apply(x,1,mean))))
-  R2.LMM <- round(var.f / (var.f + sigma.a^2 + sigma.u^2 + sigma.v^2),digits=3) # cf. Nakagawa & Schielzeth (2012) eqn 26  
-  dic.samps <- dic.samples(model.fit, n.iter=8000,thin=4)
+  R2.LMM <- round(mean(1- unlist(lapply(samps[["residuals"]], function(x) mean(apply(x,1,var)))) / var(dat2fit.richness$Log.RR)),digits=3) # cf. Gelman, A. & Hill, J. (2007) Data Analysis Using Regression and Multilevel/Hierarchical Models
+#   var.f <- mean(unlist(lapply(samps[["predictions"]], function(x) apply(x,1,var))))
+#   sigma.a <- mean(unlist(lapply(samps[["sigma.a"]], function(x) apply(x,1,mean))))
+#   sigma.u <- mean(unlist(lapply(samps[["sigma.u"]], function(x) apply(x,1,mean))))
+#   sigma.v <- mean(unlist(lapply(samps[["sigma.v"]], function(x) apply(x,1,mean))))
+#   R2.LMM <- round(var.f / (var.f + sigma.a^2 + sigma.u^2 + sigma.v^2),digits=3) # cf. Nakagawa & Schielzeth (2012) eqn 26  
+  dic.samps <- dic.samples(model.fit, n.iter=10000,thin=4)
   DIC <- round(sum(dic.samps[["deviance"]]) + sum(dic.samps[["penalty"]]),digits=3) # model deviance information criterion "deviance"=mean deviance, "penalty" = 2*pD
   bpvalue <- round(mean(unlist(samps[["bpvalue"]])),digits=3)
-  goodness.of.fit <- list(DIC=DIC,R2.LMM=R2.LMM,bpvalue=bpvalue)
+  goodness.of.fit <- data.frame(DIC=DIC,R2.LMM=R2.LMM,bpvalue=bpvalue)
   print(xtable(goodness.of.fit), type = "html", file=path2temp %+% model.name %+% "goodness.of.fit.doc") # save the HTML table as a .doc file
   save(model.name,model.fit,samps,goodness.of.fit, file=path2temp %+% model.name %+% ".Rdata")
   
