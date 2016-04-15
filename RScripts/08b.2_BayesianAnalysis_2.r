@@ -31,21 +31,21 @@ cat("model{
     Log.RR.new[i] ~ dnorm(mu[i],tau[i]) # one new data set at each MCMC iteration
     sq.res.new[i] <- pow(Log.RR.new[i]-predictions[i],2) # Squared residuals for new data
   }    
-  SSR <- sum(sq.res) # Sum of squared residuals for actual data set
-  SSR.new <- sum(sq.res.new) # Sum of squared residuals for new data set
+  SSR <- sum(sq.res[]) # Sum of squared residuals for actual data set
+  SSR.new <- sum(sq.res.new[]) # Sum of squared residuals for new data set
   test <- step(SSR-SSR.new) # Test whether new data set more extreme, step() tests for x > 0
   bpvalue <- mean(test) # Bayesian p-value, cf. Kery (2010) Introduction to WinBUGS for ecologists, p106ff 
 }",file=path2temp %+% "bayesianMA_2.txt")
 
-run.analysis <- function(model.name,X.matrix,ES.frame.richness,long.names){
+run.analysis <- function(model.name,X.matrix,ES.df,long.names){
 
   print("Prepare the data")
   dat2fit.richness <- list(
-    Log.RR=ES.frame.richness$Log.RR, 
-    Log.RR.Var=ES.frame.richness$Log.RR.Var,
-    Study.Case = ES.frame.richness$Study.Case,
-    N.Case = nlevels(ES.frame.richness$Study.Case), # number of cases within studies
-    N.obs = nrow(ES.frame.richness),
+    Log.RR=ES.df$Log.RR, 
+    Log.RR.Var=ES.df$Log.RR.Var,
+    Study.Case = ES.df$Study.Case,
+    N.Case = nlevels(ES.df$Study.Case), # number of cases within studies
+    N.obs = nrow(ES.df),
     X = X.matrix,
     N.colX = ncol(X.matrix))
   
@@ -64,14 +64,14 @@ run.analysis <- function(model.name,X.matrix,ES.frame.richness,long.names){
   }
 
   print("Estimate goodness-of-fit")
-  #  R2.LMM <- round(mean(1- unlist(lapply(samps[["residuals"]], function(x) mean(apply(x,1,var)))) / var(dat2fit.richness$Log.RR)),digits=3) # cf. Gelman, A. & Hill, J. (2007) Data Analysis Using Regression and Multilevel/Hierarchical Models
+  R2.GH <- round(mean(1- unlist(lapply(samps[["residuals"]], function(x) mean(apply(x,1,var)))) / var(dat2fit.richness$Log.RR)),digits=3) # cf. Gelman, A. & Hill, J. (2007) Data Analysis Using Regression and Multilevel/Hierarchical Models
   var.f <- mean(unlist(lapply(samps[["predictions"]], function(x) apply(x,1,var))))
   sigma.v <- mean(unlist(lapply(samps[["sigma.v"]], function(x) apply(x,1,mean))))
   R2.LMM <- round(var.f / (var.f + sigma.v^2),digits=3) # cf. Nakagawa & Schielzeth (2012) eqn 26  
   dic.samps <- dic.samples(model.fit, n.iter=10000,thin=4)
-  DIC <- round(sum(dic.samps[["deviance"]]) + sum(dic.samps[["penalty"]]),digits=3) # model deviance information criterion "deviance"=mean deviance, "penalty" = 2*pD
+  DIC <- round(mean(dic.samps[["deviance"]]) + mean(dic.samps[["penalty"]]),digits=3) # model deviance information criterion "deviance"=mean deviance, "penalty" = 2*pD
   bpvalue <- round(mean(unlist(samps[["bpvalue"]])),digits=3)
-  goodness.of.fit <- data.frame(DIC=DIC,R2.LMM=R2.LMM,bpvalue=bpvalue)
+  goodness.of.fit <- data.frame(DIC=DIC,R2.LMM=R2.LMM, R2.GH=R2.GH,bpvalue=bpvalue)
   print(xtable(goodness.of.fit), type = "html", file=path2temp %+% model.name %+% "goodness.of.fit.doc") # save the HTML table as a .doc file
   save(model.name,model.fit,samps,goodness.of.fit, file=path2temp %+% model.name %+% ".Rdata")
   
@@ -99,10 +99,10 @@ run.analysis <- function(model.name,X.matrix,ES.frame.richness,long.names){
     beta.ub <- summary(samps[["beta"]])$quantiles[,"97.5%"]    
   }
   
-  plot.dat <- data.frame(beta.mean, beta.lb, beta.ub, long.names)
-  p <- ggplot(data = plot.dat, aes(x = beta.mean, y = long.names)) + 
+  plot.dat <- data.frame(beta.mean, beta.lb, beta.ub, long.names, sortvar=letters[1:length(beta.mean)])
+  p <- ggplot(data = plot.dat, aes(x = beta.mean, y = sortvar)) + 
     geom_point() + 
-    geom_segment(aes(x = beta.lb, xend = beta.ub, y = long.names, yend = long.names)) +
+    geom_segment(aes(x = beta.lb, xend = beta.ub, y = sortvar, yend = sortvar)) +
     geom_vline(xintercept = 0, linetype = 2) + 
     scale_x_continuous(labels=trans_format("exp",comma_format(digits=3))) +
     xlab("Response Ratio") + ylab("") +
@@ -118,28 +118,39 @@ run.analysis <- function(model.name,X.matrix,ES.frame.richness,long.names){
 }
 
 ### 1. within-study intensification
-model.name <- "GrandMean2"
+model.name <- "Richness_GrandMean2"
 X.matrix <- as.data.frame(model.matrix(Log.RR ~ 1, data=ES.frame.richness))
 GrandMeanMA <- run.analysis(model.name,X.matrix,ES.frame.richness,"Grand Mean")
 
-### 2. Analysis with corvariates
-# remove cases with NA in covariates
-ES.frame.richness <- ES.frame.richness[complete.cases(ES.frame.richness),] 
-ES.frame.richness$Study.ID <- ES.frame.richness$Study.ID[drop=T] # drop unused study levels
-ES.frame.richness$Study.Case <- ES.frame.richness$Study.Case[drop=T] # drop unused study levels
-
+### 2. Analysis with covariates
 ### LUI.RANGE.LEVEL
-model.name <- "LUI.range.level2"
+model.name <- "Richness_LUI.range.level2"
 X.matrix <- as.data.frame(model.matrix(Log.RR ~ LUI.range.level-1, data=ES.frame.richness))
 names(X.matrix) <- levels(ES.frame.richness$LUI.range.level)
 long.names <- colnames(X.matrix)
 LUIMA <- run.analysis(model.name,X.matrix,ES.frame.richness,long.names)
 
 ### FULL MODEL
-model.name <- "FullModel2"
+model.name <- "Richness_FullModel2"
 X.matrix <- as.data.frame(model.matrix(Log.RR ~ LUI.range.level * (Species.Group + Product + BIOME -1), data=ES.frame.richness))
 #names(X.matrix) <- c(levels(ES.frame.richness$LUI.range.level), levels(ES.frame.richness$Species.Group), levels(ES.frame.richness$Product), levels(ES.frame.richness$BIOME))# add interactions 
 long.names <- colnames(X.matrix)
 FullMA <- run.analysis(model.name,X.matrix,ES.frame.richness,long.names)
 
-                                                                                                                                                
+##################################
+### 1. within-study intensification
+model.name <- "Yield_GrandMean2"
+X.matrix <- as.data.frame(model.matrix(Log.RR ~ 1, data=ES.frame.yield))
+GrandMeanMA <- run.analysis(model.name,X.matrix,ES.frame.yield,"Grand Mean")
+
+### 2. Analysis with covariates
+### LUI.RANGE.LEVEL
+model.name <- "Yield_LUI.range.level2"
+X.matrix <- as.data.frame(model.matrix(Log.RR ~ LUI.range.level-1, data=ES.frame.yield))
+names(X.matrix) <- levels(ES.frame.yield$LUI.range.level)
+long.names <- colnames(X.matrix)
+LUIMA <- run.analysis(model.name,X.matrix,ES.frame.yield,long.names)
+
+### FULL MODEL
+model.name <- "Yield_FullModel2"
+X.matrix <- as.data.frame(model.matrix(Log.RR ~ LUI.range.level * (Species.Group + Product + BIOME -1), data=ES.frame.yield))

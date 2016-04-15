@@ -29,58 +29,58 @@
 mods.Richness <- c("Species.Group","LUI.range.level","Product","BIOME", paste("LUI.range.level:",c("Species.Group","Product","BIOME"),sep=""))
 modelDataRichness <- ES.frame.richness[,c('Log.RR','Log.RR.Var',paste(mods.Richness[1:4],sep=","),
                                           'Case.ID','Study.ID','Study.Case','Low.LUI','High.LUI')]
-modelDataRichness <- na.omit(modelDataRichness)
+# modelDataRichness <- na.omit(modelDataRichness)
 
 mods.Yield <- c("LUI.range.level","Product","BIOME", paste("LUI.range.level:",c("Product","BIOME"),sep=""))
 modelDataYield <- ES.frame.yield[,c('Log.RR','Log.RR.Var',paste(mods.Yield[1:3],sep=","),
                                     'Case.ID','Study.ID','Study.Case','Low.LUI','High.LUI')]
-modelDataYield <- na.omit(modelDataYield)
+# modelDataYield <- na.omit(modelDataYield)
 
 
 ### store models in a list
 ### Model results will be in here!
-Richness.MA.model <- list() 
-Yield.MA.model <- list()
+Richness.MA.model <- Yield.MA.model <- vector("list", length=3)
+names(Richness.MA.model) <- names(Yield.MA.model) <- c("None","Full","Select")
 
 ############################################################################
 ### 07.2. Analysis without moderators
 ############################################################################
 
-Richness.MA.model[["None"]] <- rma.mv(yi=Log.RR, V=M.matrix(modelDataRichness), mods=~1, random = ~factor(Case.ID)|factor(Study.ID), struct="CS", slab=paste(Study.Case, Low.LUI, High.LUI,sep="_"),method="REML", tdist=FALSE, level=95, digits=4,data=modelDataRichness)
+Richness.MA.model[["None"]] <- rma.mv(yi=Log.RR, V=M.matrix(modelDataRichness)+diag(modelDataRichness$Log.RR.Var), mods=~1, random = ~factor(Case.ID)|factor(Study.ID), struct="CS", slab=paste(Study.Case, Low.LUI, High.LUI,sep="_"),method="REML", tdist=FALSE, level=95, digits=4,data=modelDataRichness)
 
-Yield.MA.model[["None"]] <- rma.mv(yi=Log.RR,V=M.matrix(modelDataYield),mods=~1, random = ~factor(Case.ID)|factor(Study.ID), struct="CS", slab=paste(Study.Case, Low.LUI, High.LUI,sep="_"),method="REML", tdist=FALSE, level=95, digits=4,data=modelDataYield)#[!duplicated(data[c("Study.ID","LUI.range.level","Product"),])])
+Yield.MA.model[["None"]] <- rma.mv(yi=Log.RR,V=M.matrix(modelDataYield)+diag(modelDataYield$Log.RR.Var),mods=~1, random = ~factor(Case.ID)|factor(Study.ID), struct="CS", slab=paste(Study.Case, Low.LUI, High.LUI,sep="_"),method="REML", tdist=FALSE, level=95, digits=4,data=modelDataYield)#[!duplicated(data[c("Study.ID","LUI.range.level","Product"),])])
 
 ############################################################################
 ### 07.3. Analysis with moderators
 ############################################################################
 
 #mods.formula <- as.formula(paste("~",paste(mods.Richness,collapse="+")))
-Richness.MA.model[["full"]] <- rma.mv(yi=Log.RR, V=M.matrix(modelDataRichness), 
+Richness.MA.model[["full"]] <- rma.mv(yi=Log.RR, V=M.matrix(modelDataRichness)+diag(modelDataRichness$Log.RR.Var), 
                                       mods=~-1 + Species.Group + LUI.range.level + Product + BIOME + LUI.range.level:Species.Group + LUI.range.level:Product + LUI.range.level:BIOME,# + cropcover+ npp + time.since.first.use,
                                       random = ~factor(Case.ID)|factor(Study.ID), struct="CS", 
                                       slab=paste(Study.Case, Low.LUI, High.LUI,sep="_"),
                                       method="REML", tdist=FALSE, level=95, digits=4,data=modelDataRichness)
 
-model2select <- rma.mv(yi=Log.RR, V=M.matrix(modelDataRichness), 
+model2select <- rma.mv(yi=Log.RR, V=M.matrix(modelDataRichness)+diag(modelDataRichness$Log.RR.Var), 
                                       mods=~-1 + Species.Group + LUI.range.level + Product + BIOME + LUI.range.level:Species.Group + LUI.range.level:Product + LUI.range.level:BIOME,# + cropcover+ npp + time.since.first.use,
                                       random = ~factor(Case.ID)|factor(Study.ID), struct="CS", 
                                       slab=paste(Study.Case, Low.LUI, High.LUI,sep="_"),
                                       method="ML", tdist=FALSE, level=95, digits=4,data=modelDataRichness)
 
 model.select <- RMASelect(model2select)
-Richness.MA.model[["select"]] <- rma.mv(yi=Log.RR, V=M.matrix(modelDataRichness), 
+Richness.MA.model[["select"]] <- rma.mv(yi=Log.RR, V=M.matrix(modelDataRichness)+diag(modelDataRichness$Log.RR.Var), 
                                         mods=model.select$call$mods,
                                         random = ~factor(Case.ID)|factor(Study.ID), struct="CS", 
                                         slab=paste(Study.Case, Low.LUI, High.LUI,sep="_"),
                                         method="REML", tdist=FALSE, level=95, digits=4,data=modelDataRichness)
 
-Yield.MA.model[["full"]] <- rma.mv(yi=Log.RR,V=M.matrix(modelDataYield),
+Yield.MA.model[["full"]] <- rma.mv(yi=Log.RR,V=M.matrix(modelDataYield)+diag(modelDataYield$Log.RR.Var),
                                    mods=~-1 + LUI.range.level + Product + BIOME + LUI.range.level:Product + 
                                      LUI.range.level:BIOME,# + cropcover +npp +time.since.first.use,
                                    random = ~factor(Case.ID)|factor(Study.ID), struct="CS", slab=paste(Study.Case, Low.LUI, High.LUI,sep="_"),
                                    method="REML", tdist=FALSE, level=95, digits=4,data=modelDataYield)
 
-model2select <- rma.mv(yi=Log.RR,V=M.matrix(modelDataYield),
+model2select <- rma.mv(yi=Log.RR,V=M.matrix(modelDataYield)+diag(modelDataYield$Log.RR.Var),
                                    mods=~-1 + LUI.range.level + Product + BIOME + LUI.range.level:Product + 
                                      LUI.range.level:BIOME,# + cropcover +npp +time.since.first.use,
                                    random = ~factor(Case.ID)|factor(Study.ID), struct="CS", slab=paste(Study.Case, Low.LUI, High.LUI,sep="_"),
@@ -88,7 +88,7 @@ model2select <- rma.mv(yi=Log.RR,V=M.matrix(modelDataYield),
 
 model.select <- RMASelect(model2select)
 
-Yield.MA.model[["select"]] <- rma.mv(yi=Log.RR,V=M.matrix(modelDataYield),
+Yield.MA.model[["select"]] <- rma.mv(yi=Log.RR,V=M.matrix(modelDataYield)+diag(modelDataYield$Log.RR.Var),
                                      mods=model.select$call$mods,
                                      random = ~factor(Case.ID)|factor(Study.ID), struct="CS", slab=paste(Study.Case, Low.LUI, High.LUI,sep="_"),
                                      method="REML", tdist=FALSE, level=95, digits=4,data=modelDataYield)

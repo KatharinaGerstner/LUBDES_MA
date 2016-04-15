@@ -1,0 +1,164 @@
+---
+title: "DataPreparation"
+author: "Katharina Gerstner"
+date: "Monday, April 11, 2016"
+output: html_document
+---
+
+```{r, include=F}
+.setwdntemp <- function(){
+  cu <- Sys.info()["user"]
+  cn <- Sys.info()["nodename"]
+  
+  if (cu == "rseppelt")
+  {
+    path2temp <- "/Users/rseppelt/Documents/Projekte/Synthese & Netzwerke/LU-BD-ES/Temp" 
+    path2wd <- "/Users/rseppelt/Documents/git/LUBDES_MA/RScripts/" 
+  } else if (cn == "UCBTTNE-LT"){
+    path2wd <- "C:/Users/Tim/Documents/LUBDES_MA/RScripts/" #TN
+    path2temp <- "C:/Users/Tim/Documents/LUBDES_MA_Out/" #TN
+    
+  } else if (cn == "juro-MacBookPro"){
+    path2wd <- "/home/juro/git/LUBDES_MA/RScripts/" #MB
+    path2temp <- "/home/juro/tmp/" #MB
+    
+  } else if (cn == "LEIH-HAL6"){
+    path2wd <- "C:/Users/kambach/Desktop/aktuelle Arbeiten/SESYNC/LUBDES_MA-master/RScripts/" #SK
+    path2temp <- "C:/Users/kambach/Desktop/aktuelle Arbeiten/SESYNC/LUBDES_MA-master/RScripts/" #SK
+    
+  } else if (cn == "Helen-Phillipss-MacBook-Pro.local"){
+    path2wd <- "/Users/Helen/LUBDES_MA/RScripts/"
+    path2temp <- "/Users/Helen/tmp/" ##HP
+  } else {
+    path2wd <- "C:/Users/hoppek/Documents/GitHub/LUBDES_MA/RScripts/" #KG
+    path2temp <- "C:/Users/hoppek/Documents/temp/" #KG 
+  }  
+  return(list(path2temp,path2wd))
+}
+
+set.list <-  .setwdntemp()
+path2temp <- set.list[[1]]
+path2wd <- set.list[[2]]
+
+### helper function to combine strings
+"%+%" <- function(x,y)paste(x,y,sep="")
+
+source(path2wd %+% "01_load_libraries_and_functions.r")
+load(file=path2temp %+% "SavedData.Rdata")
+### some additional data preparation steps
+source(path2wd %+% "06_DataPreparation4Analysis.R")
+
+```
+
+```{r Summary}
+### 07.1 Protocol structure and summary of variables in the ES.frame.yields
+
+str(ES.frame.richness)
+summary(ES.frame.richness)
+
+### distribution of LUI ranges among covariables
+with(ES.frame.richness,table(Species.Group,LUI.range.level))
+with(ES.frame.richness,table(Product,LUI.range.level))
+
+str(ES.frame.yield)
+summary(ES.frame.yield)
+
+### distribution of LUI ranges among covariables
+with(ES.frame.yield,table(Species.Group,LUI.range.level))
+with(ES.frame.yield,table(Product,LUI.range.level))
+
+```
+
+```{r Histograms}
+### 07.2 Plot Histograms of all variables in the ES.frame 
+for(i in c("Log.RR","Log.RR.Var")){
+  p <- ggplot(data=ES.frame.richness) + 
+    geom_histogram(aes(x=ES.frame.richness[,i]), size=0.4, binwidth=0.2) + 
+    labs(x="",y="") +
+    ggtitle(paste(i)) + 
+    theme(axis.title = element_text(size = rel(2)), axis.text = element_text(size = rel(2)),plot.title=element_text(size = rel(2)) , axis.text.x=element_text(angle=45,vjust = 1, hjust=1),legend.text=element_text(size = rel(2)),legend.title=element_text(size = rel(2)))
+  #,axis.ticks.length=unit(.4,"cm")
+  print(p)
+  ggsave(p, file = paste(path2temp,"/PlotHist_ES.frame.richness_",i,".png",sep=""), width = 20, height = 8, type = "cairo-png")
+}  
+for(i in c("LUI.range.level","Species.Group","Product","BIOME")){
+  p <- ggplot(data=ES.frame.richness) + 
+    geom_bar(aes(x=ES.frame.richness[,i]), size=0.4) + 
+    labs(x="",y="") +
+    ggtitle(paste(i)) + 
+    theme(axis.title = element_text(size = rel(2)), axis.text = element_text(size = rel(2)),plot.title=element_text(size = rel(2)) , axis.text.x=element_text(angle=45,vjust = 1, hjust=1),legend.text=element_text(size = rel(2)),legend.title=element_text(size = rel(2)))
+  #,axis.ticks.length=unit(.4,"cm")
+  print(p)
+  ggsave(p, file = paste(path2temp,"/PlotHist_ES.frame.richness_",i,".png",sep=""), width = 20, height = 8, type = "cairo-png")
+}  
+
+for(i in c("Log.RR","Log.RR.Var")){
+  p <- ggplot(data=ES.frame.yield) + 
+    geom_histogram(aes(x=ES.frame.yield[,i]), size=0.4, binwidth=0.2) + 
+    labs(x="",y="") +
+    ggtitle(paste(i)) + 
+    theme(axis.title = element_text(size = rel(2)), axis.text = element_text(size = rel(2)),plot.title=element_text(size = rel(2)) , axis.text.x=element_text(angle=45,vjust = 1, hjust=1),legend.text=element_text(size = rel(2)),legend.title=element_text(size = rel(2)))
+  #,axis.ticks.length=unit(.4,"cm")
+  print(p)
+  ggsave(p, file = paste(path2temp,"/PlotHist_ES.frame.yield_",i,".png",sep=""), width = 20, height = 8, type = "cairo-png")
+}  
+for(i in c("LUI.range.level","Species.Group","Product","BIOME")){
+  p <- ggplot(data=ES.frame.yield) + 
+    geom_bar(aes(x=ES.frame.yield[,i]), size=0.4) + 
+    labs(x="",y="") +
+    ggtitle(paste(i)) + 
+    theme(axis.title = element_text(size = rel(2)), axis.text = element_text(size = rel(2)),plot.title=element_text(size = rel(2)) , axis.text.x=element_text(angle=45,vjust = 1, hjust=1),legend.text=element_text(size = rel(2)),legend.title=element_text(size = rel(2)))
+  #,axis.ticks.length=unit(.4,"cm")
+  print(p)
+  ggsave(p, file = paste(path2temp,"/PlotHist_ES.frame.yield_",i,".png",sep=""), width = 20, height = 8, type = "cairo-png")
+}  
+```
+
+```{r PlotMaps}
+### 07.3. Plot map of studies
+world_map <- map_data("world")
+p <- ggplot() +
+  geom_polygon(data=world_map, aes(x=long, y=lat, group=group),fill="white",color="black",lwd=0.2) + 
+  geom_point(data=ES.frame.richness, aes(x=Longitude, y=Latitude, ymin=-55), color="blue", shape=4, size=1) +
+  scale_x_continuous(breaks=c(-90, 0, 90), labels=c("90° W", "0", "90° E")) +
+  scale_y_continuous(breaks=c(-60, -30, 0, 30, 60), labels=c("60°S", "30°S","0°", "30°N","60°N")) +
+  xlab("") + ylab("") 
+p 
+ggsave(paste(path2temp, "/ES.frame.richness.CaseDistributionAll.png",sep=""), width=18, height=10, units="cm")
+
+### plot study locations using fancy ggplot
+ES.frame.richness <- within(ES.frame.richness, LUI.range.level <- factor(LUI.range.level, levels = c("low-low","low-medium","low-high","medium-medium","medium-high","high-high"))) # resort levels for plotting
+p <- ggplot() +
+  geom_polygon(data=world_map, aes(x=long, y=lat, group=group),fill="white",color="black",lwd=0.2) + 
+  geom_point(data=ES.frame.richness, aes(x=Longitude, y=Latitude, ymin=-55), color="blue", shape=2, size=1) +
+  scale_x_continuous(breaks=c(-90, 0, 90), labels=c("90° W", "0", "90° E")) +
+  scale_y_continuous(breaks=c(-60, -30, 0, 30, 60), labels=c("60°S", "30°S","0°", "30°N","60°N")) +
+  xlab("") + ylab("") +
+  facet_wrap(~LUI.range.level)   
+p 
+ggsave(paste(path2temp, "/ES.frame.richness.CaseDistributionPanel.png",sep=""), width=18, height=10, units="cm")
+
+p <- ggplot() +
+  geom_polygon(data=world_map, aes(x=long, y=lat, group=group),fill="white",color="black",lwd=0.2) + 
+  geom_point(data=ES.frame.yield, aes(x=Longitude, y=Latitude, ymin=-55), color="blue", shape=4, size=1) +
+  scale_x_continuous(breaks=c(-90, 0, 90), labels=c("90° W", "0", "90° E")) +
+  scale_y_continuous(breaks=c(-60, -30, 0, 30, 60), labels=c("60°S", "30°S","0°", "30°N","60°N")) +
+  xlab("") + ylab("") 
+p 
+ggsave(paste(path2temp, "/ES.frame.yield.CaseDistributionAll.png",sep=""), width=18, height=10, units="cm")
+
+### plot study locations using fancy ggplot
+world_map <- map_data("world")
+ES.frame.yield <- within(ES.frame.yield, LUI.range.level <- factor(LUI.range.level, levels = c("low-low","low-medium","low-high","medium-medium","medium-high","high-high"))) # resort levels for plotting
+p <- ggplot() +
+  geom_polygon(data=world_map, aes(x=long, y=lat, group=group),fill="white",color="black",lwd=0.2) + 
+  geom_point(data=ES.frame.yield, aes(x=Longitude, y=Latitude, ymin=-55), color="blue", shape=2, size=1) +
+  scale_x_continuous(breaks=c(-90, 0, 90), labels=c("90° W", "0", "90° E")) +
+  scale_y_continuous(breaks=c(-60, -30, 0, 30, 60), labels=c("60°S", "30°S","0°", "30°N","60°N")) +
+  xlab("") + ylab("") +
+  facet_wrap(~LUI.range.level)   
+p 
+ggsave(paste(path2temp, "/ES.frame.yield.CaseDistributionPanel.png",sep=""), width=18, height=10, units="cm")
+
+```
+

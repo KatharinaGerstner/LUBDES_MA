@@ -36,7 +36,7 @@
 ### 02.2. adapt data structure
 ###
 ### 03 03_ImputeMissingData.r
-### 03.1. impute missing data using mice package
+### 03.1. impute missing data
 ###
 ### 04 04_CompileESframe.R
 ### 04.1. Compile ES frame
@@ -45,26 +45,37 @@
 ### 05 05_AddMapDataToESframe.R
 ### 05.1. Intersect studies with global maps of WWF_REALMs Ecoregions, combine to coarser classes
 ### 05.2. Intersect studies with potential NPP
-### 05.3. Intersect studies with gross capital stock in agriculture and agricultural area
-### 05.4. Intersect studies with Global Habitat Heterogeneity, Dissimilarity
-### 05.5. Intersect studies with Land-use history
-### 05.6. Intersect studies with human pressure index
 ###
-### 06 06_DescriptiveStatsOfESFrame.r
-### 06.1 Protocol structure and summary of variables in the ES.frame
-### 06.2 Plot Histograms of all variables in the ES.frame 
-### 06.3 Protocol structure and summary of variables in the ES.frame.noLU
-### 06.4 Plot Histograms of all variables in the ES.frame.noLU 
+### 06 06_DataPreparation4Analysis.R
+### 06a.1. Remove cases with zero variances, pseudo-replicates, redundant LUI.range.level comparisons 
+### 06a.2. remove columns not needed for the analysis, unify names
+### 06a.3 load functions for the data analysis
 ###
-### 07 07_DataAnalysis.R
+### 07 07_DescriptiveStatsOfESFrame.r
+### 07.1 Protocol structure and summary of variables in the ES.frame
+### 07.2 Plot Histograms of all variables in the ES.frame 
+### 07.3. Plot map of studies (full map)
+### 07.4. Plot six maps by intensity classes
+###
+### 08 Run Frequentist/Bayesian Analysis
+### overall structure of the scripts
+### 1. define the model
+### 2. run null model, i.e. grand mean
+### 3. run full model
+### 4. run model selection
+###
+### 08 08a_DataAnalysis.R
 ### 07.1. Prepare data analysis
 ### 07.2. Analysis without moderators
 ### 07.3. Analysis with moderators
 ### 07.4. Analysis with moderators for no LU vs low/medium/high LU
 ###
-### 08.1 08.1_Plot_maps.r
-### 08.1.1. Plot map of studies (full map)
-### 08.1.2. Plot six maps by intensity classes
+### 08 08b BayesianAnalysis
+### 08b.1_BayesianAnalysis_1.R # fixed effects only
+### 08b.2_BayesianAnalysis_2.R # fixed and random effects of study and study-case
+### 08b.3_BayesianAnalysis_3.R # fixed and random effects of study and study-case, and non-independence from relatedness of LUI comparisons within one study-case
+### 08b.4_BMASelect.R # fixed and random effects of study and study-case, and non-independence from relatedness of LUI comparisons within one study-case AND bayesian model selection using DIC
+
 ###
 ### 08.2 08.2_Plot_CatWhiskers.r  
 ### 08.2.1. Plot CatWhisker plots
@@ -141,11 +152,6 @@ source(path2wd %+% "03_ImputeMissingData.r")
 source(path2wd %+% "04_CompileESframe.R")
 source(path2wd %+% "05_AddMapDataToESframe.R")
 
-### Describe and plot the raw data
-#source(path2wd %+% "06.1_DescriptiveStatsOfESframe.r")
-#source(path2wd %+% "06.2_Plot_forest_plots.r")
-#source(path2wd %+% "06.3_Plot_maps.r")
-
 save(data,dataimp,ES.frame,file=path2temp %+% "SavedData.Rdata")
 rm(list=objects()) # empty workspace, keep libraries loaded
 
@@ -160,16 +166,23 @@ path2wd <- set.list[[2]]
 "%+%" <- function(x,y)paste(x,y,sep="")
 source(path2wd %+% "01_load_libraries_and_functions.r")
 load(file=path2temp %+% "SavedData.Rdata")
-source(path2wd %+% "07a_DataPreparation4Analysis.R")
 
-### BAYESIAN ANALYSIS
-source(path2wd %+% "BayesianAnalysis_1.R") # fixed effects only
-source(path2wd %+% "BayesianAnalysis_2.R") # fixed and random effects of study and study-case
-source(path2wd %+% "BayesianAnalysis_3.R") # fixed and random effects of study and study-case, and non-independence from relatedness of LUI comparisons within one study-case
-source(path2wd %+% "BMASelect.R") # fixed and random effects of study and study-case, and non-independence from relatedness of LUI comparisons within one study-case AND bayesian model selection using DIC
+### some additional data preparation steps
+source(path2wd %+% "06_DataPreparation4Analysis.R")
+
+### Describe and plot the raw data
+#source(path2wd %+% "07.1_DescriptiveStatsOfESframe.Rmd")
+source(path2wd %+% "07.2_Plot_forest_plots.r")
 
 ### FREQUENTIST ANALYSIS
-source(path2wd %+% "07_DataAnalysis.R")
+source(path2wd %+% "08a_DataAnalysis.R")
+
+### BAYESIAN ANALYSIS
+source(path2wd %+% "08b.1_BayesianAnalysis_1.R") # fixed effects only
+source(path2wd %+% "08b.2_BayesianAnalysis_2.R") # fixed and random effects of study and study-case
+source(path2wd %+% "08b.3_BayesianAnalysis_3.R") # fixed and random effects of study and study-case, and non-independence from relatedness of LUI comparisons within one study-case
+#source(path2wd %+% "08b.4_BMA_Select.R") # fixed and random effects of study and study-case, and non-independence from relatedness of LUI comparisons within one study-case AND bayesian model selection using DIC
+
 #source(path2wd %+% "08_Plotting.r")
 #source(path2wd %+% "08.2_Plot_CatWhiskers.r")
 source(path2wd %+% "08.4_Plot_model_coeffs.r") # cross plots for LUI range level and forest plots for model coefficients

@@ -1,10 +1,10 @@
-############################################################################
+﻿############################################################################
 ### Purpose of this skript module 06 is to:
 ###
-### 06.1 Protocol structure and summary of variables in the ES.frame
-### 06.2 Plot Histograms of all variables in the ES.frame 
-### 06.3 Protocol structure and summary of variables in the ES.frame.noLU
-### 06.4 Plot Histograms of all variables in the ES.frame.noLU 
+### 07.1 Protocol structure and summary of variables in the ES.frame
+### 07.2 Plot Histograms of all variables in the ES.frame 
+### 07.3 Plot map of studies (full map)
+### 07.4 Plot six maps by intensity classes
 ###
 ### General comments:
 ###
@@ -14,21 +14,26 @@
 setwd(path2temp %+% "/")
 
 ############################################################################
-### 06.1 Protocol structure and summary of variables in the ES.frame
+### 07.1 Protocol structure and summary of variables in the ES.frame
 ############################################################################
 
-sink('str_summary_ESframe.txt')
-str(ES.frame)
-summary(ES.frame)
-
-### explore the issue of dependence
-hist(table(ES.frame$Study.Case),breaks=0.5:6.5)
-ES.frame[duplicated(ES.frame$Study.Case),c("Study.Case", "LUI.range.level")]
+sink('str_summary_ESframe.richness.txt')
+str(ES.frame.richness)
+summary(ES.frame.richness)
 
 ### distribution of LUI ranges among covariables
-with(ES.frame,table(Land.use...land.cover,LUI.range.level))
-with(ES.frame,table(Species.Group,LUI.range.level))
-with(ES.frame,table(Product,LUI.range.level))
+with(ES.frame.richness,table(Species.Group,LUI.range.level))
+with(ES.frame.richness,table(Product,LUI.range.level))
+sink()
+
+sink('str_summary_ESframe.yield.txt')
+str(ES.frame.yield)
+summary(ES.frame.yield)
+
+### distribution of LUI ranges among covariables
+with(ES.frame.yield,table(Species.Group,LUI.range.level))
+with(ES.frame.yield,table(Product,LUI.range.level))
+
 sink()
 
 ############################################################################

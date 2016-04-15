@@ -1,4 +1,4 @@
-############################################################################
+﻿############################################################################
 ### Purpose of this skript module 03 is to:
 ###
 ### 03.1. impute missing sd data using linear regression with means and number of samples
@@ -20,8 +20,9 @@ dataimp$yieldID <- paste(dataimp$Study.ID,dataimp$yield.mean,dataimp$X..of.sampl
 
 ### reduce dataframe, remove duplicates in Study.ID_meanRRs and restrict imputation to non-zero mean and SD cases
 data4imp.richness <- subset(dataimp,!duplicated(dataimp[,"richnessID"]) & dataimp$richness.mean>0 & dataimp$richness.SD>0 & dataimp$X..of.samples.for.BD.measure > 1)
-#data4imp.richness[,c("richness.mean","richness.SD")] <- scale(data4imp.richness[,c("richness.mean","richness.SD")])
 data4imp.yield <- subset(dataimp,!duplicated(dataimp[,"yieldID"]) & dataimp$yield.mean>0 & dataimp$yield.SD>0 & dataimp$X..of.samples.for.YD.measure > 1)
+
+#data4imp.richness[,c("richness.mean","richness.SD")] <- scale(data4imp.richness[,c("richness.mean","richness.SD")])
 #data4imp.yield[,c("yield.mean","yield.SD")] <- scale(data4imp.yield[,c("yield.mean","yield.SD")])
 
 ############################################################################
@@ -66,17 +67,19 @@ jags.data <- list(N.obs = nrow(data4imp.richness), mean = data4imp.richness$rich
 jm <- jags.model(path2temp %+% "imputation.model.Stevens.txt", data = jags.data, n.chains = 3, n.adapt = 1000)
 update(jm, n.iter = 1000) # throw away the initial samples (the so-called “burn-in” phase)
 jm.sample <- jags.samples(jm, variable.names = c("a", "b", "mu","sigma","tau","dev", "resdev"), n.iter = 2000, thin = 2)
-# pdf(path2temp %+% "TracePlot_Imputation_Richness.pdf")
-# sapply(c("a", "b", "mu","tau"),function(x) plot(as.mcmc.list(jm.sample[[x]]),main=paste(x))) # check convergence
-# dev.off()
+pdf(path2temp %+% "TracePlot_Imputation_Richness.pdf")
+sapply(c("a", "b", "mu","tau"),function(x) plot(as.mcmc.list(jm.sample[[x]]),main=paste(x))) # check convergence
+dev.off()
 
 ### plot predictions
 tau.summary <- summary(as.mcmc.list(jm.sample$tau))$statistics
 tau.mean <- tau.summary[,"Mean"]
 sd.mean <- 1/sqrt(tau.mean)
 plot.range <- range(sd.mean,sqrt(jags.data$sd2))
+png(path2temp %+% "MissingDataImputation_Richness.png")
 plot(sd.mean~sqrt(jags.data$sd2), cex = 1, col = "lightgrey", pch = 1,lwd = 2, xlab = "original SD", ylab="predicted SD",xlim=plot.range,ylim=plot.range,main="Richness")
 abline(0,1)
+dev.off()
 
 ### impute 
 data2imp.richness <- dataimp[which(dataimp$richness.SD.is.imputed=="yes"),]
@@ -92,17 +95,19 @@ jags.data <- list(N.obs = nrow(data4imp.yield), mean = data4imp.yield$yield.mean
 jm <- jags.model(path2temp %+% "imputation.model.Stevens.txt", data = jags.data, n.chains = 3, n.adapt = 1000)
 update(jm, n.iter = 1000) # throw away the initial samples (the so-called “burn-in” phase)
 jm.sample <- jags.samples(jm, variable.names = c("a", "b", "mu","sigma","tau","dev", "resdev"), n.iter = 2000, thin = 2)
-# pdf(path2temp %+% "TracePlot_Imputation_Yield.pdf")
-# sapply(c("a", "b", "mu","tau"),function(x) plot(as.mcmc.list(jm.sample[[x]]),main=paste(x))) # check convergence
-# dev.off()
+pdf(path2temp %+% "TracePlot_Imputation_Yield.pdf")
+sapply(c("a", "b", "mu","tau"),function(x) plot(as.mcmc.list(jm.sample[[x]]),main=paste(x))) # check convergence
+dev.off()
 
 ### plot predictions
 tau.summary <- summary(as.mcmc.list(jm.sample$tau))$statistics
 tau.mean <- tau.summary[,"Mean"]
 sd.mean <- 1/sqrt(tau.mean)
 plot.range <- range(sd.mean,sqrt(jags.data$sd2))
+png(path2temp %+% "MissingDataImputation_Yield.png")
 plot(sd.mean~sqrt(jags.data$sd2), cex = 1, col = "lightgrey", pch = 1,lwd = 2, xlab = "original SD", ylab="predicted SD",xlim=plot.range,ylim=plot.range,main="Yield")
 abline(0,1)
+dev.off()
 
 ### impute 
 data2imp.yield <- dataimp[which(dataimp$yield.SD.is.imputed=="yes"),]

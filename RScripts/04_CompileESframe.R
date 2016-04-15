@@ -32,7 +32,6 @@ names(ES.frame) <- c("Study.ID","Case.ID","Low.LUI","High.LUI","Habitat.Type",
 
 for(i in unique(dataimp$study.case)){
   
-  if(i %in% c("30106-Mayer2009_1","30347-Krogmann2008_1")) next
   print(i)
   
   data.temp = subset(dataimp, dataimp$study.case %in% i)

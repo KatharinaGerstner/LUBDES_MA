@@ -11,9 +11,11 @@
 ############################################################################
 
 LUI.range.level = c("low-low","medium-medium","high-high","low-medium","medium-high","low-high")
-
-
-LUI.level.to.plot = LUI.range.level[1]
+x.max <- max(c(ES.frame$Richness.Log.RR+1.96*sqrt(ES.frame$Richness.Log.RR.Var),ES.frame$Yield.Log.RR+1.96*sqrt(ES.frame$Yield.Log.RR.Var)),na.rm=T)
+x.min <- min(c(ES.frame$Richness.Log.RR-1.96*sqrt(ES.frame$Richness.Log.RR.Var),ES.frame$Yield.Log.RR-1.96*sqrt(ES.frame$Yield.Log.RR.Var)),na.rm=T)
+# decide about what the limits should show SD or 95%CI???
+# unify ranges across LUIrangelevels
+# set x-axis limits to c(x.min,x.max)
 
 for(LUI.level.to.plot in LUI.range.level){
   data.to.plot = subset(ES.frame, LUI.range.level %in% LUI.level.to.plot)
@@ -59,7 +61,7 @@ for(LUI.level.to.plot in LUI.range.level){
   
   
   # get axes length to center the plot 
-  max.values = sqrt(max(data.to.plot$RR.value^2,na.rm=TRUE)) + 0.5
+  max.values = max(abs(c(x.max,x.min)))
   
   # create a data is imputed column
   data.to.plot$is.SD.imputed = "no"
@@ -91,7 +93,7 @@ for(LUI.level.to.plot in LUI.range.level){
   plot.forest =
     ggplot(data=data.to.plot) +
     
-    geom_linerange(aes(x=uniqueID,ymin=RR.value	- (1.96*Log.RR.Var), ymax=RR.value	+ (1.96*Log.RR.Var),colour=colouring,alpha=is.SD.imputed,linetype=is.SD.imputed),size=1.5) +
+    geom_linerange(aes(x=uniqueID,ymin=RR.value	- (1.96*sqrt(Log.RR.Var)), ymax=RR.value	+ (1.96*sqrt(Log.RR.Var)),colour=colouring,alpha=is.SD.imputed,linetype=is.SD.imputed),size=1.5) +
     geom_point(aes(x=uniqueID, y=RR.value,colour=colouring),size=5) +
     geom_hline(x=0,linetype ="twodash")  +
     
@@ -109,8 +111,8 @@ for(LUI.level.to.plot in LUI.range.level){
     
     #axes labels
     xlab("Study ID") +
-    ylab("Log Response Ration")+
-    ggtitle(paste("Forest Plot of study case effect sizes\n- ",LUI.level.to.plot)) 
+    ylab("Log Response Ratio")+
+    ggtitle(paste("Forest Plot of study case effect sizes\n ",LUI.level.to.plot)) 
   
   print(plot.forest)
   ggsave(plot.forest, file = paste(c(path2temp, "Forest_plot_",LUI.level.to.plot,".png"), collapse=""), width = 15, height = nrow(data.to.plot) / 5, type = "cairo-png")
