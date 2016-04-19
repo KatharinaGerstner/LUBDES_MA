@@ -10,20 +10,22 @@
 ### Authors: SK, RS ...
 ############################################################################
 
+ES.frame2plot <- subset(ES.frame, !(is.na(Richness.Log.RR.Var)) & Richness.Log.RR.Var>0 & !is.na(Yield.Log.RR.Var) & Yield.Log.RR.Var>0) 
+
 LUI.range.level = c("low-low","medium-medium","high-high","low-medium","medium-high","low-high")
-x.max <- max(c(ES.frame$Richness.Log.RR+1.96*sqrt(ES.frame$Richness.Log.RR.Var),ES.frame$Yield.Log.RR+1.96*sqrt(ES.frame$Yield.Log.RR.Var)),na.rm=T)
-x.min <- min(c(ES.frame$Richness.Log.RR-1.96*sqrt(ES.frame$Richness.Log.RR.Var),ES.frame$Yield.Log.RR-1.96*sqrt(ES.frame$Yield.Log.RR.Var)),na.rm=T)
+x.max <- max(c(ES.frame2plot$Richness.Log.RR+1.96*sqrt(ES.frame2plot$Richness.Log.RR.Var),ES.frame2plot$Yield.Log.RR+1.96*sqrt(ES.frame2plot$Yield.Log.RR.Var)),na.rm=T)
+x.min <- min(c(ES.frame2plot$Richness.Log.RR-1.96*sqrt(ES.frame2plot$Richness.Log.RR.Var),ES.frame2plot$Yield.Log.RR-1.96*sqrt(ES.frame2plot$Yield.Log.RR.Var)),na.rm=T)
 # decide about what the limits should show SD or 95%CI???
 # unify ranges across LUIrangelevels
 # set x-axis limits to c(x.min,x.max)
 
 for(LUI.level.to.plot in LUI.range.level){
-  data.to.plot = subset(ES.frame, LUI.range.level %in% LUI.level.to.plot)
+  data.to.plot = subset(ES.frame2plot, LUI.range.level %in% LUI.level.to.plot)
   data.to.plot = melt(data.to.plot[,c("Study.ID","Case.ID","LUI.range.level","Richness.Log.RR","Richness.Log.RR.Var","Yield.Log.RR","Yield.Log.RR.Var",
                                       "Yield.SD.is.imputed.low","Yield.SD.is.imputed.high", "Richness.SD.is.imputed.low","Richness.SD.is.imputed.high")],
                       id.vars=c("Study.ID","Case.ID","LUI.range.level","Richness.Log.RR.Var","Yield.Log.RR.Var","Yield.SD.is.imputed.low","Yield.SD.is.imputed.high", "Richness.SD.is.imputed.low","Richness.SD.is.imputed.high"),
                       measure.vars=c("Richness.Log.RR", "Yield.Log.RR"))
-  data.to.plot = data.to.plot[order(data.to.plot$value),]
+#  data.to.plot = data.to.plot[order(data.to.plot$value),]
   data.to.plot$Richness.Log.RR.Var[which(data.to.plot$variable %in% "Yield.Log.RR")] =   data.to.plot$Yield.Log.RR.Var[which(data.to.plot$variable %in% "Yield.Log.RR")] 
   data.to.plot = data.to.plot[,-(which(names(data.to.plot) %in% "Yield.Log.RR.Var"))]
   names(data.to.plot)[which(names(data.to.plot) %in% "Richness.Log.RR.Var")] = "Log.RR.Var"
@@ -93,29 +95,29 @@ for(LUI.level.to.plot in LUI.range.level){
   plot.forest =
     ggplot(data=data.to.plot) +
     
-    geom_linerange(aes(x=uniqueID,ymin=RR.value	- (1.96*sqrt(Log.RR.Var)), ymax=RR.value	+ (1.96*sqrt(Log.RR.Var)),colour=colouring,alpha=is.SD.imputed,linetype=is.SD.imputed),size=1.5) +
-    geom_point(aes(x=uniqueID, y=RR.value,colour=colouring),size=5) +
-    geom_hline(x=0,linetype ="twodash")  +
+    geom_segment(aes(y=uniqueID,yend=uniqueID,x=RR.value	- (1.96*sqrt(Log.RR.Var)), xend=RR.value	+ (1.96*sqrt(Log.RR.Var)),colour=colouring,alpha=is.SD.imputed,linetype=is.SD.imputed),size=1.2) +
+    geom_point(aes(y=uniqueID, x=RR.value,colour=colouring),size=3.5) +
+    geom_vline(xintercept=0,linetype ="twodash")  +
     
     #scale manually to get the legend correct
     scale_colour_manual(values=c("#FF6633","grey","#00CC00","grey")) +
-    scale_x_discrete("Study ID",breaks= as.character(data.to.plot$uniqueID),labels=data.to.plot$axes.naming)  +
+    scale_y_discrete("Study ID",breaks= as.character(data.to.plot$uniqueID),labels=data.to.plot$axes.naming)  +
     scale_alpha_discrete(range = c(1,0.4)) + 
     
     #white background + flip 90 degrees
-    theme(axis.ticks.y = element_blank(),panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
+    theme(axis.ticks.x = element_blank(),panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
           panel.background = element_rect(colour = "black", size=1,fill=NA), axis.line = element_line(colour = "black"),
-          axis.text.y = element_text(vjust=1),legend.key.width=unit(3,"line")) +
-    coord_flip(ylim=c(0 - max.values,max.values)) +
-    geom_vline(xintercept=seq(from=0.5, to=nrow(data.to.plot)-0.5,by=2),colour="grey") +
+          axis.text.x = element_text(hjust=1),legend.key.width=unit(3,"line")) +
+#    coord_flip(ylim=c(0 - max.values,max.values)) +
+    geom_hline(yintercept=seq(from=0.5, to=nrow(data.to.plot)-0.5,by=2),colour="grey") +
     
     #axes labels
-    xlab("Study ID") +
-    ylab("Log Response Ratio")+
-    ggtitle(paste("Forest Plot of study case effect sizes\n ",LUI.level.to.plot)) 
+    ylab("Study ID") +
+    xlab("Log Response Ratio")+
+    ggtitle("Forest Plot of study case effect sizes\n" %+% LUI.level.to.plot)
   
   print(plot.forest)
-  ggsave(plot.forest, file = paste(c(path2temp, "Forest_plot_",LUI.level.to.plot,".png"), collapse=""), width = 15, height = nrow(data.to.plot) / 5, type = "cairo-png")
+  ggsave(plot.forest, file = path2temp %+% "Forest_plot_" %+% LUI.level.to.plot %+% ".png", width = 15, height = nrow(data.to.plot) / 5, type = "cairo-png")
   
 }
 

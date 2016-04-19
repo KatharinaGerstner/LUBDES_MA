@@ -13,8 +13,7 @@
 ##########################################################################
 
 ### restrict analysis to study cases with positive variances
-ES.frame.richness <- subset(ES.frame, Richness.Log.RR.Var>0) 
-ES.frame.yield <- subset(ES.frame, Yield.Log.RR.Var>0) 
+ES.frame.richness <- ES.frame.yield <- subset(ES.frame, Richness.Log.RR.Var>0 & Yield.Log.RR.Var>0) 
 
 ### Remove pseudo-replicates
 ES.frame.richness <- ES.frame.richness[!duplicated(ES.frame.richness[,c("Study.ID","Case.ID","LUI.range.level","Species.Group")]),]

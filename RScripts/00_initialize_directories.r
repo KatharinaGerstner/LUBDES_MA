@@ -178,6 +178,8 @@ source(path2wd %+% "07.2_Plot_forest_plots.r")
 source(path2wd %+% "08a_DataAnalysis.R")
 
 ### BAYESIAN ANALYSIS
+
+Nchains = 3; Nadapt=1000; Nstart=2000; Niter=20000; Nthin=5
 source(path2wd %+% "08b.1_BayesianAnalysis_1.R") # fixed effects only
 source(path2wd %+% "08b.2_BayesianAnalysis_2.R") # fixed and random effects of study and study-case
 source(path2wd %+% "08b.3_BayesianAnalysis_3.R") # fixed and random effects of study and study-case, and non-independence from relatedness of LUI comparisons within one study-case

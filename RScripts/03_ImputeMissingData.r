@@ -1,4 +1,4 @@
-﻿############################################################################
+############################################################################
 ### Purpose of this skript module 03 is to:
 ###
 ### 03.1. impute missing sd data using linear regression with means and number of samples
@@ -19,8 +19,8 @@ dataimp$richnessID <- paste(dataimp$Study.ID,dataimp$richness.mean,dataimp$X..of
 dataimp$yieldID <- paste(dataimp$Study.ID,dataimp$yield.mean,dataimp$X..of.samples.for.YD.measure)
 
 ### reduce dataframe, remove duplicates in Study.ID_meanRRs and restrict imputation to non-zero mean and SD cases
-data4imp.richness <- subset(dataimp,!duplicated(dataimp[,"richnessID"]) & dataimp$richness.mean>0 & dataimp$richness.SD>0 & dataimp$X..of.samples.for.BD.measure > 1)
-data4imp.yield <- subset(dataimp,!duplicated(dataimp[,"yieldID"]) & dataimp$yield.mean>0 & dataimp$yield.SD>0 & dataimp$X..of.samples.for.YD.measure > 1)
+data4imp.richness <- subset(dataimp,!duplicated(dataimp[,"richnessID"]) & dataimp$richness.SD>0 & dataimp$X..of.samples.for.BD.measure > 1)
+data4imp.yield <- subset(dataimp,!duplicated(dataimp[,"yieldID"]) & dataimp$yield.SD>0 & dataimp$X..of.samples.for.YD.measure > 1)
 
 #data4imp.richness[,c("richness.mean","richness.SD")] <- scale(data4imp.richness[,c("richness.mean","richness.SD")])
 #data4imp.yield[,c("yield.mean","yield.SD")] <- scale(data4imp.yield[,c("yield.mean","yield.SD")])
