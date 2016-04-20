@@ -176,7 +176,7 @@ dataimp$yield.SD[which(dataimp$yield.SD.is.imputed=="yes")] <- data2imp.yield$yi
 # ############################################################################
 # jags.data <- list(N.obs = nrow(data4imp.yield), mean = data4imp.yield$yield.mean, log.sd=log(data4imp.yield$yield.SD),n.sample=data4imp.yield$X..of.samples.for.YD.measure)
 # 
-# jm <- jags.model("imputation.model.txt", data = jags.data, n.chains = 3, n.adapt = 1000)
+# jm <- jags.model(path2temp %+% "imputation.model.txt", data = jags.data, n.chains = 3, n.adapt = 1000)
 # params <- c("beta0", "beta1", "beta2","mu","tau", "prediction")
 # update(jm, n.iter = 1000) # throw away the initial samples (the so-called “burn-in” phase)
 # jm.sample <- jags.samples(jm, variable.names = params, n.iter = 2000, thin = 2)
@@ -199,7 +199,6 @@ dataimp$yield.SD[which(dataimp$yield.SD.is.imputed=="yes")] <- data2imp.yield$yi
 # # p.yield <- ggplot(dataimp) +
 # #   geom_point(aes(x=yield.mean, y=log(yield.SD), color=yield.SD.is.imputed, size=4, alpha=.5)) 
 # # print(p.yield)
-
 
 
 ### Resterampe

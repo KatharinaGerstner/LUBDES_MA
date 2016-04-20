@@ -15,11 +15,11 @@ run.analysis4select <- function(model.name,X.matrix,ES.df){
   
   print(str(dat2fit))
   
-  model.fit <- jags.model(data=dat2fit, file=path2temp %+% "bayesianMA_3.txt", 
-                          n.chains = 3, n.adapt=1000) # n.adapt for sampling the parameter space and conclude on one value
-  update(model.fit, n.iter=1000) # start from this value
-  dic.samps <- dic.samples(model.fit, n.iter=10000,thin=4)
-  DIC <- round(mean(dic.samps[["deviance"]]) + mean(dic.samps[["penalty"]]),digits=3) # model deviance information criterion "deviance"=mean deviance, "penalty" = 2*pD
+  model.fit <- jags.model(data=dat2fit, file=path2temp %+% BayesianModel %+% ".txt", 
+                          n.chains = Nchains, n.adapt=Nadapt) # n.adapt for sampling the parameter space and conclude on one value
+  update(model.fit, n.iter=Nstart) # start from this value
+  dic.samps <- dic.samples(model.fit, n.iter=Niter,thin=Nthin)
+  DIC <- round(mean(dic.samps[["deviance"]] + dic.samps[["penalty"]]),digits=3) # model deviance information criterion "deviance"=mean deviance, "penalty" = 2*pD
   return(list(model.fit=model.fit,DIC=DIC))
 }
 

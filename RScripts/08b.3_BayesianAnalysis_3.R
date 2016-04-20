@@ -49,7 +49,7 @@ cat("model{
 run.analysis <- function(model.name,X.matrix,ES.df,long.names){
 
   print("Prepare the data")
-  dat2fit.richness <- list(
+  dat2fit <- list(
     Log.RR=ES.df$Log.RR, 
     Log.RR.Var=ES.df$Log.RR.Var,
     N.obs = nrow(ES.df),
@@ -59,54 +59,49 @@ run.analysis <- function(model.name,X.matrix,ES.df,long.names){
     X = X.matrix,
     N.colX = ncol(X.matrix))
   
-  print(str(dat2fit.richness))
+  print(str(dat2fit))
 
   print("Fit the model")
-  params2monitor <- c("beta", "sigma.a","sigma.v","bpvalue", "predictions","residuals")
-  model.fit <- jags.model(data=dat2fit.richness, file=path2temp %+% "bayesianMA_3.txt", 
-                          n.chains = 3, n.adapt=1000) # n.adapt for sampling the parameter space and conclude on one value
-  update(model.fit, n.iter=2000) # start from this value
+  params2monitor <- c("beta", "sigma.a","sigma.v","SSR","SSR.new","bpvalue", "predictions","residuals")
+  model.fit <- jags.model(data=dat2fit, file=path2temp %+% "bayesianMA_3.txt", 
+                          n.chains = Nchains, n.adapt=Nadapt) # n.adapt for sampling the parameter space and conclude on one value
+  update(model.fit, n.iter=Nstart) # start from this value
   samps <- vector("list",length(params2monitor))
   names(samps) <- params2monitor
   for(i in params2monitor){
     print("Monitor " %+% i)
-    samps[[i]] <- coda.samples(model.fit, i, n.iter=10000, thin=4) # coda controls the chains, saves the samples  
+    samps[[i]] <- coda.samples(model.fit, i, n.iter=Niter, thin=Nthin) # coda controls the chains, saves the samples  
   }
 
   print("Estimate goodness-of-fit")
-  R2.GH <- round(1- mean(unlist(lapply(samps[["residuals"]], function(x) apply(x,1,var)))) / var(dat2fit.richness$Log.RR),digits=3) # cf. Gelman, A. & Hill, J. (2007) Data Analysis Using Regression and Multilevel/Hierarchical Models, p. 473ff
+  # R² for multilevel models cf. Gelman, A. & Hill, J. (2007) Data Analysis Using Regression and Multilevel/Hierarchical Models, p. 474 eqn (21.8)
+  var.res.sims <- matrix(unlist(lapply(samps[["residuals"]], function(x) apply(x,1,var))),byrow=F,ncol=3)
+  var.res <- numeric(length=dat2fit$N.obs)
+  var.Log.RR <- numeric(length=dat2fit$N.obs)
+  for(k in 1:dat2fit$N.colX){
+    var.res.k <- var.res.sims[X.matrix[,k]==1,]
+    var.res[k] <- var(apply(var.res.k,1,mean)) # average over 3 MCMC chains and calculate the variance
+    var.Log.RR[k] <- var(dat2fit$Log.RR[X.matrix[,k]==1])
+  }
+  R2.GH <- 1-mean(var.res)/mean(var.Log.RR)
   var.f <- mean(unlist(lapply(samps[["predictions"]], function(x) apply(x,1,var))))
   sigma.a <- mean(unlist(lapply(samps[["sigma.a"]], function(x) apply(x,1,mean))))
   sigma.v <- mean(unlist(lapply(samps[["sigma.v"]], function(x) apply(x,1,mean))))
   R2.LMM <- round(var.f / (var.f + sigma.a^2 + sigma.v^2),digits=3) # cf. Nakagawa & Schielzeth (2012) eqn 26  
-  dic.samps <- dic.samples(model.fit, n.iter=10000,thin=4)
-  DIC <- round(mean(dic.samps[["deviance"]]) + mean(dic.samps[["penalty"]]),digits=3) # model deviance information criterion "deviance"=mean deviance, "penalty" = 2*pD
+  dic.samps <- dic.samples(model.fit, n.iter=Niter,thin=Nthin)
+  DIC <- round(mean(dic.samps[["deviance"]] + dic.samps[["penalty"]]),digits=3) # model deviance information criterion "deviance"=mean deviance, "penalty" = 2*pD
   bpvalue <- round(mean(unlist(samps[["bpvalue"]])),digits=3)
   goodness.of.fit <- data.frame(DIC=DIC,R2.LMM=R2.LMM,R2.GH,bpvalue=bpvalue)
   print(xtable(goodness.of.fit), type = "html", file=path2temp %+% model.name %+% "goodness.of.fit.doc") # save the HTML table as a .doc file
   save(model.name,model.fit,samps,goodness.of.fit, file=path2temp %+% model.name %+% ".Rdata")
   
-  print("Check convergence")
-  pdf(file=path2temp %+% "TracePlot" %+% model.name %+% ".pdf")
-  for(i in c("beta", "sigma.a", "sigma.v")){
-    plot(samps[[i]]) ### check convergence visually
-  }  
-  dev.off()
-
-  print("Posterior predictive check")
-  residuals.mean <- summary(samps[["residuals"]])$statistics[,"Mean"]
-  predictions.mean <- summary(samps[["predictions"]])$statistics[,"Mean"]
-  png(path2temp %+% "residuals_vs_predictions_" %+% model.name %+% ".png")
-  plot(residuals.mean~predictions.mean, main=paste(model.name)) # should look like the sky at night
-  dev.off()
-
   print("Caterpillar plot")
-  if(dat2fit.richness$N.colX==1){
+  if(dat2fit$N.colX==1){
     beta.mean <- summary(samps[["beta"]])$statistics["Mean"]
     beta.lb <- summary(samps[["beta"]])$quantiles["2.5%"]
     beta.ub <- summary(samps[["beta"]])$quantiles["97.5%"]    
   }
-  if(dat2fit.richness$N.colX>1) {
+  if(dat2fit$N.colX>1) {
     beta.mean <- summary(samps[["beta"]])$statistics[,"Mean"]
     beta.lb <- summary(samps[["beta"]])$quantiles[,"2.5%"]
     beta.ub <- summary(samps[["beta"]])$quantiles[,"97.5%"]    
@@ -118,15 +113,14 @@ run.analysis <- function(model.name,X.matrix,ES.df,long.names){
     geom_segment(aes(x = beta.lb, xend = beta.ub, y = sortvar, yend = sortvar)) +
     geom_vline(xintercept = 0, linetype = 2) + 
     scale_x_continuous(labels=trans_format("exp",comma_format(digits=3))) +
-    scale_y_discrete(labels=long.names) +
+    scale_y_discrete(labels=rev(long.names)) +
     xlab("Response Ratio") + ylab("") +
     theme(axis.title = element_text(size = rel(1.5)), axis.text = element_text(size = rel(1.5)),legend.text=element_text(size = rel(1.5)),legend.title=element_text(size = rel(1.5)))
   print(p)
   ggsave(p, file = path2temp %+% "CaterpillarPlot_" %+% model.name %+% ".png", width = 20, height = 8, type = "cairo-png")
   
   # save table of fixed effects as a .doc file
-  dat.table <- xtable(plot.dat)
-  print(dat.table, type = "html", file=path2temp %+% "model.output_" %+% model.name %+% ".doc") 
+  print(xtable(plot.dat,digits=4), type = "html", file=path2temp %+% "model.output" %+% model.name %+% ".doc") 
   
   return(list(model.name=model.name,model.fit=model.fit,samps=samps))
 }
@@ -135,7 +129,6 @@ fit.tab <- data.frame(DIC=numeric(length=8),R2LMM=numeric(length=8),R2GH=numeric
 
 Richness.MA.model <- Yield.MA.model <- vector("list", length=4)
 names(Richness.MA.model) <- names(Yield.MA.model) <- c("None","LUI","Full","Select")
-
 
 ### 1. within-study intensification
 model.name <- "Richness_GrandMean3"
@@ -195,6 +188,7 @@ fit.tab[7,] <- goodness.of.fit
 rownames(fit.tab)[7] <- model.name
 
 ### Model
+BayesianModel <- "bayesianMA_3"
 source(path2wd %+% "08b.4_BMA_Select.R")
 model.name <- "Richness_SelectModel3"
 X.matrix <- as.data.frame(model.matrix(as.formula(paste("Log.RR~",paste(reduced.model.richness$terms,collapse="+"),-1)), data=ES.frame.richness))
@@ -210,4 +204,4 @@ Yield.MA.model[["Select"]] <- run.analysis(model.name,X.matrix,ES.frame.yield,lo
 fit.tab[8,] <- goodness.of.fit
 rownames(fit.tab)[8] <- model.name
 
-print(xtable(fit.tab), type = "html", file=path2temp %+% "fit.tab.doc") 
+write.csv(fit.tab, file=path2temp %+% "fit.tab3.csv") 

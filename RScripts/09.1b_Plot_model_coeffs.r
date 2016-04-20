@@ -109,39 +109,32 @@ for(i in newdat$level){
 dev.off()
 
 par(..., no.readonly = T)
+
 ############################################################################
 ### 08.4.3 Plot model coefficients + 95%CI (cf. Fig1 in Newbold et al. 2015)
 ############################################################################
+cat.plot.select <- function(response,samps,X.matrix){
+  beta <- data.frame(coeffs=colnames(X.matrix))
+  beta$means <- summary(samps[["beta"]])$statistics[,"Mean"]
+  beta$lb <- summary(samps[["beta"]])$quantiles[,"2.5%"]
+  beta$ub <- summary(samps[["beta"]])$quantiles[,"97.5%"]    
+  
+  plot <- ggplot(data=beta) +
+    geom_point(aes(x=beta$coeffs, y=means), size=4) +
+    geom_pointrange(aes(x=beta$coeffs, y=means, ymin=lb, ymax=ub)) +
+    geom_hline(aes(yintercept=0), linetype="twodash") +
+    scale_y_continuous(labels=trans_format("exp",comma_format(digits=2))) + 
+    scale_x_discrete(limits=beta$coeffs) +
+    theme(axis.text.x = element_text(angle = 30, hjust = 1)) +
+    ylab("RR (" %+% response %+% ")") + xlab("")
+  
+  ggsave(plot, file = path2temp %+% "CatPlotSelect" %+% response %+% ".png", width = 20, height = 8, type = "cairo-png")
+}
+  
 samps <- Richness.MA.model[["Select"]]$samps
 X.matrix <- as.data.frame(model.matrix(as.formula(paste("Log.RR~",paste(reduced.model.richness$terms,collapse="+"),-1)), data=ES.frame.richness))
-n.coeff <- length(reduced.model.richness$terms)
-beta <- data.frame(coeffs=colnames(X.matrix))
-beta$richness.mean <- summary(samps[["beta"]])$statistics[,"Mean"]
-beta$richness.lb <- summary(samps[["beta"]])$quantiles[,"2.5%"]
-beta$richness.ub <- summary(samps[["beta"]])$quantiles[,"97.5%"]    
+cat.plot.select("species richness", samps, X.matrix)
 
-ggplot(data=beta) +
-  geom_point(aes(x=beta$coeffs, y=richness.mean), size=4) +
-  geom_pointrange(aes(x=beta$coeffs, y=richness.mean, ymin=richness.lb, ymax=richness.ub)) +
-  geom_hline(aes(yintercept=0), linetype="twodash") +
-  scale_y_continuous(labels=trans_format("exp",comma_format(digits=2))) + 
-  scale_x_discrete(limits=beta$coeffs) +
-  theme(axis.text.x = element_text(angle = 30, hjust = 1)) +
-  ylab("RR (Species Richness)") + xlab("")
-  
 samps <- Yield.MA.model[["Select"]]$samps
 X.matrix <- as.data.frame(model.matrix(as.formula(paste("Log.RR~",paste(reduced.model.yield$terms,collapse="+"),-1)), data=ES.frame.yield))
-n.coeff <- length(reduced.model.yield$terms)
-beta <- data.frame(coeffs=colnames(X.matrix))
-beta$yield.mean <- summary(samps[["beta"]])$statistics[,"Mean"]
-beta$yield.lb <- summary(samps[["beta"]])$quantiles[,"2.5%"]
-beta$yield.ub <- summary(samps[["beta"]])$quantiles[,"97.5%"]    
-
-ggplot(data=beta) +
-  geom_point(aes(x=beta$coeffs, y=yield.mean), size=4) +
-  geom_pointrange(aes(x=beta$coeffs, y=yield.mean, ymin=yield.lb, ymax=yield.ub)) +
-  geom_hline(aes(yintercept=0), linetype="twodash") +
-  scale_y_continuous(labels=trans_format("exp",comma_format(digits=2))) + 
-  scale_x_discrete(limits=beta$coeffs) +
-  theme(axis.text.x = element_text(angle = 30, hjust = 1)) +
-  ylab("RR (Yield)") + xlab("")
+cat.plot.select("yield", samps, X.matrix)
