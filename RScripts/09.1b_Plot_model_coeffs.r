@@ -7,6 +7,44 @@
 ### Authors: KG, ...
 ############################################################################
 
+model.list <- data.frame(complexity_level=c(rep(1,8),rep(2,8),rep(3,8)), model.name = apply(expand.grid(c("Richness","Yield"),c("GrandMean","LUI.range.level","FullModel","SelectModel"),1:3),1,function(x) paste0(x,collapse="_")), preds = rep(c("1", "1","LUI.range.level-1", "LUI.range.level-1","LUI.range.level * (Species.Group + Product + BIOME)", "LUI.range.level * (Product + BIOME)","",""),3))
+model.list <- model.list[-which(model.list$model.name %in% c("Richness_SelectModel_1","Richness_SelectModel_2","Yield_SelectModel_1","Yield_SelectModel_2")),]
+n.models <- nrow(model.list)
+fit.tab <- data.frame(DIC=numeric(length=n.models),R2LMM=numeric(length=n.models),R2GH=numeric(length=n.models),bpvalue=numeric(length=n.models))
+MA.model <- vector("list", length=n.models)
+
+for (model.name in model.list$model.name){
+  
+  load(path2temp %+% model.name %+% ".Rdata") 
+  print("Caterpillar plot")
+if(length(samps[["beta"]])==1){
+  beta.mean <- summary(samps[["beta"]])$statistics["Mean"]
+  beta.lb <- summary(samps[["beta"]])$quantiles["2.5%"]
+  beta.ub <- summary(samps[["beta"]])$quantiles["97.5%"]    
+}
+if(length(samps[["beta"]])>1) {
+  beta.mean <- summary(samps[["beta"]])$statistics[,"Mean"]
+  beta.lb <- summary(samps[["beta"]])$quantiles[,"2.5%"]
+  beta.ub <- summary(samps[["beta"]])$quantiles[,"97.5%"]    
+}
+
+plot.dat <- data.frame(beta.mean, beta.lb, beta.ub, long.names, sortvar=letters[length(beta.mean):1])
+p <- ggplot(data = plot.dat, aes(x = beta.mean, y = sortvar)) + 
+  geom_point() + 
+  geom_segment(aes(x = beta.lb, xend = beta.ub, y = sortvar, yend = sortvar)) +
+  geom_vline(xintercept = 0, linetype = 2) + 
+  scale_x_continuous(labels=trans_format("exp",comma_format(digits=3))) +
+  scale_y_discrete(labels=rev(long.names)) +
+  xlab("Response Ratio") + ylab("") +
+  theme(axis.title = element_text(size = rel(1.5)), axis.text = element_text(size = rel(1.5)),legend.text=element_text(size = rel(1.5)),legend.title=element_text(size = rel(1.5)))
+print(p)
+ggsave(p, file = path2temp %+% "CaterpillarPlot_" %+% model.name %+% ".png", width = 20, height = 8, type = "cairo-png")
+
+# save table of fixed effects as a .doc file
+print(xtable(plot.dat,digits=4), type = "html", file=path2temp %+% "model.output" %+% model.name %+% ".doc") 
+
+
+
 ############################################################################
 ### 08.4.1. plot cross diagrams
 ############################################################################
@@ -118,13 +156,14 @@ cat.plot.select <- function(response,samps,X.matrix){
   beta$means <- summary(samps[["beta"]])$statistics[,"Mean"]
   beta$lb <- summary(samps[["beta"]])$quantiles[,"2.5%"]
   beta$ub <- summary(samps[["beta"]])$quantiles[,"97.5%"]    
+  beta$sortvar <- letters[nrow(beta):1]
   
   plot <- ggplot(data=beta) +
-    geom_point(aes(x=beta$coeffs, y=means), size=4) +
+    geom_point(aes(x=beta$sortvar, y=means), size=4) +
     geom_pointrange(aes(x=beta$coeffs, y=means, ymin=lb, ymax=ub)) +
     geom_hline(aes(yintercept=0), linetype="twodash") +
     scale_y_continuous(labels=trans_format("exp",comma_format(digits=2))) + 
-    scale_x_discrete(limits=beta$coeffs) +
+    scale_x_discrete(limits=rev(beta$coeffs)) +
     theme(axis.text.x = element_text(angle = 30, hjust = 1)) +
     ylab("RR (" %+% response %+% ")") + xlab("")
   

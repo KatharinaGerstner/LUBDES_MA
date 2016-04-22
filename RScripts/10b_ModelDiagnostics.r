@@ -14,7 +14,7 @@ for(model in model.list){
   print(model$model.name)  
   print("Check convergence")
   pdf(file=path2temp %+% "TracePlot" %+% model$model.name %+% ".pdf")
-  for(i in c("beta", "sigma.a", "sigma.v")){
+  for(i in c("beta", "sigma.within","sigma.a", "sigma.v")){
     if(!(i %in% names(model$samps))) next
     plot(model$samps[[i]]) ### check convergence visually
   }  

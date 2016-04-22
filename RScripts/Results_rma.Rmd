@@ -1,0 +1,35 @@
+---
+title: "LUBDES RMA Analysis - Results"
+author: "Katharina Gerstner"
+date: "Tuesday, April 24, 2016"
+output: html_document
+---
+
+# Meta-Analysis
+
+## The effects of covariables
+Fit statistics for richness
+```{r}
+fit.tab <- read.csv("C:/Users/hoppek/Documents/temp/fit.tab.richness.csv")
+library(knitr)
+kable(fit.tab, digits=4)
+```
+
+Fit statistics for yield
+```{r}
+fit.tab <- read.csv("C:/Users/hoppek/Documents/temp/fit.tab.yield.csv")
+library(knitr)
+kable(fit.tab, digits=4)
+```
+
+### Figures to be published
+![](C:\Users\hoppek\Documents\temp\CrossPlot_LUI_rma.png)
+![](C:\Users\hoppek\Documents\temp\ForestPlot_LUI_Panel_rma.png)
+
+#### Selected model for species richness
+![](C:\Users\hoppek\Documents\temp\CatPlotSelect_richness_rma.png)
+
+#### Selected model for yield
+![](C:\Users\hoppek\Documents\temp\CatPlotSelect_yield_rma.png)
+
+

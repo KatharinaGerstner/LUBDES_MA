@@ -87,6 +87,9 @@ nm1 <- (data2imp.richness$X..of.samples.for.BD.measure-1)
 data2imp.richness$richness.SD <- sqrt(dgamma(nm1/2,nm1/(2*mean(jm.sample$sigma)^2)))
 dataimp$richness.SD[which(dataimp$richness.SD.is.imputed=="yes")] <- data2imp.richness$richness.SD[match(dataimp$richnessID[which(dataimp$richness.SD.is.imputed=="yes")],data2imp.richness$richnessID)]
 
+ggplot(data=dataimp)+
+  geom_point(aes(x=richness.mean, y=richness.SD, color=factor(richness.SD.is.imputed)), size=4)
+
 ############################################################################
 ### imputation for yield SD
 ############################################################################
@@ -115,7 +118,10 @@ nm1 <- (data2imp.yield$X..of.samples.for.YD.measure-1)
 data2imp.yield$yield.SD <- sqrt(dgamma(nm1/2,nm1/(2*mean(jm.sample$sigma)^2)))
 dataimp$yield.SD[which(dataimp$yield.SD.is.imputed=="yes")] <- data2imp.yield$yield.SD[match(dataimp$yieldID[which(dataimp$yield.SD.is.imputed=="yes")],data2imp.yield$yieldID)]
 
-# ###########
+ggplot(data=dataimp)+
+  geom_point(aes(x=yield.mean, y=yield.SD, color=factor(yield.SD.is.imputed)), size=4)
+
+# # ###########
 # cat("
 #       model
 #       {
@@ -142,10 +148,10 @@ dataimp$yield.SD[which(dataimp$yield.SD.is.imputed=="yes")] <- data2imp.yield$yi
 #         resdev <- sum(dev[])
 #       }
 #   ", file=path2temp %+% "imputation.model.txt")
-# 
-# ############################################################################
-# ### imputation for richness SD
-# ############################################################################
+
+############################################################################
+### imputation for richness SD
+############################################################################
 # jags.data <- list(N.obs = nrow(data4imp.richness), mean = data4imp.richness$richness.mean, log.sd=log(data4imp.richness$richness.SD),n.sample=data4imp.richness$X..of.samples.for.BD.measure)
 # 
 # jm <- jags.model(path2temp %+% "imputation.model.txt", data = jags.data, n.chains = 3, n.adapt = 1000)
@@ -158,7 +164,8 @@ dataimp$yield.SD[which(dataimp$yield.SD.is.imputed=="yes")] <- data2imp.yield$yi
 # predictions <- summary(as.mcmc.list(jm.sample$prediction))
 # prds <- data.frame(mean = data4imp.richness$richness.mean, predictions$statistics)
 # prds <- prds[order(prds[, 1]), ]
-# plot(log(data4imp.richness$richness.SD), prds$Mean, cex = 1, col = "lightgrey", pch = 1,lwd = 2, xlab = "original log(SD)", ylab="predicted log(SD)",xlim=range(c(range(log(data4imp.richness$richness.SD)),range(prds$Mean))),ylim=range(c(range(log(data4imp.richness$richness.SD)),range(prds$Mean))),main="Richness")
+# plot(data4imp.richness$richness.SD, exp(prds$Mean), cex = 1, col = "lightgrey", pch = 1,lwd = 2, xlab = "original SD", ylab="predicted SD",xlim=range(c(range(data4imp.richness$richness.SD),range(exp(prds$Mean)))),ylim=range(c(range(data4imp.richness$richness.SD),range(exp(prds$Mean)))),main="Richness")
+# abline(0,1)
 # # points(prds[, 1], prds[, 4], pch=1, lwd = 2, col = "red")
 # # legend("bottomright",legend=c("original Data", "Imputed Data"),col=c("lightgrey","red"),pch=1,lwd=2,title="Richness")
 # 
@@ -186,20 +193,21 @@ dataimp$yield.SD[which(dataimp$yield.SD.is.imputed=="yes")] <- data2imp.yield$yi
 # predictions <- summary(as.mcmc.list(jm.sample$prediction))
 # prds <- data.frame(mean = data4imp.yield$yield.mean, predictions$statistics)
 # prds <- prds[order(prds[, 1]), ]
-# plot(log(data4imp.yield$yield.SD), prds$Mean, cex = 1, col = "lightgrey", pch = 1,lwd = 2, xlab = "original log(SD)", ylab="predicted log(SD)",xlim=range(c(range(log(data4imp.yield$yield.SD)),range(prds$Mean))),ylim=range(c(range(log(data4imp.yield$yield.SD)),range(prds$Mean))),main="Yield")
+# plot(data4imp.yield$yield.SD, exp(prds$Mean), cex = 1, col = "lightgrey", pch = 1,lwd = 2, xlab = "original SD", ylab="predicted SD",xlim=range(c(range(data4imp.yield$yield.SD),range(exp(prds$Mean)))),ylim=range(c(range(data4imp.yield$yield.SD),range(exp(prds$Mean)))),main="Yield")
+# abline(0,1)
 # # plot(log(yield.SD) ~ yield.mean, cex = 1, col = "lightgrey", pch = 1,lwd=2, ylab = "log(SD)", xlab = "Scaled Mean",data=data4imp.yield)
 # # points(prds[, 1], prds[, 2], pch=1, lwd = 2, col = "red")
 # # legend("bottomright",legend=c("original Data", "Imputed Data"),col=c("lightgrey","red"),pch=1,lwd=2,title="Yield")
 # 
-# ### impute 
-# data2imp.yield <- dataimp[which(dataimp$yield.SD.is.imputed=="yes"),]
-# data2imp.yield$yield.SD <- exp(mean(jm.sample[["beta0"]]) + mean(jm.sample[["beta1"]])*scale(data2imp.yield$yield.mean) + mean(jm.sample[["beta2"]])*scale(data2imp.yield$X..of.samples.for.YD.measure))
-# dataimp$yield.SD[which(dataimp$yield.SD.is.imputed=="yes")] <- data2imp.yield$yield.SD[match(dataimp$yieldID[which(dataimp$yield.SD.is.imputed=="yes")],data2imp.yield$yieldID)]
+# # ### impute 
+# # data2imp.yield <- dataimp[which(dataimp$yield.SD.is.imputed=="yes"),]
+# # data2imp.yield$yield.SD <- exp(mean(jm.sample[["beta0"]]) + mean(jm.sample[["beta1"]])*scale(data2imp.yield$yield.mean) + mean(jm.sample[["beta2"]])*scale(data2imp.yield$X..of.samples.for.YD.measure))
+# # dataimp$yield.SD[which(dataimp$yield.SD.is.imputed=="yes")] <- data2imp.yield$yield.SD[match(dataimp$yieldID[which(dataimp$yield.SD.is.imputed=="yes")],data2imp.yield$yieldID)]
+# # 
+# # # p.yield <- ggplot(dataimp) +
+# # #   geom_point(aes(x=yield.mean, y=log(yield.SD), color=yield.SD.is.imputed, size=4, alpha=.5)) 
+# # # print(p.yield)
 # 
-# # p.yield <- ggplot(dataimp) +
-# #   geom_point(aes(x=yield.mean, y=log(yield.SD), color=yield.SD.is.imputed, size=4, alpha=.5)) 
-# # print(p.yield)
-
 
 ### Resterampe
 

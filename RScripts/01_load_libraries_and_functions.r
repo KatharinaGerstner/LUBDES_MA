@@ -83,7 +83,7 @@ table.sort = function(dat.low,dat.high,low,high){
 
 RMASelect <- function(model){
   
-  allTerms <- trim(strsplit(paste(model$call$mods)[2],'[+]')[[1]])[-1]
+  allTerms <- trim(strsplit(paste(model$call$mods)[2],'[+]')[[1]])
   
   currentModel <- model
   currentTerms <- allTerms
@@ -99,6 +99,7 @@ RMASelect <- function(model){
     t<-1
     for (term in currentTerms){
       
+      print(term)
       if(length(unlist(grep(term,currentTerms)))>1) next # to avoid excluding main effects when interactions are still in
       newModel<-update(currentModel,paste("~.-",term,sep=""))
       
@@ -118,9 +119,9 @@ RMASelect <- function(model){
     
     stats <- data.frame(var2drop,LRTs,dfs,Ps)
     if(length(which(stats$var2drop==""))>0) stats <- stats[-which(stats$var2drop==""),]
-    #    print(stats)
+    print(stats)
     
-    dropTerm <- stats$var2drop[which(stats$LRTs==max(stats$LRTs))]
+    dropTerm <- stats$var2drop[which(stats$LRTs==min(stats$LRTs))]
     if (length(dropTerm)==0) break
     print(dropTerm)
     
@@ -142,7 +143,7 @@ RMASelect <- function(model){
   }
   
   #  return(list(model=currentModel,stats.list=stats.list))
-  return(model=currentModel)
+  return(currentModel)
   
 }
 

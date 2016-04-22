@@ -1,7 +1,7 @@
 ---
 title: "LUBDES Bayesian Data Analysis - Methods"
 author: "Katharina Gerstner"
-date: "Thursday, March 17, 2016"
+date: "Thursday, April 21, 2016"
 output: html_document
 ---
 
@@ -11,6 +11,10 @@ Synthesize available data to obtain a global perspective on how changes in land 
 # METHODS  
 ## IMPUTATION
 We imputed missing data on standard deviations using the bayesian approach of Stevens (2011). This model estimated a population standard deviation $\sigma$. The square of missing sample standard deviations were drawn from a gamma distribution with parametes $\alpha=\frac{n-1}{2}$ and $\beta=\frac{n-1}{2\cdot\overline{\sigma}^2}$.
+
+Goodness-of-fit of the imputation model: Observed vs predicted standard deviation.
+![](C:\Users\hoppek\Documents\temp\MissingDataImputation_Richness.png)
+![](C:\Users\hoppek\Documents\temp\MissingDataImputation_Yield.png)
 
 ## META-ANALYSIS
 We used a bayesian model approach as it is much better at dealing with multiple sources of uncertainty and can deal with multi-level models. 
@@ -22,60 +26,37 @@ df <- data.frame(study=c("A","A","A","A","A","B","B"),case=c(1,1,1,2,2,1,1),LUI.
 df
 ```
 
-So we have a hierarchical dependence structure with 3 levels:  
-- study  
-- study-case  
-- study-case-LUI  
-
 # MODEL  
 ```{r, eval=F}
 Log.RR[i] ~ N(mu[i], Log.RR.var[i]+error[i])
 mu[i] = X[i,] %*% beta
-error[i] = a[i] + v[Study.Case[i]]
+error[i] = a[i] + v[Study.Case[i]] + w[i]
 ```
 
-where $a$ and $v$ are normally distributed around zero with variance $\sigma_a^2 \cdot A$ and $\sigma_v^2 \cdot I$. The matrix $A$ represents the covariance matrix between related study-cases with zeroes on the diagonal. We set the hierarchical covariance to $A_{i,j}=0.5 \cdot \sigma_i \cdot \sigma_j$ if $i, j$ belong to the same study-case and share a control or treatment, because the effect size $i$ determines 50% of the effect size $j$ and vice versa.
+where $a$, $v$ and $w$ are normally distributed around zero with variance $\sigma_a^2 \cdot A$, $\sigma_v^2 \cdot I$ and $\sigma_w^2 \cdot I$. The matrix $A$ represents the covariance matrix between related study-cases with zeroes on the diagonal. We set the hierarchical covariance to $A_{i,j}=0.5 \cdot \sigma_i \cdot \sigma_j$ if $i, j$ belong to the same study-case and share a control or treatment, because the effect size $i$ determines 50% of the effect size $j$ and vice versa. Priors for the $\sigma$'s have been chosen from a uniform distribution with limits 0 and 100.
+
+For the analysis we used the R-package rjags For each run we used 3 MCMC chains, Nadapt=1000; Nstart=2000; Niter=50000; Nthin=5
+
 
 We analyzed models of  
 1. Grand mean  
 2. LUI ranges  
 3. LUI ranges and interactions with species group, product, biome and performed variable selection using the deviance information criterion DIC which is comparable with AIC but suitable for hierarchical models where the number of parameters is not so clearly defined (Gelman & Hill 2006, p. 525f).
 
-# CONVERGENCE
-We visually checked for convergence of Markov Chains using trace plots. 
+# MODEL DIAGNOSTICS
+- Convergence: We visually checked for convergence of Markov Chains using trace plots. 
+- Posterior predictive check using bayesian p-value
+- Residuals vs. predictions
 
 # GOODNESS-OF-FIT  
-Residual Plot
-```{r, eval=F}
-residuals.mean <- samps.statistics[grep("residuals",rownames(samps.statistics)),"Mean"]
-predictions.mean <- samps.statistics[grep("predictions",rownames(samps.statistics)),"Mean"]
-plot(residuals.mean~predictions.mean, main=paste(model.name)) # should look like the sky at night
-```
-
-Bayesian p-value 
-```{r, eval=F}
-for(i in 1:N.obs){
-  residuals[i] <- Log.RR[i]-mu[i] # Residuals for observed data
-  predictions[i] <- mu[i] # Predicted values
-  sq.res[i] <- pow(residuals[i],2) # Squared residuals for observed data
-  Log.RR.tau[i] <- pow(Log.RR.Var[i],-2)
-  Log.RR.new[i] ~ dnorm(mu[i],Log.RR.tau[i]) # one new data set at each MCMC iteration
-  sq.res.new[i] <- pow(Log.RR.new[i]-predictions[i],2) # Squared residuals for new data
-}    
-SSR <- sum(sq.res) # Sum of squared residuals for actual data set
-SSR.new <- sum(sq.res.new) # Sum of squared residuals for new data set
-test <- step(SSR-SSR.new) # Test whether new data set more extreme, step() tests for x ≥ 0
-bpvalue <- mean(test) # Bayesian p-value
-```
-
-# HETEROGENEITY
-```{r, eval=F}
-Q_T <- t(Log.RR.tau^2)*sq.res # cf. Koricheva et al., p111
-I.sq <- max(c(100*(Q_T-(N.obs-1))/Q_T,0)) #  This metric quantifies the heterogeneity by comparing Q_T to its expected value under the assumption of homogeneity and can be interpreted as the percentage of total heterogeneity that can be attributed to between-study variance.
-``` 
+We calculated various statistics to compare models among each other:
+- $DIC$, i.e. the deviance information criterion which is comparable with AIC but suitable for hierarchical models where the number of parameters is not so clearly defined (Gelman & Hill 2006, p. 525f)
+- $R^2_{LMM(m)}$, i.e. the marginal $R^2$ and represents the amount of explained variance by the fixed effects only (Nakagawa & Schielzeth 2012)
+- $R^2_{LMM(c)}$, i.e. the conditional $R^2$ and represents the amount of explained variance by the fixed and random effects (Nakagawa & Schielzeth 2012)
+- $R^2_{GH}$, i.e. the averaged amount of explained varianced for each level (Gelman & Hill 2007, p. 474)
 
 # PUBLICATION BIAS
-
+TO DO!
 
 
 
