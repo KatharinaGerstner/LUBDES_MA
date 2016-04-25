@@ -30,7 +30,6 @@ predictorMatrix1 <- matrix(c(rep(0,4),rep(0,4),c(0,1,0,1),rep(0,4)),
 nchains <- 10
 
 ### impute richness
-pdf(path2temp %+% "imputation_mice.pdf")
 temp <- complete(mice(data2imp.richness, predictorMatrix=predictorMatrix1,
                       method = "pmm",
                       m=nchains, maxit =20, printFlag = FALSE), 
@@ -43,7 +42,8 @@ p.richness <- ggplot(dataimp) +
   geom_point(aes(x=richness.mean, y=richness.SD, color=richness.SD.is.imputed, size=4, alpha=.5)) +
   xlim(range(dataimp$richness.mean[dataimp$richness.SD.is.imputed=="yes"],na.rm=T)) +
   ylim(range(dataimp$richness.SD[dataimp$richness.SD.is.imputed=="yes"],na.rm=T))
-p.richness
+print(p.richness)
+ggsave(p.richness, file=path2temp %+% "imputation_mice_richness.png")
 
 temp.richness <- data.frame(matrix(temp$richness.SD, ncol=nchains, byrow=F))
 temp.richness$mean <- rowMeans(temp.richness[,1:nchains])
@@ -62,7 +62,8 @@ p.yield <- ggplot(dataimp) +
   geom_point(aes(x=yield.mean, y=yield.SD, color=yield.SD.is.imputed, size=4, alpha=.5)) +
   xlim(range(dataimp$yield.mean[dataimp$yield.SD.is.imputed=="yes"],na.rm=T)) +
   ylim(range(dataimp$yield.SD[dataimp$yield.SD.is.imputed=="yes"],na.rm=T))
-p.yield
+print(p.yield)
+ggsave(p.yield, file=path2temp %+% "imputation_mice_yield.png")
 
 ### check variability of imputation
 temp.yield <- data.frame(matrix(temp$yield.SD, ncol=nchains, byrow=F))
@@ -76,7 +77,6 @@ hist(temp.yield$mean)
 hist(temp.yield$sd)
 par(mfrow=c(1,1))
 
-dev.off()
 
 ### remove temporary variables
 rm(data2imp.richness, data2imp.yield, temp, temp.yield, temp.richness, predictorMatrix1, nchains)

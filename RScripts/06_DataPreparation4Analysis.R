@@ -63,27 +63,4 @@ ES.frame.yield$Study.Case <- factor(ES.frame.yield$Study.Case)[drop=T] # drop un
 print(xtable(ES.frame.richness), type = "html", file=path2temp %+% "ES.frame.richness.doc") # save the HTML table as a .doc file
 print(xtable(ES.frame.yield), type = "html", file=path2temp %+% "ES.frame.yield.doc") # save the HTML table as a .doc file
 
-###########################################################################
-### 07a.3 load functions for the data analysis
-###########################################################################
-
-### Covariance Matrix of Log.RRs with zero on the diagonal
-### cov(X,Y) <- cor(X,Y)*sqrt(Var(X))*sqrt(Var(Y))
-### cor(X,Y) is 0.5 if LUI.range.level within the same study-case share a control or treatment
-M.matrix <- function(dat){
-  M <- diag(nrow(dat))
-  diag(M) <- 0
-  ## calculate covariance for cases with (low-medium, medium-high), (low-low, low-medium, low-high), (medium-medium, medium- high), (high-high, medium-high)
-  for(x in unique(dat$Study.Case)){
-    sub.rows <- which(dat$Study.Case==x)
-    for (i in sub.rows){
-      for(j in sub.rows){
-        if(paste(dat$LUI.range.level[i],dat$LUI.range.level[j],sep="_") %in% c("low-medium_medium-high","low-medium_medium-medium", "low-medium_medium-high","low-low_low-medium","low-low_low-high","medium-medium_medium-high","high-high_medium-high")){
-          M[i,j] <- M[j,i] <- 0.5 * sqrt(dat$Log.RR.Var[i] * dat$Log.RR.Var[j])
-        }
-      }  
-    }
-  }
-  return(M)
-}  
 
