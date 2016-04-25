@@ -1,0 +1,51 @@
+---
+title: "LUBDES RMA Analysis - Methods"
+author: "Katharina Gerstner"
+date: "Thursday, April 24, 2016"
+output: html_document
+---
+
+# AIMS  
+Synthesize available data to obtain a global perspective on how changes in land use intensity affect both biodiversity (focusing on species richness, because this is what most studies record) and production (measured as biomass per unit area per year, or the nearest available proxy, and their trade-off). 
+
+# DATA STRUCTURE  
+```{r}
+df <- data.frame(study=c("A","A","A","A","A","B","B"),case=c(1,1,1,2,2,1,1),LUI.range=c("low-low","low-medium","low-high","low-medium","low-high","low-medium","low-high"), species.group=c(rep("plants",3),rep("mammals",2), rep("plants",2)), Log.RR=rnorm(7),Log.RR.Var=abs(rnorm(7,mean=0,sd=0.5)))
+df
+```
+
+# METHODS  
+## IMPUTATION
+We imputed missing data on standard deviations using the function mice in the R-package mice (version 2.22). Therefore, we used predictive mean matching (which is based on Rubin, D.B. (1987). Multiple imputation for nonresponse in surveys. New York: 'Wiley.) and fit the relationship between means of RRs, standard deviation and number of samples to the complete data and predict the missing data based on this relationship.
+
+Goodness-of-fit of the imputation model: Observed vs predicted standard deviation.
+![](C:\Users\hoppek\Documents\temp\imputation_mice_richness.png)
+![](C:\Users\hoppek\Documents\temp\imputation_mice_yield.png)
+
+## META-ANALYSIS
+We fit linear mixed effects model using rma.mv::metafor (version 1.9-8) and accounted for (1) non-independence of observations from related sources, i.e. the same study-case, by specifying random=1|study.case, and (2) non-independence from relatedness of LUI comparisons when multiple comparisons within one study-case are used by specifying covariances as $cov(X,Y) = cor(X,Y)*sqrt(Var(X))*sqrt(Var(Y))$ where $cor(X,Y) set to 0.5$ if X,Y belong to the same study-case and share a control or treatment, because the effect size $X$ determines 50$\%$ of the effect size $Y$ and vice versa.
+
+We analyzed models of  
+1. Grand mean  
+2. LUI ranges  
+3. LUI ranges and interactions with species group, product, biome and performed variable selection using the AIC.
+
+# MODEL DIAGNOSTICS
+- Test for normality of residuals
+- Test for influential data points
+- Publication bias using Egger's regression and the trim-and-fill method
+
+# GOODNESS-OF-FIT  
+We evaluated the goodness-of-fit using various statistics provided by the metafor-package:
+- restricted log-likelihood,
+- deviance,
+- AIC,
+- BIC,
+- AICc.
+Note that variance components in the model (e.g., τ² in random/mixed-effects models) are counted as additional parameters in the calculation of the AIC, BIC, and AICc. Also, the fixed effects are counted as parameters in the calculation of the AIC, BIC, and AICc even when using REML estimation. 
+However, for mixed-effects models the number of parameters is not so clearly defined but depend on the amount of pooling (Gelman & Hill 2006, p. 525f). Hence, statistics might be misleading.
+
+# Uncertainty analysis
+Imputation is the greatest source of uncertainty which we can control for. For the analysis we used the mean of multiple imputation. We repeated the analysis using each single imputation and calculated the uncertainty of our results with respect to imputation.
+
+
