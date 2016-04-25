@@ -223,7 +223,7 @@ for (model.name in model.list$model.name[19:20]){
   if (model.name == "Yield_SelectModel_3"){
     X.matrix <- as.data.frame(model.matrix(as.formula(paste("Log.RR~",paste(reduced.model.yield$terms,collapse="+"))), data=ES.df))
   }
-  long.names <- ifelse(grep("GrandMean",model.name),"Grand Mean",colnames(X.matrix))
+  long.names <- ifelse(length(grep("GrandMean",model.name))==1,"Grand Mean",colnames(X.matrix))
   bayesMA(BayesianModel)
   load(path2temp %+% model.name %+% ".Rdata")
   fit.tab[row.select,] <- goodness.of.fit

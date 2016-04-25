@@ -176,17 +176,13 @@ source(path2wd %+% "06_DataPreparation4Analysis.R")
 ### FREQUENTIST ANALYSIS
 source(path2wd %+% "08a_DataAnalysis.R")
 source(path2wd %+% "09.1_Plot_model_coeffs.r") # cross plots for LUI range level and forest plots for model 
-source(path2wd %+% "10b_ModelDiagnostics.R") # not yet working
+source(path2wd %+% "10_ModelDiagnostics.R") # not yet working
 
 ### BAYESIAN ANALYSIS
 Nchains = 3; Nadapt=1000; Nstart=2000; Niter=20000; Nthin=5
-source(path2wd %+% "08b_BayesianAnalysis_complete.R") # runs all three separate analyses and sources 08b.4_BMA_Select.r
-# source(path2wd %+% "08b.1_BayesianAnalysis_1.R") # fixed effects only
-# source(path2wd %+% "08b.2_BayesianAnalysis_2.R") # fixed and random effects of study and study-case
-# source(path2wd %+% "08b.3_BayesianAnalysis_3.R") # fixed and random effects of study and study-case, and non-independence from relatedness of LUI comparisons within one study-case
-#source(path2wd %+% "08b.4_BMA_Select.R") # fixed and random effects of study and study-case, and non-independence from relatedness of LUI comparisons within one study-case AND bayesian model selection using DIC
+source(path2wd %+% "08b_BayesianAnalysis_complete.R") # runs all three separate analyses and sources 08b.4_BMA_Select.r for bayesian model selection using DIC
 
 source(path2wd %+% "09.1.b_Plot_model_coeffs.r") # cross plots for LUI range level and forest plots for model coefficients
-source(path2wd %+% "10b_ModelDiagnostics.R") # 
+source(path2wd %+% "10b_ModelDiagnostics.R") # check convergence of MCMC chains, posterior predictve checks, i.e. plot bayesian p-value and residuals vs predictions
 #source(path2wd %+% "11_UncertaintyAnalysis.R") # not yet working
 
