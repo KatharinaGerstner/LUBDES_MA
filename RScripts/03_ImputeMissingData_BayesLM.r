@@ -1,7 +1,7 @@
 ############################################################################
 ### Purpose of this skript module 03 is to:
 ###
-### 03.1. impute missing sd data using linear regression with means and number of samples
+### 03.1. impute missing sd data using bayesian linear regression with means and number of samples following Stevens (2011) Pharmaceutical Statistics
 ### 
 ### General comments:
 ### 

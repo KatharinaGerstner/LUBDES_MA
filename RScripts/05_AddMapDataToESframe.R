@@ -55,6 +55,9 @@ ES.frame$BIOME[(ES.frame$BIOME %in% c("Temperate Grasslands, Savannas and Shrubl
 ES.frame$BIOME[(ES.frame$BIOME=="NA")]<-NA
 ES.frame$BIOME <- factor(ES.frame$BIOME)
 
+setwd(path2wd)
+rm(realms_extract,ecoregions)
+
 ### for ES.frame.noLU
 # extract ecoregions
 # if(nrow(ES.frame.noLU) >0){
@@ -119,7 +122,6 @@ ES.frame$BIOME <- factor(ES.frame$BIOME)
 #   ES.frame.noLU$start.agr.use <- ifelse(ES.frame.noLU$time.since.first.use >= 500,"old","young")
 #   ES.frame.noLU$start.agr.use[is.na(ES.frame.noLU$start.agr.use)] <- "not yet used"
 # }
-setwd(path2wd)
 
 
 ############################################################################
@@ -198,7 +200,6 @@ setwd(path2wd)
 # 
 # 
 
-
 ############################################################################
 ### 05.4. Intersect studies with Global Habitat Heterogeneity, Dissimilarity
 ############################################################################
@@ -218,7 +219,6 @@ setwd(path2wd)
 # 
 # ES.frame.noLU$habitat_dissimilarity<-extract(habitat_dissimilarity,lonlat.noLU, buffer=10000, fun=mean) # consider a buffer of radius=10km² around each dot)
 # 
-
 
 ############################################################################
 ### 05.3. Intersect studies with gross capital stock in agriculture
@@ -284,8 +284,6 @@ setwd(path2wd)
 # 
 # ES.frame$globcover<-extract(globcover.rc,lonlat, buffer=50000, fun=mean) # consider a buffer of radius=50km² around each dot)
 # 
-
-
 
 ## climate zones
 # if (file.exists("1976-2000_GIS.zip")==FALSE){

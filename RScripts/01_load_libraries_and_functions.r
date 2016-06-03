@@ -29,7 +29,8 @@ needed_libs <- c("devtools",# needed for library googlesheets
                  "countrycode",# convert FAO country IDs to ISO3
                  "VennDiagram",
                  "reshape2",
-                 "rjags", # for running bayesian models
+#                 "rjags", # for running bayesian models
+                 "knitr", # for knitting .Rmd-documents
                  "xtable"  # for saving tables as .doc
 )
 usePackage <- function(p) {
@@ -104,6 +105,9 @@ M.matrix <- function(dat){
   return(M)
 }  
 
+###########################################################################
+### Model selection based on likelihood-ratio test
+###########################################################################
 RMASelect <- function(model){
   
   allTerms <- trim(strsplit(paste(model$call$mods)[2],'[+]')[[1]])
@@ -122,10 +126,13 @@ RMASelect <- function(model){
     t<-1
     for (term in currentTerms){
       
-      print(term)
+#      print(term)
       if(length(unlist(grep(term,currentTerms)))>1) next # to avoid excluding main effects when interactions are still in
-      newModel<-update(currentModel,paste("~.-",term,sep=""))
-      
+      newModel <- try(update(currentModel,paste("~.-",term,sep="")),silent=T)
+      if(inherits(newModel, "try-error")){
+        newModel <- update(currentModel,paste("~.-",term,sep=""),control=list(optimizer="optim", optmethod="BFGS"))     
+      }
+        
       an <- anova(currentModel,newModel)
       #       print(term)
       #       print(an)
@@ -148,7 +155,10 @@ RMASelect <- function(model){
     if (length(dropTerm)==0) break
     print(dropTerm)
     
-    currentModel <- update(currentModel,paste("~.-",dropTerm,sep=""))
+    currentModel <- try(update(currentModel,paste("~.-",term,sep="")),silent=T)
+    if(inherits(currentModel, "try-error")){
+      currentModel <- update(currentModel,paste("~.-",term,sep=""),control=list(optimizer="optim", optmethod="BFGS"))     
+    }
     currentTerms <- currentTerms[-which(currentTerms==dropTerm)]
     
     stats.list[[i]] <- stats

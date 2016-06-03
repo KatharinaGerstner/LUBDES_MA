@@ -1,6 +1,23 @@
-#### Bayesian model setup
+############################################################################
+### Purpose of this skript module 08b is to:
+###
+### 08 08b BayesianAnalysis
+### 08b.1. Bayesian analysis of fixed effects only
+### 08b.2. Bayesian analysis of fixed and random effects of study and study-case
+### 08b.3. Bayesian analysis of fixed and random effects of study and study-case, and non-independence from relatedness of LUI comparisons within one study-case
+### 08b.4. run model selection using BIC: 08b.4_BMASelect.R for fixed and random effects of study and study-case, and non-independence from relatedness of LUI comparisons within one study-case AND bayesian model selection using DIC
+### General comments:
+### * 
+###
+### Authors: KG ...
+############################################################################
+
+############################################################################
+### Bayesian model setup
+############################################################################
 
 ## define the models
+### 08b.1. Bayesian analysis of fixed effects only
 cat("model{
   ### 1. priors 
     # fixed effects
@@ -35,6 +52,7 @@ cat("model{
     bpvalue <- mean(test) # Bayesian p-value, cf. Kery (2010) Introduction to WinBUGS for ecologists, p106ff 
   }",file=path2temp %+% "bayesianMA_1.txt")
 
+### 08b.2. Bayesian analysis of fixed and random effects of study and study-case
 cat("model{
   ### 1. priors 
   # study-case-specific effects 
@@ -74,6 +92,7 @@ cat("model{
   bpvalue <- mean(test) # Bayesian p-value, cf. Kery (2010) Introduction to WinBUGS for ecologists, p106ff 
 }",file=path2temp %+% "bayesianMA_2.txt")
 
+### 08b.3. Bayesian analysis of fixed and random effects of study and study-case, and non-independence from relatedness of LUI comparisons within one study-case
 cat("model{
   ### 1. priors 
     # study-case-specific effects 
@@ -118,7 +137,9 @@ cat("model{
     bpvalue <- mean(test) # Bayesian p-value, cf. Kery (2010) Introduction to WinBUGS for ecologists, p106ff 
     }",file=path2temp %+% "bayesianMA_3.txt")
 
+############################################################################
 ### function for calling 
+############################################################################
 
 bayesMA <- function(BayesianModel){
   dat2fit <- NULL
@@ -173,7 +194,7 @@ bayesMA <- function(BayesianModel){
   }
   
   print("Estimate goodness-of-fit")
-  # R² for multilevel models cf. Gelman, A. & Hill, J. (2007) Data Analysis Using Regression and Multilevel/Hierarchical Models, p. 474 eqn (21.8)
+  # R? for multilevel models cf. Gelman, A. & Hill, J. (2007) Data Analysis Using Regression and Multilevel/Hierarchical Models, p. 474 eqn (21.8)
   var.res.sims <- matrix(unlist(lapply(samps[["residuals"]], function(x) apply(x,1,var))),byrow=F,ncol=3)
   var.res <- numeric(length=dat2fit$N.obs)
   var.Log.RR <- numeric(length=dat2fit$N.obs)
@@ -208,8 +229,13 @@ model.list <- data.frame(complexity_level=c(rep(1,8),rep(2,8),rep(3,8)), model.n
 model.list <- model.list[-which(model.list$model.name %in% c("Richness_SelectModel_1","Richness_SelectModel_2","Yield_SelectModel_1","Yield_SelectModel_2")),]
 n.models <- nrow(model.list)
 fit.tab <- data.frame(DIC=numeric(length=n.models),R2.LMM.m=numeric(length=n.models),R2.LMM.c=numeric(length=n.models),R2GH=numeric(length=n.models),bpvalue=numeric(length=n.models))
+
+### 08b.4. run model selection using BIC: 08b.4_BMASelect.R for fixed and random effects of study and study-case, and non-independence from relatedness of LUI comparisons within one study-case AND bayesian model selection using DIC
 source(path2wd %+% "08b.4_BMA_Select.R")
 
+############################################################################
+### extract fit statistics
+############################################################################
 for (model.name in model.list$model.name[19:20]){
   row.select <- which(model.list$model.name==model.name)
   print(model.name)

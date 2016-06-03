@@ -1,7 +1,7 @@
 ############################################################################
 ### Purpose of this skript module 09 is to:
 ###
-### 09.1. model diagnostics
+### 10.1. model diagnostics
 ###
 ### General comments:
 ###
@@ -18,7 +18,7 @@ mods.list <- c("None","LUI","Full","Select")
 for(mods in mods.list){
   
   pdf(path2temp %+% mods %+% ".pdf")
-  ### relationship residuals vs model fit, non-linear?, homogeneity of variances? 
+  ### 10.1. relationship residuals vs model fit, non-linear?, homogeneity of variances? 
   ### residuals against fitted values, 
   plot(rstandard(Richness.MA.model[[mods]])$z~fitted(Richness.MA.model[[mods]]), xlab="Fitted values", ylab="Standardized Residuals", main="Residuals vs. Fitted")
   abline(h=0,lty="dashed")
@@ -27,7 +27,7 @@ for(mods in mods.list){
   plot(sqrt(abs(rstandard(Richness.MA.model[[mods]])$z))~fitted(Richness.MA.model[[mods]]), xlab="Fitted values", ylab=expression(sqrt("Standardized Residuals")), main="Scale-Location")
   abline(h=0,lty="dashed")
   
-  ### normality of resiuals
+  ### 10.2. normality of resiuals
   hist(residuals(Richness.MA.model[[mods]]))
   # test the assumption of a normal distribution of the residuals
   # H0: data is drawn from a normal distribution, reject if p<0.05
@@ -37,7 +37,7 @@ for(mods in mods.list){
   qqnorm(y=residuals(Richness.MA.model[[mods]]))
   qqline(y=residuals(Richness.MA.model[[mods]]))
   
-  ### influential points
+  ### 10.3. influential points
   ### a plot of Cook's distances against leverage/(1-leverage). 
   # influence(Richness.MA.model[[mods]]) is not yet implemented in metafor for rma.mv objects. TO DO: Ask Wolfgang Viechtbauer whether implementation is planned or if he can suggest some workaround.
   # an alternative approach from http://people.stern.nyu.edu/jsimonof/classes/2301/pdf/diagnost.pdf
@@ -49,7 +49,7 @@ for(mods in mods.list){
   plot(rstandard(Richness.MA.model[[mods]])$z~h,xlab="Leverage",ylab="Standardized Residuals", main="Residuals vs. Leverage")
   #contour(x.seq,y.seq,D) # not working
   
-  ### publication bias
+  ### 10.4. publication bias
   # Egger's regression test (regtest() function),
   # the trim and fill method (trimfill() function),
   

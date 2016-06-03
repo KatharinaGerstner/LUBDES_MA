@@ -1,29 +1,56 @@
 ---
 title: "LUBDES RMA Analysis - Results"
 author: "Katharina Gerstner"
-date: "Tuesday, April 24, 2016"
-output: html_document
+date: "`r Sys.Date()`"
+output: word_document
 ---
+
+```{r, include=FALSE}
+path2temp <- "C:/Users/hoppek/Documents/temp/"
+library(knitr)
+"%+%" <- function(x,y)paste(x,y,sep="")
+
+```
 
 # Meta-Analysis
 
-## The effects of covariables
-Fit statistics for richness
+## The effect of imputation
+### Comparison of fit statistics
+- The absolute fit statistics are not comparable across models based on different imputations. Relative, however, the models show the same patterns: Lower AIC of LUI model compared to the grand mean model, lowest AIC for the full (=select) model: 
+
 ```{r}
-fit.tab <- read.csv("C:/Users/hoppek/Documents/temp/fit.tab.richness.csv")
-library(knitr)
-kable(fit.tab, digits=4)
+### BASED ON MEAN OF IMPUTATION
+# Fit statistics for species richness
+kable(read.csv(path2temp %+% "fit.tab.richness.csv"), digits=3)
+
+# Fit statistics for yield
+kable(read.csv(path2temp %+% "fit.tab.yield.csv"), digits=3)
+
+### MULTIPLE IMPUTATION
+# Fit statistics for species richness
+kable(read.csv(path2temp %+% "ModelsAvgImp_fit.tab.richness.csv"), digits=3)
+
+# Fit statistics for yield
+kable(read.csv(path2temp %+% "ModelsAvgImp_fit.tab.yield.csv"), digits=3)
+
 ```
 
-Fit statistics for yield
-```{r}
-fit.tab <- read.csv("C:/Users/hoppek/Documents/temp/fit.tab.yield.csv")
-library(knitr)
-kable(fit.tab, digits=4)
-```
+### Comparison of parameter estimates
+- The more covariables the less (relative) differences in parameter estimates caused by imputation. 
+- Partly huge differences in parameter estimates between the two approaches:  
+
+Species Richness                                                             
+![](C:\Users\hoppek\Documents\temp\MeanImp_vs_ModelsAvgImp_None_Richness.png)
+![](C:\Users\hoppek\Documents\temp\MeanImp_vs_ModelsAvgImp_LUI_Richness.png) 
+![](C:\Users\hoppek\Documents\temp\MeanImp_vs_ModelsAvgImp_Full_Richness.png)
+
+Yield
+![](C:\Users\hoppek\Documents\temp\MeanImp_vs_ModelsAvgImp_None_Yield.png)
+![](C:\Users\hoppek\Documents\temp\MeanImp_vs_ModelsAvgImp_LUI_Yield.png) 
+![](C:\Users\hoppek\Documents\temp\MeanImp_vs_ModelsAvgImp_Full_Yield.png)
 
 ### Figures to be published
-![](C:\Users\hoppek\Documents\temp\CrossPlot_LUI_rma.png)
+![](C:\Users\hoppek\Documents\temp\CrossPlot_modelavg_LUI_rma.png.png)
 ![](C:\Users\hoppek\Documents\temp\ForestPlot_LUI_Panel_rma.png)
 
 #### Selected model for species richness

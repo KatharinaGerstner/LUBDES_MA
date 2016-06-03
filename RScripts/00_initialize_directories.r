@@ -35,8 +35,11 @@
 ### 02.1. load data directly from google docs
 ### 02.2. adapt data structure
 ###
-### 03 03_ImputeMissingData.r
-### 03.1. impute missing data
+### 03 03_ImputeMissingData_mice_mean.r
+### 03.1. impute missing data using the mice package and the mean of 10 imputation chains
+###
+### ### 03 03_ImputeMissingData_mice_BayesLM.r
+### ### 03.1. impute missing sd data using bayesian linear regression with means and number of samples following Stevens (2011) Pharmaceutical Statistics
 ###
 ### 04 04_CompileESframe.R
 ### 04.1. Compile ES frame
@@ -44,25 +47,17 @@
 ###
 ### 05 05_AddMapDataToESframe.R
 ### 05.1. Intersect studies with global maps of WWF_REALMs Ecoregions, combine to coarser classes
-### 05.2. Intersect studies with potential NPP
 ###
 ### 06 06_DataPreparation4Analysis.R
-### 06a.1. Remove cases with zero variances, pseudo-replicates, redundant LUI.range.level comparisons 
-### 06a.2. remove columns not needed for the analysis, unify names
-### 06a.3 load functions for the data analysis
+### 06.1. Remove cases with zero variances, pseudo-replicates, redundant LUI.range.level comparisons 
+### 06.2. remove columns not needed for the analysis, unify names
+### 06.2. save rawdata as table in a word doc
 ###
-### 07 07_DescriptiveStatsOfESFrame.r
-### 07.1 Protocol structure and summary of variables in the ES.frame
-### 07.2 Plot Histograms of all variables in the ES.frame 
-### 07.3. Plot map of studies (full map)
-### 07.4. Plot six maps by intensity classes
-###
-### 08 Run Frequentist/Bayesian Analysis
-### overall structure of the scripts
-### 1. define the model
-### 2. run null model, i.e. grand mean
-### 3. run full model
-### 4. run model selection
+### 07 07.1_DescriptiveStatsOfESFrame.Rmd
+### 07.1. Protocol structure and summary of variables in the ES.frames for richness and yield
+### 07.2. Plot Histograms of all variables in the ES.frame 
+### 07.3. Plot map of studies
+### 07.4. Forest Plots of study.cases per LUI.range.level
 ###
 ### 08 08a_DataAnalysis.R
 ### 07.1. Prepare data analysis
@@ -70,22 +65,33 @@
 ### 07.3. Analysis with moderators
 ### 07.4. Analysis with moderators for no LU vs low/medium/high LU
 ###
-### 08 08b BayesianAnalysis
-### 08b.1_BayesianAnalysis_1.R # fixed effects only
-### 08b.2_BayesianAnalysis_2.R # fixed and random effects of study and study-case
-### 08b.3_BayesianAnalysis_3.R # fixed and random effects of study and study-case, and non-independence from relatedness of LUI comparisons within one study-case
-### 08b.4_BMASelect.R # fixed and random effects of study and study-case, and non-independence from relatedness of LUI comparisons within one study-case AND bayesian model selection using DIC
+### ### 08 08b BayesianAnalysis_complete.r
+### ### 08b.1. Bayesian analysis of fixed effects only
+### ### 08b.2. Bayesian analysis of fixed and random effects of study and study-case
+### ### 08b.3. Bayesian analysis of fixed and random effects of study and study-case, and non-independence from relatedness of LUI comparisons within one study-case
+### ### 08b.4. run model selection using BIC: 08b.4_BMASelect.R for fixed and random effects of study and study-case, and non-independence from relatedness of LUI comparisons within one study-case AND bayesian model selection using DIC
+###
+### 09 09.1_Plot_model_coeffs.r
+### 09.1. plot model parameter estimates
+### 09.1.1. plot cross diagrams
+### 09.1.2. plot Panel for LUIrangelevel
+### 09.1.3. Plot model coeeficients + SE relative to the intercept (cf. Fig1 in Newbold et al. 2015)
+### 
+### ### 09 09.1b_Plot_model_coeffs.r # for bayesian analysis
+### ### 09.1b. plot model parameter estimates
+### ### 09.1.1. plot cross diagrams
+### ### 09.1.2. plot Panel for LUIrangelevel
+### ### 09.1.3. Plot model coefficients + SE relative to the intercept (cf. Fig1 in Newbold et al. 2015)
 
+### 10 10_ModelDiagnostics.r
+### 10.1. relationship residuals vs model fit, non-linear?, homogeneity of variances? 
+### 10.2. normality of resiuals
+### 10.3. influential points
+### 10.4. publication bias
 ###
-### 08.2 08.2_Plot_CatWhiskers.r  
-### 08.2.1. Plot CatWhisker plots
-###
-### 08.3 08.3_Plot_forest_plots.r
-### 08.3.1. plot forest plots for each LUI-comparison class
-###
-### 09 09_ModelDiagnostics.r
-###
-### 10 10_UncertaintyAnalysis.R
+### ### 10 10b_ModelDiagnostics.r # for bayesian analysis
+### ### 10b.1. model diagnostics, i.e. convergence check and posterior predictive check
+### ### 10b.2. model performances, i.e. residuals vs predictions
 ###
 ### Authors: MB, KG, ...
 ############################################################################
@@ -148,7 +154,7 @@ source(path2wd %+% "01_load_libraries_and_functions.r")
 source(path2wd %+% "02_load_table_directly_from_google.R")
 
 ### Compile raw data
-source(path2wd %+% "03_ImputeMissingData_mice.r")
+source(path2wd %+% "03_ImputeMissingData_mice_mean.r")
 source(path2wd %+% "04_CompileESframe.R")
 source(path2wd %+% "05_AddMapDataToESframe.R")
 
@@ -171,18 +177,17 @@ load(file=path2temp %+% "SavedData.Rdata")
 source(path2wd %+% "06_DataPreparation4Analysis.R")
 
 ### Describe and plot the raw data
-#source(path2wd %+% "07.1_DescriptiveStatsOfESframe.Rmd") # summary statistics, plot histograms of responses and covariables, plot maps of study location, plot forest plots for each Study.Case-LUI.range.level combination
+knit(path2wd %+% "07.1_DescriptiveStatsOfESframe.Rmd") # summary statistics, plot histograms of responses and covariables, plot maps of study location, plot forest plots for each Study.Case-LUI.range.level combination
 
 ### FREQUENTIST ANALYSIS
 source(path2wd %+% "08a_DataAnalysis.R")
 source(path2wd %+% "09.1_Plot_model_coeffs.r") # cross plots for LUI range level and forest plots for model 
 source(path2wd %+% "10_ModelDiagnostics.R") # not yet working
 
-### BAYESIAN ANALYSIS
-Nchains = 3; Nadapt=1000; Nstart=2000; Niter=20000; Nthin=5
-source(path2wd %+% "08b_BayesianAnalysis_complete.R") # runs all three separate analyses and sources 08b.4_BMA_Select.r for bayesian model selection using DIC
-
-source(path2wd %+% "09.1.b_Plot_model_coeffs.r") # cross plots for LUI range level and forest plots for model coefficients
-source(path2wd %+% "10b_ModelDiagnostics.R") # check convergence of MCMC chains, posterior predictve checks, i.e. plot bayesian p-value and residuals vs predictions
-#source(path2wd %+% "11_UncertaintyAnalysis.R") # not yet working
+# ### BAYESIAN ANALYSIS
+# Nchains = 3; Nadapt=1000; Nstart=2000; Niter=20000; Nthin=5
+# source(path2wd %+% "08b_BayesianAnalysis_complete.R") # runs all three separate analyses and sources 08b.4_BMA_Select.r for bayesian model selection using DIC
+# 
+# source(path2wd %+% "09.1.b_Plot_model_coeffs.r") # cross plots for LUI range level and forest plots for model coefficients
+# source(path2wd %+% "10b_ModelDiagnostics.R") # check convergence of MCMC chains, posterior predictve checks, i.e. plot bayesian p-value and residuals vs predictions
 

@@ -1,8 +1,8 @@
 ############################################################################
-### Purpose of this skript module 09 is to:
+### Purpose of this skript module 10b is to:
 ###
-### 09.1. model diagnostics
-### 09.2. model performances
+### 10b.1. model diagnostics, i.e. convergence check and posterior predictive check
+### 10b.2. model performances, i.e. residuals vs predictions
 ###
 ### General comments:
 ###
@@ -21,9 +21,7 @@ for (model.name in model.list$model.name){
   
   load(path2temp %+% model.name %+% ".Rdata") 
   
-  print("Fit statsístics")
-  
-  
+  print("Fit statistics")
   
   print("Check convergence")
   pdf(file=path2temp %+% "TracePlot" %+% model$model.name %+% ".pdf")

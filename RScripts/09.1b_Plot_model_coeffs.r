@@ -1,10 +1,13 @@
 ############################################################################
-### Purpose of this skript module 08.4 is to:
+### Purpose of this skript module 09.1b is to:
 ###
-### 08.4.1. plot cross diagrams
+### 09.1b. plot model parameter estimates
+### 09.1.1. plot cross diagrams
+### 09.1.2. plot Panel for LUIrangelevel
+### 09.1.3. Plot model coefficients + SE relative to the intercept (cf. Fig1 in Newbold et al. 2015)
 ###
+### Authors: KG,...
 ###
-### Authors: KG, ...
 ############################################################################
 
 model.list <- data.frame(complexity_level=c(rep(1,8),rep(2,8),rep(3,8)), model.name = apply(expand.grid(c("Richness","Yield"),c("GrandMean","LUI.range.level","FullModel","SelectModel"),1:3),1,function(x) paste0(x,collapse="_")), preds = rep(c("1", "1","LUI.range.level-1", "LUI.range.level-1","LUI.range.level * (Species.Group + Product + BIOME)", "LUI.range.level * (Product + BIOME)","",""),3))
@@ -54,7 +57,7 @@ p <- ggplot(data = plot.dat, aes(x = beta.mean, y = sortvar)) +
 }
 
 ############################################################################
-### 08.4.1. plot cross diagrams
+### 09.1.1. plot cross diagrams
 ############################################################################
 # predict for each covariate combination
 beta <- data.frame(level=character(6),richness.mean=numeric(6),richness.lb=numeric(6),richness.ub=numeric(6),yield.mean=numeric(6),yield.lb=numeric(6),yield.ub=numeric(6))
@@ -98,9 +101,8 @@ plot <- ggplot(data=beta) +
 print(plot)
 ggsave(plot, file = path2temp %+% "CrossPlot_LUI.png", width = 20, height = 8, type = "cairo-png")
 
-
 ############################################################################
-### 08.4.2. plot Panel for LUIrangelevel
+### 09.1.2. plot Panel for LUIrangelevel
 ############################################################################
 one=3; two=5; three=7; alpha=100
 y.offset <- 0.2
@@ -159,7 +161,7 @@ dev.off()
 par(..., no.readonly = T)
 
 ############################################################################
-### 08.4.3 Plot model coefficients + 95%CI (cf. Fig1 in Newbold et al. 2015)
+### 09.1.3. Plot model coefficients + SE relative to the intercept (cf. Fig1 in Newbold et al. 2015)
 ############################################################################
 cat.plot.select <- function(response,samps,X.matrix){
   beta <- data.frame(coeffs=colnames(X.matrix))

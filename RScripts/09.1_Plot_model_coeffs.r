@@ -1,14 +1,16 @@
 ############################################################################
-### Purpose of this skript module 08.4 is to:
+### Purpose of this skript module 09.1 is to:
 ###
-### 08.4.1. plot cross diagrams
+### 09.1. plot model parameter estimates
+### 09.1.1. plot cross diagrams
+### 09.1.2. plot Panel for LUIrangelevel
+### 09.1.3. Plot model coeeficients + SE relative to the intercept (cf. Fig1 in Newbold et al. 2015)
 ###
-###
-### Authors: KG, ...
+### Authors: KG, TN,...
 ############################################################################
 
 ############################################################################
-### 08.4.1. plot cross diagrams
+### 09.1.1. plot cross diagrams
 ############################################################################
 # predict for each covariate combination
 newdat <- expand.grid(LUI.range.level=levels(ES.frame.richness$LUI.range.level))
@@ -16,13 +18,13 @@ newdat$level <- newdat$LUI.range.level
 #newdat$level <- factor(newdat$level, levels = rev(levels(newdat$level)))
 
 model <- Richness.MA.model[["LUI"]]
-mm <- model.matrix(as.formula(model$call$mods), data=newdat)
+mm <- model.matrix(~LUI.range.level-1, data=newdat)
 preds <- predict.rma(model, newmods = mm)
 newdat$logRR.richness <- preds$pred
 newdat$logRR.richness.se <- preds$se
 
 model <- Yield.MA.model[["LUI"]]
-mm <- model.matrix(as.formula(model$call$mods), data=newdat)
+mm <- model.matrix(~LUI.range.level-1, data=newdat)
 preds <- predict.rma(model, newmods = mm)
 newdat$logRR.yield <- preds$pred
 newdat$logRR.yield.se <- preds$se
@@ -50,7 +52,7 @@ print(plot)
 ggsave(plot, file = path2temp %+% "CrossPlot_LUI_rma.png", width = 20, height = 8, type = "cairo-png")
 
 ############################################################################
-### 08.4.2. plot Panel for LUIrangelevel
+### 09.1.2. plot Panel for LUIrangelevel
 ############################################################################
 one=3; two=5; three=7; alpha=100
 y.offset <- 0.2
@@ -110,9 +112,8 @@ dev.off()
 
 par(par(no.readonly = T))
 
-
 ############################################################################
-### 08.4.2 Plot model coeeficients + SE relative to the intercept (cf. Fig1 in Newbold et al. 2015)
+### 09.1.3. Plot model coeeficients + SE relative to the intercept (cf. Fig1 in Newbold et al. 2015)
 ############################################################################
 model <- Richness.MA.model[["Select"]]
 plot <- ggplot() +

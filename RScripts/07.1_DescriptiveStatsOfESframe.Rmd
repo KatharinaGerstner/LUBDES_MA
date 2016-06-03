@@ -57,7 +57,7 @@ source(path2wd %+% "06_DataPreparation4Analysis.R")
 ```
 
 ```{r Summary}
-### 07.1 Protocol structure and summary of variables in the ES.frame.yields
+### 07.1 Protocol structure and summary of variables in the ES.frames for richness and yield
 
 str(ES.frame.richness)
 summary(ES.frame.richness)
@@ -170,6 +170,7 @@ ggsave(paste(path2temp, "/ES.frame.yield.CaseDistributionPanel.png",sep=""), wid
 
 ## Forest Plots per study within LUI.range.level
 ```{r ForestPlots, include=F}
+### 07.4. Forest Plots of study.cases per LUI.range.level
 ES.frame2plot <- subset(ES.frame, !(is.na(Richness.Log.RR.Var)) & Richness.Log.RR.Var>0 & !is.na(Yield.Log.RR.Var) & Yield.Log.RR.Var>0) 
 
 LUI.range.level = c("low-low","medium-medium","high-high","low-medium","medium-high","low-high")
