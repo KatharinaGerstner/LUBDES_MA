@@ -181,8 +181,14 @@ knit(path2wd %+% "07.1_DescriptiveStatsOfESframe.Rmd") # summary statistics, plo
 
 ### FREQUENTIST ANALYSIS
 source(path2wd %+% "08a_DataAnalysis.R")
+
+############################################################################
+###  Plotting & Model Diagnostics
+############################################################################
+load(path2temp %+% "Models.Rdata")
 source(path2wd %+% "09.1_Plot_model_coeffs.r") # cross plots for LUI range level and forest plots for model 
-source(path2wd %+% "10_ModelDiagnostics.R") # not yet working
+source(path2wd %+% "09.2_Plot_YieldPotential_vs_BiodiveristyRisk.r") # Mapping effects of LUI on richness/yield using the full model
+source(path2wd %+% "10_ModelDiagnostics.R") 
 
 # ### BAYESIAN ANALYSIS
 # Nchains = 3; Nadapt=1000; Nstart=2000; Niter=20000; Nthin=5

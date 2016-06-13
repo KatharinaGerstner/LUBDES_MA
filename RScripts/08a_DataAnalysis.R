@@ -36,6 +36,21 @@ modelDataYield <- ES.frame.yield[,c('Log.RR','Log.RR.Var',paste(mods.Yield[1:3],
                                     'Case.ID','Study.ID','Study.Case','Low.LUI','High.LUI')]
 # modelDataYield <- na.omit(modelDataYield)
 
+### set reference level to the most common level, i.e.
+### for richness: timber-non-woody.plants-temp.boreal.forest
+### for yield: timber-temp.boreal.forest
+setRefToMostCommonLevel <- function(f) { 
+  f <- as.factor(f) 
+  t <- table(f)
+  relevel(f,ref=as.integer(which(t>=max(t))[[1]]))
+}
+for(x in c("Species.Group","Product","BIOME")){
+  modelDataRichness[,x] <- setRefToMostCommonLevel(modelDataRichness[,x])
+}
+for(x in c("Product","BIOME")){
+  modelDataYield[,x] <- setRefToMostCommonLevel(modelDataYield[,x])
+}
+
 ###########################################################################
 ### store models in a list
 ###########################################################################
