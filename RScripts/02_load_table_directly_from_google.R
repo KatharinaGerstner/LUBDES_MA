@@ -36,7 +36,7 @@ data<-as.data.frame(data) #some functions don't like the tbl.df data type
 
 ### check variable types 
 str(data)
-data$X..of.samples.for.BD.measure <- as.integer(data$X..of.samples.for.BD.measure)
+data$`# of samples for BD measure` <- as.integer(data$`# of samples for BD measure`)
 
 ## Standardise units
 # data <- convertYieldUnits(data)
