@@ -15,6 +15,7 @@
 
 needed_libs <- c("devtools",# needed for library googlesheets
                  "googlesheets",# for loading data directly from google
+                 "mice", # for multiple imputation
                  "metafor",# for meta analysis
                  "ggplot2",# For plotting
                  "scales", # for transformation of axes labels
@@ -28,7 +29,8 @@ needed_libs <- c("devtools",# needed for library googlesheets
                  "countrycode",# convert FAO country IDs to ISO3
                  "VennDiagram",
                  "reshape2",
-                 "rjags", # for running bayesian models
+#                 "rjags", # for running bayesian models
+                 "knitr", # for knitting .Rmd-documents
                  "xtable"  # for saving tables as .doc
 )
 usePackage <- function(p) {
@@ -80,10 +82,35 @@ table.sort = function(dat.low,dat.high,low,high){
              "Richness.SD.is.imputed.low" = dat.low$richness.SD.is.imputed,"Richness.SD.is.imputed.high" = dat.high$richness.SD.is.imputed)
 }
 
+###########################################################################
+### Covariance Matrix of Log.RRs with zero on the diagonal
+###########################################################################
 
+### cov(X,Y) <- cor(X,Y)*sqrt(Var(X))*sqrt(Var(Y))
+### cor(X,Y) is 0.5 if LUI.range.level within the same study-case share a control or treatment
+M.matrix <- function(dat){
+  M <- diag(nrow(dat))
+  diag(M) <- 0
+  ## calculate covariance for cases with (low-medium, medium-high), (low-low, low-medium, low-high), (medium-medium, medium- high), (high-high, medium-high)
+  for(x in unique(dat$Study.Case)){
+    sub.rows <- which(dat$Study.Case==x)
+    for (i in sub.rows){
+      for(j in sub.rows){
+        if(paste(dat$LUI.range.level[i],dat$LUI.range.level[j],sep="_") %in% c("low-medium_medium-high","low-medium_medium-medium", "low-medium_medium-high","low-low_low-medium","low-low_low-high","medium-medium_medium-high","high-high_medium-high")){
+          M[i,j] <- M[j,i] <- 0.5 * sqrt(dat$Log.RR.Var[i] * dat$Log.RR.Var[j])
+        }
+      }  
+    }
+  }
+  return(M)
+}  
+
+###########################################################################
+### Model selection based on likelihood-ratio test
+###########################################################################
 RMASelect <- function(model){
   
-  allTerms <- trim(strsplit(paste(model$call$mods)[2],'[+]')[[1]])[-1]
+  allTerms <- trim(strsplit(paste(model$call$mods)[2],'[+]')[[1]])
   
   currentModel <- model
   currentTerms <- allTerms
@@ -99,9 +126,13 @@ RMASelect <- function(model){
     t<-1
     for (term in currentTerms){
       
+#      print(term)
       if(length(unlist(grep(term,currentTerms)))>1) next # to avoid excluding main effects when interactions are still in
-      newModel<-update(currentModel,paste("~.-",term,sep=""))
-      
+      newModel <- try(update(currentModel,paste("~.-",term,sep="")),silent=T)
+      if(inherits(newModel, "try-error")){
+        newModel <- update(currentModel,paste("~.-",term,sep=""),control=list(optimizer="optim", optmethod="BFGS"))     
+      }
+        
       an <- anova(currentModel,newModel)
       #       print(term)
       #       print(an)
@@ -118,13 +149,16 @@ RMASelect <- function(model){
     
     stats <- data.frame(var2drop,LRTs,dfs,Ps)
     if(length(which(stats$var2drop==""))>0) stats <- stats[-which(stats$var2drop==""),]
-    #    print(stats)
+    print(stats)
     
-    dropTerm <- stats$var2drop[which(stats$LRTs==max(stats$LRTs))]
+    dropTerm <- stats$var2drop[which(stats$LRTs==min(stats$LRTs))]
     if (length(dropTerm)==0) break
     print(dropTerm)
     
-    currentModel <- update(currentModel,paste("~.-",dropTerm,sep=""))
+    currentModel <- try(update(currentModel,paste("~.-",term,sep="")),silent=T)
+    if(inherits(currentModel, "try-error")){
+      currentModel <- update(currentModel,paste("~.-",term,sep=""),control=list(optimizer="optim", optmethod="BFGS"))     
+    }
     currentTerms <- currentTerms[-which(currentTerms==dropTerm)]
     
     stats.list[[i]] <- stats
@@ -142,7 +176,7 @@ RMASelect <- function(model){
   }
   
   #  return(list(model=currentModel,stats.list=stats.list))
-  return(model=currentModel)
+  return(currentModel)
   
 }
 

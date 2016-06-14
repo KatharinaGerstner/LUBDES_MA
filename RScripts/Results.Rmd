@@ -5,51 +5,30 @@ date: "Tuesday, April 12, 2016"
 output: html_document
 ---
 
-# Forest Plots per study within LUI.range.level
-Forest plots of effect sizes for species richness (green) and yield (red) reported by the studies. Grey highlights duplicates.
-![](Y:\Home\hoppek\temp\Forest_plot_low-low.png)
-![](Y:\Home\hoppek\temp\Forest_plot_low-medium.png)
-![](Y:\Home\hoppek\temp\Forest_plot_low-high.png)
-![](Y:\Home\hoppek\temp\Forest_plot_medium-medium.png)
-![](Y:\Home\hoppek\temp\Forest_plot_medium-high.png)
-![](Y:\Home\hoppek\temp\Forest_plot_high-high.png)
-
-# Imputation
-Goodness-of-fit of the imputation model: Observed vs predicted standard deviation.
-![](C:\Users\hoppek\Documents\temp\MissingDataImputation_Richness.png)
-![](C:\Users\hoppek\Documents\temp\MissingDataImputation_Yield.png)
-
 # Meta-Analysis
-## The effect of random-effects and correlation structure
-For the Grand Mean model. Top: Fixed effects only, centre: Fixed and random effects of study-case, bottom: Fixed and random effects of study-case, and non-independence from relatedness of LUI comparisons within one study-case.
-![](Y:\Home\hoppek\temp\CaterpillarPlot_Richness_GrandMean1.png)
-![](Y:\Home\hoppek\temp\CaterpillarPlot_Richness_GrandMean2.png)
-![](Y:\Home\hoppek\temp\CaterpillarPlot_Richness_GrandMean3.png)
-
-For the LUI.range.level model. Top: Fixed effects only, centre: Fixed and random effects of study-case, bottom: Fixed and random effects of study-case, and non-independence from relatedness of LUI comparisons within one study-case.
-![](Y:\Home\hoppek\temp\CaterpillarPlot_Richness_LUI.range.level1.png)
-![](Y:\Home\hoppek\temp\CaterpillarPlot_Richness_LUI.range.level2.png)
-![](Y:\Home\hoppek\temp\CaterpillarPlot_Richness_LUI.range.level3.png)
-
-MAIN MESSAGE: Reducing complexity leads to overestimating the confidence about the parameter estimates
 
 ## The effects of covariables
 Comparison of R$^2$, DICs, and bayesian p-value among models
-\begin{tabular}{ l r r r}
-DIC &	R2LMM &	bpvalue \\
-Richness_GrandMean3 &	39469.65 &	0.00 &	0.00\\ 
-Richness_LUI.range.level3 &	72271.86 &	0.00 &	0.00\\ 
-Richness_FullModel3 &	1676127.60 &	0.08 &	0.00\\ 
-Richness_SelectModel3 &	109439.94 &	0.19 &	0.01\\ 
-Yield_GrandMean3 &	570765.03 &	0.00 &	0.00\\ 
-Yield_LUI.range.level3 &	627282.93 &	0.00 &	0.00\\ 
-Yield_FullModel3 &	109439.94 &	0.19 &	0.01\\ 
-Yield_SelectModel3 &	109439.94 &	0.19 &	0.01 
-\end{tabular}
+```{r}
+fit.tab <- read.csv("Y:/Home/hoppek/temp/fit.tab.csv")
+library(knitr)
+kable(fit.tab, digits=4)
+```
 
-### Model Selection
-![Fixed and random effects of study-case, and non-independence from relatedness of LUI comparisons within one study-case](Y:\Home\hoppek\temp\CaterpillarPlot_Richness_SelectModel3.png)
-![Fixed and random effects of study-case, and non-independence from relatedness of LUI comparisons within one study-case](Y:\Home\hoppek\temp\CaterpillarPlot_Yield_SelectModel3.png)
+# For Richness
+![](Y:\Home\hoppek\temp\CaterpillarPlot_Richness_GrandMean_3.png)
+![](Y:\Home\hoppek\temp\CaterpillarPlot_Richness_LUI.range.level_3.png)
+![](Y:\Home\hoppek\temp\CaterpillarPlot_Richness_Select_3.png)
+
+# For Yield
+![](Y:\Home\hoppek\temp\CaterpillarPlot_Yield_GrandMean_3.png)
+![](Y:\Home\hoppek\temp\CaterpillarPlot_Yield_LUI.range.level_3.png)
+![](Y:\Home\hoppek\temp\CaterpillarPlot_Yield_Select_3.png)
+
+### Figures to be published
+![](Y:\Home\hoppek\temp\CrossPlot_LUI.png)
+![](Y:\Home\hoppek\temp\ForestPlot_LUI_Panel.png)
+![](Y:\Home\hoppek\temp\CatPlotSelectspecies richness.png)
+![](Y:\Home\hoppek\temp\CatPlotSelectyield.png)
 
 
-## Publication Bias

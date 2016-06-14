@@ -5,7 +5,6 @@
 ### 02.2. adapt data structure
 ###
 ### General comments:
-### * standardization of units is not applied atm, check why its not working
 ###
 ### Authors: MB, KG
 ############################################################################

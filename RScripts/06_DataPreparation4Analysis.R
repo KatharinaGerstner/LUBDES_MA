@@ -9,7 +9,7 @@
 ############################################################################
 
 ###########################################################################
-### 07a.1. Remove cases with zero variances, pseudo-replicates, redundant LUI.range.level comparisons 
+### 06.1. Remove cases with zero variances, pseudo-replicates, redundant LUI.range.level comparisons 
 ##########################################################################
 
 ### restrict analysis to study cases with positive variances
@@ -33,7 +33,7 @@ for(x in unique(ES.frame$Study.Case)){
 }  
 
 ###########################################################################
-### 07a.2. remove columns not needed for the analysis, unify names
+### 06.2. remove columns not needed for the analysis, unify names
 ##########################################################################
 
 ES.frame.richness <- ES.frame.richness[,c("Richness.Log.RR","Richness.Log.RR.Var","Longitude", "Latitude","LUI.range.level","Low.LUI","High.LUI","Study.ID","Case.ID","Study.Case","Species.Group","Product","BIOME")] #,"npp","time.since.first.use")]
@@ -59,31 +59,10 @@ ES.frame.yield$Study.Case <- factor(ES.frame.yield$Study.Case)[drop=T] # drop un
 #ES.frame.yield$npp <- scale(ES.frame.yield$npp)
 #ES.frame.yield$time.since.first.use <- scale(ES.frame.yield$time.since.first.use)
 
-### save rawdata as table in a word doc
+###########################################################################
+### 06.2. save rawdata as table in a word doc
+###########################################################################
 print(xtable(ES.frame.richness), type = "html", file=path2temp %+% "ES.frame.richness.doc") # save the HTML table as a .doc file
 print(xtable(ES.frame.yield), type = "html", file=path2temp %+% "ES.frame.yield.doc") # save the HTML table as a .doc file
 
-###########################################################################
-### 07a.3 load functions for the data analysis
-###########################################################################
-
-### Covariance Matrix of Log.RRs with zero on the diagonal
-### cov(X,Y) <- cor(X,Y)*sqrt(Var(X))*sqrt(Var(Y))
-### cor(X,Y) is 0.5 if LUI.range.level within the same study-case share a control or treatment
-M.matrix <- function(dat){
-  M <- diag(nrow(dat))
-  diag(M) <- 0
-  ## calculate covariance for cases with (low-medium, medium-high), (low-low, low-medium, low-high), (medium-medium, medium- high), (high-high, medium-high)
-  for(x in unique(dat$Study.Case)){
-    sub.rows <- which(dat$Study.Case==x)
-    for (i in sub.rows){
-      for(j in sub.rows){
-        if(paste(dat$LUI.range.level[i],dat$LUI.range.level[j],sep="_") %in% c("low-medium_medium-high","low-medium_medium-medium", "low-medium_medium-high","low-low_low-medium","low-low_low-high","medium-medium_medium-high","high-high_medium-high")){
-          M[i,j] <- M[j,i] <- 0.5 * sqrt(dat$Log.RR.Var[i] * dat$Log.RR.Var[j])
-        }
-      }  
-    }
-  }
-  return(M)
-}  
 

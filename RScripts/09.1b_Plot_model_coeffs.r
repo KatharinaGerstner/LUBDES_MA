@@ -1,39 +1,90 @@
 ############################################################################
-### Purpose of this skript module 08.4 is to:
+### Purpose of this skript module 09.1b is to:
 ###
-### 08.4.1. plot cross diagrams
+### 09.1b. plot model parameter estimates
+### 09.1.1. plot cross diagrams
+### 09.1.2. plot Panel for LUIrangelevel
+### 09.1.3. Plot model coefficients + SE relative to the intercept (cf. Fig1 in Newbold et al. 2015)
 ###
+### Authors: KG,...
 ###
-### Authors: KG, ...
 ############################################################################
 
+model.list <- data.frame(complexity_level=c(rep(1,8),rep(2,8),rep(3,8)), model.name = apply(expand.grid(c("Richness","Yield"),c("GrandMean","LUI.range.level","FullModel","SelectModel"),1:3),1,function(x) paste0(x,collapse="_")), preds = rep(c("1", "1","LUI.range.level-1", "LUI.range.level-1","LUI.range.level * (Species.Group + Product + BIOME)", "LUI.range.level * (Product + BIOME)","",""),3))
+model.list <- model.list[-which(model.list$model.name %in% c("Richness_SelectModel_1","Richness_SelectModel_2","Yield_SelectModel_1","Yield_SelectModel_2")),]
+n.models <- nrow(model.list)
+fit.tab <- data.frame(DIC=numeric(length=n.models),R2LMM=numeric(length=n.models),R2GH=numeric(length=n.models),bpvalue=numeric(length=n.models))
+MA.model <- vector("list", length=n.models)
+
+for (model.name in model.list$model.name){
+  
+  row.select <- which(model.list$model.name==model.name)
+  
+  load(path2temp %+% model.name %+% ".Rdata") 
+  
+  print("Caterpillar plot:" %+% model.name)
+if(is.null(dim(summary(samps[["beta"]])$statistics))){
+  beta.mean <- summary(samps[["beta"]])$statistics["Mean"]
+  beta.lb <- summary(samps[["beta"]])$quantiles["2.5%"]
+  beta.ub <- summary(samps[["beta"]])$quantiles["97.5%"]    
+}
+if(!is.null(dim(summary(samps[["beta"]])$statistics))) {
+  beta.mean <- summary(samps[["beta"]])$statistics[,"Mean"]
+  beta.lb <- summary(samps[["beta"]])$quantiles[,"2.5%"]
+  beta.ub <- summary(samps[["beta"]])$quantiles[,"97.5%"]    
+}
+
+  if(length(grep("Richness",model.name))==1) df <- ES.frame.richness
+  if(length(grep("Yield",model.name))==1) df <- ES.frame.yield
+  X.matrix <- as.data.frame(model.matrix(as.formula(paste("Log.RR~",paste(model.list$preds[row.select],collapse="+"))),data=df ))
+  if(length(grep("GrandMean", model.name))==1) long.names <- "Grand mean"
+  if(length(grep("GrandMean", model.name))==0) long.names <- colnames(X.matrix)
+
+plot.dat <- data.frame(beta.mean, beta.lb, beta.ub, long.names, sortvar=letters[length(beta.mean):1])
+p <- ggplot(data = plot.dat, aes(x = beta.mean, y = sortvar)) + 
+  geom_point() + 
+  geom_segment(aes(x = beta.lb, xend = beta.ub, y = sortvar, yend = sortvar)) +
+  geom_vline(xintercept = 0, linetype = 2) + 
+  scale_x_continuous(labels=trans_format("exp",comma_format(digits=3))) +
+  scale_y_discrete(labels=rev(long.names)) +
+  xlab("Response Ratio") + ylab("") +
+  theme(axis.title = element_text(size = rel(1.5)), axis.text = element_text(size = rel(1.5)),legend.text=element_text(size = rel(1.5)),legend.title=element_text(size = rel(1.5)))
+  print(p)
+  ggsave(p, file = path2temp %+% "CaterpillarPlot_" %+% model.name %+% ".png", width = 20, height = 8, type = "cairo-png")
+
+  # save table of fixed effects as a .doc file
+  print(xtable(plot.dat,digits=4), type = "html", file=path2temp %+% "model.output" %+% model.name %+% ".doc") 
+}
+
 ############################################################################
-### 08.4.1. plot cross diagrams
+### 09.1.1. plot cross diagrams
 ############################################################################
 # predict for each covariate combination
 beta <- data.frame(level=character(6),richness.mean=numeric(6),richness.lb=numeric(6),richness.ub=numeric(6),yield.mean=numeric(6),yield.lb=numeric(6),yield.ub=numeric(6))
 beta$level <- levels(ES.frame.richness$LUI.range.level)
 
 # list(model.name,model.fit,samps)
-samps <- Richness.MA.model[["LUI"]]$samps
+load(path2temp %+% "Richness_LUI.range.level_3.Rdata") 
 beta$richness.mean <- summary(samps[["beta"]])$statistics[,"Mean"]
 beta$richness.lb <- summary(samps[["beta"]])$quantiles[,"2.5%"]
 beta$richness.ub <- summary(samps[["beta"]])$quantiles[,"97.5%"]    
 
-samps <- Yield.MA.model[["LUI"]]$samps
+load(path2temp %+% "Yield_LUI.range.level_3.Rdata") 
 beta$yield.mean <- summary(samps[["beta"]])$statistics[,"Mean"]
 beta$yield.lb <- summary(samps[["beta"]])$quantiles[,"2.5%"]
 beta$yield.ub <- summary(samps[["beta"]])$quantiles[,"97.5%"]    
 
-samps1 <- Richness.MA.model[["None"]]$samps
-samps2 <- Yield.MA.model[["None"]]$samps
+load(path2temp %+% "Richness_GrandMean_3.Rdata") 
+samps1 <- samps
+load(path2temp %+% "Yield_GrandMean_3.Rdata") 
+samps2 <- samps
 beta[7,] <- data.frame(level ="GrandMean",
-                         richness.mean = summary(samps1[["beta"]])$statistics["Mean"],
-                         richness.lb = summary(samps1[["beta"]])$quantiles["2.5%"],
-                         richness.ub = summary(samps1[["beta"]])$quantiles["97.5%"],
-                         yield.mean = summary(samps2[["beta"]])$statistics["Mean"],
-                         yield.lb = summary(samps2[["beta"]])$quantiles["2.5%"],
-                         yield.ub = summary(samps2[["beta"]])$quantiles["97.5%"])
+                       richness.mean = summary(samps1[["beta"]])$statistics["Mean"],
+                       richness.lb = summary(samps1[["beta"]])$quantiles["2.5%"],
+                       richness.ub = summary(samps1[["beta"]])$quantiles["97.5%"],
+                       yield.mean = summary(samps2[["beta"]])$statistics["Mean"],
+                       yield.lb = summary(samps2[["beta"]])$quantiles["2.5%"],
+                       yield.ub = summary(samps2[["beta"]])$quantiles["97.5%"])
 beta[7,"level"] <- "GrandMean"
 
 # plot crosses for each covariate combination
@@ -50,9 +101,8 @@ plot <- ggplot(data=beta) +
 print(plot)
 ggsave(plot, file = path2temp %+% "CrossPlot_LUI.png", width = 20, height = 8, type = "cairo-png")
 
-
 ############################################################################
-### 08.4.2. plot Panel for LUIrangelevel
+### 09.1.2. plot Panel for LUIrangelevel
 ############################################################################
 one=3; two=5; three=7; alpha=100
 y.offset <- 0.2
@@ -111,20 +161,21 @@ dev.off()
 par(..., no.readonly = T)
 
 ############################################################################
-### 08.4.3 Plot model coefficients + 95%CI (cf. Fig1 in Newbold et al. 2015)
+### 09.1.3. Plot model coefficients + SE relative to the intercept (cf. Fig1 in Newbold et al. 2015)
 ############################################################################
 cat.plot.select <- function(response,samps,X.matrix){
   beta <- data.frame(coeffs=colnames(X.matrix))
   beta$means <- summary(samps[["beta"]])$statistics[,"Mean"]
   beta$lb <- summary(samps[["beta"]])$quantiles[,"2.5%"]
   beta$ub <- summary(samps[["beta"]])$quantiles[,"97.5%"]    
+  beta$sortvar <- letters[nrow(beta):1]
   
   plot <- ggplot(data=beta) +
-    geom_point(aes(x=beta$coeffs, y=means), size=4) +
+    geom_point(aes(x=beta$sortvar, y=means), size=4) +
     geom_pointrange(aes(x=beta$coeffs, y=means, ymin=lb, ymax=ub)) +
     geom_hline(aes(yintercept=0), linetype="twodash") +
     scale_y_continuous(labels=trans_format("exp",comma_format(digits=2))) + 
-    scale_x_discrete(limits=beta$coeffs) +
+    scale_x_discrete(limits=rev(beta$coeffs)) +
     theme(axis.text.x = element_text(angle = 30, hjust = 1)) +
     ylab("RR (" %+% response %+% ")") + xlab("")
   
@@ -132,9 +183,9 @@ cat.plot.select <- function(response,samps,X.matrix){
 }
   
 samps <- Richness.MA.model[["Select"]]$samps
-X.matrix <- as.data.frame(model.matrix(as.formula(paste("Log.RR~",paste(reduced.model.richness$terms,collapse="+"),-1)), data=ES.frame.richness))
+X.matrix <- as.data.frame(model.matrix(as.formula(paste("Log.RR~",paste(reduced.model.richness$terms,collapse="+"))), data=ES.frame.richness))
 cat.plot.select("species richness", samps, X.matrix)
 
 samps <- Yield.MA.model[["Select"]]$samps
-X.matrix <- as.data.frame(model.matrix(as.formula(paste("Log.RR~",paste(reduced.model.yield$terms,collapse="+"),-1)), data=ES.frame.yield))
+X.matrix <- as.data.frame(model.matrix(as.formula(paste("Log.RR~",paste(reduced.model.yield$terms,collapse="+"))), data=ES.frame.yield))
 cat.plot.select("yield", samps, X.matrix)
