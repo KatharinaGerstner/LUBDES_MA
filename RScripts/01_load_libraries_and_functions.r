@@ -19,7 +19,7 @@ needed_libs <- c("devtools",# needed for library googlesheets
                  "metafor",# for meta analysis
                  "ggplot2",# For plotting
                  "scales", # for transformation of axes labels
-#                 "maps",
+                 "maptools", # for converting shp into data.frame using fortify() in ggplot
 #                 "rworldmap",
                  "raster",# for adding map data
                  "rgdal", # for loading map data

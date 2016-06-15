@@ -120,25 +120,85 @@ for(i in c("LUI.range.level","Species.Group","Product","BIOME")){
 }  
 ```
 
+```{r biome_map, echo=F}
+setwd(path2temp %+% "/") 
+ecoregions <- readOGR(".","tnc_terr_ecoregions",verbose = FALSE)
+setwd(path2wd)
+
+ecoregions@data$BIOME <- ecoregions@data$WWF_MHTNAM
+ecoregions@data$BIOME <- paste(ecoregions@data$BIOME)
+ecoregions@data$BIOME[(ecoregions@data$BIOME %in% c("Tropical and Subtropical Moist Broadleaf Forests",
+                                      "Tropical and Subtropical Dry Broadleaf Forests",
+                                      "Tropical and Subtropical Coniferous Forests",
+                                      "Tropical and Subtropical Coniferous Forests"))] <- "Tropical_Forests"
+ecoregions@data$BIOME[(ecoregions@data$BIOME %in% c("Temperate Broadleaf and Mixed Forests",
+                                      "Temperate Conifer Forests",
+                                      "Boreal Forests/Taiga"))] <- "Temperate_Boreal_Forests"
+ecoregions@data$BIOME[(ecoregions@data$BIOME %in% c("Mediterranean Forests, Woodlands and Scrub",
+                                      "Deserts and Xeric Shrublands"))] <- "Drylands"
+ecoregions@data$BIOME[(ecoregions@data$BIOME %in% c("Tropical and Subtropical Grasslands, Savannas and Shrublands",
+                                      "Flooded Grasslands and Savannas"))] <- "Tropical_Grasslands"
+ecoregions@data$BIOME[(ecoregions@data$BIOME %in% c("Temperate Grasslands, Savannas and Shrublands",
+                                      "Montane Grasslands and Shrublands"))]<-"Temperate_Montane_Grasslands"
+ecoregions@data$BIOME[(ecoregions@data$BIOME %in% c("Inland Water","NA"))]<-NA
+ecoregions@data$BIOME <- factor(ecoregions@data$BIOME)
+
+biome_mapdata <- fortify(ecoregions, region="BIOME") #  convert shapefile to a data frame, extract biomes 
+save(biome_mapdata, file=path2temp %+% "biome_mapdata.Rdata")
+
+load(path2temp %+% "biome_mapdata.Rdata")
+biome_map <- ggplot() +
+     geom_polygon(data = biome_mapdata, aes(x = long, y = lat, group = group, fill = id)) +
+     scale_x_continuous(breaks=c(-90, 0, 90), labels=c("90° W", "0", "90° E")) +
+     scale_y_continuous(breaks=c(-30, 0, 30, 60), labels=c("30°S","0°", "30°N","60°N"),limits=c(-55,90)) +
+     xlab("") + ylab("") +
+     scale_fill_manual(values=c(rgb(255,127,0, max = 255), 
+                                rgb(152,78,163, max = 255), 
+                                rgb(247,129,191, max = 255), 
+                                rgb(77,175,74, max = 255), 
+                                rgb(178,223,138, max = 255), 
+                                rgb(166,86,40, max = 255),  
+                                rgb(255,255,51, max = 255),
+                                rgb(153,153,153, max = 255)), 
+                       name="BIOME",
+                       limits=c("Drylands",  
+                               "Temperate_Boreal_Forests","Temperate_Montane_Grasslands",
+                                "Tropical_Forests","Tropical_Grasslands",
+                                "Tundra",
+                                "Mangroves",
+                                "Rock and Ice"), 
+                       labels=c("Drylands",  
+                                "Temperate Boreal Forests","Temperate Montane Grasslands",
+                                "Tropical Forests","Tropical Grasslands",
+                                "Tundra",
+                                "Mangroves",
+                                "Rock and Ice"))
+
+ggsave(path2temp %+% "biome_map.png", width=22, height=10, units="cm")
+save(biome_map, file=path2temp %+% "biome_map.Rdata")
+
+```
+
 ```{r PlotMaps, echo=F}
 ### 07.3. Plot map of studies
 world_map <- map_data("world")
 p <- ggplot() +
   geom_polygon(data=world_map, aes(x=long, y=lat, group=group),fill="white",color="black",lwd=0.2) + 
-  geom_point(data=ES.frame.richness, aes(x=Longitude, y=Latitude, ymin=-55), color="blue", shape=4, size=1) +
+  geom_point(data=ES.frame.richness, aes(x=Longitude, y=Latitude), color="blue", shape=4, size=1) +
   scale_x_continuous(breaks=c(-90, 0, 90), labels=c("90° W", "0", "90° E")) +
-  scale_y_continuous(breaks=c(-60, -30, 0, 30, 60), labels=c("60°S", "30°S","0°", "30°N","60°N")) +
-  xlab("") + ylab("") 
+  scale_y_continuous(breaks=c(-30, 0, 30, 60), labels=c("30°S","0°", "30°N","60°N"),limits=c(-55,90)) +
+  xlab("") + ylab("")
 p 
 ggsave(paste(path2temp, "/ES.frame.richness.CaseDistributionAll.png",sep=""), width=18, height=10, units="cm")
 
 ### plot study locations using fancy ggplot
+### Richness
 ES.frame.richness <- within(ES.frame.richness, LUI.range.level <- factor(LUI.range.level, levels = c("low-low","low-medium","low-high","medium-medium","medium-high","high-high"))) # resort levels for plotting
 p <- ggplot() +
   geom_polygon(data=world_map, aes(x=long, y=lat, group=group),fill="white",color="black",lwd=0.2) + 
-  geom_point(data=ES.frame.richness, aes(x=Longitude, y=Latitude, ymin=-55), color="blue", shape=2, size=1) +
+  geom_point(data=ES.frame.richness, aes(x=Longitude, y=Latitude), color="blue", shape=2, size=1) +
   scale_x_continuous(breaks=c(-90, 0, 90), labels=c("90° W", "0", "90° E")) +
-  scale_y_continuous(breaks=c(-60, -30, 0, 30, 60), labels=c("60°S", "30°S","0°", "30°N","60°N")) +
+  scale_y_continuous(breaks=c(-30, 0, 30, 60), labels=c("30°S","0°", "30°N","60°N"),limits=c(-55,90)) +
   xlab("") + ylab("") +
   facet_wrap(~LUI.range.level)   
 p 
@@ -146,25 +206,60 @@ ggsave(paste(path2temp, "/ES.frame.richness.CaseDistributionPanel.png",sep=""), 
 
 p <- ggplot() +
   geom_polygon(data=world_map, aes(x=long, y=lat, group=group),fill="white",color="black",lwd=0.2) + 
-  geom_point(data=ES.frame.yield, aes(x=Longitude, y=Latitude, ymin=-55), color="blue", shape=4, size=1) +
+  geom_point(data=ES.frame.yield, aes(x=Longitude, y=Latitude), color="blue", shape=4, size=1) +
   scale_x_continuous(breaks=c(-90, 0, 90), labels=c("90° W", "0", "90° E")) +
-  scale_y_continuous(breaks=c(-60, -30, 0, 30, 60), labels=c("60°S", "30°S","0°", "30°N","60°N")) +
-  xlab("") + ylab("") 
+  scale_y_continuous(breaks=c(-30, 0, 30, 60), labels=c("30°S","0°", "30°N","60°N"),limits=c(-55,90)) +
+  xlab("") + ylab("")
 p 
 ggsave(paste(path2temp, "/ES.frame.yield.CaseDistributionAll.png",sep=""), width=18, height=10, units="cm")
 
 ### plot study locations using fancy ggplot
+### Yield
 world_map <- map_data("world")
 ES.frame.yield <- within(ES.frame.yield, LUI.range.level <- factor(LUI.range.level, levels = c("low-low","low-medium","low-high","medium-medium","medium-high","high-high"))) # resort levels for plotting
 p <- ggplot() +
   geom_polygon(data=world_map, aes(x=long, y=lat, group=group),fill="white",color="black",lwd=0.2) + 
-  geom_point(data=ES.frame.yield, aes(x=Longitude, y=Latitude, ymin=-55), color="blue", shape=2, size=1) +
+  geom_point(data=ES.frame.yield, aes(x=Longitude, y=Latitude), color="blue", shape=2, size=1) +
   scale_x_continuous(breaks=c(-90, 0, 90), labels=c("90° W", "0", "90° E")) +
-  scale_y_continuous(breaks=c(-60, -30, 0, 30, 60), labels=c("60°S", "30°S","0°", "30°N","60°N")) +
+  scale_y_continuous(breaks=c(-30, 0, 30, 60), labels=c("30°S","0°", "30°N","60°N"),limits=c(-55,90)) +
   xlab("") + ylab("") +
   facet_wrap(~LUI.range.level)   
 p 
 ggsave(paste(path2temp, "/ES.frame.yield.CaseDistributionPanel.png",sep=""), width=18, height=10, units="cm")
+
+```
+
+```{r PlotMapsTopBiomes, echo=F}
+### 07.3. Plot map of studies
+### plot study locations using fancy ggplot
+### Richness
+p <- biome_map + 
+  geom_point(data=ES.frame.richness, aes(x=Longitude, y=Latitude), color="blue", shape=4, size=1) +
+  guides(fill=FALSE)
+p 
+ggsave(paste(path2temp, "/ES.frame.richness.CaseDistributionAll_TopBiomes.png",sep=""), width=18, height=10, units="cm")
+
+ES.frame.richness <- within(ES.frame.richness, LUI.range.level <- factor(LUI.range.level, levels = c("low-low","low-medium","low-high","medium-medium","medium-high","high-high"))) # resort levels for plotting
+p <- biome_map +
+  geom_point(data=ES.frame.richness, aes(x=Longitude, y=Latitude), color="blue", shape=2, size=1) +
+  facet_wrap(~LUI.range.level) + guides(fill=FALSE)  
+p 
+ggsave(paste(path2temp, "/ES.frame.richness.CaseDistributionPanel_TopBiomes.png",sep=""), width=18, height=10, units="cm")
+
+### plot study locations using fancy ggplot
+### Yield
+p <- biome_map +
+  geom_point(data=ES.frame.yield, aes(x=Longitude, y=Latitude), color="blue", shape=4, size=1) + 
+  guides(fill=FALSE)
+p 
+ggsave(paste(path2temp, "/ES.frame.yield.CaseDistributionAll_TopBiomes.png",sep=""), width=18, height=10, units="cm")
+
+ES.frame.yield <- within(ES.frame.yield, LUI.range.level <- factor(LUI.range.level, levels = c("low-low","low-medium","low-high","medium-medium","medium-high","high-high"))) # resort levels for plotting
+p <- biome_map +  
+  geom_point(data=ES.frame.yield, aes(x=Longitude, y=Latitude), color="blue", shape=2, size=1) +
+  facet_wrap(~LUI.range.level) + guides(fill=FALSE) 
+p 
+ggsave(paste(path2temp, "/ES.frame.yield.CaseDistributionPanel_TopBiomes.png",sep=""), width=18, height=10, units="cm")
 
 ```
 
