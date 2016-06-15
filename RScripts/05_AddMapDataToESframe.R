@@ -39,17 +39,17 @@ colnames(ES.frame)[which(names(ES.frame) == "realms_extract$WWF_MHTNAM")]<-"BIOM
 
 ### reclassify Biomes in coarse classes
 ES.frame$BIOME <- paste(ES.frame$BIOME)
-ES.frame$BIOME[(ES.frame$BIOME %in% c("Tropical and Subtropical Moist Broadleaf Forests",
+ES.frame$BIOME[(ES.frame$BIOME %in% c("Tropical and Subtropical Grasslands, Savannas and Shrublands",
+                                      "Tropical and Subtropical Moist Broadleaf Forests",
                                       "Tropical and Subtropical Dry Broadleaf Forests",
                                       "Tropical and Subtropical Coniferous Forests",
-                                      "Tropical and Subtropical Coniferous Forests"))] <- "Tropical_Forests"
+                                      "Tropical and Subtropical Coniferous Forests"))] <- "Tropical_Forests_Savannas"
 ES.frame$BIOME[(ES.frame$BIOME %in% c("Temperate Broadleaf and Mixed Forests",
                                       "Temperate Conifer Forests",
                                       "Boreal Forests/Taiga"))] <- "Temperate_Boreal_Forests"
 ES.frame$BIOME[(ES.frame$BIOME %in% c("Mediterranean Forests, Woodlands and Scrub",
                                       "Deserts and Xeric Shrublands"))] <- "Drylands"
-ES.frame$BIOME[(ES.frame$BIOME %in% c("Tropical and Subtropical Grasslands, Savannas and Shrublands",
-                                      "Flooded Grasslands and Savannas"))] <- "Tropical_Grasslands"
+ES.frame$BIOME[(ES.frame$BIOME %in% c("Flooded Grasslands and Savannas"))] <- NA
 ES.frame$BIOME[(ES.frame$BIOME %in% c("Temperate Grasslands, Savannas and Shrublands",
                                       "Montane Grasslands and Shrublands"))]<-"Temperate_Montane_Grasslands"
 ES.frame$BIOME[(ES.frame$BIOME=="NA")]<-NA
