@@ -13,7 +13,7 @@
 ### 09.1.1. plot cross diagrams
 ############################################################################
 # predict for each covariate combination
-newdat <- expand.grid(LUI.range.level=levels(ES.frame.richness$LUI.range.level))
+newdat <- expand.grid(LUI.range.level=levels(ES.frame$LUI.range.level))
 newdat$level <- newdat$LUI.range.level
 #newdat$level <- factor(newdat$level, levels = rev(levels(newdat$level)))
 
@@ -37,16 +37,37 @@ newdat[7,] <- data.frame(LUI.range.level=NA, level=NA,
 levels(newdat$level) <- c(levels(newdat$level),"Grand mean")
 newdat$level[7] <- "Grand mean"
 
-# plot crosses for each covariate combination
-plot <- ggplot(data=newdat) + 
-  geom_point(aes(x=logRR.yield, y=logRR.richness, color=level), size=4) +
-  geom_pointrange(aes(x=logRR.yield, y=logRR.richness, ymin=logRR.richness - (1.96*logRR.richness.se), 
-                                   ymax=logRR.richness + (1.96*logRR.richness.se),color=level), size=1.5) +
-  geom_segment(aes(x=logRR.yield - (1.96*logRR.yield.se), xend=logRR.yield + (1.96*logRR.yield.se), y = logRR.richness, yend = logRR.richness, color=level),size=1.5) +
-  geom_hline(aes(yintercept=0), linetype="twodash") + geom_vline(aes(xintercept=0), linetype="twodash") +
+modelData <- subset(ES.frame, Richness.Log.RR.Var>0 & Yield.Log.RR.Var>0)
+## calculation of 95%CI in forest() from metafor
+#vi <- sei^2
+#ci.lb <- yi - qnorm(alpha/2, lower.tail=FALSE) * sei
+#ci.ub <- yi + qnorm(alpha/2, lower.tail=FALSE) * sei
+
+### plot rawdata
+plot <- ggplot() +
+  geom_point(aes(x=modelData$Yield.Log.RR, y=modelData$Richness.Log.RR,color=modelData$LUI.range.level),alpha=0.5) +
+  geom_pointrange(aes(x=modelData$Yield.Log.RR, y=modelData$Richness.Log.RR, ymin=modelData$Richness.Log.RR - (1.96*sqrt(modelData$Richness.Log.RR)), ymax=modelData$Richness.Log.RR + (1.96*sqrt(modelData$Richness.Log.RR)),color=modelData$LUI.range.level),alpha=0.5) +
+  geom_segment(aes(x=modelData$Yield.Log.RR - (1.96*sqrt(modelData$Yield.Log.RR.Var)), xend=modelData$Yield.Log.RR + (1.96*sqrt(modelData$Yield.Log.RR.Var)), y = modelData$Richness.Log.RR, yend = modelData$Richness.Log.RR, color=modelData$LUI.range.level),alpha=0.5) +
   scale_y_continuous(labels=trans_format("exp",comma_format(digits=2))) + 
   scale_x_continuous(labels=trans_format("exp",comma_format(digits=2))) +
-  ylab("RR (Species Richness)") + xlab("RR (Yield)") + labs(color='level') +
+  scale_colour_manual(values=c("low-low"='#d0d1e6',"medium-medium"="#a6bddb","high-high"="#045a8d","low-medium"='#fee090',"medium-high"='#fc8d59',"low-high"="#d73027","Grand mean"="darkgrey"),breaks=c(levels(modelData$LUI.range.level),"Grand mean")) +
+  ylab("RR (Species Richness)") + xlab("RR (Yield)") + labs(color='') +
+  theme(axis.title = element_text(size = rel(1.5)), axis.text = element_text(size = rel(1.5)),legend.text=element_text(size = rel(1.5)),legend.title=element_text(size = rel(1.5))) 
+print(plot)
+ggsave(plot, file = path2temp %+% "rawdata_LUI.png", width = 20, height = 8, type = "cairo-png")
+
+
+# plot crosses for each covariate combination
+plot <- ggplot() + 
+  geom_hline(aes(yintercept=0), linetype="twodash") + geom_vline(aes(xintercept=0), linetype="twodash") +
+  geom_point(aes(x=newdat$logRR.yield, y=newdat$logRR.richness, color=newdat$level), size=4) +
+  geom_pointrange(aes(x=newdat$logRR.yield, y=newdat$logRR.richness, ymin=newdat$logRR.richness - (1.96*newdat$logRR.richness.se), 
+                                   ymax=newdat$logRR.richness + (1.96*newdat$logRR.richness.se),color=newdat$level), size=1.5) +
+  geom_segment(aes(x=newdat$logRR.yield - (1.96*newdat$logRR.yield.se), xend=newdat$logRR.yield + (1.96*newdat$logRR.yield.se), y = newdat$logRR.richness, yend = newdat$logRR.richness, color=newdat$level),size=1.5) +
+  scale_y_continuous(labels=trans_format("exp",comma_format(digits=2))) + 
+  scale_x_continuous(labels=trans_format("exp",comma_format(digits=2))) +
+  scale_colour_manual(values=c("low-low"='#d0d1e6',"medium-medium"="#a6bddb","high-high"="#045a8d","low-medium"='#fee090',"medium-high"='#fc8d59',"low-high"="#d73027","Grand mean"="darkgrey"),breaks=c(levels(modelData$LUI.range.level),"Grand mean")) +
+  ylab("RR (Species Richness)") + xlab("RR (Yield)") + labs(color='') +
   theme(axis.title = element_text(size = rel(1.5)), axis.text = element_text(size = rel(1.5)),legend.text=element_text(size = rel(1.5)),legend.title=element_text(size = rel(1.5))) 
 print(plot)
 ggsave(plot, file = path2temp %+% "CrossPlot_LUI_rma.png", width = 20, height = 8, type = "cairo-png")
