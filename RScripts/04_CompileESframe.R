@@ -89,6 +89,7 @@ for(i in unique(dataimp$study.case)){
 }
 
 ES.frame$LUI.range.level <- factor(paste(ES.frame$Low.LUI,ES.frame$High.LUI,sep="-"))
+ES.frame$LUI.range.level <- factor(ES.frame$LUI.range.level,levels=c("low-low","low-medium","low-high","medium-medium","medium-high","high-high")) # reorder factor levels
 
 ES.frame$LUI.range <- NA
 ES.frame$LUI.range[ES.frame$LUI.range.level %in% c("low-low","medium-medium","high-high")] <- 0

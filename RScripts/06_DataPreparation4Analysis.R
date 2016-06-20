@@ -45,11 +45,9 @@ names(ES.frame.yield)[1:2] <- c("Log.RR","Log.RR.Var")
 ES.frame.richness <- ES.frame.richness[complete.cases(ES.frame.richness),] 
 ES.frame.yield <- ES.frame.yield[complete.cases(ES.frame.yield),] 
 
-ES.frame.richness$LUI.range.level <- factor(ES.frame.richness$LUI.range.level,levels=c("low-low","low-medium","low-high","medium-medium","medium-high","high-high")) # reorder factor levels
 ES.frame.richness$Study.ID <- factor(ES.frame.richness$Study.ID)[drop=T] # drop unused study levels
 ES.frame.richness$Study.Case <- factor(ES.frame.richness$Study.Case)[drop=T] # drop unused study levels
 
-ES.frame.yield$LUI.range.level <- factor(ES.frame.yield$LUI.range.level,levels=c("low-low","low-medium","low-high","medium-medium","medium-high","high-high")) # reorder factor levels
 ES.frame.yield$Study.ID <- factor(ES.frame.yield$Study.ID)[drop=T] # drop unused study levels
 ES.frame.yield$Study.Case <- factor(ES.frame.yield$Study.Case)[drop=T] # drop unused study levels
 
