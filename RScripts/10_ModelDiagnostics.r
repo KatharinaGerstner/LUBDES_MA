@@ -12,7 +12,7 @@
 ### 09.1. model diagnostics
 ############################################################################
 
-mods.list <- c("None","LUI","Full","Select")
+mods.list <- c("None","LUI","Context","Full","Select")
 
 ### run loop over all models
 for(mods in mods.list){

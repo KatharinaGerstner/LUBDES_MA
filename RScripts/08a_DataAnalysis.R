@@ -86,6 +86,7 @@ rma.mv.func <- function(df, moderators, fit.method)
 ###########################################################################
 Richness.MA.model[["None"]] <- rma.mv.func(df=modelDataRichness, moderators=c(1), fit.method="REML")
 Richness.MA.model[["LUI"]] <- rma.mv.func(df=modelDataRichness, moderators=c(-1,"LUI.range.level"), fit.method="REML")
+Richness.MA.model[["Context"]] <- rma.mv.func(df=modelDataRichness, moderators=c(-1,"Product", "Species.Group", "BIOME"), fit.method="REML")
 Richness.MA.model[["Full"]] <- rma.mv.func(df=modelDataRichness, moderators=c(-1,"LUI.range.level", "Product", "Species.Group", "BIOME", "LUI.range.level:Product", "LUI.range.level:Species.Group", "LUI.range.level:BIOME"), fit.method="REML")
 model2select <- try(rma.mv(yi=Log.RR, V=M.matrix(modelDataRichness)+diag(modelDataRichness$Log.RR.Var), 
                        mods=~LUI.range.level + Product + Species.Group + BIOME + LUI.range.level:Product + LUI.range.level:Species.Group + LUI.range.level:BIOME,
@@ -111,6 +112,7 @@ Richness.MA.model[["Select"]] <- rma.mv.func(df=modelDataRichness, moderators=c(
 ###########################################################################
 Yield.MA.model[["None"]] <- rma.mv.func(df=modelDataYield, moderators=c(1), fit.method="REML")
 Yield.MA.model[["LUI"]] <- rma.mv.func(df=modelDataYield, moderators=c(-1,"LUI.range.level"), fit.method="REML")
+Yield.MA.model[["Context"]] <- rma.mv.func(df=modelDataYield, moderators=c(-1,"Product", "BIOME"), fit.method="REML")
 Yield.MA.model[["Full"]] <- rma.mv.func(df=modelDataYield, moderators=c(-1,"LUI.range.level", "Product", "BIOME", "LUI.range.level:Product", "LUI.range.level:BIOME"), fit.method="REML")
 model2select <- try(rma.mv(yi=Log.RR, V=M.matrix(modelDataYield)+diag(modelDataYield$Log.RR.Var), 
                            mods=~LUI.range.level + Product + BIOME + LUI.range.level:Product + LUI.range.level:BIOME,
@@ -130,17 +132,13 @@ if(inherits(model2select, "try-error")){
 model.select <- RMASelect(model2select)
 Yield.MA.model[["Select"]] <- rma.mv.func(df=modelDataYield, moderators=c(-1,model.select$call$mods[[2]]), fit.method="REML")
 
-###########################################################################
-### save models as Rdata
-###########################################################################
-save(Richness.MA.model,Yield.MA.model,modelDataRichness,modelDataYield,file=path2temp %+% "Models.Rdata")
 
 ###########################################################################
 ### extract fit statistics
 ###########################################################################
 fit.tab.richness <- data.frame(model=names(Richness.MA.model),logLik=NA, deviance=NA, AIC=NA, BIC=NA, AICc=NA, R2.LMM.m=NA,R2.LMM.c=NA)
 fit.tab.yield <- data.frame(model=names(Yield.MA.model),logLik=NA, deviance=NA, AIC=NA, BIC=NA, AICc=NA, R2.LMM.m=NA,R2.LMM.c=NA)
-for(i in 1:4){
+for(i in 1:length(Richness.MA.model)){
   var.fixed <- lapply(Richness.MA.model,function(x) {ifelse(length(coef(x))==1,0,var(coef(x)))})
   fit.tab.richness[i,2:6] <- t(fitstats.rma(Richness.MA.model[[i]]))
 #  fit.tab.richness$R2.GH <- lapply(Richness.MA.model,function(x) {1-var(residuals(x))/var(ES.frame.richness$Log.RR)})

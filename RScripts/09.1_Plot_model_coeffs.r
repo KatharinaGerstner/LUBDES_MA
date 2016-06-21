@@ -46,7 +46,7 @@ modelData <- subset(ES.frame, Richness.Log.RR.Var>0 & Yield.Log.RR.Var>0)
 ### plot rawdata
 plot <- ggplot() +
   geom_point(aes(x=modelData$Yield.Log.RR, y=modelData$Richness.Log.RR,color=modelData$LUI.range.level),alpha=0.5) +
-  geom_pointrange(aes(x=modelData$Yield.Log.RR, y=modelData$Richness.Log.RR, ymin=modelData$Richness.Log.RR - (1.96*sqrt(modelData$Richness.Log.RR)), ymax=modelData$Richness.Log.RR + (1.96*sqrt(modelData$Richness.Log.RR)),color=modelData$LUI.range.level),alpha=0.5) +
+  geom_pointrange(aes(x=modelData$Yield.Log.RR, y=modelData$Richness.Log.RR, ymin=modelData$Richness.Log.RR - (1.96*sqrt(modelData$Richness.Log.RR.Var)), ymax=modelData$Richness.Log.RR + (1.96*sqrt(modelData$Richness.Log.RR.Var)),color=modelData$LUI.range.level),alpha=0.5) +
   geom_segment(aes(x=modelData$Yield.Log.RR - (1.96*sqrt(modelData$Yield.Log.RR.Var)), xend=modelData$Yield.Log.RR + (1.96*sqrt(modelData$Yield.Log.RR.Var)), y = modelData$Richness.Log.RR, yend = modelData$Richness.Log.RR, color=modelData$LUI.range.level),alpha=0.5) +
   scale_y_continuous(labels=trans_format("exp",comma_format(digits=2))) + 
   scale_x_continuous(labels=trans_format("exp",comma_format(digits=2))) +

@@ -121,38 +121,14 @@ for(i in c("LUI.range.level","Species.Group","Product","BIOME")){
 ```
 
 ```{r biome_map, echo=F}
-setwd(path2temp %+% "/") 
-ecoregions <- readOGR(".","tnc_terr_ecoregions",verbose = FALSE)
-setwd(path2wd)
-
-ecoregions@data$BIOME <- ecoregions@data$WWF_MHTNAM
-ecoregions@data$BIOME <- paste(ecoregions@data$BIOME)
-ecoregions@data$BIOME[(ecoregions@data$BIOME %in% c("Tropical and Subtropical Moist Broadleaf Forests",
-                                      "Tropical and Subtropical Dry Broadleaf Forests",
-                                      "Tropical and Subtropical Coniferous Forests",
-                                      "Tropical and Subtropical Coniferous Forests"))] <- "Tropical_Forests"
-ecoregions@data$BIOME[(ecoregions@data$BIOME %in% c("Temperate Broadleaf and Mixed Forests",
-                                      "Temperate Conifer Forests",
-                                      "Boreal Forests/Taiga"))] <- "Temperate_Boreal_Forests"
-ecoregions@data$BIOME[(ecoregions@data$BIOME %in% c("Mediterranean Forests, Woodlands and Scrub",
-                                      "Deserts and Xeric Shrublands"))] <- "Drylands"
-ecoregions@data$BIOME[(ecoregions@data$BIOME %in% c("Tropical and Subtropical Grasslands, Savannas and Shrublands",
-                                      "Flooded Grasslands and Savannas"))] <- "Tropical_Grasslands"
-ecoregions@data$BIOME[(ecoregions@data$BIOME %in% c("Temperate Grasslands, Savannas and Shrublands",
-                                      "Montane Grasslands and Shrublands"))]<-"Temperate_Montane_Grasslands"
-ecoregions@data$BIOME[(ecoregions@data$BIOME %in% c("Inland Water","NA"))]<-NA
-ecoregions@data$BIOME <- factor(ecoregions@data$BIOME)
-
-biome_mapdata <- fortify(ecoregions, region="BIOME") #  convert shapefile to a data frame, extract biomes 
-save(biome_mapdata, file=path2temp %+% "biome_mapdata.Rdata")
-
 load(path2temp %+% "biome_mapdata.Rdata")
 biome_map <- ggplot() +
-     geom_polygon(data = biome_mapdata, aes(x = long, y = lat, group = group, fill = id)) +
-     scale_x_continuous(breaks=c(-90, 0, 90), labels=c("90° W", "0", "90° E")) +
+     geom_polygon(data = biome_mapdata, aes(x = long, y = lat, group = group, fill = BIOME)) +
+     scale_x_continuous(breaks=c(-90, 0, 90), labels=c("90°W", "0", "90°E")) +
      scale_y_continuous(breaks=c(-30, 0, 30, 60), labels=c("30°S","0°", "30°N","60°N"),limits=c(-55,90)) +
      xlab("") + ylab("") +
-     scale_fill_manual(values=c(rgb(255,127,0, max = 255), 
+     scale_fill_manual(values=c(rgb(255,237,160,max=255),
+                                rgb(255,127,0, max = 255), 
                                 rgb(152,78,163, max = 255), 
                                 rgb(247,129,191, max = 255), 
                                 rgb(77,175,74, max = 255), 
@@ -161,13 +137,13 @@ biome_map <- ggplot() +
                                 rgb(255,255,51, max = 255),
                                 rgb(153,153,153, max = 255)), 
                        name="BIOME",
-                       limits=c("Drylands",  
+                       limits=c("Deserts","Drylands",  
                                "Temperate_Boreal_Forests","Temperate_Montane_Grasslands",
                                 "Tropical_Forests","Tropical_Grasslands",
                                 "Tundra",
                                 "Mangroves",
                                 "Rock and Ice"), 
-                       labels=c("Drylands",  
+                       labels=c("Deserts","Drylands",  
                                 "Temperate Boreal Forests","Temperate Montane Grasslands",
                                 "Tropical Forests","Tropical Grasslands",
                                 "Tundra",
@@ -185,7 +161,7 @@ world_map <- map_data("world")
 p <- ggplot() +
   geom_polygon(data=world_map, aes(x=long, y=lat, group=group),fill="white",color="black",lwd=0.2) + 
   geom_point(data=ES.frame.richness, aes(x=Longitude, y=Latitude), color="blue", shape=4, size=1) +
-  scale_x_continuous(breaks=c(-90, 0, 90), labels=c("90° W", "0", "90° E")) +
+  scale_x_continuous(breaks=c(-90, 0, 90), labels=c("90°W", "0", "90°E")) +
   scale_y_continuous(breaks=c(-30, 0, 30, 60), labels=c("30°S","0°", "30°N","60°N"),limits=c(-55,90)) +
   xlab("") + ylab("")
 p 
@@ -197,7 +173,7 @@ ES.frame.richness <- within(ES.frame.richness, LUI.range.level <- factor(LUI.ran
 p <- ggplot() +
   geom_polygon(data=world_map, aes(x=long, y=lat, group=group),fill="white",color="black",lwd=0.2) + 
   geom_point(data=ES.frame.richness, aes(x=Longitude, y=Latitude), color="blue", shape=2, size=1) +
-  scale_x_continuous(breaks=c(-90, 0, 90), labels=c("90° W", "0", "90° E")) +
+  scale_x_continuous(breaks=c(-90, 0, 90), labels=c("90°W", "0", "90°E")) +
   scale_y_continuous(breaks=c(-30, 0, 30, 60), labels=c("30°S","0°", "30°N","60°N"),limits=c(-55,90)) +
   xlab("") + ylab("") +
   facet_wrap(~LUI.range.level)   
@@ -207,7 +183,7 @@ ggsave(paste(path2temp, "/ES.frame.richness.CaseDistributionPanel.png",sep=""), 
 p <- ggplot() +
   geom_polygon(data=world_map, aes(x=long, y=lat, group=group),fill="white",color="black",lwd=0.2) + 
   geom_point(data=ES.frame.yield, aes(x=Longitude, y=Latitude), color="blue", shape=4, size=1) +
-  scale_x_continuous(breaks=c(-90, 0, 90), labels=c("90° W", "0", "90° E")) +
+  scale_x_continuous(breaks=c(-90, 0, 90), labels=c("90°W", "0", "90°E")) +
   scale_y_continuous(breaks=c(-30, 0, 30, 60), labels=c("30°S","0°", "30°N","60°N"),limits=c(-55,90)) +
   xlab("") + ylab("")
 p 
@@ -220,7 +196,7 @@ ES.frame.yield <- within(ES.frame.yield, LUI.range.level <- factor(LUI.range.lev
 p <- ggplot() +
   geom_polygon(data=world_map, aes(x=long, y=lat, group=group),fill="white",color="black",lwd=0.2) + 
   geom_point(data=ES.frame.yield, aes(x=Longitude, y=Latitude), color="blue", shape=2, size=1) +
-  scale_x_continuous(breaks=c(-90, 0, 90), labels=c("90° W", "0", "90° E")) +
+  scale_x_continuous(breaks=c(-90, 0, 90), labels=c("90°W", "0", "90°E")) +
   scale_y_continuous(breaks=c(-30, 0, 30, 60), labels=c("30°S","0°", "30°N","60°N"),limits=c(-55,90)) +
   xlab("") + ylab("") +
   facet_wrap(~LUI.range.level)   

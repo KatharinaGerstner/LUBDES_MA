@@ -98,7 +98,7 @@ ES.frame$LUI.range[ES.frame$LUI.range.level %in% c("low-high")] <- 2
 
 ES.frame$Species.Group<-paste(ES.frame$Species.Group)
 
-ES.frame$Species.Group[(ES.frame$Species.Group %in% c("all plants"))]<-"woody plants"
+ES.frame$Species.Group[(ES.frame$Species.Group %in% c("all plants","non-woody plants", "woody plants"))] <- "plants"
 ES.frame$Species.Group[ES.frame$Species.Group %in% c("birds","mammals","reptiles/amphibians")]<-"vertebrates"
 ES.frame$Species.Group[ES.frame$Species.Group %in% c("non-arthropod invertebrates","arthropods")]<-"invertebrates"
 ES.frame$Species.Group[(ES.frame$Species.Group=="fungi")]<-NA

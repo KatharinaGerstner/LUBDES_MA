@@ -181,13 +181,28 @@ knit(path2wd %+% "07.1_DescriptiveStatsOfESframe.Rmd") # summary statistics, plo
 
 ### FREQUENTIST ANALYSIS
 source(path2wd %+% "08a_DataAnalysis.R")
+save(Richness.MA.model,Yield.MA.model,modelDataRichness,modelDataYield,file=path2temp %+% "Models.Rdata")
+rm(list=objects()) # empty workspace, keep libraries loaded
 
 ############################################################################
 ###  Plotting & Model Diagnostics
 ############################################################################
+### reload required data and functions
+set.list <-  .setwdntemp()
+path2temp <- set.list[[1]]
+path2wd <- set.list[[2]]
+"%+%" <- function(x,y)paste(x,y,sep="")
+source(path2wd %+% "01_load_libraries_and_functions.r")
+load(file=path2temp %+% "SavedData.Rdata")
 load(path2temp %+% "Models.Rdata")
-source(path2wd %+% "09.1_Plot_model_coeffs.r") # cross plots for LUI range level and forest plots for model 
-source(path2wd %+% "09.2_Plot_YieldPotential_vs_BiodiveristyRisk.r") # Mapping effects of LUI on richness/yield using the full model
+
+### cross plots for LUI range level and forest plots for model 
+source(path2wd %+% "09.1_Plot_model_coeffs.r") 
+
+### Mapping effects of LUI on richness/yield using the full model
+source(path2wd %+% "09.2_Plot_YieldPotential_vs_BiodiversityRisk.r") 
+
+### Model diagnostics
 source(path2wd %+% "10_ModelDiagnostics.R") 
 
 # ### BAYESIAN ANALYSIS

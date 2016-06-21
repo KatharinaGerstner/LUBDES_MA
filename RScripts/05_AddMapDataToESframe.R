@@ -32,25 +32,42 @@ if (file.exists("terr-ecoregions-TNC.zip")==FALSE){
 
 ecoregions <- readOGR(".","tnc_terr_ecoregions",verbose = FALSE)
 
+### reclassify Biomes in coarse classes
+ecoregions@data$BIOME <- ecoregions@data$WWF_MHTNAM
+ecoregions@data$BIOME <- paste(ecoregions@data$BIOME)
+ecoregions@data$BIOME[(ecoregions@data$BIOME %in% c("Tropical and Subtropical Moist Broadleaf Forests",
+                                                    "Tropical and Subtropical Dry Broadleaf Forests",
+                                                    "Tropical and Subtropical Coniferous Forests",
+                                                    "Tropical and Subtropical Coniferous Forests"))] <- "Tropical_Forests"
+ecoregions@data$BIOME[(ecoregions@data$BIOME %in% c("Temperate Broadleaf and Mixed Forests",
+                                                    "Temperate Conifer Forests",
+                                                    "Boreal Forests/Taiga"))] <- "Temperate_Boreal_Forests"
+ecoregions@data$BIOME[(ecoregions@data$BIOME %in% c("Mediterranean Forests, Woodlands and Scrub"))] <- "Drylands"
+ecoregions@data$BIOME[(ecoregions@data$BIOME %in% c("Tropical and Subtropical Grasslands, Savannas and Shrublands",
+                                                    "Flooded Grasslands and Savannas"))] <- "Tropical_Grasslands"
+ecoregions@data$BIOME[(ecoregions@data$BIOME %in% c("Temperate Grasslands, Savannas and Shrublands",
+                                                    "Montane Grasslands and Shrublands"))]<-"Temperate_Montane_Grasslands"
+ecoregions@data$BIOME[(ecoregions@data$BIOME %in% c("Deserts and Xeric Shrublands"))]<-"Deserts"
+ecoregions@data$BIOME[(ecoregions@data$BIOME %in% c("Inland Water","NA"))]<-NA
+ecoregions@data$BIOME <- factor(ecoregions@data$BIOME)
+biome_mapdata <- fortify(ecoregions, region="BIOME") #  convert shapefile to a data frame, extract biomes 
+names(biome_mapdata)[grep("id",names(biome_mapdata))] <- "BIOME"
+biome_mapdata$BIOME <- factor(biome_mapdata$BIOME)
+
+## reduce size of the data.frame
+biome_mapdata <- subset(biome_mapdata, hole==FALSE & lat>=-55) # remove points equal to holes (not plotted in ggplot cf https://github.com/hadley/ggplot2/wiki/plotting-polygon-shapefiles) and cut out Antarctica
+biome_mapdata$lon <- round(biome_mapdata$lon, digits=2) # reduce resolution
+biome_mapdata$lat <- round(biome_mapdata$lat, digits=2) # reduce resolution
+biome_mapdata <- biome_mapdata[!duplicated(biome_mapdata[,c("long","lat","BIOME")]),] # remove duplicates not needed for plotting
+biome_mapdata <- biome_mapdata[,c("long","lat","BIOME","group")] # remove columns not needed for plotting
+
+save(biome_mapdata, file=path2temp %+% "biome_mapdata.Rdata")
+
 # extract ecoregions
 realms_extract <- extract(ecoregions,lonlat)
-ES.frame <- cbind(ES.frame,realms_extract$WWF_MHTNAM)
-colnames(ES.frame)[which(names(ES.frame) == "realms_extract$WWF_MHTNAM")]<-"BIOME"
+ES.frame <- cbind(ES.frame,realms_extract$BIOME)
+colnames(ES.frame)[which(names(ES.frame) == "realms_extract$BIOME")]<-"BIOME"
 
-### reclassify Biomes in coarse classes
-ES.frame$BIOME <- paste(ES.frame$BIOME)
-ES.frame$BIOME[(ES.frame$BIOME %in% c("Tropical and Subtropical Moist Broadleaf Forests",
-                                      "Tropical and Subtropical Dry Broadleaf Forests",
-                                      "Tropical and Subtropical Coniferous Forests"))] <- "Tropical_Forests"
-ES.frame$BIOME[(ES.frame$BIOME %in% c("Temperate Broadleaf and Mixed Forests",
-                                      "Temperate Conifer Forests",
-                                      "Boreal Forests/Taiga"))] <- "Temperate_Boreal_Forests"
-ES.frame$BIOME[(ES.frame$BIOME %in% c("Mediterranean Forests, Woodlands and Scrub") <- "Drylands"
-ES.frame$BIOME[(ES.frame$BIOME %in% c("Tropical and Subtropical Grasslands, Savannas and Shrublands","Flooded Grasslands and Savannas"))] <- "Tropical Grasslands"
-ES.frame$BIOME[(ES.frame$BIOME %in% c("Temperate Grasslands, Savannas and Shrublands",
-                                      "Montane Grasslands and Shrublands"))]<-"Temperate_Montane_Grasslands"
-ES.frame$BIOME[ES.frame$BIOME %in% c("Deserts and Xeric Shrublands")] <- "Deserts"
-ES.frame$BIOME[ES.frame$BIOME %in% c("Inland Water","NA")]<-NA                                       
 ES.frame$BIOME <- factor(ES.frame$BIOME)
 
 setwd(path2wd)
