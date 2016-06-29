@@ -35,7 +35,7 @@ newdat.richness <- subset(newdat.richness,n>0)
 newdat.richness <- newdat.richness[,c("Species.Group","Product","BIOME","n","logRR","logRR.se","logRR.ci.lb","logRR.ci.ub")]
 
 write.csv(newdat.richness,file=path2temp %+% "preds.richness.context.csv",row.names=F)
-print(xtable(newdat.richness, caption="Response ratios for the context model for richness and available evidence"),type="latex",include.rownames=F,size="\\fontsize{9pt}{10pt}\\selectfont")
+#print(xtable(newdat.richness, caption="Response ratios for the context model for richness and available evidence"),type="latex",include.rownames=F,size="\\fontsize{9pt}{10pt}\\selectfont")
 
 ############################################################################
 ### 09.2.2. Predictions for yield
@@ -62,7 +62,7 @@ newdat.yield <- subset(newdat.yield,n>0)
 newdat.yield <- newdat.yield[,c("Product","BIOME","n","logRR","logRR.se","logRR.ci.lb","logRR.ci.ub")]
 
 write.csv(newdat.yield,file=path2temp %+% "preds.yield.context.csv",row.names=F)
-print(xtable(newdat.yield, caption="Response ratios for the context model for yield and available evidence"),type="latex",include.rownames=F)
+#print(xtable(newdat.yield, caption="Response ratios for the context model for yield and available evidence"),type="latex",include.rownames=F)
 
 save(newdat.richness,newdat.yield,file=path2temp %+% "newdat.context.Rdata")
 ############################################################################
@@ -71,20 +71,9 @@ save(newdat.richness,newdat.yield,file=path2temp %+% "newdat.context.Rdata")
 load(path2temp %+% "newdat.context.Rdata") # newdat.richness,newdat.yield cf. module 09.2.2
 load(path2temp %+% "biome_mapdata.Rdata") # biome_mapdata cf. module 07.1_biome_mapdata
 
-# install.packages("bigmemory")
-# library(bigmemory)
-# biome_mapdata_logRR.richness <- big.matrix(nrow=nrow(biome_mapdata)*nrow(newdat.richness),ncol=ncol(biome_mapdata))
-# biome_mapdata_logRR.richness <- biome_mapdata[rep(seq_len(nrow(biome_mapdata)), times=nrow(newdat.richness)),] # reaches maximum of memory size
-#biome_mapdata_logRR.richness$LUI.range.level <- rep(newdat.richness$LUI.range.level,each=nrow(biome_mapdata))
-
-p <- vector("list", length(levels(modelDataRichness$Product)))
 for(SG in levels(newdat.richness$Species.Group)){
   newdat.SG <- subset(newdat.richness, n>1 & Species.Group==SG)
-#   if(SG=="non-woody plants") SG <- "non-woody_plants" # rename this level for filenames otherwise blank space leads to issues when plotting with latex
-#   if(SG=="woody plants") SG <- "woody_plants" # rename this level for filenames otherwise blank space leads to issues when plotting with latex
-  i <- 1
   for(P in levels(modelDataRichness$Product)){
-    j <- 1
     biome_mapdata$RR <- NA
     for(B in levels(modelDataRichness$BIOME)){
       temp <- exp(newdat.SG$logRR[newdat.SG$Product==P & newdat.SG$BIOME ==B])
@@ -100,8 +89,6 @@ for(SG in levels(newdat.richness$Species.Group)){
       xlab("") + ylab("") 
     p 
     ggsave(path2temp %+% "RR_TopBiomes_" %+% SG %+% "_" %+% P %+% ".png", width=19, height=10, units="cm")
-    j <- j+1
-    i <- i+1
   }
 }
 
@@ -122,8 +109,6 @@ for(P in levels(modelDataYield$Product)){
   p 
   ggsave(path2temp %+% "RR_TopBiomes_" %+% P %+% ".png", width=19, height=10, units="cm")
 }
-
-
 
 
 ############################################################################
@@ -153,7 +138,7 @@ newdat.richness <- subset(newdat.richness,n>0)
 newdat.richness <- newdat.richness[,c("Species.Group","Product","LUI.range.level","BIOME","n","logRR","logRR.se","logRR.ci.lb","logRR.ci.ub")]
 
 write.csv(newdat.richness,file=path2temp %+% "preds.richness.select.csv",row.names=F)
-print(xtable(newdat.richness, caption="Response ratios for the full model for richness and available evidence"),type="latex",include.rownames=F,size="\\fontsize{9pt}{10pt}\\selectfont")
+#print(xtable(newdat.richness, caption="Response ratios for the full model for richness and available evidence"),type="latex",include.rownames=F,size="\\fontsize{9pt}{10pt}\\selectfont")
 
 ############################################################################
 ### 09.2.2. Predictions for yield
@@ -181,7 +166,7 @@ newdat.yield <- subset(newdat.yield,n>0)
 newdat.yield <- newdat.yield[,c("Product","LUI.range.level","BIOME","n","logRR","logRR.se","logRR.ci.lb","logRR.ci.ub")]
 
 write.csv(newdat.yield,file=path2temp %+% "preds.yield.select.csv",row.names=F)
-print(xtable(newdat.yield, caption="Response ratios for the full model for yield and available evidence"),type="latex",include.rownames=F)
+#print(xtable(newdat.yield, caption="Response ratios for the full model for yield and available evidence"),type="latex",include.rownames=F)
 
 save(newdat.richness,newdat.yield,file=path2temp %+% "newdat.select.Rdata")
 ############################################################################
@@ -190,20 +175,9 @@ save(newdat.richness,newdat.yield,file=path2temp %+% "newdat.select.Rdata")
 load(path2temp %+% "newdat.select.Rdata") # newdat.richness,newdat.yield cf. module 09.2.2
 load(path2temp %+% "biome_mapdata.Rdata") # biome_mapdata cf. module 07.1_biome_mapdata
 
-# install.packages("bigmemory")
-# library(bigmemory)
-# biome_mapdata_logRR.richness <- big.matrix(nrow=nrow(biome_mapdata)*nrow(newdat.richness),ncol=ncol(biome_mapdata))
-# biome_mapdata_logRR.richness <- biome_mapdata[rep(seq_len(nrow(biome_mapdata)), times=nrow(newdat.richness)),] # reaches maximum of memory size
-#biome_mapdata_logRR.richness$LUI.range.level <- rep(newdat.richness$LUI.range.level,each=nrow(biome_mapdata))
-
-p <- vector("list", length(levels(modelDataRichness$Product)))
 for(SG in levels(newdat.richness$Species.Group)){
   newdat.SG <- subset(newdat.richness, n>1 & Species.Group==SG)
-#   if(SG=="non-woody plants") SG <- "non-woody_plants" # rename this level for filenames otherwise blank space leads to issues when plotting with latex
-#   if(SG=="woody plants") SG <- "woody_plants" # rename this level for filenames otherwise blank space leads to issues when plotting with latex
-  i <- 1
   for(P in levels(modelDataRichness$Product)){
-    j <- 1
     for(LUI in levels(modelDataRichness$LUI.range.level)){
       biome_mapdata$RR <- NA
       for(B in levels(modelDataRichness$BIOME)){
@@ -220,13 +194,9 @@ for(SG in levels(newdat.richness$Species.Group)){
         xlab("") + ylab("") 
       p 
       ggsave(path2temp %+% "RR_TopBiomes_" %+% SG %+% "_" %+% P %+% "_" %+% LUI %+% ".png", width=19, height=10, units="cm")
-      j <- j+1
     }
-    i <- i+1
   }
 }
-save(p,file=path2temp %+% "Plots_RR_TopBiomes_Richness.Rdata")
-#grid.arrange(p[[1]],p[[2]],p[[3]],ncol=6, nrow=3)
 
 for(P in levels(modelDataYield$Product)){
   for(LUI in levels(modelDataYield$LUI.range.level)){

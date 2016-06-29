@@ -200,7 +200,10 @@ load(path2temp %+% "Models.Rdata")
 source(path2wd %+% "09.1_Plot_model_coeffs.r") 
 
 ### Mapping effects of LUI on richness/yield using the full model
-source(path2wd %+% "09.2_Plot_YieldPotential_vs_BiodiversityRisk.r") 
+source(path2wd %+% "09.2_Plot_YieldPotential_vs_BiodiversityRisk.r") # CAUTION: takes ages
+
+### Mapping effects of LUI on richness/yield using the LUI.SGP model
+source(path2wd %+% "09.3_Plot_LUI.SGP_crossDiagrams.r") 
 
 ### Model diagnostics
 source(path2wd %+% "10_ModelDiagnostics.R") 

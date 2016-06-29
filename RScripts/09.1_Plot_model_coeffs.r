@@ -44,33 +44,34 @@ modelData <- subset(ES.frame, Richness.Log.RR.Var>0 & Yield.Log.RR.Var>0)
 #ci.ub <- yi + qnorm(alpha/2, lower.tail=FALSE) * sei
 
 ### plot rawdata
-plot <- ggplot() +
-  geom_point(aes(x=modelData$Yield.Log.RR, y=modelData$Richness.Log.RR,color=modelData$LUI.range.level),alpha=0.5) +
-  geom_pointrange(aes(x=modelData$Yield.Log.RR, y=modelData$Richness.Log.RR, ymin=modelData$Richness.Log.RR - (1.96*sqrt(modelData$Richness.Log.RR.Var)), ymax=modelData$Richness.Log.RR + (1.96*sqrt(modelData$Richness.Log.RR.Var)),color=modelData$LUI.range.level),alpha=0.5) +
-  geom_segment(aes(x=modelData$Yield.Log.RR - (1.96*sqrt(modelData$Yield.Log.RR.Var)), xend=modelData$Yield.Log.RR + (1.96*sqrt(modelData$Yield.Log.RR.Var)), y = modelData$Richness.Log.RR, yend = modelData$Richness.Log.RR, color=modelData$LUI.range.level),alpha=0.5) +
+plot <- ggplot(data=modelData) +
+  geom_point(aes(x=Yield.Log.RR, y=Richness.Log.RR,color=LUI.range.level),alpha=0.5) +
+  geom_pointrange(aes(x=Yield.Log.RR, y=Richness.Log.RR, ymin=Richness.Log.RR - (1.96*sqrt(Richness.Log.RR.Var)), ymax=Richness.Log.RR + (1.96*sqrt(Richness.Log.RR.Var)),color=LUI.range.level),alpha=0.5) +
+  geom_segment(aes(x=Yield.Log.RR - (1.96*sqrt(Yield.Log.RR.Var)), xend=Yield.Log.RR + (1.96*sqrt(Yield.Log.RR.Var)), y = Richness.Log.RR, yend = Richness.Log.RR, color=LUI.range.level),alpha=0.5) +
   scale_y_continuous(labels=trans_format("exp",comma_format(digits=2))) + 
   scale_x_continuous(labels=trans_format("exp",comma_format(digits=2))) +
-  scale_colour_manual(values=c("low-low"='#d0d1e6',"medium-medium"="#a6bddb","high-high"="#045a8d","low-medium"='#fee090',"medium-high"='#fc8d59',"low-high"="#d73027","Grand mean"="darkgrey"),breaks=c(levels(modelData$LUI.range.level),"Grand mean")) +
-  ylab("RR (Species Richness)") + xlab("RR (Yield)") + labs(color='') +
-  theme(axis.title = element_text(size = rel(1.5)), axis.text = element_text(size = rel(1.5)),legend.text=element_text(size = rel(1.5)),legend.title=element_text(size = rel(1.5))) 
+  scale_colour_manual(values=c("low-low"='#d0d1e6',"medium-medium"="#a6bddb","high-high"="#045a8d","low-medium"='#fee090',"medium-high"='#fc8d59',"low-high"="#d73027","Grand mean"="darkgrey"),breaks=c(levels(modelData$LUI.range.level))) +
+  ylab("RR (Species Richness)") + xlab("RR (Yield)") + labs(color='') + 
+  theme_lubdes()
 print(plot)
 ggsave(plot, file = path2temp %+% "rawdata_LUI.png", width = 20, height = 8, type = "cairo-png")
 
 
 # plot crosses for each covariate combination
-plot <- ggplot() + 
-  geom_hline(aes(yintercept=0), linetype="twodash") + geom_vline(aes(xintercept=0), linetype="twodash") +
-  geom_point(aes(x=newdat$logRR.yield, y=newdat$logRR.richness, color=newdat$level), size=4) +
-  geom_pointrange(aes(x=newdat$logRR.yield, y=newdat$logRR.richness, ymin=newdat$logRR.richness - (1.96*newdat$logRR.richness.se), 
-                                   ymax=newdat$logRR.richness + (1.96*newdat$logRR.richness.se),color=newdat$level), size=1.5) +
-  geom_segment(aes(x=newdat$logRR.yield - (1.96*newdat$logRR.yield.se), xend=newdat$logRR.yield + (1.96*newdat$logRR.yield.se), y = newdat$logRR.richness, yend = newdat$logRR.richness, color=newdat$level),size=1.5) +
+plot <- ggplot(data=newdat) + 
+  geom_hline(aes(yintercept=0), linetype="twodash",size=1.05) + geom_vline(aes(xintercept=0), linetype="twodash",size=1.05) +
+  geom_point(aes(x=logRR.yield, y=logRR.richness, color=level), size=3) +
+  geom_pointrange(aes(x=logRR.yield, y=logRR.richness, ymin=logRR.richness - (1.96*logRR.richness.se), 
+                                   ymax=logRR.richness + (1.96*logRR.richness.se),color=level), size=1.2) +
+  geom_segment(aes(x=logRR.yield - (1.96*logRR.yield.se), xend=logRR.yield + (1.96*logRR.yield.se), y = logRR.richness, yend = logRR.richness, color=level),size=1.2) +
   scale_y_continuous(labels=trans_format("exp",comma_format(digits=2))) + 
   scale_x_continuous(labels=trans_format("exp",comma_format(digits=2))) +
-  scale_colour_manual(values=c("low-low"='#d0d1e6',"medium-medium"="#a6bddb","high-high"="#045a8d","low-medium"='#fee090',"medium-high"='#fc8d59',"low-high"="#d73027","Grand mean"="darkgrey"),breaks=c(levels(modelData$LUI.range.level),"Grand mean")) +
+  scale_colour_manual(values=c("low-low"='#d0d1e6',"medium-medium"="#a6bddb","high-high"="#045a8d","low-medium"='#fee090',"medium-high"='#fc8d59',"low-high"="#d73027","Grand mean"="black"),breaks=c(levels(modelData$LUI.range.level),"Grand mean")) +
   ylab("RR (Species Richness)") + xlab("RR (Yield)") + labs(color='') +
-  theme(axis.title = element_text(size = rel(1.5)), axis.text = element_text(size = rel(1.5)),legend.text=element_text(size = rel(1.5)),legend.title=element_text(size = rel(1.5))) 
+  theme_lubdes()
 print(plot)
 ggsave(plot, file = path2temp %+% "CrossPlot_LUI_rma.png", width = 20, height = 8, type = "cairo-png")
+
 
 ############################################################################
 ### 09.1.2. plot Panel for LUIrangelevel
