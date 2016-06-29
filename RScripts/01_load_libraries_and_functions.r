@@ -180,6 +180,27 @@ RMASelect <- function(model){
   
 }
 
+###########################################################################
+### user defined theme for ggplot
+###########################################################################
+theme_lubdes <- function (base_size = 12, base_family = "") {
+  theme_grey(base_size = base_size, base_family = base_family) %+replace% 
+    theme(axis.text = element_text(size = rel(1.5)), 
+      axis.ticks = element_line(colour = "black"), 
+      axis.title = element_text(size = rel(1.5)), 
+      axis.text = element_text(size = rel(1.5)),
+      legend.text=element_text(size = rel(1.5)),
+      legend.title=element_text(size = rel(1.5)),
+      legend.key = element_rect(colour = "grey80"), 
+      panel.background = element_rect(fill = "white", colour = NA), 
+      panel.border = element_rect(fill = NA, colour = "grey50"), 
+      panel.grid.major = element_line(colour = "grey90", size = 0.2), 
+      panel.grid.minor = element_line(colour = "grey98", size = 0.5), 
+      strip.background = element_rect(fill = "grey80", colour = "grey50", size = 0.2),
+      strip.text = element_text(size=rel(1.5)))
+}
+
+
 # ############################################################################
 # ### standardize yield units (by HP, KG)
 # ############################################################################
