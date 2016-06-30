@@ -129,7 +129,7 @@ print(xtable(newdat, caption="Response ratios for the LUI.SGP model and availabl
 ############################################################################
 
 levels(newdat$Product)[levels(newdat$Product)=="animal_feed"]  <- "animal feed"
-plot <- ggplot(data=newdat,aes(x=logRR.yield, y=logRR.richness,color=factor(LUI.range.level))) + 
+plot <- ggplot(data=newdat,aes(x=logRR.yield, y=logRR.richness,fill=LUI.range.level)) + 
   geom_hline(aes(yintercept=0), linetype="twodash",size=1.05) + geom_vline(aes(xintercept=0), linetype="twodash",size=1.05) +
   geom_point(aes(x=logRR.yield, y=logRR.richness, color=LUI.range.level), size=3) +
   geom_pointrange(aes(x=logRR.yield, y=logRR.richness, ymin=logRR.richness - (1.96*logRR.richness.se), 
