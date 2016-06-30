@@ -86,9 +86,8 @@ for(SG in levels(newdat.richness$Species.Group)){
       scale_x_continuous(breaks=c(-90, 0, 90), labels=c("90°W", "0", "90°E")) +
       scale_y_continuous(breaks=c(-30, 0, 30, 60), labels=c("30°S","0°", "30°N","60°N"),limits=c(-55,90)) +
       xlab("") + ylab("") +
-      theme_lubdes()
-    p 
-    ggsave(path2temp %+% "RR_TopBiomes_" %+% SG %+% "_" %+% P %+% ".png", width=20, height=12, units="cm")
+      theme_lubdes(rel.text.size=1.18)
+    ggsave(file=path2temp %+% "RR_TopBiomes_" %+% SG %+% "_" %+% P %+% ".png",plot=p, width=22, height=12, units="cm")
   }
 }
 
@@ -105,9 +104,8 @@ for(P in levels(modelDataYield$Product)){
     scale_x_continuous(breaks=c(-90, 0, 90), labels=c("90°W", "0", "90°E")) +
     scale_y_continuous(breaks=c(-30, 0, 30, 60), labels=c("30°S","0°", "30°N","60°N"),limits=c(-55,90)) +
     xlab("") + ylab("") +
-    theme_lubdes()
-  p 
-  ggsave(path2temp %+% "RR_TopBiomes_" %+% P %+% ".png", width=20, height=12, units="cm")
+    theme_lubdes(rel.text.size=1.18)
+  ggsave(file=path2temp %+% "RR_TopBiomes_" %+% P %+% ".png", plot=p, width=22, height=12, units="cm")
 }
 
 
@@ -172,50 +170,50 @@ save(newdat.richness,newdat.yield,file=path2temp %+% "newdat.select.Rdata")
 ############################################################################
 ### 09.2.3. Map predictions facetted by Product and LUI on top of biomes
 ############################################################################
-load(path2temp %+% "newdat.select.Rdata") # newdat.richness,newdat.yield cf. module 09.2.2
-load(path2temp %+% "biome_mapdata.Rdata") # biome_mapdata cf. module 07.1_biome_mapdata
-
-for(SG in levels(newdat.richness$Species.Group)){
-  newdat.SG <- subset(newdat.richness, n>1 & Species.Group==SG)
-  for(P in levels(modelDataRichness$Product)){
-    for(LUI in levels(modelDataRichness$LUI.range.level)){
-      biome_mapdata$RR <- NA
-      for(B in levels(modelDataRichness$BIOME)){
-        temp <- exp(newdat.SG$logRR[newdat.SG$Product==P & newdat.SG$LUI.range.level==LUI & newdat.SG$BIOME ==B])
-        biome_mapdata$RR[biome_mapdata$BIOME == B] <- ifelse(length(temp)>0, temp, NA)
-      }
-      if(all(is.na(biome_mapdata$RR))) next
-      p <- ggplot(biome_mapdata) +
-        geom_polygon(aes(x = long, y = lat, group = group, fill = RR)) +
-        scale_fill_gradientn(limits=c(0,2),colours=c("#990000","#fc8d59","white","#1d91c0","#0c2c84"),breaks = c(0,1,2),guide="colourbar",na.value="grey90", name="Response ratio") + 
-        scale_x_continuous(breaks=c(-90, 0, 90), labels=c("90°W", "0", "90°E")) +
-        scale_y_continuous(breaks=c(-30, 0, 30, 60), labels=c("30°S","0°", "30°N","60°N"),limits=c(-55,90)) +
-        xlab("") + ylab("") +
-        theme_lubdes()
-      p 
-      ggsave(path2temp %+% "RR_TopBiomes_" %+% SG %+% "_" %+% P %+% "_" %+% LUI %+% ".png", width=20, height=12, units="cm")
-    }
-  }
-}
-
-for(P in levels(modelDataYield$Product)){
-  for(LUI in levels(modelDataYield$LUI.range.level)){
-    biome_mapdata$RR <- NA
-    for(B in levels(modelDataYield$BIOME)){
-      temp <- exp(newdat.yield$logRR[newdat.yield$Product==P & newdat.yield$LUI.range.level==LUI & newdat.yield$BIOME ==B])
-      biome_mapdata$RR[biome_mapdata$BIOME == B] <- ifelse(length(temp)>0, temp, NA)
-    }
-    if(all(is.na(biome_mapdata$RR))) next
-    p <- ggplot(biome_mapdata) +
-      geom_polygon(aes(x = long, y = lat, group = group, fill = RR)) +
-      scale_fill_gradientn(limits=c(0,8.1),colours=c("red","white","#c7e9b4", "#7fcdbb", "#41b6c4", "#1d91c0","#225ea8", "#0c2c84"),breaks = c(0,1,2,4,8),guide="colourbar",na.value="grey90", name="Response ratio") + 
-      scale_x_continuous(breaks=c(-90, 0, 90), labels=c("90°W", "0", "90°E")) +
-      scale_y_continuous(breaks=c(-30, 0, 30, 60), labels=c("30°S","0°", "30°N","60°N"),limits=c(-55,90)) +
-      xlab("") + ylab("") +
-      theme_lubdes()
-    p 
-    ggsave(path2temp %+% "RR_TopBiomes_" %+% P %+% "_" %+% LUI %+% ".png", width=20, height=12, units="cm")
-  }
-}
+# load(path2temp %+% "newdat.select.Rdata") # newdat.richness,newdat.yield cf. module 09.2.2
+# load(path2temp %+% "biome_mapdata.Rdata") # biome_mapdata cf. module 07.1_biome_mapdata
+# 
+# for(SG in levels(newdat.richness$Species.Group)){
+#   newdat.SG <- subset(newdat.richness, n>1 & Species.Group==SG)
+#   for(P in levels(modelDataRichness$Product)){
+#     for(LUI in levels(modelDataRichness$LUI.range.level)){
+#       biome_mapdata$RR <- NA
+#       for(B in levels(modelDataRichness$BIOME)){
+#         temp <- exp(newdat.SG$logRR[newdat.SG$Product==P & newdat.SG$LUI.range.level==LUI & newdat.SG$BIOME ==B])
+#         biome_mapdata$RR[biome_mapdata$BIOME == B] <- ifelse(length(temp)>0, temp, NA)
+#       }
+#       if(all(is.na(biome_mapdata$RR))) next
+#       p <- ggplot(biome_mapdata) +
+#         geom_polygon(aes(x = long, y = lat, group = group, fill = RR)) +
+#         scale_fill_gradientn(limits=c(0,2),colours=c("#990000","#fc8d59","white","#1d91c0","#0c2c84"),breaks = c(0,1,2),guide="colourbar",na.value="grey90", name="Response ratio") + 
+#         scale_x_continuous(breaks=c(-90, 0, 90), labels=c("90°W", "0", "90°E")) +
+#         scale_y_continuous(breaks=c(-30, 0, 30, 60), labels=c("30°S","0°", "30°N","60°N"),limits=c(-55,90)) +
+#         xlab("") + ylab("") +
+#         theme_lubdes(rel.text.size=1.18)
+#       p 
+#       ggsave(path2temp %+% "RR_TopBiomes_" %+% SG %+% "_" %+% P %+% "_" %+% LUI %+% ".png", width=22, height=12, units="cm")
+#     }
+#   }
+# }
+# 
+# for(P in levels(modelDataYield$Product)){
+#   for(LUI in levels(modelDataYield$LUI.range.level)){
+#     biome_mapdata$RR <- NA
+#     for(B in levels(modelDataYield$BIOME)){
+#       temp <- exp(newdat.yield$logRR[newdat.yield$Product==P & newdat.yield$LUI.range.level==LUI & newdat.yield$BIOME ==B])
+#       biome_mapdata$RR[biome_mapdata$BIOME == B] <- ifelse(length(temp)>0, temp, NA)
+#     }
+#     if(all(is.na(biome_mapdata$RR))) next
+#     p <- ggplot(biome_mapdata) +
+#       geom_polygon(aes(x = long, y = lat, group = group, fill = RR)) +
+#       scale_fill_gradientn(limits=c(0,8.1),colours=c("red","white","#c7e9b4", "#7fcdbb", "#41b6c4", "#1d91c0","#225ea8", "#0c2c84"),breaks = c(0,1,2,4,8),guide="colourbar",na.value="grey90", name="Response ratio") + 
+#       scale_x_continuous(breaks=c(-90, 0, 90), labels=c("90°W", "0", "90°E")) +
+#       scale_y_continuous(breaks=c(-30, 0, 30, 60), labels=c("30°S","0°", "30°N","60°N"),limits=c(-55,90)) +
+#       xlab("") + ylab("") +
+#       theme_lubdes(rel.text.size=1.18)
+#     p 
+#     ggsave(path2temp %+% "RR_TopBiomes_" %+% P %+% "_" %+% LUI %+% ".png", width=22, height=12, units="cm")
+#   }
+# }
 
 

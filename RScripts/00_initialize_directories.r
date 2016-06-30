@@ -141,25 +141,25 @@
 ############################################################################
 ### DATA PREPARATION
 ############################################################################
-set.list <-  .setwdntemp()
-path2temp <- set.list[[1]]
-path2wd <- set.list[[2]]
-
-### helper function to combine strings
-"%+%" <- function(x,y)paste(x,y,sep="")
-
-### load libraries, functions and google sheets 
-#source(path2wd %+% "-01_load+analyse_screeningtable.r")
-source(path2wd %+% "01_load_libraries_and_functions.r")
-source(path2wd %+% "02_load_table_directly_from_google.R")
-
-### Compile raw data
-source(path2wd %+% "03_ImputeMissingData_mice_mean.r")
-source(path2wd %+% "04_CompileESframe.R")
-source(path2wd %+% "05_AddMapDataToESframe.R")
-
-save(data,dataimp,ES.frame,file=path2temp %+% "SavedData.Rdata")
-rm(list=objects()) # empty workspace, keep libraries loaded
+# set.list <-  .setwdntemp()
+# path2temp <- set.list[[1]]
+# path2wd <- set.list[[2]]
+# 
+# ### helper function to combine strings
+# "%+%" <- function(x,y)paste(x,y,sep="")
+# 
+# ### load libraries, functions and google sheets 
+# #source(path2wd %+% "-01_load+analyse_screeningtable.r")
+# source(path2wd %+% "01_load_libraries_and_functions.r")
+# source(path2wd %+% "02_load_table_directly_from_google.R")
+# 
+# ### Compile raw data
+# source(path2wd %+% "03_ImputeMissingData_mice_mean.r")
+# source(path2wd %+% "04_CompileESframe.R")
+# source(path2wd %+% "05_AddMapDataToESframe.R")
+# 
+# save(data,dataimp,ES.frame,file=path2temp %+% "SavedData.Rdata")
+# rm(list=objects()) # empty workspace, keep libraries loaded
 
 ############################################################################
 ###  DATA ANALYSIS
@@ -177,7 +177,7 @@ load(file=path2temp %+% "SavedData.Rdata")
 source(path2wd %+% "06_DataPreparation4Analysis.R")
 
 ### Describe and plot the raw data
-knit(path2wd %+% "07.1_DescriptiveStatsOfESframe.Rmd") # summary statistics, plot histograms of responses and covariables, plot maps of study location, plot forest plots for each Study.Case-LUI.range.level combination
+#knit(path2wd %+% "07.1_DescriptiveStatsOfESframe.Rmd") # summary statistics, plot histograms of responses and covariables, plot maps of study location, plot forest plots for each Study.Case-LUI.range.level combination
 
 ### FREQUENTIST ANALYSIS
 source(path2wd %+% "08a_DataAnalysis.R")
@@ -196,7 +196,7 @@ source(path2wd %+% "01_load_libraries_and_functions.r")
 load(file=path2temp %+% "SavedData.Rdata")
 load(path2temp %+% "Models.Rdata")
 
-### cross plots for LUI range level and forest plots for model 
+### cross plots for LUI range level and forest plots for models 
 source(path2wd %+% "09.1_Plot_model_coeffs.r") 
 
 ### Mapping effects of LUI on richness/yield using the full model

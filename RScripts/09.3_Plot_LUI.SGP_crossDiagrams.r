@@ -121,27 +121,28 @@ newdat.SGP <- join_all(list(newdat.richness,newdat.yield),type="full")
 # newdat.GM[,c("n.yield","logRR.yield","logRR.yield.se","logRR.yield.ci.lb","logRR.yield.ci.ub")] <- matrix(rep(c(nrow(modelDataYield),preds$pred,preds$se,preds$ci.lb,preds$ci.ub),times=nrow(newdat.GM)),ncol=5,byrow=T)
 
 newdat <- join_all(list(newdat.LUI.SGP,newdat.SGP),type="full")
+newdat$LUI.range.level <- factor(newdat$LUI.range.level, levels = c("low-low","medium-medium","high-high","low-medium","medium-high","low-high","Grand Mean"))
 write.csv(newdat,file=path2temp %+% "preds.LUI.SGP.csv",row.names=F)
-print(xtable(newdat, caption="Response ratios for the LUI.SGP model and available evidence"),type="latex",include.rownames=F)
+#print(xtable(newdat, caption="Response ratios for the LUI.SGP model and available evidence"),type="latex",include.rownames=F)
 
 ############################################################################
 ### 09.2.3. Map predictions facetted by Product and LUI on top of biomes
 ############################################################################
 
 levels(newdat$Product)[levels(newdat$Product)=="animal_feed"]  <- "animal feed"
-plot <- ggplot(data=newdat,aes(x=logRR.yield, y=logRR.richness,fill=LUI.range.level)) + 
+plot <- ggplot(data=newdat) + 
   geom_hline(aes(yintercept=0), linetype="twodash",size=1.05) + geom_vline(aes(xintercept=0), linetype="twodash",size=1.05) +
   geom_point(aes(x=logRR.yield, y=logRR.richness, color=LUI.range.level), size=3) +
   geom_pointrange(aes(x=logRR.yield, y=logRR.richness, ymin=logRR.richness - (1.96*logRR.richness.se), 
                       ymax=logRR.richness + (1.96*logRR.richness.se),color=LUI.range.level), size=1.2) +
   geom_segment(aes(x=logRR.yield - (1.96*logRR.yield.se), xend=logRR.yield + (1.96*logRR.yield.se), y = logRR.richness, yend = logRR.richness, color=LUI.range.level),size=1.2) +
-  scale_y_continuous(labels=trans_format("exp",comma_format(digits=2))) + 
-  scale_x_continuous(labels=trans_format("exp",comma_format(digits=2))) +
+  scale_y_continuous(labels=trans_format("exp",comma_format(digits=2)),limits=c(log(0.45),log(1.815)),breaks=c(log(0.5),log(1),log(1.5),log(2)), oob = squish, expand=c(0,0)) + 
+  scale_x_continuous(labels=trans_format("exp",comma_format(digits=2)),limits=c(log(0.45),log(3.25)),breaks=c(log(0.5),log(1),log(1.5),log(2)), oob = squish, expand=c(0,0)) +
   scale_colour_manual(values=c("low-low"='#d0d1e6',"medium-medium"="#a6bddb","high-high"="#045a8d","low-medium"='#fee090',"medium-high"='#fc8d59',"low-high"="#d73027","Grand Mean"="black"),breaks=c(levels(newdat$LUI.range.level))) +
-  ylab("RR (Species Richness)") + xlab("RR (Yield)") +
+  ylab("RR (Species Richness)") + xlab("RR (Yield)") + labs(color='') +
   facet_grid(Species.Group~Product) + 
-  theme_lubdes()
-print(plot)
-ggsave(plot, file = path2temp %+% "CrossPlot_LUI.SGP.png", width = 15, height = 8, type = "cairo-png")
+  theme_lubdes(legend.position="bottom") +
+  guides(color=guide_legend(nrow=3))
+ggsave(file = path2temp %+% "CrossPlot_LUI.SGP.png",plot=plot, width = 15, height = 10, type = "cairo-png")
 
 

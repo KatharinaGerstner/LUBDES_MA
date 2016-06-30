@@ -14,7 +14,6 @@
 ############################################################################
 # predict for each covariate combination
 newdat <- expand.grid(LUI.range.level=levels(ES.frame$LUI.range.level))
-newdat$level <- newdat$LUI.range.level
 #newdat$level <- factor(newdat$level, levels = rev(levels(newdat$level)))
 
 model <- Richness.MA.model[["LUI"]]
@@ -23,19 +22,24 @@ preds <- predict.rma(model, newmods = mm)
 newdat$logRR.richness <- preds$pred
 newdat$logRR.richness.se <- preds$se
 
+newdat$n.richness <- as.numeric(table(modelDataRichness$LUI.range.level))
+
 model <- Yield.MA.model[["LUI"]]
 mm <- model.matrix(~LUI.range.level-1, data=newdat)
 preds <- predict.rma(model, newmods = mm)
 newdat$logRR.yield <- preds$pred
 newdat$logRR.yield.se <- preds$se
+newdat$n.yield <- as.numeric(table(modelDataYield$LUI.range.level))
 
 model1 <- Richness.MA.model[["None"]]
 model2 <- Yield.MA.model[["None"]]
-newdat[7,] <- data.frame(LUI.range.level=NA, level=NA,
-                         logRR.richness= model1$b, logRR.richness.se= model1$se,
-                         logRR.yield= model2$b, logRR.yield.se= model2$se)
-levels(newdat$level) <- c(levels(newdat$level),"Grand mean")
-newdat$level[7] <- "Grand mean"
+newdat.GM <- data.frame(LUI.range.level="Grand Mean",
+                         logRR.richness= model1$b, logRR.richness.se= model1$se, n.richness=nrow(modelDataRichness),
+                         logRR.yield= model2$b, logRR.yield.se= model2$se, n.yield=nrow(modelDataYield))
+
+newdat <- join_all(list(newdat,newdat.GM),type="full")
+
+write.csv(newdat,file=path2temp %+% "preds.LUI.csv",row.names=F)
 
 modelData <- subset(ES.frame, Richness.Log.RR.Var>0 & Yield.Log.RR.Var>0)
 ## calculation of 95%CI in forest() from metafor
@@ -50,27 +54,27 @@ plot <- ggplot(data=modelData) +
   geom_segment(aes(x=Yield.Log.RR - (1.96*sqrt(Yield.Log.RR.Var)), xend=Yield.Log.RR + (1.96*sqrt(Yield.Log.RR.Var)), y = Richness.Log.RR, yend = Richness.Log.RR, color=LUI.range.level),alpha=0.5) +
   scale_y_continuous(labels=trans_format("exp",comma_format(digits=2))) + 
   scale_x_continuous(labels=trans_format("exp",comma_format(digits=2))) +
-  scale_colour_manual(values=c("low-low"='#d0d1e6',"medium-medium"="#a6bddb","high-high"="#045a8d","low-medium"='#fee090',"medium-high"='#fc8d59',"low-high"="#d73027","Grand mean"="darkgrey"),breaks=c(levels(modelData$LUI.range.level))) +
+  scale_colour_manual(values=c("low-low"='#d0d1e6',"medium-medium"="#a6bddb","high-high"="#045a8d","low-medium"='#fee090',"medium-high"='#fc8d59',"low-high"="#d73027","Grand Mean"="darkgrey"),breaks=c(levels(modelData$LUI.range.level))) +
   ylab("RR (Species Richness)") + xlab("RR (Yield)") + labs(color='') + 
-  theme_lubdes()
-print(plot)
-ggsave(plot, file = path2temp %+% "rawdata_LUI.png", width = 20, height = 8, type = "cairo-png")
+  theme_lubdes(legend.position="bottom") +
+  guides(color=guide_legend(nrow=3))
+ggsave(plot, file = path2temp %+% "rawdata_LUI.png", width = 20, height = 10, type = "cairo-png")
 
 
 # plot crosses for each covariate combination
 plot <- ggplot(data=newdat) + 
   geom_hline(aes(yintercept=0), linetype="twodash",size=1.05) + geom_vline(aes(xintercept=0), linetype="twodash",size=1.05) +
-  geom_point(aes(x=logRR.yield, y=logRR.richness, color=level), size=3) +
+  geom_point(aes(x=logRR.yield, y=logRR.richness, color=LUI.range.level), size=3) +
   geom_pointrange(aes(x=logRR.yield, y=logRR.richness, ymin=logRR.richness - (1.96*logRR.richness.se), 
-                                   ymax=logRR.richness + (1.96*logRR.richness.se),color=level), size=1.2) +
-  geom_segment(aes(x=logRR.yield - (1.96*logRR.yield.se), xend=logRR.yield + (1.96*logRR.yield.se), y = logRR.richness, yend = logRR.richness, color=level),size=1.2) +
+                                   ymax=logRR.richness + (1.96*logRR.richness.se),color=LUI.range.level), size=1.2) +
+  geom_segment(aes(x=logRR.yield - (1.96*logRR.yield.se), xend=logRR.yield + (1.96*logRR.yield.se), y = logRR.richness, yend = logRR.richness, color=LUI.range.level),size=1.2) +
   scale_y_continuous(labels=trans_format("exp",comma_format(digits=2))) + 
   scale_x_continuous(labels=trans_format("exp",comma_format(digits=2))) +
-  scale_colour_manual(values=c("low-low"='#d0d1e6',"medium-medium"="#a6bddb","high-high"="#045a8d","low-medium"='#fee090',"medium-high"='#fc8d59',"low-high"="#d73027","Grand mean"="black"),breaks=c(levels(modelData$LUI.range.level),"Grand mean")) +
+  scale_colour_manual(values=c("low-low"='#d0d1e6',"medium-medium"="#a6bddb","high-high"="#045a8d","low-medium"='#fee090',"medium-high"='#fc8d59',"low-high"="#d73027","Grand Mean"="black"),breaks=levels(newdat$LUI.range.level)) +
   ylab("RR (Species Richness)") + xlab("RR (Yield)") + labs(color='') +
-  theme_lubdes()
-print(plot)
-ggsave(plot, file = path2temp %+% "CrossPlot_LUI_rma.png", width = 20, height = 8, type = "cairo-png")
+  theme_lubdes(legend.position="bottom") +
+  guides(color=guide_legend(nrow=3))
+ggsave(plot, file = path2temp %+% "CrossPlot_LUI_rma.png", width = 20, height = 10, type = "cairo-png")
 
 
 ############################################################################
