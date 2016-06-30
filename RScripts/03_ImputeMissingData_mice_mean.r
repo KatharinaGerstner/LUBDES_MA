@@ -74,17 +74,16 @@ print(p.yield)
 ggsave(p.yield, file=path2temp %+% "imputation_mice_yield.png",height=4,width=4)
 
 ### check variability of imputation
-temp.yield <- data.frame(matrix(temp$yield.SD, ncol=nchains, byrow=F))
-temp.yield$mean <- rowMeans(temp.yield[,1:nchains])
-temp.yield$sd <- apply(temp.yield[,1:nchains],1,sd)
-
-par(mfrow=c(2,2))
-hist(temp.richness$mean)
-hist(temp.richness$sd)
-hist(temp.yield$mean)
-hist(temp.yield$sd)
-par(mfrow=c(1,1))
-
+# temp.yield <- data.frame(matrix(temp$yield.SD, ncol=nchains, byrow=F))
+# temp.yield$mean <- rowMeans(temp.yield[,1:nchains])
+# temp.yield$sd <- apply(temp.yield[,1:nchains],1,sd)
+# 
+# par(mfrow=c(2,2))
+# hist(temp.richness$mean)
+# hist(temp.richness$sd)
+# hist(temp.yield$mean)
+# hist(temp.yield$sd)
+# par(mfrow=c(1,1))
 
 save(dataimp,file=path2temp %+% "dataimp.Rdata")
 
