@@ -1,0 +1,156 @@
+---
+title: "LUBDES Data Analysis"
+author: "Katharina Gerstner"
+date: "`r Sys.Date()`"
+output: word_document
+---
+
+```{r opts, echo = FALSE}
+knitr::opts_chunk$set(
+  fig.width = 8
+)
+```
+
+```{r, include=F}
+.setwdntemp <- function(){
+  cu <- Sys.info()["user"]
+  cn <- Sys.info()["nodename"]
+  
+  if (cu == "rseppelt")
+  {
+    path2temp <- "/Users/rseppelt/Documents/Projekte/Synthese & Netzwerke/LU-BD-ES/Temp" 
+    path2wd <- "/Users/rseppelt/Documents/git/LUBDES_MA/RScripts/" 
+  } else if (cn == "UCBTTNE-LT"){
+    path2wd <- "C:/Users/Tim/Documents/LUBDES_MA/RScripts/" #TN
+    path2temp <- "C:/Users/Tim/Documents/LUBDES_MA_Out/" #TN
+    
+  } else if (cn == "juro-MacBookPro"){
+    path2wd <- "/home/juro/git/LUBDES_MA/RScripts/" #MB
+    path2temp <- "/home/juro/tmp/" #MB
+    
+  } else if (cn == "LEIH-HAL6"){
+    path2wd <- "C:/Users/kambach/Desktop/aktuelle Arbeiten/SESYNC/LUBDES_MA-master/RScripts/" #SK
+    path2temp <- "C:/Users/kambach/Desktop/aktuelle Arbeiten/SESYNC/LUBDES_MA-master/RScripts/" #SK
+    
+  } else if (cn == "Helen-Phillipss-MacBook-Pro.local"){
+    path2wd <- "/Users/Helen/LUBDES_MA/RScripts/"
+    path2temp <- "/Users/Helen/tmp/" ##HP
+  } else {
+    path2wd <- "C:/Users/hoppek/Documents/GitHub/LUBDES_MA/RScripts/" #KG
+    path2temp <- "C:/Users/hoppek/Documents/temp/" #KG 
+  }  
+  return(list(path2temp,path2wd))
+}
+
+set.list <-  .setwdntemp()
+path2temp <- set.list[[1]]
+path2wd <- set.list[[2]]
+
+### helper function to combine strings
+"%+%" <- function(x,y)paste(x,y,sep="")
+source(path2wd %+% "01_load_libraries_and_functions.r")
+```
+# AIMS
+Here, we comprehensively synthesized available data to obtain a global perspective on how changes in land use intensity affect both production and biodiversity, and their trade-off. We conducted an extensive search of the web of science for research papers that study the effects of intensification on biodiversity with data on production to quantify the nature and magnitude of the trade-offs (see Methods). Recent studies on the consequences of intensification of land use have generally not considered the coincident effects on production.  We analyze both the effects of intensification on biodiversity (focusing on species richness, because this is what most studies record) and on production (measured as biomass per unit area per year, or the nearest available proxy). 
+
+Research questions:
+1. Which effect has land-use intensification on species richness and production?
+2. Do these effects depend on the degree of land-use intensification?
+3. Do these effects depend on the environmental context of land-use intensification?  
+4. Do these effects vary among species groups and products?
+
+# STATISTICAL METHODS
+
+## Computation of effect sizes and variances
+We extracted means, standard deviations and sample sizes for both control (lower LUI) and treatment group (higher LUI) from studies and calculated the response ratio and its variance. 
+For the meta-analysis we used the log-transformed response ratio and its variance as effect size: 
+
+$$ln(RR)=ln(\frac{Y_{treatment}}{Y_{control}})$$
+$$var(ln(RR))=\frac{SD_{treatment}^2}{n_{treatment}\bar{Y}_{treatment}^2} + \frac{SD_{control}^2}{n_{control}\bar{Y}_{control}^2}$$
+
+where $Y$ are the reported species richness or yield, $SD$ its standard deviation, and $n_{treatment}$, $n_{control}$ are sample sizes used to determine species richness or yield (cf. Koricheva et al. 2013).
+
+The response ratio can be interpreted as percentage increase or decrease of species richness or yield respectively. Hence, a response ratio of one signifies no change. Consequently, the log-transformed response ratio range from $-\infty$ to $+\infty$, where 0 signifies no effect (no difference between the means). 
+
+## Imputation of missing standard deviations
+We imputed missing data on SDs using the function 'mice' in the R-package 'mice' (version 2.22, Buuren & Groothuis-Oudshoorn (2011)). Therefore, we used predictive mean matching (which is based on Rubin 1987). It fits the relationship between means of RRs, standard deviation and number of samples to the complete data. It then generates multiple imputations by Gibbs sampling, i.e. makes a random draw from the “posterior predictive distribution” of model coefficients. 
+
+![](C:\Users\hoppek\Documents\temp\imputed.SD.richness.png)       
+![](C:\Users\hoppek\Documents\temp\imputed.SD.yield.png)
+
+Figure: Distribution of imputed SDs. On the x-axis are the Study-Case IDs with missing SDs. Red dots are the imputed SDs from the 10 chains. Black dots represent the mean of the red dots.
+
+![](C:\Users\hoppek\Documents\temp\imputation_mice_richness.png)       
+![](C:\Users\hoppek\Documents\temp\imputation_mice_yield.png)
+
+Figure: Standard deviation of richness (top) and yield (bottom) relative to the mean. Red dots for observed data and standard deviations of green dots have been estimated by the mean of 10 chains of imputed standard deviations using the function 'mice::mice' in R.
+
+## Analysis
+We analysed variation of effect sizes using linear mixed-effects models (R version 3.0.1: R Core Team 2015; function ‘rma.mv’, package ‘metafor’: Viechtbauer 2010). This function particularly enables the user to specify weights and thus is suitable for performing multilevel meta-analyses (Nakagawa & Santos 2012). We accounted for (1) non-independence of observations from related sources, i.e. the same study-case and study, by specifying random=list(~1|study.case,~1|study), and (2) non-independence from relatedness of LUI comparisons when multiple comparisons within one study-case are used by specifying covariances as $cov(X,Y) = cor(X,Y)*sqrt(Var(X))*sqrt(Var(Y))$ where $cor(X,Y)$ set to 0.5 if X,Y belong to the same study-case and share a control or treatment, because the effect size $X$ determines 50$\%$ of the effect size $Y$ and vice versa. All models were fit using study and study-case as random effects and land-use intensity, biomes, species group and product as ﬁxed effects. We compared mean effect sizes and their 95% conﬁdence intervals (CIs). Conservatively, we considered effect sizes significant if the corresponding 95% CI did not cover zero and significantly different from each other if the corresponding 95% CIs did not overlap.
+
+Corresponding to our research questions we compared several models using different sets of covariables (Table). For the model called 'Select' we performed a model selection starting with the full set of covariables and backward select thevariables which can be removed without reducing the variance explained by the model. We evaluated the goodness-of-fit using various statistics provided by the metafor-package. These were the AICc, $R^2_{LMM(m)}$ and $R^2_{LMM(c)}$, i.e. the percentage of variance explained by the fixed, and fixed and random effects respectively (Nakagawa & Schielzeth, 2013).
+  
+```{r ModelTable, echo=F}
+df <- data.frame(Model_Name=c("None","LUI","Context","LUI.SGP","SGP","Full","Select"),
+                 Covariables=c("Intercept",
+                               "LUI.range.level",
+                               paste(c("Product", "Species.Group", "BIOME"),collapse=" + "),
+                               paste(c("LUI.range.level","Product", "Species.Group", "LUI.range.level:Product", "LUI.range.level:Species.Group"),collapse=" + "), 
+                               paste(c("Product", "Species.Group"), collapse=" + "),
+                               paste(c("LUI.range.level", "Product", "Species.Group", "BIOME", "LUI.range.level:Product", "LUI.range.level:Species.Group", "LUI.range.level:BIOME"),collapse=" + "),
+                               paste(c("LUI.range.level", "Product", "Species.Group", "BIOME", "LUI.range.level:Product", "LUI.range.level:Species.Group", "LUI.range.level:BIOME"),collapse=" + ")))
+knitr::kable(df, caption = "Table: Models and covariables used as fixed effects in the analysis")
+```
+
+# RESULTS
+```{r FitStatistics richness, echo=F}
+# Fit statistics for species richness
+df <- read.csv(path2temp %+% "fit.tab.richness.csv")
+kable(df[,c("model","AICc","R2.LMM.m","R2.LMM.c")], digits=2)
+```
+
+```{r FitStatistics yield, echo=F}
+# Fit statistics for yield
+df <- read.csv(path2temp %+% "fit.tab.yield.csv")
+kable(df[,c("model","AICc","R2.LMM.m","R2.LMM.c")], digits=2,
+      caption="Table: Goodness-of-fit statistics for meta-analysis models for species richness (top) and yield (bottom).")
+```
+
+The goodness-of-fit statistics suggest that the full model is the most parsimonious having the lowest AICc and the highest $R^2_{LMM(m)}$ and $R^2_{LMM(c)}$. Backward model selection did not result in removing covariables. Hence, all covariables are of significant importance for explaining variation of response ratios. The second best model is the model without biomes followed by the model which only considers land-use intensity range level.   
+
+### LUI.range.level
+```{r LUI, echo=F}
+df <- read.csv(path2temp %+% "preds.LUI.csv")
+kable(df, digits=2)
+```
+
+![](C:\Users\hoppek\Documents\temp\CrossPlot_LUI_rma.png)
+
+### Context
+```{r Context, echo=F}
+df <- read.csv(path2temp %+% "preds.richness.context.csv")
+kable(df, digits=2)
+
+df <- read.csv(path2temp %+% "preds.yield.context.csv")
+kable(df, digits=2)
+```
+
+![](C:\Users\hoppek\Documents\temp\Context.png) 
+
+### LUI.SGP
+```{r LUI.SGP, echo=F}
+# Fit statistics for species richness
+df <- read.csv(path2temp %+% "preds.LUI.SGP.csv")
+kable(df, digits=2)
+```
+
+![](C:\Users\hoppek\Documents\temp\CrossPlot_LUI.SGP.png)
+
+
+# REFERENCES
+Buuren, S. van & Groothuis-Oudshoorn, K. (2011) mice: Multivariate Imputation by Chained Equations in R. Journal of Statistical Software, 45, 1–67.  
+Nakagawa, S. & Santos, E.S. (2012) Methodological issues and advances in biological meta-analysis. Evolutionary Ecology, 26, 1253–1274.  
+Nakagawa, S. & Schielzeth, H. (2013) A general and simple method for obtaining R² from generalized linear mixed-effects models. Methods in Ecology and Evolution, 4, 133–142.  
+R Core Team. (2015) R: A Language and Environment for Statistical Computing. R Foundation for Statistical Computing, Vienna, Austria.  
+Rubin, D.B. (1987). Multiple imputation for nonresponse in surveys. New York: 'Wiley.  
+Viechtbauer, W. (2010) Conducting meta-analyses in R with the metafor package. Journal of Statistical Software, 36, 1–48.  
