@@ -108,7 +108,7 @@
   
   if (cu == "rseppelt")
   {
-    path2temp <- "/Users/rseppelt/Documents/Projekte/Synthese & Netzwerke/LU-BD-ES/Temp" 
+    path2temp <- "/Users/rseppelt/Documents/Projekte/Synthese & Netzwerke/LU-BD-ES/Temp/" 
     path2wd <- "/Users/rseppelt/Documents/git/LUBDES_MA/RScripts/" 
   } else if (cn == "UCBTTNE-LT"){
     path2wd <- "C:/Users/Tim/Documents/LUBDES_MA/RScripts/" #TN

@@ -183,7 +183,7 @@ RMASelect <- function(model){
 ###########################################################################
 ### user defined theme for ggplot
 ###########################################################################
-theme_lubdes <- function (base_size = 12, base_family = "", rel.text.size=1.5, legend.position = "right",legend.nrows=) {
+theme_lubdes <- function (base_size = 12, base_family = "", rel.text.size=1.5, legend.position = "right",legend.nrows=3) {
   theme_grey(base_size = base_size, base_family = base_family) %+replace% 
     theme(axis.text = element_text(size = rel(rel.text.size)), 
       axis.ticks = element_line(colour = "black"), 
