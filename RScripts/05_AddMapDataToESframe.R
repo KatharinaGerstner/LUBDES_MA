@@ -82,6 +82,59 @@ rm(realms_extract,ecoregions)
 # }
 
 ############################################################################
+### Intersect studies with Land-use history (new version)
+############################################################################
+
+setwd(path2temp %+% "/")
+
+if (file.exists("KK11_05m_8k_merge_100yr.nc.zip")==FALSE){
+  download.file("https://www.dropbox.com/s/oat650i7ervc5oh/KK11_05m_8k_merge_100yr.nc.zip?dl=1", "KK11_05m_8k_merge_100yr.nc.zip", mode="wb")
+  unzip("KK11_05m_8k_merge_100yr.nc.zip")
+} else {unzip("KK11_05m_8k_merge_100yr.nc.zip")}
+
+#kk11<-nc_open("KK11_05m_8k_merge_100yr.nc")
+#rkk11<-raster("KK11_05m_8k_merge_100yr.nc")
+srkk11<-stack("KK11_05m_8k_merge_100yr.nc") # load data as stack
+rsrkk11<-srkk11 # create raster object to fill
+
+gc() # clear memory
+
+# reclassify stack based on a 20% land used threshold
+for (i in 1:nlayers(srkk11)){
+  m <- c(-1, 0.2, -999,  0.2, 1.1, as.numeric((strsplit(names(srkk11[[i]]),"X"))[[1]][2]))  
+  rclmat<-matrix(m,ncol=3,byrow=TRUE)
+  rsrkk11[[i]]<-reclassify(srkk11[[i]], rclmat)
+}
+
+# merge stack to get oldest time since 20% used
+mrsrkk11<-max(rsrkk11)
+
+mrsrkk11[mrsrkk11<0]<-NA #set -999 to NA
+#plot(mrsrkk11)
+
+# reclassify to 5 age classes (until 50BC, 50BC-1450, 1450-1650,1650-1850,1850-1950)
+m <- c(0,100,1950,100,300,1850,300,500,1650,500,2000,1450,2000,8000,50)  # can't seem to be able to set negative value, so 50 is actually -50 (50BC)
+rclmat<-matrix(m,ncol=3,byrow=TRUE)
+rmrsrkk11<-reclassify(mrsrkk11, rclmat,include.lowest=TRUE)
+rmrsrkk11[rmrsrkk11==50]<--50 #reset to -50
+plot(rmrsrkk11)
+
+# extract year since 20% use
+years_extract <- extract(rmrsrkk11,lonlat)
+ES.frame <- cbind(ES.frame,years_extract)
+colnames(ES.frame)[which(names(ES.frame) == "years_extract")]<-"landuse_history"
+
+summary(years_extract)
+table(years_extract)
+
+### its weird that we have 91 NAs here!!! 
+### reasons could be: kk11 data stops 1950 and some areas where our studies are were used only later? 
+### also: most of the data seems to be in the 50BC and before group, maybe another classification makes more sense? Especially since in the 1450-1650 class only 2 studies exist...
+
+setwd(path2wd)
+
+
+############################################################################
 ### 05.2. Intersect studies with NPP
 ############################################################################
 # print("Intersect studies with NPP")
@@ -96,6 +149,7 @@ rm(realms_extract,ecoregions)
 # if(nrow(ES.frame.noLU) >0){
 #   ES.frame.noLU$npp<-extract(npp,lonlat.noLU, buffer=100000, fun=mean)
 # }
+
 ############################################################################
 ### 05.3. Intersect studies with Land-use history
 ############################################################################
