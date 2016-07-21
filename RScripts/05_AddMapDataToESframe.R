@@ -101,7 +101,7 @@ gc() # clear memory
 
 # reclassify stack based on a 20% land used threshold
 for (i in 1:nlayers(srkk11)){
-  m <- c(-1, 0.2, -999,  0.2, 1.1, as.numeric((strsplit(names(srkk11[[i]]),"X"))[[1]][2]))  
+  m <- c(-1, 0.2, -9999,  0.2, 1.1, as.numeric((strsplit(names(srkk11[[i]]),"X"))[[1]][2]))  
   rclmat<-matrix(m,ncol=3,byrow=TRUE)
   rsrkk11[[i]]<-reclassify(srkk11[[i]], rclmat)
 }
@@ -109,15 +109,54 @@ for (i in 1:nlayers(srkk11)){
 # merge stack to get oldest time since 20% used
 mrsrkk11<-max(rsrkk11)
 
-mrsrkk11[mrsrkk11<0]<-NA #set -999 to NA
+mrsrkk11[mrsrkk11==-9999]<-NA #set -99999 to NA
 #plot(mrsrkk11)
 
 # reclassify to 5 age classes (until 50BC, 50BC-1450, 1450-1650,1650-1850,1850-1950)
-m <- c(0,100,1950,100,300,1850,300,500,1650,500,2000,1450,2000,8000,50)  # can't seem to be able to set negative value, so 50 is actually -50 (50BC)
+m <- c(-1,501,1950,502,2001,1450,2002,7801,-50, 7802,8001,-5950)
 rclmat<-matrix(m,ncol=3,byrow=TRUE)
-rmrsrkk11<-reclassify(mrsrkk11, rclmat,include.lowest=TRUE)
-rmrsrkk11[rmrsrkk11==50]<--50 #reset to -50
-plot(rmrsrkk11)
+rmrsrkk11<-reclassify(mrsrkk11, rclmat)#,include.lowest=TRUE)
+#rmrsrkk11[rmrsrkk11==50]<--50 #reset to -50
+
+my.at <- c(-7000,-5900,-10, 1500,1800, 2000,12000)
+levelplot(rmrsrkk11,par.settings=YlOrRdTheme,at=my.at)
+
+
+#################### create a 1% threshold layer 
+
+rsrkk11_1<-srkk11 # create raster object to fill
+
+rm(mrsrkk11,rsrkk11)
+gc() # clear memory
+
+# reclassify stack based on a 1% land used threshold
+for (i in 1:nlayers(srkk11)){
+  m <- c(-1, 0.01, -9999,  0.01, 1.1, as.numeric((strsplit(names(srkk11[[i]]),"X"))[[1]][2]))  
+  rclmat<-matrix(m,ncol=3,byrow=TRUE)
+  rsrkk11_1[[i]]<-reclassify(srkk11[[i]], rclmat)
+}
+
+# merge stack to get oldest time since 1% used
+mrsrkk11_1<-max(rsrkk11_1)
+
+mrsrkk11_1[mrsrkk11_1==-9999]<-NA #set -9999 to NA
+#plot(mrsrkk11)
+
+# reclassify to 1 age class
+m <- c(-1,8001,10000)
+rclmat<-matrix(m,ncol=3,byrow=TRUE)
+rmrsrkk11_1<-reclassify(mrsrkk11_1, rclmat)#,include.lowest=TRUE)
+#rmrsrkk11[rmrsrkk11==50]<--50 #reset to -50
+
+rm(mrsrkk11_1,rsrkk11_1)
+gc() # clear memory
+
+## cells that are below 20% threshold are reclassified to the value 11000
+rmrsrkk11[is.na(rmrsrkk11_1)]<-10000
+rmrsrkk11[is.na(rmrsrkk11)]<-11000
+rmrsrkk11[rmrsrkk11==10000]<-NA
+
+levelplot(rmrsrkk11,par.settings=YlOrRdTheme,at=my.at)
 
 # extract year since 20% use
 years_extract <- extract(rmrsrkk11,lonlat)
@@ -126,10 +165,6 @@ colnames(ES.frame)[which(names(ES.frame) == "years_extract")]<-"landuse_history"
 
 summary(years_extract)
 table(years_extract)
-
-### its weird that we have 91 NAs here!!! 
-### reasons could be: kk11 data stops 1950 and some areas where our studies are were used only later? 
-### also: most of the data seems to be in the 50BC and before group, maybe another classification makes more sense? Especially since in the 1450-1650 class only 2 studies exist...
 
 setwd(path2wd)
 
