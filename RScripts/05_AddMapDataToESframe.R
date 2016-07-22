@@ -92,7 +92,7 @@ if (file.exists("rmsrkk11.zip")==FALSE){
   unzip("rmsrkk11.zip")
 } else {unzip("rmsrkk11.zip")}
 
-rmsrkk11<-raster("rmsrkk11.grd")
+rmrsrkk11<-raster("rmsrkk11.grd")
 
 my.at <- c(-7000,-5900,-10, 1500,1800, 2000,12000)
 levelplot(rmrsrkk11,par.settings=YlOrRdTheme,at=my.at)
