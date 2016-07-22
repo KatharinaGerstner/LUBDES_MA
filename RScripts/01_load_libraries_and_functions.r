@@ -31,7 +31,9 @@ needed_libs <- c("devtools",# needed for library googlesheets
                  "reshape2",
 #                 "rjags", # for running bayesian models
                  "knitr", # for knitting .Rmd-documents
-                 "xtable"  # for saving tables as .doc
+                 "xtable",  # for saving tables as .doc
+                  "ncdf4", # for loading landuse history data
+                  "rasterVis" #plotting maps
 )
 usePackage <- function(p) {
   if (!is.element(p, installed.packages()[,1]))

@@ -87,18 +87,18 @@ rma.mv.func <- function(df, moderators, fit.method)
 Richness.MA.model[["None"]] <- rma.mv.func(df=modelDataRichness, moderators=c(1), fit.method="REML")
 Richness.MA.model[["LUI"]] <- rma.mv.func(df=modelDataRichness, moderators=c(-1,"LUI.range.level"), fit.method="REML")
 Richness.MA.model[["Context"]] <- rma.mv.func(df=modelDataRichness, moderators=c(-1,"Product", "Species.Group", "BIOME"), fit.method="REML")
-Richness.MA.model[["LUI.SGP"]] <- rma.mv.func(df=modelDataRichness, moderators=c(-1,"LUI.range.level","Product", "Species.Group", "LUI.range.level:Product", "LUI.range.level:Species.Group"), fit.method="REML")
-Richness.MA.model[["SGP"]] <- rma.mv.func(df=modelDataRichness, moderators=c(-1,"Product", "Species.Group"), fit.method="REML")
-Richness.MA.model[["Full"]] <- rma.mv.func(df=modelDataRichness, moderators=c(-1,"LUI.range.level", "Product", "Species.Group", "BIOME", "LUI.range.level:Product", "LUI.range.level:Species.Group", "LUI.range.level:BIOME"), fit.method="REML")
+Richness.MA.model[["LUI.SGP"]] <- rma.mv.func(df=modelDataRichness, moderators=c(-1,"LUI.range.level","Product", "Species.Group", "LUI.range.level:Product", "LUI.range.level:Species.Group", "Species.Group:Product"), fit.method="REML")
+Richness.MA.model[["SGP"]] <- rma.mv.func(df=modelDataRichness, moderators=c(-1,"Product", "Species.Group", "Species.Group:Product"), fit.method="REML")
+Richness.MA.model[["Full"]] <- rma.mv.func(df=modelDataRichness, moderators=c(-1,"LUI.range.level", "Product", "Species.Group", "BIOME", "LUI.range.level:Product", "LUI.range.level:Species.Group", "LUI.range.level:BIOME", "Species.Group:Product"), fit.method="REML")
 model2select <- try(rma.mv(yi=Log.RR, V=M.matrix(modelDataRichness)+diag(modelDataRichness$Log.RR.Var), 
-                       mods=~LUI.range.level + Product + Species.Group + BIOME + LUI.range.level:Product + LUI.range.level:Species.Group + LUI.range.level:BIOME,
+                       mods=~LUI.range.level + Product + Species.Group + BIOME + LUI.range.level:Product + LUI.range.level:Species.Group + LUI.range.level:BIOME + Species.Group:Product,
                        random = list(~1|Study.Case, ~1|Study.ID),
                        slab=paste(Study.Case, Low.LUI, High.LUI,sep="_"),
                        method="ML", tdist=FALSE, level=95, digits=4,data=modelDataRichness))
 
 if(inherits(model2select, "try-error")){
   model2select <- rma.mv(yi=Log.RR, V=M.matrix(modelDataRichness)+diag(modelDataRichness$Log.RR.Var), 
-                         mods=~LUI.range.level + Product + Species.Group + BIOME + LUI.range.level:Product + LUI.range.level:Species.Group + LUI.range.level:BIOME,
+                         mods=~LUI.range.level + Product + Species.Group + BIOME + LUI.range.level:Product + LUI.range.level:Species.Group + LUI.range.level:BIOME + Species.Group:Product,
                          random = list(~1|Study.Case, ~1|Study.ID),
                          slab=paste(Study.Case, Low.LUI, High.LUI,sep="_"),
                          method="ML", tdist=FALSE, level=95, digits=4,data=modelDataRichness,

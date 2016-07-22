@@ -25,7 +25,7 @@ for(i in 1:nrow(newdat.richness)){
   newdat.richness$n.richness[i] <- length(which(modelDataRichness$Product %in% newdat.richness$Product[i] & modelDataRichness$Species.Group %in% newdat.richness$Species.Group[i] & modelDataRichness$LUI.range.level %in% newdat.richness$LUI.range.level[i]))
 }
 
-mm <- model.matrix(~LUI.range.level + Product + Species.Group + LUI.range.level:Product + LUI.range.level:Species.Group-1,data=newdat.richness)
+mm <- model.matrix(~LUI.range.level + Product + Species.Group + LUI.range.level:Product + LUI.range.level:Species.Group + Species.Group:Product-1,data=newdat.richness)
 mm <- mm[,colnames(mm) %in% rownames(model$b)] # remove colums without coeffs
 preds <- predict.rma(model, newmods = mm)
 newdat.richness[,c("logRR.richness","logRR.richness.se","logRR.richness.ci.lb","logRR.richness.ci.ub")] <- cbind(preds$pred,preds$se,preds$ci.lb,preds$ci.ub)
@@ -76,7 +76,7 @@ for(i in 1:nrow(newdat.richness)){
   newdat.richness$n.richness[i] <- length(which(modelDataRichness$Product %in% newdat.richness$Product[i] & modelDataRichness$Species.Group %in% newdat.richness$Species.Group[i]))
 }
 
-mm <- model.matrix(~Product + Species.Group-1,data=newdat.richness)
+mm <- model.matrix(~Product + Species.Group + Species.Group:Product-1,data=newdat.richness)
 mm <- mm[,colnames(mm) %in% rownames(model$b)] # remove colums without coeffs
 preds <- predict.rma(model, newmods = mm)
 newdat.richness[,c("logRR.richness","logRR.richness.se","logRR.richness.ci.lb","logRR.richness.ci.ub")] <- cbind(preds$pred,preds$se,preds$ci.lb,preds$ci.ub)
