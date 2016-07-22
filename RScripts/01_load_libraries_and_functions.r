@@ -22,6 +22,7 @@ needed_libs <- c("devtools",# needed for library googlesheets
                  "maptools", # for converting shp into data.frame using fortify() in ggplot
 #                 "rworldmap",
                  "raster",# for adding map data
+                 "rasterVis", # for plotting map data with levelplot(), needs version >0.35
                  "rgdal", # for loading map data
                  "rgeos",# dependency for rgdal
                  "RColorBrewer",# fancy color schemes for plotting
@@ -42,7 +43,7 @@ usePackage <- function(p) {
 }
 sapply(needed_libs,usePackage)
 
-rm(needed_libs)
+rm(needed_libs, usePackage)
 
 ############################################################################
 ### 01.2. load all self-written functions needed for subsequent analysis

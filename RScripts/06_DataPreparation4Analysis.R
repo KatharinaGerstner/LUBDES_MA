@@ -13,7 +13,8 @@
 ##########################################################################
 
 ### restrict analysis to study cases with positive variances
-ES.frame.richness <- ES.frame.yield <- subset(ES.frame, Richness.Log.RR.Var>0 & Yield.Log.RR.Var>0) 
+ES.frame <- subset(ES.frame, Richness.Log.RR.Var>0 & Yield.Log.RR.Var>0)
+ES.frame.richness <- ES.frame.yield <- ES.frame
 
 ### Remove pseudo-replicates
 ES.frame.richness <- ES.frame.richness[!duplicated(ES.frame.richness[,c("Study.ID","Case.ID","LUI.range.level","Species.Group")]),]
@@ -36,9 +37,9 @@ for(x in unique(ES.frame$Study.Case)){
 ### 06.2. remove columns not needed for the analysis, unify names
 ##########################################################################
 
-ES.frame.richness <- ES.frame.richness[,c("Richness.Log.RR","Richness.Log.RR.Var","Longitude", "Latitude","LUI.range.level","Low.LUI","High.LUI","Study.ID","Case.ID","Study.Case","Species.Group","Product","BIOME","ES.and.BD")] #,"npp","time.since.first.use")]
+ES.frame.richness <- ES.frame.richness[,c("Richness.Log.RR","Richness.Log.RR.Var","Longitude", "Latitude","LUI.range.level","Low.LUI","High.LUI","Study.ID","Case.ID","Study.Case","Species.Group","Product","main_climate","landuse_history","ES.and.BD")] #,"npp","time.since.first.use")]
 names(ES.frame.richness)[1:2] <- c("Log.RR","Log.RR.Var")
-ES.frame.yield <- ES.frame.yield[,c("Yield.Log.RR","Yield.Log.RR.Var","Longitude", "Latitude","LUI.range.level","Low.LUI","High.LUI","Study.ID","Study.Case","Case.ID","Species.Group","Product","BIOME", "LU.definition.and.ES")] #,"npp","time.since.first.use")]
+ES.frame.yield <- ES.frame.yield[,c("Yield.Log.RR","Yield.Log.RR.Var","Longitude", "Latitude","LUI.range.level","Low.LUI","High.LUI","Study.ID","Study.Case","Case.ID","Species.Group","Product","main_climate","landuse_history", "LU.definition.and.ES")] #,"npp","time.since.first.use")]
 names(ES.frame.yield)[1:2] <- c("Log.RR","Log.RR.Var")
 
 ## remove cases with NA in covariates

@@ -129,15 +129,15 @@ write.csv(newdat,file=path2temp %+% "preds.LUI.SGP.csv",row.names=F)
 ### 09.2.3. Map predictions facetted by Product and LUI on top of biomes
 ############################################################################
 
-levels(newdat$Product)[levels(newdat$Product)=="animal_feed"]  <- "animal feed"
+levels(newdat$Product)[levels(newdat$Product)=="animal_feed"]  <- "green fodder"
 plot <- ggplot(data=newdat) + 
   geom_hline(aes(yintercept=0), linetype="twodash",size=1.05) + geom_vline(aes(xintercept=0), linetype="twodash",size=1.05) +
   geom_point(aes(x=logRR.yield, y=logRR.richness, color=LUI.range.level), size=3) +
   geom_pointrange(aes(x=logRR.yield, y=logRR.richness, ymin=logRR.richness - (1.96*logRR.richness.se), 
                       ymax=logRR.richness + (1.96*logRR.richness.se),color=LUI.range.level), size=1.2) +
   geom_segment(aes(x=logRR.yield - (1.96*logRR.yield.se), xend=logRR.yield + (1.96*logRR.yield.se), y = logRR.richness, yend = logRR.richness, color=LUI.range.level),size=1.2) +
-  scale_y_continuous(labels=trans_format("exp",comma_format(digits=2)),limits=c(log(0.45),log(1.815)),breaks=c(log(0.5),log(1),log(1.5),log(2)), oob = squish, expand=c(0,0)) + 
-  scale_x_continuous(labels=trans_format("exp",comma_format(digits=2)),limits=c(log(0.45),log(3.25)),breaks=c(log(0.5),log(1),log(1.5),log(2)), oob = squish, expand=c(0,0)) +
+  scale_y_continuous(labels=trans_format("exp",comma_format(digits=2)),limits=c(log(0.4),log(1.815)),breaks=c(log(0.5),log(1),log(1.5),log(2)), oob = squish, expand=c(0,0)) + 
+  scale_x_continuous(labels=trans_format("exp",comma_format(digits=2)),limits=c(log(0.3),log(3.25)),breaks=c(log(0.5),log(1),log(1.5),log(2)), oob = squish, expand=c(0,0)) +
   scale_colour_manual(values=c("low-low"='#d0d1e6',"medium-medium"="#a6bddb","high-high"="#045a8d","low-medium"='#fee090',"medium-high"='#fc8d59',"low-high"="#d73027","Grand Mean"="black"),breaks=c(levels(newdat$LUI.range.level))) +
   ylab("RR (Species Richness)") + xlab("RR (Yield)") + labs(color='') +
   facet_grid(Species.Group~Product) + 
