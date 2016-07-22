@@ -58,6 +58,7 @@ rm(needed_libs)
 table.sort = function(dat.low,dat.high,low,high){
   data.frame("Study.ID"=dat.low$Study.ID, "Case.ID" =dat.low$Case.ID, 
              "Low.LUI" = low, "High.LUI" = high,
+             "Study.Type" = dat.low$study.type,
              "Land.use...land.cover" = dat.low$Land.use...land.cover, "Product" = dat.low$Product, "ES.and.BD" =dat.low$ES.and.BD, "LU.definition.and.ES"=dat.low$LU.definition.and.ES,             
              "Fertilization" = paste(dat.low$Fertilization, dat.high$Fertilization, sep="_"), 
              "Irrigation" =paste(dat.low$Irrigation, dat.high$Irrigation, sep="_"),
