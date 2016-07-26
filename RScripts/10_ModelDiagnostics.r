@@ -12,10 +12,8 @@
 ### 09.1. model diagnostics
 ############################################################################
 
-mods.list <- c("None","LUI","Context","Full","Select")
-
 ### run loop over all models
-for(mods in mods.list){
+for(mods in names(Richness.MA.model)){
   
   pdf(path2temp %+% mods %+% ".pdf")
   ### 10.1. relationship residuals vs model fit, non-linear?, homogeneity of variances? 

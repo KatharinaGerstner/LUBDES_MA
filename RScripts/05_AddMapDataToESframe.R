@@ -93,6 +93,8 @@ ES.frame$landuse_history[is.na(ES.frame$landuse_history)] <- 11000
 
 # transform landuse_history to factor
 ES.frame$landuse_history <- factor(ES.frame$landuse_history)
+levels(ES.frame$landuse_history) <- c("5950 BC","50 BC", "1450","1950", "after 1950")
+
 summary(ES.frame$landuse_history)
 
 setwd(path2wd)

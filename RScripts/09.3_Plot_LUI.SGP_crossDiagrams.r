@@ -9,6 +9,8 @@
 ### Authors: KG, ...
 ############################################################################
 
+seqBreaks <- log(sapply(-2:7,function(x) 2^x))
+
 ############################################################################
 ### 09.2.1. Predictions for richness
 ############################################################################
@@ -58,58 +60,88 @@ newdat.yield[,c("logRR.yield","logRR.yield.se","logRR.yield.ci.lb","logRR.yield.
 newdat.yield <- subset(newdat.yield,n.yield>0)
 newdat.yield <- newdat.yield[,c("Product","LUI.range.level","n.yield","logRR.yield","logRR.yield.se","logRR.yield.ci.lb","logRR.yield.ci.ub")]
 
-newdat.LUI.SGP <- join_all(list(newdat.richness,newdat.yield),type="full")
+newdat <- join_all(list(newdat.richness,newdat.yield),type="full")
+newdat$CI95.richness <- "[" %+% round(newdat$logRR.richness.ci.lb,digits=2) %+% "," %+%  round(newdat$logRR.richness.ci.ub,digits=2) %+% "]"
+newdat$CI95.yield <- "[" %+% round(newdat$logRR.yield.ci.lb,digits=2) %+% "," %+%  round(newdat$logRR.yield.ci.ub,digits=2) %+% "]" 
+
+newdat$LUI.range.level <- factor(newdat$LUI.range.level, levels = c("low-low","medium-medium","high-high","low-medium","medium-high","low-high","Grand Mean"))
+
+write.csv(newdat[,c("Species.Group","Product","LUI.range.level",
+                 "n.richness", "logRR.richness",  "logRR.richness.se", "CI95.richness",
+                 "n.yield", "logRR.yield",  "logRR.yield.se", "CI95.yield")],
+          file=path2temp %+% "preds.LUI.SGP.csv",row.names=F)
+#print(xtable(newdat, caption="Response ratios for the LUI.SGP model and available evidence"),type="latex",include.rownames=F)
 
 ############################################################################
-### 09.2.1. Predictions for richness
+### 09.2.3. Map predictions facetted by Product and LUI on top of biomes
 ############################################################################
-model <- Richness.MA.model[["SGP"]]
 
-newdat.richness <- expand.grid(Product = levels(modelDataRichness$Product),
-                               Species.Group = levels(modelDataRichness$Species.Group)) 
-newdat.richness$LUI.range.level <- "Grand Mean"
+plot <- ggplot(data=newdat) + 
+  geom_hline(aes(yintercept=0), linetype="twodash",size=1.05) + geom_vline(aes(xintercept=0), linetype="twodash",size=1.05) +
+  geom_point(aes(x=logRR.yield, y=logRR.richness, color=LUI.range.level), size=3) +
+  geom_pointrange(aes(x=logRR.yield, y=logRR.richness, ymin=logRR.richness - (1.96*logRR.richness.se), 
+                      ymax=logRR.richness + (1.96*logRR.richness.se),color=LUI.range.level), size=1.2) +
+  geom_segment(aes(x=logRR.yield - (1.96*logRR.yield.se), xend=logRR.yield + (1.96*logRR.yield.se), y = logRR.richness, yend = logRR.richness, color=LUI.range.level),size=1.2) +
+  scale_y_continuous(labels=exp(seqBreaks),breaks=seqBreaks,limits=c(log(0.4),log(1.815)), oob = squish, expand=c(0,0)) + 
+  scale_x_continuous(labels=exp(seqBreaks),breaks=seqBreaks,limits=c(log(0.3),log(3.25)), oob = squish, expand=c(0,0)) +
+  scale_colour_manual(values=c("low-low"='#d0d1e6',"medium-medium"="#a6bddb","high-high"="#045a8d","low-medium"='#fee090',"medium-high"='#fc8d59',"low-high"="#d73027","Grand Mean"="black"),breaks=c(levels(newdat$LUI.range.level))) +
+  ylab("RR (Species Richness)") + xlab("RR (Yield)") + labs(color='') +
+  facet_grid(Species.Group~Product) + 
+  theme_lubdes(legend.position="bottom") +
+  guides(color=guide_legend(nrow=3))
+ggsave(file = path2temp %+% "CrossPlot_LUI.SGP.png",plot=plot, width = 15, height = 10, type = "cairo-png")
 
-## count number of cases within groups
-newdat.richness$n.richness <- NA
 
-for(i in 1:nrow(newdat.richness)){
-  newdat.richness$n.richness[i] <- length(which(modelDataRichness$Product %in% newdat.richness$Product[i] & modelDataRichness$Species.Group %in% newdat.richness$Species.Group[i]))
-}
-
-mm <- model.matrix(~Product + Species.Group + Species.Group:Product-1,data=newdat.richness)
-mm <- mm[,colnames(mm) %in% rownames(model$b)] # remove colums without coeffs
-preds <- predict.rma(model, newmods = mm)
-newdat.richness[,c("logRR.richness","logRR.richness.se","logRR.richness.ci.lb","logRR.richness.ci.ub")] <- cbind(preds$pred,preds$se,preds$ci.lb,preds$ci.ub)
-
-## remove levels with zero sample size
-newdat.richness <- subset(newdat.richness,n.richness>0)
-newdat.richness <- newdat.richness[,c("Species.Group","Product","LUI.range.level","n.richness","logRR.richness","logRR.richness.se","logRR.richness.ci.lb","logRR.richness.ci.ub")]
-
-############################################################################
-### 09.2.2. Predictions for yield
-############################################################################
-model <- Yield.MA.model[["SGP"]]
-
-newdat.yield <- expand.grid(Product = levels(modelDataYield$Product))
-newdat.yield$LUI.range.level <- "Grand Mean"
-
-## count number of cases within groups
-newdat.yield$n.yield <- NA
-
-for(i in 1:nrow(newdat.yield)){
-  newdat.yield$n.yield[i] <- length(which(modelDataYield$Product %in% newdat.yield$Product[i]))
-}
-
-mm <- model.matrix(~Product - 1,data=newdat.yield)
-mm <- mm[,colnames(mm) %in% rownames(model$b)] # remove colums without coeffs
-preds <- predict.rma(model, newmods = mm)
-newdat.yield[,c("logRR.yield","logRR.yield.se","logRR.yield.ci.lb","logRR.yield.ci.ub")] <- cbind(preds$pred,preds$se,preds$ci.lb,preds$ci.ub)
-
-## remove levels with zero sample size
-newdat.yield <- subset(newdat.yield,n.yield>0)
-newdat.yield <- newdat.yield[,c("Product","LUI.range.level","n.yield","logRR.yield","logRR.yield.se","logRR.yield.ci.lb","logRR.yield.ci.ub")]
-
-newdat.SGP <- join_all(list(newdat.richness,newdat.yield),type="full")
+# ############################################################################
+# ### 09.2.1. Predictions for richness
+# ############################################################################
+# model <- Richness.MA.model[["SGP"]]
+# 
+# newdat.richness <- expand.grid(Product = levels(modelDataRichness$Product),
+#                                Species.Group = levels(modelDataRichness$Species.Group)) 
+# newdat.richness$LUI.range.level <- "Grand Mean"
+# 
+# ## count number of cases within groups
+# newdat.richness$n.richness <- NA
+# 
+# for(i in 1:nrow(newdat.richness)){
+#   newdat.richness$n.richness[i] <- length(which(modelDataRichness$Product %in% newdat.richness$Product[i] & modelDataRichness$Species.Group %in% newdat.richness$Species.Group[i]))
+# }
+# 
+# mm <- model.matrix(~Product + Species.Group + Species.Group:Product-1,data=newdat.richness)
+# mm <- mm[,colnames(mm) %in% rownames(model$b)] # remove colums without coeffs
+# preds <- predict.rma(model, newmods = mm)
+# newdat.richness[,c("logRR.richness","logRR.richness.se","logRR.richness.ci.lb","logRR.richness.ci.ub")] <- cbind(preds$pred,preds$se,preds$ci.lb,preds$ci.ub)
+# 
+# ## remove levels with zero sample size
+# newdat.richness <- subset(newdat.richness,n.richness>0)
+# newdat.richness <- newdat.richness[,c("Species.Group","Product","LUI.range.level","n.richness","logRR.richness","logRR.richness.se","logRR.richness.ci.lb","logRR.richness.ci.ub")]
+# 
+# ############################################################################
+# ### 09.2.2. Predictions for yield
+# ############################################################################
+# model <- Yield.MA.model[["SGP"]]
+# 
+# newdat.yield <- expand.grid(Product = levels(modelDataYield$Product))
+# newdat.yield$LUI.range.level <- "Grand Mean"
+# 
+# ## count number of cases within groups
+# newdat.yield$n.yield <- NA
+# 
+# for(i in 1:nrow(newdat.yield)){
+#   newdat.yield$n.yield[i] <- length(which(modelDataYield$Product %in% newdat.yield$Product[i]))
+# }
+# 
+# mm <- model.matrix(~Product - 1,data=newdat.yield)
+# mm <- mm[,colnames(mm) %in% rownames(model$b)] # remove colums without coeffs
+# preds <- predict.rma(model, newmods = mm)
+# newdat.yield[,c("logRR.yield","logRR.yield.se","logRR.yield.ci.lb","logRR.yield.ci.ub")] <- cbind(preds$pred,preds$se,preds$ci.lb,preds$ci.ub)
+# 
+# ## remove levels with zero sample size
+# newdat.yield <- subset(newdat.yield,n.yield>0)
+# newdat.yield <- newdat.yield[,c("Product","LUI.range.level","n.yield","logRR.yield","logRR.yield.se","logRR.yield.ci.lb","logRR.yield.ci.ub")]
+# 
+# newdat.SGP <- join_all(list(newdat.richness,newdat.yield),type="full")
 
 # 
 # model1 <- Richness.MA.model[["None"]]
@@ -120,29 +152,4 @@ newdat.SGP <- join_all(list(newdat.richness,newdat.yield),type="full")
 # preds <- predict.rma(model2)
 # newdat.GM[,c("n.yield","logRR.yield","logRR.yield.se","logRR.yield.ci.lb","logRR.yield.ci.ub")] <- matrix(rep(c(nrow(modelDataYield),preds$pred,preds$se,preds$ci.lb,preds$ci.ub),times=nrow(newdat.GM)),ncol=5,byrow=T)
 
-newdat <- join_all(list(newdat.LUI.SGP,newdat.SGP),type="full")
-newdat$LUI.range.level <- factor(newdat$LUI.range.level, levels = c("low-low","medium-medium","high-high","low-medium","medium-high","low-high","Grand Mean"))
-write.csv(newdat,file=path2temp %+% "preds.LUI.SGP.csv",row.names=F)
-#print(xtable(newdat, caption="Response ratios for the LUI.SGP model and available evidence"),type="latex",include.rownames=F)
-
-############################################################################
-### 09.2.3. Map predictions facetted by Product and LUI on top of biomes
-############################################################################
-
-levels(newdat$Product)[levels(newdat$Product)=="animal_feed"]  <- "green fodder"
-plot <- ggplot(data=newdat) + 
-  geom_hline(aes(yintercept=0), linetype="twodash",size=1.05) + geom_vline(aes(xintercept=0), linetype="twodash",size=1.05) +
-  geom_point(aes(x=logRR.yield, y=logRR.richness, color=LUI.range.level), size=3) +
-  geom_pointrange(aes(x=logRR.yield, y=logRR.richness, ymin=logRR.richness - (1.96*logRR.richness.se), 
-                      ymax=logRR.richness + (1.96*logRR.richness.se),color=LUI.range.level), size=1.2) +
-  geom_segment(aes(x=logRR.yield - (1.96*logRR.yield.se), xend=logRR.yield + (1.96*logRR.yield.se), y = logRR.richness, yend = logRR.richness, color=LUI.range.level),size=1.2) +
-  scale_y_continuous(labels=trans_format("exp",comma_format(digits=2)),limits=c(log(0.4),log(1.815)),breaks=c(log(0.5),log(1),log(1.5),log(2)), oob = squish, expand=c(0,0)) + 
-  scale_x_continuous(labels=trans_format("exp",comma_format(digits=2)),limits=c(log(0.3),log(3.25)),breaks=c(log(0.5),log(1),log(1.5),log(2)), oob = squish, expand=c(0,0)) +
-  scale_colour_manual(values=c("low-low"='#d0d1e6',"medium-medium"="#a6bddb","high-high"="#045a8d","low-medium"='#fee090',"medium-high"='#fc8d59',"low-high"="#d73027","Grand Mean"="black"),breaks=c(levels(newdat$LUI.range.level))) +
-  ylab("RR (Species Richness)") + xlab("RR (Yield)") + labs(color='') +
-  facet_grid(Species.Group~Product) + 
-  theme_lubdes(legend.position="bottom") +
-  guides(color=guide_legend(nrow=3))
-ggsave(file = path2temp %+% "CrossPlot_LUI.SGP.png",plot=plot, width = 15, height = 10, type = "cairo-png")
-
-
+#newdat <- join_all(list(newdat.LUI.SGP,newdat.SGP),type="full")

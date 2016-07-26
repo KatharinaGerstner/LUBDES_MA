@@ -1,0 +1,29 @@
+---
+title: "Tables4Manuscript"
+author: "Katharina Gerstner"
+date: "Tuesday, July 26, 2016"
+output: word_document
+---
+
+```{r include=FALSE}
+path2temp <- "C:/Users/hoppek/Documents/temp/"
+library(knitr)
+"%+%" <- function(x,y)paste(x,y,sep="")
+
+```
+
+```{r}
+# LUI
+kable(read.csv(path2temp %+% "preds.LUI.csv"), digits=2)
+```
+
+```{r}
+# LUI.SGP
+kable(read.csv(path2temp %+% "preds.LUI.SGP.csv"), digits=2)
+```
+
+```{r}
+# SELECT
+kable(read.csv(path2temp %+% "preds.select.csv"), digits=2)
+```
+

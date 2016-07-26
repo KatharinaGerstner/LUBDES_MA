@@ -87,7 +87,7 @@ for(i in c("Log.RR","Log.RR.Var")){
   print(p)
   ggsave(p, file = paste(path2temp,"/PlotHist_ES.frame.richness_",i,".png",sep=""), width = 20, height = 8, type = "cairo-png")
 }  
-for(i in c("LUI.range.level","Species.Group","Product","BIOME", "landuse_history")){
+for(i in c("LUI.range.level","Species.Group","Product", "landuse_history")){
   p <- ggplot(data=ES.frame.richness) + 
     geom_bar(aes(x=ES.frame.richness[,i]), size=0.4) + 
     labs(x="",y="") +
@@ -108,7 +108,7 @@ for(i in c("Log.RR","Log.RR.Var")){
   print(p)
   ggsave(p, file = paste(path2temp,"/PlotHist_ES.frame.yield_",i,".png",sep=""), width = 20, height = 8, type = "cairo-png")
 }  
-for(i in c("LUI.range.level","Species.Group","Product","BIOME")){
+for(i in c("LUI.range.level","Species.Group","Product")){
   p <- ggplot(data=ES.frame.yield) + 
     geom_bar(aes(x=ES.frame.yield[,i]), size=0.4) + 
     labs(x="",y="") +
@@ -151,7 +151,7 @@ biome_map <- ggplot() +
                                 "Rock and Ice")) + 
   theme_lubdes(legend.position="bottom")
 
-ggsave(path2temp %+% "biome_map.png", width=22, height=10, units="cm")
+ggsave(path2temp %+% "biome_map.png", width=18, height=10, units="cm")
 ```
 
 ```{r LUhistory_map, echo=F}
@@ -163,6 +163,7 @@ df <- data.frame(LUhistory_data)
 #Make appropriate column headings
 colnames(df) <- c("Longitude", "Latitude", "LUhistory")
 df$LUhistory <- factor(df$LUhistory)
+levels(df$LUhistory) <- c("5950 BC","50 BC", "1450","1950", "after 1950")
 
 LUhistory_map <- ggplot(data=df, aes(y=Latitude, x=Longitude)) +
      geom_polygon(data = biome_mapdata, aes(x = long, y = lat, group = group, fill = NA)) +
@@ -173,11 +174,10 @@ LUhistory_map <- ggplot(data=df, aes(y=Latitude, x=Longitude)) +
      scale_fill_manual(values=c('#ffffb2','#fecc5c','#fd8d3c','#f03b20','#bd0026'), 
                        na.value="lightgrey",
                        name="",
-                       limits=c("-5950","-50", "1450","1950", "11000"), 
-                       labels=c("6000 BC","0", "1450","1950", "after 1950")) + 
+                       limits=c("5950 BC","50 BC", "1450","1950", "after 1950")) + 
   theme_lubdes(legend.position="bottom")
 
-ggsave(path2temp %+% "LUhistory_map.png", width=22, height=10, units="cm")
+ggsave(path2temp %+% "LUhistory_map.png", width=18, height=10, units="cm")
 # 
 # my.at <- c(-7000,-5900,-10, 1500,1800, 2000,12000)
 # levelplot(rmrsrkk11,par.settings=YlOrRdTheme,at=my.at)
@@ -243,13 +243,11 @@ ggsave(p, file=path2temp %+% "/ES.frame.CaseDistributionAll.png", width=18, heig
 ### 07.4. Forest Plots of study.cases per LUI.range.level
 ES.frame2plot <- ES.frame
   #subset(ES.frame, !(is.na(Richness.Log.RR.Var)) & Richness.Log.RR.Var>0 & !is.na(Yield.Log.RR.Var) & Yield.Log.RR.Var>0) 
+seqBreaks <- log(sapply(-2:7,function(x) 2^x))
 
 LUI.range.level = c("low-low","medium-medium","high-high","low-medium","medium-high","low-high")
 x.max <- max(c(ES.frame2plot$Richness.Log.RR+1.96*sqrt(ES.frame2plot$Richness.Log.RR.Var),ES.frame2plot$Yield.Log.RR+1.96*sqrt(ES.frame2plot$Yield.Log.RR.Var)),na.rm=T)
 x.min <- min(c(ES.frame2plot$Richness.Log.RR-1.96*sqrt(ES.frame2plot$Richness.Log.RR.Var),ES.frame2plot$Yield.Log.RR-1.96*sqrt(ES.frame2plot$Yield.Log.RR.Var)),na.rm=T)
-# decide about what the limits should show SD or 95%CI???
-# unify ranges across LUIrangelevels
-# set x-axis limits to c(x.min,x.max)
 
 for(LUI.level.to.plot in LUI.range.level){
   data.to.plot = subset(ES.frame2plot, LUI.range.level %in% LUI.level.to.plot)
@@ -310,7 +308,6 @@ for(LUI.level.to.plot in LUI.range.level){
   data.to.plot$is.duplicate[which(data.to.plot$is.duplicate %in% "FALSE")] = "value"
   data.to.plot$is.duplicate = factor(data.to.plot$is.duplicate,levels=c("value","duplicate"))
   
-  
   #### if ervery runs smooth - cut away this plot  
   #cut away the information of Yield.Log.RR from the unique Study ID to have them not displayed in the graph
   #  data.to.plot$uniqueID.for.axis.lables = seq(nrow(data.to.plot):1)
@@ -321,21 +318,21 @@ for(LUI.level.to.plot in LUI.range.level){
   data.to.plot$uniqueID = factor(data.to.plot$uniqueID,levels=rev(data.to.plot$uniqueID))
   data.to.plot$axes.naming = gsub(" Yield.Log.RR","",data.to.plot$axes.naming)
   data.to.plot$colouring = paste(data.to.plot$RR.ID,data.to.plot$is.duplicate)
-  data.to.plot$colouring = factor(data.to.plot$colouring,levels = c("Yield value","Yield duplicate","Species Richness value","Species Richness duplicate"))
-  
+  data.to.plot$colouring = factor(data.to.plot$colouring,levels = c("Yield value","Yield duplicate","Species Richness value","Species Richness duplicate"))  
   
   plot.forest =
     ggplot(data=data.to.plot) +
     
-    geom_segment(aes(y=uniqueID,yend=uniqueID,x=RR.value  - (1.96*sqrt(Log.RR.Var)), xend=RR.value	+ (1.96*sqrt(Log.RR.Var)),colour=colouring,alpha=is.SD.imputed,linetype=is.SD.imputed),size=1.2) +
+    geom_segment(aes(y=uniqueID,yend=uniqueID,x=RR.value  - (1.96*sqrt(Log.RR.Var)), xend=RR.value	+ (1.96*sqrt(Log.RR.Var)),colour=colouring,linetype=is.SD.imputed),size=1.2) +
     geom_point(aes(y=uniqueID, x=RR.value,colour=colouring),size=3.5) +
     geom_vline(xintercept=0,linetype ="twodash")  +
     
     #scale manually to get the legend correct
-    scale_colour_manual(values=c("#FF6633","grey","#00CC00","grey")) +
+    scale_colour_manual("",values=c("#FF6633","grey","#00CC00","grey"),limits=c("Yield value","Yield duplicate","Species Richness value","Species Richness duplicate"),labels=c("Yield","Yield duplicate","Species richness","Species richness duplicate")) +
+    scale_linetype("",limits=c("no","yes"),labels=c("SD reported", "SD imputed")) +
+    scale_x_continuous(labels=exp(seqBreaks),breaks=seqBreaks) +
     scale_y_discrete("Study ID",breaks= as.character(data.to.plot$uniqueID),labels=data.to.plot$axes.naming)  +
-    scale_alpha_discrete(range = c(1,0.4)) + 
-    
+
     #white background + flip 90 degrees
     theme(axis.ticks.x = element_blank(),panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
           panel.background = element_rect(colour = "black", size=1,fill=NA), axis.line = element_line(colour = "black"),
@@ -345,8 +342,8 @@ for(LUI.level.to.plot in LUI.range.level){
     
     #axes labels
     ylab("Study ID") +
-    xlab("Log Response Ratio")+
-    ggtitle("Forest Plot of study case effect sizes\n" %+% LUI.level.to.plot)
+    xlab("Response Ratio")+
+    ggtitle(LUI.level.to.plot)
   
   ggsave(plot.forest, file = path2temp %+% "Forest_plot_" %+% LUI.level.to.plot %+% ".png", width = 15, height = nrow(data.to.plot) / 5, type = "cairo-png")
   
@@ -361,14 +358,32 @@ for(LUI.level.to.plot in LUI.range.level){
 ![](Y:\Home\hoppek\temp\Forest_plot_medium-high.png)
 ![](Y:\Home\hoppek\temp\Forest_plot_high-high.png)
 
-```{r linked_vs_independent}
-# Are BD and ES measured from the same species (e.g. weed BD and weed biomass in grasslands is linked)?
-# ggplot(data=ES.frame.richness,aes(y=Log.RR,x=factor(ES.and.BD))) + 
-#   geom_boxplot()
+```{r confounding variables}
+### Are BD and ES measured from the same species (e.g. weed BD and weed biomass in grasslands is linked)?
+ggplot(data=ES.frame.richness,aes(y=Log.RR,x=factor(ES.and.BD))) + 
+  geom_boxplot()
+
+t.test(Log.RR ~ factor(ES.and.BD), data=ES.frame.richness)
+
+### Is land use intensity measured from data on yield.
+ggplot(data=ES.frame.yield,aes(y=Log.RR,x=factor(LU.definition.and.ES))) + 
+  geom_boxplot()
+t.test(Log.RR ~ factor(LU.definition.and.ES), data=ES.frame.yield)
+
+# ### Relationship spatial scale - log.RR
 # 
-# # Is land use intensity measured from data on yield.
-# ggplot(data=ES.frame.yield,aes(y=Log.RR,x=factor(LU.definition.and.ES))) + 
-#   geom_boxplot()
+# # 1. standardize units cf. function convertAreaUnits() in 01_load:libraries_and_functions.r (currently outcommented)
+# table(data$reported.area.of.BD)
+# table(data$reported.area.unit.of.BD)
+# 
+# # 2. add to ES.frame.richness
+# 
+# # 3. fit linear model
+# fm <- lm(Log.RR ~ plot.size, data=ES.frame.richness)
+# 
+# # 4. plot data and fitted line
+# ggplot(data=ES.frame.richness,aes(y=Log.RR,x=factor(ES.and.BD))) + 
+#   geom_points() + geom_line()
 
 ```
 

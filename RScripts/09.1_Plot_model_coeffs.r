@@ -9,11 +9,12 @@
 ### Authors: KG, TN,...
 ############################################################################
 
+seqBreaks <- log(sapply(-2:7,function(x) 2^x))
+
 ############################################################################
 ### 09.1.1. plot raw data + grand mean
 ############################################################################
 newdat <- data.frame(1)
-
 
 model <- Richness.MA.model[["None"]]
 newdat$logRR.richness <- model$b
@@ -26,15 +27,15 @@ newdat$logRR.yield.se <- model$se
 plot <- ggplot() +
   geom_hline(aes(yintercept=0), linetype="twodash",size=1.05) + geom_vline(aes(xintercept=0), linetype="twodash",size=1.05) +
   geom_point(data=ES.frame, aes(x=Yield.Log.RR, y=Richness.Log.RR),color="grey",alpha=0.5,size=2) +
-  geom_point(data=newdat, aes(x=logRR.yield, y=logRR.richness), color="black", size=1.4) +
+  geom_point(data=newdat, aes(x=logRR.yield, y=logRR.richness), color="black", size=1.1) +
   geom_pointrange(data=newdat, aes(x=logRR.yield, y=logRR.richness, ymin=logRR.richness - (1.96*logRR.richness.se), 
                       ymax=logRR.richness + (1.96*logRR.richness.se)),color="black", size=1.2) +
   geom_segment(data=newdat, aes(x=logRR.yield - (1.96*logRR.yield.se), xend=logRR.yield + (1.96*logRR.yield.se), y = logRR.richness, yend = logRR.richness), color="black",size=1.2) +
-  scale_y_continuous(labels=trans_format("exp",comma_format(digits=2))) + 
-  scale_x_continuous(labels=trans_format("exp",comma_format(digits=2))) +
+  scale_y_continuous(labels=exp(seqBreaks),breaks=seqBreaks) + 
+  scale_x_continuous(labels=exp(seqBreaks),breaks=seqBreaks) +
   ylab("RR (Species Richness)") + xlab("RR (Yield)") + labs(color='') + 
   theme_lubdes() 
-ggsave(plot, file = path2temp %+% "Rawdata+GrandMean_rma.png", width = 20, height = 10, type = "cairo-png")
+ggsave(plot, file = path2temp %+% "Rawdata+GrandMean_rma.png", width = 16, height = 8, type = "cairo-png")
 
 ############################################################################
 ### 09.1.2. plot LUI cross diagrams
@@ -46,27 +47,34 @@ newdat <- expand.grid(LUI.range.level=levels(ES.frame$LUI.range.level))
 model <- Richness.MA.model[["LUI"]]
 mm <- model.matrix(~LUI.range.level-1, data=newdat)
 preds <- predict.rma(model, newmods = mm)
-newdat$logRR.richness <- preds$pred
-newdat$logRR.richness.se <- preds$se
+newdat[,c("logRR.richness","logRR.richness.se","logRR.richness.ci.lb","logRR.richness.ci.ub")] <- cbind(preds$pred,preds$se,preds$ci.lb,preds$ci.ub)
 
 newdat$n.richness <- as.numeric(table(modelDataRichness$LUI.range.level))
 
 model <- Yield.MA.model[["LUI"]]
 mm <- model.matrix(~LUI.range.level-1, data=newdat)
 preds <- predict.rma(model, newmods = mm)
-newdat$logRR.yield <- preds$pred
-newdat$logRR.yield.se <- preds$se
+newdat[,c("logRR.yield","logRR.yield.se","logRR.yield.ci.lb","logRR.yield.ci.ub")] <- cbind(preds$pred,preds$se,preds$ci.lb,preds$ci.ub)
 newdat$n.yield <- as.numeric(table(modelDataYield$LUI.range.level))
 
 model1 <- Richness.MA.model[["None"]]
 model2 <- Yield.MA.model[["None"]]
 newdat.GM <- data.frame(LUI.range.level="Grand Mean",
-                         logRR.richness= model1$b, logRR.richness.se= model1$se, n.richness=nrow(modelDataRichness),
-                         logRR.yield= model2$b, logRR.yield.se= model2$se, n.yield=nrow(modelDataYield))
+                        logRR.richness= model1$b, logRR.richness.se= model1$se, 
+                        logRR.richness.ci.lb=model1$b-1.96*model1$se,logRR.richness.ci.ub=model1$b+1.96*model1$se,
+                        n.richness=nrow(modelDataRichness),
+                        logRR.yield= model2$b, logRR.yield.se= model2$se, 
+                        logRR.yield.ci.lb=model2$b-1.96*model2$se,logRR.yield.ci.ub=model2$b+1.96*model2$se,
+                        n.yield=nrow(modelDataYield))
 
 newdat <- join_all(list(newdat,newdat.GM),type="full")
+newdat$CI95.richness <- "[" %+% round(newdat$logRR.richness.ci.lb,digits=2) %+% "," %+%  round(newdat$logRR.richness.ci.ub,digits=2) %+% "]"
+newdat$CI95.yield <- "[" %+% round(newdat$logRR.yield.ci.lb,digits=2) %+% "," %+%  round(newdat$logRR.yield.ci.ub,digits=2) %+% "]" 
 
-write.csv(newdat,file=path2temp %+% "preds.LUI.csv",row.names=F)
+write.csv(newdat[,c("LUI.range.level", 
+                    "n.richness", "logRR.richness",	"logRR.richness.se", "CI95.richness",
+                    "n.yield", "logRR.yield",  "logRR.yield.se", "CI95.yield")],
+          file=path2temp %+% "preds.LUI.csv",row.names=F)
 
 ## calculation of 95%CI in forest() from metafor
 #vi <- sei^2
@@ -78,29 +86,29 @@ plot <- ggplot(data=ES.frame) +
   geom_point(aes(x=Yield.Log.RR, y=Richness.Log.RR,color=LUI.range.level),alpha=0.5) +
   geom_pointrange(aes(x=Yield.Log.RR, y=Richness.Log.RR, ymin=Richness.Log.RR - (1.96*sqrt(Richness.Log.RR.Var)), ymax=Richness.Log.RR + (1.96*sqrt(Richness.Log.RR.Var)),color=LUI.range.level),alpha=0.5) +
   geom_segment(aes(x=Yield.Log.RR - (1.96*sqrt(Yield.Log.RR.Var)), xend=Yield.Log.RR + (1.96*sqrt(Yield.Log.RR.Var)), y = Richness.Log.RR, yend = Richness.Log.RR, color=LUI.range.level),alpha=0.5) +
-  scale_y_continuous(labels=trans_format("exp",comma_format(digits=2))) + 
-  scale_x_continuous(labels=trans_format("exp",comma_format(digits=2))) +
+  scale_y_continuous(labels=exp(seqBreaks),breaks=seqBreaks) + 
+  scale_x_continuous(labels=exp(seqBreaks),breaks=seqBreaks) +
   scale_colour_manual(values=c("low-low"='#d0d1e6',"medium-medium"="#a6bddb","high-high"="#045a8d","low-medium"='#fee090',"medium-high"='#fc8d59',"low-high"="#d73027","Grand Mean"="darkgrey"),breaks=c(levels(ES.frame$LUI.range.level))) +
   ylab("RR (Species Richness)") + xlab("RR (Yield)") + labs(color='') + 
   theme_lubdes(legend.position="bottom") +
   guides(color=guide_legend(nrow=3))
-ggsave(plot, file = path2temp %+% "rawdata_LUI.png", width = 20, height = 10, type = "cairo-png")
+ggsave(plot, file = path2temp %+% "rawdata_LUI.png", width = 16, height = 8, type = "cairo-png")
 
 
 # plot crosses for each covariate combination
 plot <- ggplot(data=newdat) + 
   geom_hline(aes(yintercept=0), linetype="twodash",size=1.05) + geom_vline(aes(xintercept=0), linetype="twodash",size=1.05) +
   geom_point(aes(x=logRR.yield, y=logRR.richness, color=LUI.range.level), size=3) +
-  geom_pointrange(aes(x=logRR.yield, y=logRR.richness, ymin=logRR.richness - (1.96*logRR.richness.se), 
-                                   ymax=logRR.richness + (1.96*logRR.richness.se),color=LUI.range.level), size=1.2) +
-  geom_segment(aes(x=logRR.yield - (1.96*logRR.yield.se), xend=logRR.yield + (1.96*logRR.yield.se), y = logRR.richness, yend = logRR.richness, color=LUI.range.level),size=1.2) +
-  scale_y_continuous(labels=trans_format("exp",comma_format(digits=2))) + 
-  scale_x_continuous(labels=trans_format("exp",comma_format(digits=2))) +
+  geom_pointrange(aes(x=logRR.yield, y=logRR.richness, ymin=logRR.richness.ci.lb, 
+                                   ymax=logRR.richness.ci.ub,color=LUI.range.level), size=1.2) +
+  geom_segment(aes(x=logRR.yield.ci.lb, xend=logRR.yield.ci.ub, y = logRR.richness, yend = logRR.richness, color=LUI.range.level),size=1.2) +
+  scale_y_continuous(labels=exp(seqBreaks),breaks=seqBreaks) + 
+  scale_x_continuous(labels=exp(seqBreaks),breaks=seqBreaks) +
   scale_colour_manual(values=c("low-low"='#d0d1e6',"medium-medium"="#a6bddb","high-high"="#045a8d","low-medium"='#fee090',"medium-high"='#fc8d59',"low-high"="#d73027","Grand Mean"="black"),breaks=levels(newdat$LUI.range.level)) +
   ylab("RR (Species Richness)") + xlab("RR (Yield)") + labs(color='') +
   theme_lubdes(legend.position="bottom") +
   guides(color=guide_legend(nrow=3))
-ggsave(plot, file = path2temp %+% "CrossPlot_LUI_rma.png", width = 20, height = 10, type = "cairo-png")
+ggsave(plot, file = path2temp %+% "CrossPlot_LUI_rma.png", width = 16, height = 8, type = "cairo-png")
 
 
 ############################################################################

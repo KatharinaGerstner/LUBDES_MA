@@ -54,8 +54,8 @@ for(x in c("Product", "landuse_history", "main_climate")){
 ###########################################################################
 ### store models in a list
 ###########################################################################
-Richness.MA.model <- Yield.MA.model <- vector("list", length=7)
-names(Richness.MA.model) <- names(Yield.MA.model) <- c("None","LUI","Context","LUI.SGP","SGP","Full","Select")
+Richness.MA.model <- Yield.MA.model <- vector("list", length=5)
+names(Richness.MA.model) <- names(Yield.MA.model) <- c("None","LUI","LUI.SGP","Full","Select")
 
 ###########################################################################
 ### Function for model fitting using rma.mv
@@ -86,9 +86,9 @@ rma.mv.func <- function(df, moderators, fit.method)
 ###########################################################################
 Richness.MA.model[["None"]] <- rma.mv.func(df=modelDataRichness, moderators=c(1), fit.method="REML")
 Richness.MA.model[["LUI"]] <- rma.mv.func(df=modelDataRichness, moderators=c(-1,"LUI.range.level"), fit.method="REML")
-Richness.MA.model[["Context"]] <- rma.mv.func(df=modelDataRichness, moderators=c(-1,"Product", "Species.Group","landuse_history","main_climate","landuse_history:main_climate"), fit.method="REML")
+#Richness.MA.model[["Context"]] <- rma.mv.func(df=modelDataRichness, moderators=c(-1,"Product", "Species.Group","landuse_history","main_climate","landuse_history:main_climate"), fit.method="REML")
 Richness.MA.model[["LUI.SGP"]] <- rma.mv.func(df=modelDataRichness, moderators=c(-1,"LUI.range.level","Product", "Species.Group", "LUI.range.level:Product", "LUI.range.level:Species.Group", "Species.Group:Product"), fit.method="REML")
-Richness.MA.model[["SGP"]] <- rma.mv.func(df=modelDataRichness, moderators=c(-1,"Product", "Species.Group", "Species.Group:Product"), fit.method="REML")
+#Richness.MA.model[["SGP"]] <- rma.mv.func(df=modelDataRichness, moderators=c(-1,"Product", "Species.Group", "Species.Group:Product"), fit.method="REML")
 Richness.MA.model[["Full"]] <- rma.mv.func(df=modelDataRichness, moderators=c(-1,"LUI.range.level", "Product", "Species.Group", "landuse_history","main_climate", "LUI.range.level:Product", "LUI.range.level:Species.Group","LUI.range.level:main_climate", "main_climate:landuse_history","Species.Group:Product"), fit.method="REML")
 model2select <- try(rma.mv(yi=Log.RR, V=M.matrix(modelDataRichness)+diag(modelDataRichness$Log.RR.Var), 
                        mods=~LUI.range.level + Product + Species.Group + landuse_history + main_climate + LUI.range.level:Product + LUI.range.level:Species.Group + LUI.range.level:landuse_history + LUI.range.level:main_climate + Species.Group:Product + landuse_history:main_climate,
@@ -115,9 +115,9 @@ Richness.MA.model[["Select"]] <- rma.mv.func(df=modelDataRichness, moderators=c(
 ###########################################################################
 Yield.MA.model[["None"]] <- rma.mv.func(df=modelDataYield, moderators=c(1), fit.method="REML")
 Yield.MA.model[["LUI"]] <- rma.mv.func(df=modelDataYield, moderators=c(-1,"LUI.range.level"), fit.method="REML")
-Yield.MA.model[["Context"]] <- rma.mv.func(df=modelDataYield, moderators=c(-1,"Product","landuse_history","main_climate","landuse_history:main_climate"), fit.method="REML")
+#Yield.MA.model[["Context"]] <- rma.mv.func(df=modelDataYield, moderators=c(-1,"Product","landuse_history","main_climate","landuse_history:main_climate"), fit.method="REML")
 Yield.MA.model[["LUI.SGP"]] <- rma.mv.func(df=modelDataYield, moderators=c(-1,"LUI.range.level", "Product", "LUI.range.level:Product"), fit.method="REML")
-Yield.MA.model[["SGP"]] <- rma.mv.func(df=modelDataYield, moderators=c(-1,"Product"), fit.method="REML")
+#Yield.MA.model[["SGP"]] <- rma.mv.func(df=modelDataYield, moderators=c(-1,"Product"), fit.method="REML")
 Yield.MA.model[["Full"]] <- rma.mv.func(df=modelDataYield, moderators=c(-1,"LUI.range.level", "Product", "landuse_history","main_climate", "LUI.range.level:Product","LUI.range.level:main_climate","LUI.range.level:landuse_history", "main_climate:landuse_history"), fit.method="REML")
 model2select <- try(rma.mv(yi=Log.RR, V=M.matrix(modelDataYield)+diag(modelDataYield$Log.RR.Var), 
                            mods=~LUI.range.level + Product + landuse_history + main_climate + LUI.range.level:Product + LUI.range.level:landuse_history + LUI.range.level:main_climate + landuse_history:main_climate,
@@ -142,25 +142,35 @@ Yield.MA.model[["Select"]] <- rma.mv.func(df=modelDataYield, moderators=c(-1,mod
 ###########################################################################
 ### extract fit statistics
 ###########################################################################
-fit.tab.richness <- data.frame(model=names(Richness.MA.model),logLik=NA, deviance=NA, AIC=NA, BIC=NA, AICc=NA, R2.LMM.m=NA,R2.LMM.c=NA)
-fit.tab.yield <- data.frame(model=names(Yield.MA.model),logLik=NA, deviance=NA, AIC=NA, BIC=NA, AICc=NA, R2.LMM.m=NA,R2.LMM.c=NA)
+fit.tab.richness <- data.frame(model=names(Richness.MA.model),
+                               logLik=NA, deviance=NA, AIC=NA, BIC=NA, AICc=NA, 
+                               QE=unlist(lapply(Richness.MA.model,function(x) x$QE)), QEp=unlist(lapply(Richness.MA.model,function(x) x$QEp)),
+                               QM=unlist(lapply(Richness.MA.model,function(x) x$QM)),QMp=unlist(lapply(Richness.MA.model,function(x) x$QMp)))
+fit.tab.yield <- data.frame(model=names(Yield.MA.model),
+                            logLik=NA, deviance=NA, AIC=NA, BIC=NA, AICc=NA, 
+                            QE=unlist(lapply(Yield.MA.model,function(x) x$QE)), QEp=unlist(lapply(Yield.MA.model,function(x) x$QEp)),
+                            QM=unlist(lapply(Yield.MA.model,function(x) x$QM)),QMp=unlist(lapply(Yield.MA.model,function(x) x$QMp)))
+
 for(i in 1:length(Richness.MA.model)){
-  var.fixed <- lapply(Richness.MA.model,function(x) {ifelse(length(coef(x))==1,0,var(coef(x)))})
   fit.tab.richness[i,2:6] <- t(fitstats.rma(Richness.MA.model[[i]]))
-#  fit.tab.richness$R2.GH <- lapply(Richness.MA.model,function(x) {1-var(residuals(x))/var(ES.frame.richness$Log.RR)})
-  fit.tab.richness$R2.LMM.m <- unlist(lapply(Richness.MA.model,function(x) {var.fixed[[i]]/(var.fixed[[i]]+x$sigma2[1]+x$sigma2[2]+var(residuals(x)))}))
-  fit.tab.richness$R2.LMM.c <- unlist(lapply(Richness.MA.model,function(x) {(var.fixed[[i]]+x$sigma2[1]+x$sigma2[2])/(var.fixed[[i]]+x$sigma2[1]+x$sigma2[2]+var(residuals(x)))}))
-  
-  var.fixed <- lapply(Yield.MA.model,function(x) {ifelse(length(coef(x))==1,0,var(coef(x)))})
   fit.tab.yield[i,2:6] <- t(fitstats.rma(Yield.MA.model[[i]]))
-  fit.tab.yield$R2.LMM.m <- unlist(lapply(Yield.MA.model,function(x) {var.fixed[[i]]/(var.fixed[[i]]+x$sigma2[1]+x$sigma2[2]+var(residuals(x)))}))
-  fit.tab.yield$R2.LMM.c <- unlist(lapply(Yield.MA.model,function(x) {(var.fixed[[i]]+x$sigma2[1]+x$sigma2[2])/(var.fixed[[i]]+x$sigma2[1]+x$sigma2[2]+var(residuals(x)))}))
 }
+fit.tab.richness$R2 <- fit.tab.richness$QM/(fit.tab.richness$QM+fit.tab.richness$QE)
+fit.tab.yield$R2 <- fit.tab.yield$QM/(fit.tab.yield$QM+fit.tab.yield$QE)
 
 write.csv(fit.tab.richness,file=path2temp %+% "fit.tab.richness.csv",row.names=F)
 write.csv(fit.tab.yield,file=path2temp %+% "fit.tab.yield.csv",row.names=F)
 
+## estimation of R² according to Nakagaw&Schielzeth2012 for LMM, however this does not account for the weights in contrast to the heterogeneity statistics (cf Koricheva et al. 2013)
+# var.fixed.richness <- lapply(Richness.MA.model,function(x) {ifelse(length(coef(x))==1,0,var(coef(x)))})
+# var.fixed.yield <- lapply(Yield.MA.model,function(x) {ifelse(length(coef(x))==1,0,var(coef(x)))})
+#  fit.tab.richness$R2.GH <- lapply(Richness.MA.model,function(x) {1-var(residuals(x))/var(ES.frame.richness$Log.RR)})
+#   fit.tab.richness$R2.LMM.m <- unlist(lapply(Richness.MA.model,function(x) {var.fixed.richness[[i]]/(var.fixed.richness[[i]]+x$sigma2[1]+x$sigma2[2]+var(residuals(x)))}))
+#   fit.tab.richness$R2.LMM.c <- unlist(lapply(Richness.MA.model,function(x) {(var.fixed.richness[[i]]+x$sigma2[1]+x$sigma2[2])/(var.fixed.richness[[i]]+x$sigma2[1]+x$sigma2[2]+var(residuals(x)))}))
+#   fit.tab.yield$R2.LMM.m <- unlist(lapply(Yield.MA.model,function(x) {var.fixed.yield[[i]]/(var.fixed.yield[[i]]+x$sigma2[1]+x$sigma2[2]+var(residuals(x)))}))
+#   fit.tab.yield$R2.LMM.c <- unlist(lapply(Yield.MA.model,function(x) {(var.fixed.yield[[i]]+x$sigma2[1]+x$sigma2[2])/(var.fixed.yield[[i]]+x$sigma2[1]+x$sigma2[2]+var(residuals(x)))}))
 
+# 
 # ############################################################################
 # ### 07.4. Analysis with moderators for no LU vs low/medium/high LU
 # ############################################################################
