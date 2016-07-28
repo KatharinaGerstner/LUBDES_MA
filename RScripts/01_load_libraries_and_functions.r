@@ -80,6 +80,7 @@ table.sort = function(dat.low,dat.high,low,high){
              "Richness.Mean.Low" = as.numeric(dat.low$richness.mean), "Richness.SD.Low" =as.numeric(dat.low$richness.SD), "Richness.N.Low" =as.numeric(dat.low$X..of.samples.for.BD.measure), 
              "Richness.Mean.High" = as.numeric(dat.high$richness.mean), "Richness.SD.High" = as.numeric(dat.high$richness.SD), "Richness.N.High" = as.numeric(dat.high$X..of.samples.for.BD.measure),             
              "Richness.Plot.Size" = as.numeric(dat.low$reported.area.of.BD),
+             "Yield.Unit.Type" = dat.low$Yield.Unit.Type,
              "Yield.Mean.Low" = as.numeric(dat.low$yield.mean), "Yield.SD.Low" = as.numeric(dat.low$yield.SD), "Yield.N.Low" = as.numeric(dat.low$X..of.samples.for.YD.measure),
              "Yield.Mean.High" = as.numeric(dat.high$yield.mean), "Yield.SD.High" = as.numeric(dat.high$yield.SD), "Yield.N.High" = as.numeric(dat.high$X..of.samples.for.YD.measure),
              "Yield.SD.is.imputed.low" = dat.low$yield.SD.is.imputed,"Yield.SD.is.imputed.high" = dat.high$yield.SD.is.imputed,
@@ -205,6 +206,69 @@ theme_lubdes <- function (base_size = 12, base_family = "", rel.text.size=1.5, l
       strip.text = element_text(size=rel(rel.text.size)))
 }
 
+############################################################################
+### standardize area units
+############################################################################
+
+convertAreaUnits <- function(data, type=c("bd", "yield")){
+  if(type == "yield"){
+    if(!("reported.area.of.ES" %in% names(data))){stop("There must be a column called 'reported.area.of.ES'")}
+    if(!("reported.area.unit.of.ES" %in% names(data))){stop("There must be a column called 'reported.area.unit.of.ES'")}
+    new_units <- data$sampled.size.unit.1
+    new_area <- as.numeric(data$sampled.size.area)
+  }
+  
+  if(type == "bd"){
+    if(!("reported.area.of.BD" %in% names(data))){stop("There must be a column called 'reported.area.of.BD'")}
+    if(!("reported.area.unit.of.BD" %in% names(data))){stop("There must be a column called 'reported.area.unit.of.BD'")}
+    new_units <- data$reported.area.unit.of.BD
+    new_area <- as.numeric(data$reported.area.of.BD)
+  }
+  new_units <- ifelse(!is.na(new_units) & new_units %in% c("mÂ²","m2","m²"), "m²", new_units)  
+  
+  new_area  <- ifelse(!is.na(new_units) & new_units == "ha", new_area * 10000, new_area)
+  new_units <- ifelse(!is.na(new_units) & new_units == "ha", "m²", new_units)  
+  
+  new_area  <- ifelse(!is.na(new_units) & new_units == "cm²", new_area * 0.0001, new_area)
+  new_units <- ifelse(!is.na(new_units) & new_units == "cm²", "m²", new_units)	
+  
+  new_area  <- ifelse(!is.na(new_units) & new_units == "mm²", new_area * 1e-6, new_area)
+  new_units <- ifelse(!is.na(new_units) & new_units == "mm²", "m²", new_units)	
+  
+  new_area  <- ifelse(!is.na(new_units) & new_units == "km²", new_area * 1000000, new_area)
+  new_units <- ifelse(!is.na(new_units) & new_units == "km²", "m²", new_units)	
+#  
+  if(type == "yield"){
+    data$sampled.size.unit.1 <- new_units
+    data$sampled.size.area <- as.numeric(new_area)
+  }
+  if(type == "bd"){
+    data$reported.area.unit.of.BD <- new_units
+    data$reported.area.of.BD <- as.numeric(new_area)
+  }
+  return(data)
+}
+
+### Sort transects and traps
+# SortTransectsTraps <- function(data){
+#   if(!("reported.area.of.BD" %in% names(data))){stop("There must be a column called 'reported.area.of.BD'")}
+#   
+#   new_units <- data$sampled.size.unit
+#   new_area <- as.numeric(data$sampled.area)
+#   
+#   transects <- c("points/transect", "transect", "transect (km)","transect (m)")
+#   new_units <- ifelse(new_units %in% transects, "transects", new_units)	
+#   new_area <- ifelse(new_units %in% transects, NA, new_area)
+#   
+#   traps <- c("traps", "traps (mistnets)")
+#   new_units <- ifelse(new_units %in% traps, "traps", new_units)	
+#   new_area <- ifelse(new_units %in% traps, NA, new_area)
+#   
+#   data$sampled.size.unit <- new_units
+#   data$sampled.area <- new_area
+#   
+#   return(data)
+# }
 
 # ############################################################################
 # ### standardize yield units (by HP, KG)
@@ -259,69 +323,6 @@ theme_lubdes <- function (base_size = 12, base_family = "", rel.text.size=1.5, l
 #   return(data)
 # }
 # 
-# ############################################################################
-# ### standardize area units
-# ############################################################################
-# 
-# convertAreaUnits <- function(data, type=c("bd", "yield")){
-#   if(type == "yield"){
-#     if(!("sampled.size.area" %in% names(data))){stop("There must be a column called 'sampled.size.area'")}
-#     if(!("sampled.size.unit.1" %in% names(data))){stop("There must be a column called 'sampled.size.unit.1'")}
-#     new_units <- data$sampled.size.unit.1
-#     new_area <- as.numeric(data$sampled.size.area)
-#   }
-#   
-#   if(type == "bd"){
-#     if(!("sampled.area" %in% names(data))){stop("There must be a column called 'sampled.area'")}
-#     if(!("sampled.size.unit" %in% names(data))){stop("There must be a column called 'sampled.size.unit'")}
-#     new_units <- data$sampled.size.unit
-#     new_area <- as.numeric(data$sampled.area)
-#   }
-#   new_area  <- ifelse(!is.na(new_units) & new_units == "mÂ²", "m²", new_area)
-#   
-#   new_area  <- ifelse(!is.na(new_units) & new_units == "ha", new_area * 10000, new_area)
-#   new_units <- ifelse(!is.na(new_units) & new_units == "ha", "m²", new_units)	
-#   
-#   new_area  <- ifelse(!is.na(new_units) & new_units == "cm²", new_area * 0.0001, new_area)
-#   new_units <- ifelse(!is.na(new_units) & new_units == "cm²", "m²", new_units)	
-#   
-#   new_area  <- ifelse(!is.na(new_units) & new_units == "mm²", new_area * 1e-6, new_area)
-#   new_units <- ifelse(!is.na(new_units) & new_units == "mm²", "m²", new_units)	
-#   
-#   new_area  <- ifelse(!is.na(new_units) & new_units == "km²", new_area * 1000000, new_area)
-#   new_units <- ifelse(!is.na(new_units) & new_units == "km²", "m²", new_units)	
-#   
-#   if(type == "yield"){
-#     data$sampled.size.unit.1 <- new_units
-#     data$sampled.size.area <- as.numeric(new_area)
-#   }
-#   if(type == "bd"){
-#     data$sampled.size.unit <- new_units
-#     data$sampled.area <- as.numeric(new_area)
-#   }
-#   return(data)
-# }
-# 
-# ### Sort transects and traps
-# SortTransectsTraps <- function(data){
-#   if(!("sampled.size.unit" %in% names(data))){stop("There must be a column called 'sampled.size.unit'")}
-#   
-#   new_units <- data$sampled.size.unit
-#   new_area <- as.numeric(data$sampled.area)
-#   
-#   transects <- c("points/transect", "transect", "transect (km)","transect (m)")
-#   new_units <- ifelse(new_units %in% transects, "transects", new_units)	
-#   new_area <- ifelse(new_units %in% transects, NA, new_area)
-#   
-#   traps <- c("traps", "traps (mistnets)")
-#   new_units <- ifelse(new_units %in% traps, "traps", new_units)	
-#   new_area <- ifelse(new_units %in% traps, NA, new_area)
-#   
-#   data$sampled.size.unit <- new_units
-#   data$sampled.area <- new_area
-#   
-#   return(data)
-# }
 # ############################################################################
 # ### RMA select function (by HP and TN)
 # ############################################################################

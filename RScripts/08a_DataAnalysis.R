@@ -158,8 +158,14 @@ for(i in 1:length(Richness.MA.model)){
 fit.tab.richness$R2 <- fit.tab.richness$QM/(fit.tab.richness$QM+fit.tab.richness$QE)
 fit.tab.yield$R2 <- fit.tab.yield$QM/(fit.tab.yield$QM+fit.tab.yield$QE)
 
-write.csv(fit.tab.richness,file=path2temp %+% "fit.tab.richness.csv",row.names=F)
-write.csv(fit.tab.yield,file=path2temp %+% "fit.tab.yield.csv",row.names=F)
+fit.tab.richness$deltaAICc <- fit.tab.richness$AICc - min(fit.tab.richness$AICc)
+fit.tab.richness$deltaBIC <- fit.tab.richness$BIC - min(fit.tab.richness$BIC)
+
+fit.tab.yield$deltaAICc <- fit.tab.yield$AICc - min(fit.tab.yield$AICc)
+fit.tab.yield$deltaBIC <- fit.tab.yield$BIC - min(fit.tab.yield$BIC)
+
+write.csv(fit.tab.richness[,c("model","deltaAICc","deltaBIC","QM","QMp","QE","R2")],file=path2temp %+% "fit.tab.richness.csv",row.names=F)
+write.csv(fit.tab.yield[,c("model","deltaAICc","deltaBIC","QM","QMp","QE","R2")],file=path2temp %+% "fit.tab.yield.csv",row.names=F)
 
 ## estimation of R² according to Nakagaw&Schielzeth2012 for LMM, however this does not account for the weights in contrast to the heterogeneity statistics (cf Koricheva et al. 2013)
 # var.fixed.richness <- lapply(Richness.MA.model,function(x) {ifelse(length(coef(x))==1,0,var(coef(x)))})

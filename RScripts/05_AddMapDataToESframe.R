@@ -29,6 +29,9 @@ if (file.exists("1976-2000_GIS.zip")==FALSE){
   unzip("1976-2000_GIS.zip")
 } else {unzip("1976-2000_GIS.zip")}
 climate_zone <- readOGR(dsn=".",layer="1976-2000")
+
+climate_zone@data$main_climate <- cut(climate_zone@data$GRIDCODE, breaks=c(10,20,30,40,60,70), labels=c("Tropical","Arid","Temperate","Cold (Continental)","Polar"))
+save(climate_zone, file=path2temp %+% "climate_mapdata.Rdata")
 # Legend(GRIDCODE)
 # 11 ... Af
 # 12 ... Am
@@ -65,7 +68,7 @@ climate_zone <- readOGR(dsn=".",layer="1976-2000")
 # extract ecoregions
 climate_extract <- extract(climate_zone,lonlat)
 climate_extract <- climate_extract[!duplicated(climate_extract$point.ID),]
-ES.frame$main_climate <- cut(climate_extract$GRIDCODE, breaks=c(10,20,30,40,60,70), labels=c("Tropical","Arid","Temperate","Cold (Continental)","Polar"))
+ES.frame$main_climate <- climate_extract$main_climate
 
 ############################################################################
 ### Intersect studies with Land-use history (new version)

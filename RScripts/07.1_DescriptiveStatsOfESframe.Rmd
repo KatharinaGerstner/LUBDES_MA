@@ -168,21 +168,38 @@ levels(df$LUhistory) <- c("5950 BC","50 BC", "1450","1950", "after 1950")
 LUhistory_map <- ggplot(data=df, aes(y=Latitude, x=Longitude)) +
      geom_polygon(data = biome_mapdata, aes(x = long, y = lat, group = group, fill = NA)) +
      geom_raster(aes(fill=LUhistory)) + 
-     scale_x_continuous(breaks=c(-90, 0, 90), labels=c("90°W", "0", "90°E")) +
+     scale_x_continuous(breaks=c(-90, 0, 90), labels=c("90°W", "0°", "90°E")) +
      scale_y_continuous(breaks=c(-30, 0, 30, 60), labels=c("30°S","0°", "30°N","60°N"),limits=c(-55,90)) +
      xlab("") + ylab("") +
      scale_fill_manual(values=c('#ffffb2','#fecc5c','#fd8d3c','#f03b20','#bd0026'), 
                        na.value="lightgrey",
                        name="",
                        limits=c("5950 BC","50 BC", "1450","1950", "after 1950")) + 
-  theme_lubdes(legend.position="bottom")
+  theme_lubdes(legend.position="bottom",rel.text.size=1.2)
 
-ggsave(path2temp %+% "LUhistory_map.png", width=18, height=10, units="cm")
-# 
-# my.at <- c(-7000,-5900,-10, 1500,1800, 2000,12000)
-# levelplot(rmrsrkk11,par.settings=YlOrRdTheme,at=my.at)
-
+ggsave(LUhistory_map, file=path2temp %+% "LUhistory_map.png", width=18, height=10, units="cm")
 ```
+
+```{r main_climate_map, echo=F}
+load(path2temp %+% "climate_mapdata.Rdata") #climate_zone
+
+climate_mapdata <- fortify(climate_zone,region="main_climate")
+climate_map <- ggplot() +
+     geom_polygon(data = climate_mapdata, aes(x = long, y = lat, group = group,fill = id)) +
+     scale_x_continuous(breaks=c(-90, 0, 90), labels=c("90°W", "0", "90°E")) +
+     scale_y_continuous(breaks=c(-30, 0, 30, 60), labels=c("30°S","0°", "30°N","60°N"),limits=c(-55,90)) +
+     xlab("") + ylab("") +
+     scale_fill_manual(values=c('#2c7bb6','#abd9e9','#ffffbf','#fdae61','#d7191c'), 
+                       name="",
+                       limits=c("Polar","Cold (Continental)","Temperate","Arid","Tropical"), 
+                       labels=c("Polar","Cold (Continental)","Temperate","Arid","Tropical")) + 
+  theme_lubdes(legend.position="bottom",rel.text.size=1.2) +
+#  guides(fill=guide_legend(nrow=2, byrow=T))+
+  theme(legend.key = element_rect(colour = NA))
+
+ggsave(climate_map, file=path2temp %+% "climate_map.png", width=18, height=10, units="cm")
+```
+
 
 ```{r PlotMaps, echo=F}
 ### 07.3. Plot map of studies
@@ -351,39 +368,65 @@ for(LUI.level.to.plot in LUI.range.level){
 
 ```
 
-![](Y:\Home\hoppek\temp\Forest_plot_low-low.png)
-![](Y:\Home\hoppek\temp\Forest_plot_low-medium.png)
-![](Y:\Home\hoppek\temp\Forest_plot_low-high.png)
-![](Y:\Home\hoppek\temp\Forest_plot_medium-medium.png)
-![](Y:\Home\hoppek\temp\Forest_plot_medium-high.png)
-![](Y:\Home\hoppek\temp\Forest_plot_high-high.png)
+![](c:\Users\hoppek\Documents\temp\Forest_plot_low-low.png)
+![](c:\Users\hoppek\Documents\temp\Forest_plot_low-medium.png)
+![](c:\Users\hoppek\Documents\temp\Forest_plot_low-high.png)
+![](c:\Users\hoppek\Documents\temp\Forest_plot_medium-medium.png)
+![](c:\Users\hoppek\Documents\temp\Forest_plot_medium-high.png)
+![](c:\Users\hoppek\Documents\temp\Forest_plot_high-high.png)
 
 ```{r confounding variables}
+library(gridExtra)
 ### Are BD and ES measured from the same species (e.g. weed BD and weed biomass in grasslands is linked)?
-ggplot(data=ES.frame.richness,aes(y=Log.RR,x=factor(ES.and.BD))) + 
-  geom_boxplot()
+p1 <- ggplot(data=ES.frame.richness,aes(y=Log.RR,x=factor(ES.and.BD))) + 
+  geom_boxplot() +
+  theme(axis.text = element_text(size = rel(2)), 
+      axis.ticks = element_line(colour = "black"), 
+      axis.title = element_text(size = rel(2)), 
+      axis.text = element_text(size = rel(2))) +
+  xlab("BD.and.ES")
 
 t.test(Log.RR ~ factor(ES.and.BD), data=ES.frame.richness)
 
 ### Is land use intensity measured from data on yield.
-ggplot(data=ES.frame.yield,aes(y=Log.RR,x=factor(LU.definition.and.ES))) + 
-  geom_boxplot()
+p2 <- ggplot(data=ES.frame.yield,aes(y=Log.RR,x=factor(LU.definition.and.ES))) + 
+  geom_boxplot()+
+  theme(axis.text = element_text(size = rel(2)), 
+      axis.ticks = element_line(colour = "black"), 
+      axis.title = element_text(size = rel(2)), 
+      axis.text = element_text(size = rel(2))) +
+  xlab("LU.definition.and.ES")
+
 t.test(Log.RR ~ factor(LU.definition.and.ES), data=ES.frame.yield)
 
-# ### Relationship spatial scale - log.RR
-# 
-# # 1. standardize units cf. function convertAreaUnits() in 01_load:libraries_and_functions.r (currently outcommented)
-# table(data$reported.area.of.BD)
-# table(data$reported.area.unit.of.BD)
-# 
-# # 2. add to ES.frame.richness
-# 
-# # 3. fit linear model
-# fm <- lm(Log.RR ~ plot.size, data=ES.frame.richness)
-# 
-# # 4. plot data and fitted line
-# ggplot(data=ES.frame.richness,aes(y=Log.RR,x=factor(ES.and.BD))) + 
-#   geom_points() + geom_line()
+grid.arrange(p1, p2,ncol=2, nrow=1)
+
+### Relationship spatial scale - log.RR
+
+hist(log10(ES.frame.richness$Richness.Plot.Size))
+
+# fit linear model
+fm <- lm(Log.RR ~ log10(Richness.Plot.Size), data=ES.frame.richness)
+
+summary(fm)
+
+# plot data and fitted line
+plot(Log.RR~log10(Richness.Plot.Size),data=ES.frame.richness)
+abline(fm,col="red") 
+
+### Relationship Yield.Unit.Type - log.RR
+fm2 <- aov(Log.RR ~ Yield.Unit.Type, data=ES.frame.yield)
+TukeyHSD(fm2)
+plot(TukeyHSD(fm2),las=1)
+
+ggplot(data=ES.frame.yield,aes(y=Log.RR,x=factor(Yield.Unit.Type))) +
+  geom_boxplot()+
+  theme(axis.text = element_text(size = rel(2)), 
+      axis.ticks = element_line(colour = "black"), 
+      axis.title = element_text(size = rel(2)), 
+      axis.text = element_text(size = rel(2))) +
+  xlab("Yield.Unit.Type")
+  
 
 ```
 

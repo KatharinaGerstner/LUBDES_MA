@@ -159,7 +159,10 @@ load(file=path2temp %+% "SavedData.Rdata")
 source(path2wd %+% "04_CompileESframe.R")
 source(path2wd %+% "05_AddMapDataToESframe.R")
 # 
-save(data,dataimp,ES.frame,file=path2temp %+% "SavedData.Rdata")
+### some additional data preparation steps
+source(path2wd %+% "06_DataPreparation4Analysis.R")
+
+save(data,dataimp,ES.frame,ES.frame.richness,ES.frame.yield,file=path2temp %+% "SavedData.Rdata")
 rm(list=objects()) # empty workspace, keep libraries loaded
 
 ############################################################################
@@ -173,9 +176,6 @@ path2wd <- set.list[[2]]
 "%+%" <- function(x,y)paste(x,y,sep="")
 source(path2wd %+% "01_load_libraries_and_functions.r")
 load(file=path2temp %+% "SavedData.Rdata")
-
-### some additional data preparation steps
-source(path2wd %+% "06_DataPreparation4Analysis.R")
 
 ### Describe and plot the raw data
 knit(path2wd %+% "07.1_DescriptiveStatsOfESframe.Rmd") # summary statistics, plot histograms of responses and covariables, plot maps of study location, plot forest plots for each Study.Case-LUI.range.level combination

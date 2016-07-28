@@ -84,6 +84,4 @@ ggsave(p.yield, file=path2temp %+% "imputation_mice_yield.png",height=4,width=3.
 
 save(dataimp,file=path2temp %+% "dataimp.Rdata")
 
-### remove temporary variables
-rm(data2imp.richness, data2imp.yield, temp, temp.yield, temp.richness, predictorMatrix1, nchains)
 
