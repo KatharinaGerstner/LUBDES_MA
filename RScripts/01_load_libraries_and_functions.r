@@ -28,6 +28,7 @@ needed_libs <- c("devtools",# needed for library googlesheets
                  "plyr",# for joining datasets
                  "countrycode",# convert FAO country IDs to ISO3
                  "VennDiagram",
+                  "venneuler",
                  "reshape2",
 #                 "rjags", # for running bayesian models
                  "knitr", # for knitting .Rmd-documents
