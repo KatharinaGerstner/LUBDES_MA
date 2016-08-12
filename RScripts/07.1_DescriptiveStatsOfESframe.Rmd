@@ -87,7 +87,7 @@ for(i in c("Log.RR","Log.RR.Var")){
   print(p)
   ggsave(p, file = paste(path2temp,"/PlotHist_ES.frame.richness_",i,".png",sep=""), width = 20, height = 8, type = "cairo-png")
 }  
-for(i in c("LUI.range.level","Species.Group","Product","BIOME")){
+for(i in c("LUI.range.level","Species.Group","Product", "landuse_history")){
   p <- ggplot(data=ES.frame.richness) + 
     geom_bar(aes(x=ES.frame.richness[,i]), size=0.4) + 
     labs(x="",y="") +
@@ -108,7 +108,7 @@ for(i in c("Log.RR","Log.RR.Var")){
   print(p)
   ggsave(p, file = paste(path2temp,"/PlotHist_ES.frame.yield_",i,".png",sep=""), width = 20, height = 8, type = "cairo-png")
 }  
-for(i in c("LUI.range.level","Species.Group","Product","BIOME")){
+for(i in c("LUI.range.level","Species.Group","Product")){
   p <- ggplot(data=ES.frame.yield) + 
     geom_bar(aes(x=ES.frame.yield[,i]), size=0.4) + 
     labs(x="",y="") +
@@ -151,96 +151,120 @@ biome_map <- ggplot() +
                                 "Rock and Ice")) + 
   theme_lubdes(legend.position="bottom")
 
-ggsave(path2temp %+% "biome_map.png", width=22, height=10, units="cm")
+ggsave(path2temp %+% "biome_map.png", width=18, height=10, units="cm")
 ```
+
+```{r LUhistory_map, echo=F}
+load(path2temp %+% "landuse_history_mapdata.Rdata")
+
+LUhistory_data <- rasterToPoints(rmrsrkk11)
+#Make the points a dataframe for ggplot
+df <- data.frame(LUhistory_data)
+#Make appropriate column headings
+colnames(df) <- c("Longitude", "Latitude", "LUhistory")
+df$LUhistory <- factor(df$LUhistory)
+levels(df$LUhistory) <- c("5950 BC","50 BC", "1450","1950", "after 1950")
+
+LUhistory_map <- ggplot(data=df, aes(y=Latitude, x=Longitude)) +
+     geom_polygon(data = biome_mapdata, aes(x = long, y = lat, group = group, fill = NA)) +
+     geom_raster(aes(fill=LUhistory)) + 
+     scale_x_continuous(breaks=c(-90, 0, 90), labels=c("90°W", "0°", "90°E")) +
+     scale_y_continuous(breaks=c(-30, 0, 30, 60), labels=c("30°S","0°", "30°N","60°N"),limits=c(-55,90)) +
+     xlab("") + ylab("") +
+     scale_fill_manual(values=c('#ffffb2','#fecc5c','#fd8d3c','#f03b20','#bd0026'), 
+                       na.value="lightgrey",
+                       name="",
+                       limits=c("5950 BC","50 BC", "1450","1950", "after 1950")) + 
+  theme_lubdes(legend.position="bottom",rel.text.size=1.2)
+
+ggsave(LUhistory_map, file=path2temp %+% "LUhistory_map.png", width=18, height=10, units="cm")
+```
+
+```{r main_climate_map, echo=F}
+load(path2temp %+% "climate_mapdata.Rdata") #climate_zone
+
+climate_mapdata <- fortify(climate_zone,region="main_climate")
+climate_map <- ggplot() +
+     geom_polygon(data = climate_mapdata, aes(x = long, y = lat, group = group,fill = id)) +
+     scale_x_continuous(breaks=c(-90, 0, 90), labels=c("90°W", "0", "90°E")) +
+     scale_y_continuous(breaks=c(-30, 0, 30, 60), labels=c("30°S","0°", "30°N","60°N"),limits=c(-55,90)) +
+     xlab("") + ylab("") +
+     scale_fill_manual(values=c('#2c7bb6','#abd9e9','#ffffbf','#fdae61','#d7191c'), 
+                       name="",
+                       limits=c("Polar","Cold (Continental)","Temperate","Arid","Tropical"), 
+                       labels=c("Polar","Cold (Continental)","Temperate","Arid","Tropical")) + 
+  theme_lubdes(legend.position="bottom",rel.text.size=1.2) +
+#  guides(fill=guide_legend(nrow=2, byrow=T))+
+  theme(legend.key = element_rect(colour = NA))
+
+ggsave(climate_map, file=path2temp %+% "climate_map.png", width=18, height=10, units="cm")
+```
+
 
 ```{r PlotMaps, echo=F}
 ### 07.3. Plot map of studies
 world_map <- map_data("world")
 p <- ggplot() +
-  geom_polygon(data=world_map, aes(x=long, y=lat, group=group),fill="white",color="black",lwd=0.2) + 
-  geom_point(data=ES.frame.richness, aes(x=Longitude, y=Latitude), color="blue", shape=4, size=1) +
-  scale_x_continuous(breaks=c(-90, 0, 90), labels=c("90°W", "0", "90°E")) +
-  scale_y_continuous(breaks=c(-30, 0, 30, 60), labels=c("30°S","0°", "30°N","60°N"),limits=c(-55,90)) +
-  xlab("") + ylab("")
-ggsave(paste(path2temp, "/ES.frame.richness.CaseDistributionAll.png",sep=""), width=18, height=10, units="cm")
+  geom_polygon(data=world_map, aes(x=long, y=lat, group=group),fill="grey",lwd=0.2) + 
+  geom_point(data=ES.frame, aes(x=Longitude, y=Latitude), color="blue", size=1.5, alpha=0.5) +
+  scale_x_continuous() +
+  scale_y_continuous(limits=c(-55,90)) +
+  xlab("") + ylab("") +
+  theme(line = element_blank(),
+        text = element_blank(),
+        line = element_blank(),
+        title = element_blank(),
+        panel.background = element_rect(fill = "white", colour = NA)) 
+ggsave(p, file=path2temp %+% "/ES.frame.CaseDistributionAll.png", width=18, height=10, units="cm")
 
 ### plot study locations using fancy ggplot
 ### Richness
-ES.frame.richness <- within(ES.frame.richness, LUI.range.level <- factor(LUI.range.level, levels = c("low-low","low-medium","low-high","medium-medium","medium-high","high-high"))) # resort levels for plotting
-p <- ggplot() +
-  geom_polygon(data=world_map, aes(x=long, y=lat, group=group),fill="white",color="black",lwd=0.2) + 
-  geom_point(data=ES.frame.richness, aes(x=Longitude, y=Latitude), color="blue", shape=2, size=1) +
-  scale_x_continuous(breaks=c(-90, 0, 90), labels=c("90°W", "0", "90°E")) +
-  scale_y_continuous(breaks=c(-30, 0, 30, 60), labels=c("30°S","0°", "30°N","60°N"),limits=c(-55,90)) +
-  xlab("") + ylab("") +
-  facet_wrap(~LUI.range.level)   
-ggsave(paste(path2temp, "/ES.frame.richness.CaseDistributionPanel.png",sep=""), width=18, height=10, units="cm")
-
-p <- ggplot() +
-  geom_polygon(data=world_map, aes(x=long, y=lat, group=group),fill="white",color="black",lwd=0.2) + 
-  geom_point(data=ES.frame.yield, aes(x=Longitude, y=Latitude), color="blue", shape=4, size=1) +
-  scale_x_continuous(breaks=c(-90, 0, 90), labels=c("90°W", "0", "90°E")) +
-  scale_y_continuous(breaks=c(-30, 0, 30, 60), labels=c("30°S","0°", "30°N","60°N"),limits=c(-55,90)) +
-  xlab("") + ylab("")
-ggsave(paste(path2temp, "/ES.frame.yield.CaseDistributionAll.png",sep=""), width=18, height=10, units="cm")
-
-### plot study locations using fancy ggplot
-### Yield
-world_map <- map_data("world")
-ES.frame.yield <- within(ES.frame.yield, LUI.range.level <- factor(LUI.range.level, levels = c("low-low","low-medium","low-high","medium-medium","medium-high","high-high"))) # resort levels for plotting
-p <- ggplot() +
-  geom_polygon(data=world_map, aes(x=long, y=lat, group=group),fill="white",color="black",lwd=0.2) + 
-  geom_point(data=ES.frame.yield, aes(x=Longitude, y=Latitude), color="blue", shape=2, size=1) +
-  scale_x_continuous(breaks=c(-90, 0, 90), labels=c("90°W", "0", "90°E")) +
-  scale_y_continuous(breaks=c(-30, 0, 30, 60), labels=c("30°S","0°", "30°N","60°N"),limits=c(-55,90)) +
-  xlab("") + ylab("") +
-  facet_wrap(~LUI.range.level)   
-ggsave(paste(path2temp, "/ES.frame.yield.CaseDistributionPanel.png",sep=""), width=18, height=10, units="cm")
-
-```
-
-```{r PlotMapsTopBiomes, echo=F}
-### 07.3. Plot map of studies
-### plot study locations using fancy ggplot
-### Richness
-p <- biome_map + 
-  geom_point(data=ES.frame.richness, aes(x=Longitude, y=Latitude), color="blue", shape=4, size=1) +
-  guides(fill=FALSE)
-ggsave(paste(path2temp, "/ES.frame.richness.CaseDistributionAll_TopBiomes.png",sep=""), width=18, height=10, units="cm")
-
-ES.frame.richness <- within(ES.frame.richness, LUI.range.level <- factor(LUI.range.level, levels = c("low-low","low-medium","low-high","medium-medium","medium-high","high-high"))) # resort levels for plotting
-p <- biome_map +
-  geom_point(data=ES.frame.richness, aes(x=Longitude, y=Latitude), color="blue", shape=2, size=1) +
-  facet_wrap(~LUI.range.level) + guides(fill=FALSE)  
-ggsave(paste(path2temp, "/ES.frame.richness.CaseDistributionPanel_TopBiomes.png",sep=""), width=18, height=10, units="cm")
-
-### plot study locations using fancy ggplot
-### Yield
-p <- biome_map +
-  geom_point(data=ES.frame.yield, aes(x=Longitude, y=Latitude), color="blue", shape=4, size=1) + 
-  guides(fill=FALSE)
-ggsave(paste(path2temp, "/ES.frame.yield.CaseDistributionAll_TopBiomes.png",sep=""), width=18, height=10, units="cm")
-
-ES.frame.yield <- within(ES.frame.yield, LUI.range.level <- factor(LUI.range.level, levels = c("low-low","low-medium","low-high","medium-medium","medium-high","high-high"))) # resort levels for plotting
-p <- biome_map +  
-  geom_point(data=ES.frame.yield, aes(x=Longitude, y=Latitude), color="blue", shape=2, size=1) +
-  facet_wrap(~LUI.range.level) + guides(fill=FALSE) 
-ggsave(paste(path2temp, "/ES.frame.yield.CaseDistributionPanel_TopBiomes.png",sep=""), width=18, height=10, units="cm")
+# ES.frame.richness <- within(ES.frame.richness, LUI.range.level <- factor(LUI.range.level, levels = c("low-low","low-medium","low-high","medium-medium","medium-high","high-high"))) # resort levels for plotting
+# p <- ggplot() +
+#   geom_polygon(data=world_map, aes(x=long, y=lat, group=group),fill="white",color="black",lwd=0.2) + 
+#   geom_point(data=ES.frame.richness, aes(x=Longitude, y=Latitude), color="blue", shape=2, size=1) +
+#   scale_x_continuous(breaks=c(-90, 0, 90), labels=c("90°W", "0", "90°E")) +
+#   scale_y_continuous(breaks=c(-30, 0, 30, 60), labels=c("30°S","0°", "30°N","60°N"),limits=c(-55,90)) +
+#   xlab("") + ylab("") +
+#   theme_lubdes() +
+#   facet_wrap(~LUI.range.level)   
+# ggsave(paste(path2temp, "/ES.frame.richness.CaseDistributionPanel.png",sep=""), width=18, height=10, units="cm")
+# 
+# p <- ggplot() +
+#   geom_polygon(data=world_map, aes(x=long, y=lat, group=group),fill="white",color="black",lwd=0.2) + 
+#   geom_point(data=ES.frame.yield, aes(x=Longitude, y=Latitude), color="blue", shape=4, size=1) +
+#   scale_x_continuous(breaks=c(-90, 0, 90), labels=c("90°W", "0", "90°E")) +
+#   scale_y_continuous(breaks=c(-30, 0, 30, 60), labels=c("30°S","0°", "30°N","60°N"),limits=c(-55,90)) +
+#   xlab("") + ylab("") +
+#   theme_lubdes()
+# ggsave(paste(path2temp, "/ES.frame.yield.CaseDistributionAll.png",sep=""), width=18, height=10, units="cm")
+# 
+# ### plot study locations using fancy ggplot
+# ### Yield
+# world_map <- map_data("world")
+# ES.frame.yield <- within(ES.frame.yield, LUI.range.level <- factor(LUI.range.level, levels = c("low-low","low-medium","low-high","medium-medium","medium-high","high-high"))) # resort levels for plotting
+# p <- ggplot() +
+#   geom_polygon(data=world_map, aes(x=long, y=lat, group=group),fill="white",color="black",lwd=0.2) + 
+#   geom_point(data=ES.frame.yield, aes(x=Longitude, y=Latitude), color="blue", shape=2, size=1) +
+#   scale_x_continuous(breaks=c(-90, 0, 90), labels=c("90°W", "0", "90°E")) +
+#   scale_y_continuous(breaks=c(-30, 0, 30, 60), labels=c("30°S","0°", "30°N","60°N"),limits=c(-55,90)) +
+#   xlab("") + ylab("") +
+#   theme_lubdes() +
+#   facet_wrap(~LUI.range.level)   
+# ggsave(paste(path2temp, "/ES.frame.yield.CaseDistributionPanel.png",sep=""), width=18, height=10, units="cm")
 
 ```
 
 ## Forest Plots per study within LUI.range.level
 ```{r ForestPlots, include=F}
 ### 07.4. Forest Plots of study.cases per LUI.range.level
-ES.frame2plot <- subset(ES.frame, !(is.na(Richness.Log.RR.Var)) & Richness.Log.RR.Var>0 & !is.na(Yield.Log.RR.Var) & Yield.Log.RR.Var>0) 
+ES.frame2plot <- ES.frame
+  #subset(ES.frame, !(is.na(Richness.Log.RR.Var)) & Richness.Log.RR.Var>0 & !is.na(Yield.Log.RR.Var) & Yield.Log.RR.Var>0) 
+seqBreaks <- log(sapply(-2:7,function(x) 2^x))
 
 LUI.range.level = c("low-low","medium-medium","high-high","low-medium","medium-high","low-high")
 x.max <- max(c(ES.frame2plot$Richness.Log.RR+1.96*sqrt(ES.frame2plot$Richness.Log.RR.Var),ES.frame2plot$Yield.Log.RR+1.96*sqrt(ES.frame2plot$Yield.Log.RR.Var)),na.rm=T)
 x.min <- min(c(ES.frame2plot$Richness.Log.RR-1.96*sqrt(ES.frame2plot$Richness.Log.RR.Var),ES.frame2plot$Yield.Log.RR-1.96*sqrt(ES.frame2plot$Yield.Log.RR.Var)),na.rm=T)
-# decide about what the limits should show SD or 95%CI???
-# unify ranges across LUIrangelevels
-# set x-axis limits to c(x.min,x.max)
 
 for(LUI.level.to.plot in LUI.range.level){
   data.to.plot = subset(ES.frame2plot, LUI.range.level %in% LUI.level.to.plot)
@@ -301,7 +325,6 @@ for(LUI.level.to.plot in LUI.range.level){
   data.to.plot$is.duplicate[which(data.to.plot$is.duplicate %in% "FALSE")] = "value"
   data.to.plot$is.duplicate = factor(data.to.plot$is.duplicate,levels=c("value","duplicate"))
   
-  
   #### if ervery runs smooth - cut away this plot  
   #cut away the information of Yield.Log.RR from the unique Study ID to have them not displayed in the graph
   #  data.to.plot$uniqueID.for.axis.lables = seq(nrow(data.to.plot):1)
@@ -312,21 +335,21 @@ for(LUI.level.to.plot in LUI.range.level){
   data.to.plot$uniqueID = factor(data.to.plot$uniqueID,levels=rev(data.to.plot$uniqueID))
   data.to.plot$axes.naming = gsub(" Yield.Log.RR","",data.to.plot$axes.naming)
   data.to.plot$colouring = paste(data.to.plot$RR.ID,data.to.plot$is.duplicate)
-  data.to.plot$colouring = factor(data.to.plot$colouring,levels = c("Yield value","Yield duplicate","Species Richness value","Species Richness duplicate"))
-  
+  data.to.plot$colouring = factor(data.to.plot$colouring,levels = c("Yield value","Yield duplicate","Species Richness value","Species Richness duplicate"))  
   
   plot.forest =
     ggplot(data=data.to.plot) +
     
-    geom_segment(aes(y=uniqueID,yend=uniqueID,x=RR.value  - (1.96*sqrt(Log.RR.Var)), xend=RR.value	+ (1.96*sqrt(Log.RR.Var)),colour=colouring,alpha=is.SD.imputed,linetype=is.SD.imputed),size=1.2) +
+    geom_segment(aes(y=uniqueID,yend=uniqueID,x=RR.value  - (1.96*sqrt(Log.RR.Var)), xend=RR.value	+ (1.96*sqrt(Log.RR.Var)),colour=colouring,linetype=is.SD.imputed),size=1.2) +
     geom_point(aes(y=uniqueID, x=RR.value,colour=colouring),size=3.5) +
     geom_vline(xintercept=0,linetype ="twodash")  +
     
     #scale manually to get the legend correct
-    scale_colour_manual(values=c("#FF6633","grey","#00CC00","grey")) +
+    scale_colour_manual("",values=c("#FF6633","grey","#00CC00","grey"),limits=c("Yield value","Yield duplicate","Species Richness value","Species Richness duplicate"),labels=c("Yield","Yield duplicate","Species richness","Species richness duplicate")) +
+    scale_linetype("",limits=c("no","yes"),labels=c("SD reported", "SD imputed")) +
+    scale_x_continuous(labels=exp(seqBreaks),breaks=seqBreaks) +
     scale_y_discrete("Study ID",breaks= as.character(data.to.plot$uniqueID),labels=data.to.plot$axes.naming)  +
-    scale_alpha_discrete(range = c(1,0.4)) + 
-    
+
     #white background + flip 90 degrees
     theme(axis.ticks.x = element_blank(),panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
           panel.background = element_rect(colour = "black", size=1,fill=NA), axis.line = element_line(colour = "black"),
@@ -336,8 +359,8 @@ for(LUI.level.to.plot in LUI.range.level){
     
     #axes labels
     ylab("Study ID") +
-    xlab("Log Response Ratio")+
-    ggtitle("Forest Plot of study case effect sizes\n" %+% LUI.level.to.plot)
+    xlab("Response Ratio")+
+    ggtitle(LUI.level.to.plot)
   
   ggsave(plot.forest, file = path2temp %+% "Forest_plot_" %+% LUI.level.to.plot %+% ".png", width = 15, height = nrow(data.to.plot) / 5, type = "cairo-png")
   
@@ -345,9 +368,66 @@ for(LUI.level.to.plot in LUI.range.level){
 
 ```
 
-![](Y:\Home\hoppek\temp\Forest_plot_low-low.png)
-![](Y:\Home\hoppek\temp\Forest_plot_low-medium.png)
-![](Y:\Home\hoppek\temp\Forest_plot_low-high.png)
-![](Y:\Home\hoppek\temp\Forest_plot_medium-medium.png)
-![](Y:\Home\hoppek\temp\Forest_plot_medium-high.png)
-![](Y:\Home\hoppek\temp\Forest_plot_high-high.png)
+![](c:\Users\hoppek\Documents\temp\Forest_plot_low-low.png)
+![](c:\Users\hoppek\Documents\temp\Forest_plot_low-medium.png)
+![](c:\Users\hoppek\Documents\temp\Forest_plot_low-high.png)
+![](c:\Users\hoppek\Documents\temp\Forest_plot_medium-medium.png)
+![](c:\Users\hoppek\Documents\temp\Forest_plot_medium-high.png)
+![](c:\Users\hoppek\Documents\temp\Forest_plot_high-high.png)
+
+```{r confounding variables}
+library(gridExtra)
+### Are BD and ES measured from the same species (e.g. weed BD and weed biomass in grasslands is linked)?
+p1 <- ggplot(data=ES.frame.richness,aes(y=Log.RR,x=factor(ES.and.BD))) + 
+  geom_boxplot() +
+  theme(axis.text = element_text(size = rel(2)), 
+      axis.ticks = element_line(colour = "black"), 
+      axis.title = element_text(size = rel(2)), 
+      axis.text = element_text(size = rel(2))) +
+  xlab("BD.and.ES")
+
+t.test(Log.RR ~ factor(ES.and.BD), data=ES.frame.richness)
+
+### Is land use intensity measured from data on yield.
+p2 <- ggplot(data=ES.frame.yield,aes(y=Log.RR,x=factor(LU.definition.and.ES))) + 
+  geom_boxplot()+
+  theme(axis.text = element_text(size = rel(2)), 
+      axis.ticks = element_line(colour = "black"), 
+      axis.title = element_text(size = rel(2)), 
+      axis.text = element_text(size = rel(2))) +
+  xlab("LU.definition.and.ES")
+
+t.test(Log.RR ~ factor(LU.definition.and.ES), data=ES.frame.yield)
+
+grid.arrange(p1, p2,ncol=2, nrow=1)
+
+### Relationship spatial scale - log.RR
+
+hist(log10(ES.frame.richness$Richness.Plot.Size))
+
+# fit linear model
+fm <- lm(Log.RR ~ log10(Richness.Plot.Size), data=ES.frame.richness)
+
+summary(fm)
+
+# plot data and fitted line
+plot(Log.RR~log10(Richness.Plot.Size),data=ES.frame.richness)
+abline(fm,col="red") 
+
+### Relationship Yield.Unit.Type - log.RR
+fm2 <- aov(Log.RR ~ Yield.Unit.Type, data=ES.frame.yield)
+TukeyHSD(fm2)
+plot(TukeyHSD(fm2),las=1)
+
+ggplot(data=ES.frame.yield,aes(y=Log.RR,x=factor(Yield.Unit.Type))) +
+  geom_boxplot()+
+  theme(axis.text = element_text(size = rel(2)), 
+      axis.ticks = element_line(colour = "black"), 
+      axis.title = element_text(size = rel(2)), 
+      axis.text = element_text(size = rel(2))) +
+  xlab("Yield.Unit.Type")
+  
+
+```
+
+

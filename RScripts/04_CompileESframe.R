@@ -16,13 +16,13 @@
 
 ### create empty ES.frame
 
-ES.frame <- data.frame(matrix(ncol=41,nrow=0))
-names(ES.frame) <- c("Study.ID","Case.ID","Low.LUI","High.LUI","Habitat.Type",        
+ES.frame <- data.frame(matrix(ncol=43,nrow=0))
+names(ES.frame) <- c("Study.ID","Case.ID","Low.LUI","High.LUI","Study.Type","Habitat.Type",        
                      "Product","ES.From.BD","Fertilization","Irrigation","Pesticides",          
                      "Grazing","Mowing","Clear.Cut","Selective.Logging","Partial.Logging",     
                      "Additional.Treatment", "Date.Start","Date.End","Latitude","Longitude", "Country.Code",          
-                     "Species.Group","Species.Subgroup","Trophic.Level","Richness.Mean.Low" ,  
-                     "Richness.SD.Low","Richness.N.Low","Richness.Plot.Size","Richness.Mean.High","Richness.SD.High",    
+                     "Species.Group","Species.Subgroup","Trophic.Level","Richness.Plot.Size","Yield.Unit.Type","Richness.Mean.Low" ,  
+                     "Richness.SD.Low","Richness.N.Low","Richness.Mean.High","Richness.SD.High",    
                      "Richness.N.High","Yield.Mean.Low","Yield.SD.Low","Yield.N.Low","Yield.Mean.High" ,    
                      "Yield.SD.High","Yield.N.High","Yield.SD.is.imputed.low","Yield.SD.is.imputed.high",
                      "Richness.SD.is.imputed.low","Richness.SD.is.imputed.high")
@@ -106,6 +106,8 @@ ES.frame$Species.Group[(ES.frame$Species.Group=="NA")]<-NA
 ES.frame$Species.Group<-factor(ES.frame$Species.Group)
 
 ES.frame$Study.Case <- paste(ES.frame$Study.ID,ES.frame$Case.ID,sep="-")
+
+levels(ES.frame$Product)[levels(ES.frame$Product)=="animal_feed"]  <- "green fodder"
 
 ############################################################################
 ### 04.2. Calculate response ratio effect sizes

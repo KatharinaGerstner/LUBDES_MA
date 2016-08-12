@@ -21,69 +21,59 @@ lonlat <- cbind(ES.frame$Longitude,ES.frame$Latitude)
 # lonlat.noLU <- cbind(ES.frame.noLU$Longitude,ES.frame.noLU$Latitude)
 
 ############################################################################
-### 05.1. Intersect studies with global maps of WWF_REALMs Ecoregions, reduce them to five main regions
+### Intersect studies with climate zones
 ############################################################################
-print("Intersect studies with BIOMES")
+print("Intersect studies with climate zones")
+if (file.exists("1976-2000_GIS.zip")==FALSE){
+  download.file("http://koeppen-geiger.vu-wien.ac.at/data/1976-2000_GIS.zip","1976-2000_GIS.zip", mode="wb")
+  unzip("1976-2000_GIS.zip")
+} else {unzip("1976-2000_GIS.zip")}
+climate_zone <- readOGR(dsn=".",layer="1976-2000")
 
-if (file.exists("terr-ecoregions-TNC.zip")==FALSE){
-  download.file("https://www.dropbox.com/s/ihivf2ie98wxvee/terr-ecoregions-TNC.zip?dl=1", "terr-ecoregions-TNC.zip", mode="wb")
-  unzip("terr-ecoregions-TNC.zip")
-  } else {unzip("terr-ecoregions-TNC.zip")}
-
-ecoregions <- readOGR(".","tnc_terr_ecoregions",verbose = FALSE)
-
-### reclassify Biomes in coarse classes
-ecoregions@data$BIOME <- ecoregions@data$WWF_MHTNAM
-ecoregions@data$BIOME <- paste(ecoregions@data$BIOME)
-ecoregions@data$BIOME[(ecoregions@data$BIOME %in% c("Tropical and Subtropical Moist Broadleaf Forests",
-                                                    "Tropical and Subtropical Dry Broadleaf Forests",
-                                                    "Tropical and Subtropical Coniferous Forests",
-                                                    "Tropical and Subtropical Coniferous Forests"))] <- "Tropical_Forests"
-ecoregions@data$BIOME[(ecoregions@data$BIOME %in% c("Temperate Broadleaf and Mixed Forests",
-                                                    "Temperate Conifer Forests",
-                                                    "Boreal Forests/Taiga"))] <- "Temperate_Boreal_Forests"
-ecoregions@data$BIOME[(ecoregions@data$BIOME %in% c("Mediterranean Forests, Woodlands and Scrub"))] <- "Drylands"
-ecoregions@data$BIOME[(ecoregions@data$BIOME %in% c("Tropical and Subtropical Grasslands, Savannas and Shrublands",
-                                                    "Flooded Grasslands and Savannas"))] <- "Tropical_Grasslands"
-ecoregions@data$BIOME[(ecoregions@data$BIOME %in% c("Temperate Grasslands, Savannas and Shrublands",
-                                                    "Montane Grasslands and Shrublands"))]<-"Temperate_Montane_Grasslands"
-ecoregions@data$BIOME[(ecoregions@data$BIOME %in% c("Deserts and Xeric Shrublands"))]<-"Deserts"
-ecoregions@data$BIOME[(ecoregions@data$BIOME %in% c("Inland Water","NA"))]<-NA
-ecoregions@data$BIOME <- factor(ecoregions@data$BIOME)
-biome_mapdata <- fortify(ecoregions, region="BIOME") #  convert shapefile to a data frame, extract biomes 
-names(biome_mapdata)[grep("id",names(biome_mapdata))] <- "BIOME"
-biome_mapdata$BIOME <- factor(biome_mapdata$BIOME)
-
-## reduce size of the data.frame
-biome_mapdata <- subset(biome_mapdata, hole==FALSE & lat>=-55) # remove points equal to holes (not plotted in ggplot cf https://github.com/hadley/ggplot2/wiki/plotting-polygon-shapefiles) and cut out Antarctica
-biome_mapdata$lon <- round(biome_mapdata$lon, digits=2) # reduce resolution
-biome_mapdata$lat <- round(biome_mapdata$lat, digits=2) # reduce resolution
-biome_mapdata <- biome_mapdata[!duplicated(biome_mapdata[,c("long","lat","BIOME")]),] # remove duplicates not needed for plotting
-biome_mapdata <- biome_mapdata[,c("long","lat","BIOME","group")] # remove columns not needed for plotting
-
-save(biome_mapdata, file=path2temp %+% "biome_mapdata.Rdata")
+climate_zone@data$main_climate <- cut(climate_zone@data$GRIDCODE, breaks=c(10,20,30,40,60,70), labels=c("Tropical","Arid","Temperate","Cold (Continental)","Polar"))
+save(climate_zone, file=path2temp %+% "climate_mapdata.Rdata")
+# Legend(GRIDCODE)
+# 11 ... Af
+# 12 ... Am
+# 13 ... As
+# 14 ... Aw
+# 21 ... BWk
+# 22 ... BWh
+# 26 ... BSk
+# 27 ... BSh
+# 31 ... Cfa
+# 32 ... Cfb
+# 33 ... Cfc
+# 34 ... Csa
+# 35 ... Csb
+# 36 ... Csc
+# 37 ... Cwa
+# 38 ... Cwb
+# 39 ... Cwc
+# 41 ... Dfa
+# 42 ... Dfb
+# 43 ... Dfc
+# 44 ... Dfd
+# 45 ... Dsa
+# 46 ... Dsb
+# 47 ... Dsc
+# 48 ... Dsd
+# 49 ... Dwa
+# 50 ... Dwb
+# 51 ... Dwc
+# 52 ... Dwd
+# 61 ... EF
+# 62 ... ET
 
 # extract ecoregions
-realms_extract <- extract(ecoregions,lonlat)
-ES.frame <- cbind(ES.frame,realms_extract$BIOME)
-colnames(ES.frame)[which(names(ES.frame) == "realms_extract$BIOME")]<-"BIOME"
-
-ES.frame$BIOME <- factor(ES.frame$BIOME)
-
-setwd(path2wd)
-rm(realms_extract,ecoregions)
-
-### for ES.frame.noLU
-# extract ecoregions
-# if(nrow(ES.frame.noLU) >0){
-#   realms_extract <- extract(ecoregions,lonlat.noLU)
-#   ES.frame.noLU <- cbind(ES.frame.noLU,realms_extract$WWF_MHTNAM)
-#   colnames(ES.frame.noLU)[which(names(ES.frame.noLU) == "realms_extract$WWF_MHTNAM")]<-"BIOME"
-# }
+climate_extract <- extract(climate_zone,lonlat)
+climate_extract <- climate_extract[!duplicated(climate_extract$point.ID),]
+ES.frame$main_climate <- climate_extract$main_climate
 
 ############################################################################
 ### Intersect studies with Land-use history (new version)
 ############################################################################
+print("Intersect studies with Land-use history")
 
 setwd(path2temp %+% "/")
 
@@ -94,16 +84,21 @@ if (file.exists("rmsrkk11.zip")==FALSE){
 
 rmrsrkk11<-raster("rmsrkk11.grd")
 
-my.at <- c(-7000,-5900,-10, 1500,1800, 2000,12000)
-levelplot(rmrsrkk11,par.settings=YlOrRdTheme,at=my.at)
+save(rmrsrkk11, file=path2temp %+% "landuse_history_mapdata.Rdata")
 
 # extract year since 20% use
 years_extract <- extract(rmrsrkk11,lonlat)
 ES.frame <- cbind(ES.frame,years_extract)
 colnames(ES.frame)[which(names(ES.frame) == "years_extract")]<-"landuse_history"
 
-summary(years_extract)
-table(years_extract)
+# recode NAs to 11000
+ES.frame$landuse_history[is.na(ES.frame$landuse_history)] <- 11000
+
+# transform landuse_history to factor
+ES.frame$landuse_history <- factor(ES.frame$landuse_history)
+levels(ES.frame$landuse_history) <- c("5950 BC","50 BC", "1450","1950", "after 1950")
+
+summary(ES.frame$landuse_history)
 
 setwd(path2wd)
 
@@ -193,6 +188,68 @@ setwd(path2wd)
 # table(years_extract)
 # 
 # setwd(path2wd)
+
+# ############################################################################
+# ### 05.1. Intersect studies with global maps of WWF_REALMs Ecoregions, reduce them to five main regions
+# ############################################################################
+# print("Intersect studies with BIOMES")
+# 
+# if (file.exists("terr-ecoregions-TNC.zip")==FALSE){
+#   download.file("https://www.dropbox.com/s/ihivf2ie98wxvee/terr-ecoregions-TNC.zip?dl=1", "terr-ecoregions-TNC.zip", mode="wb")
+#   unzip("terr-ecoregions-TNC.zip")
+# } else {unzip("terr-ecoregions-TNC.zip")}
+# 
+# ecoregions <- readOGR(".","tnc_terr_ecoregions",verbose = FALSE)
+# 
+# ### reclassify Biomes in coarse classes
+# ecoregions@data$BIOME <- ecoregions@data$WWF_MHTNAM
+# ecoregions@data$BIOME <- paste(ecoregions@data$BIOME)
+# ecoregions@data$BIOME[(ecoregions@data$BIOME %in% c("Tropical and Subtropical Moist Broadleaf Forests",
+#                                                     "Tropical and Subtropical Dry Broadleaf Forests",
+#                                                     "Tropical and Subtropical Coniferous Forests",
+#                                                     "Tropical and Subtropical Coniferous Forests"))] <- "Tropical_Forests"
+# ecoregions@data$BIOME[(ecoregions@data$BIOME %in% c("Temperate Broadleaf and Mixed Forests",
+#                                                     "Temperate Conifer Forests",
+#                                                     "Boreal Forests/Taiga"))] <- "Temperate_Boreal_Forests"
+# ecoregions@data$BIOME[(ecoregions@data$BIOME %in% c("Mediterranean Forests, Woodlands and Scrub"))] <- "Drylands"
+# ecoregions@data$BIOME[(ecoregions@data$BIOME %in% c("Tropical and Subtropical Grasslands, Savannas and Shrublands",
+#                                                     "Flooded Grasslands and Savannas"))] <- "Tropical_Grasslands"
+# ecoregions@data$BIOME[(ecoregions@data$BIOME %in% c("Temperate Grasslands, Savannas and Shrublands",
+#                                                     "Montane Grasslands and Shrublands"))]<-"Temperate_Montane_Grasslands"
+# ecoregions@data$BIOME[(ecoregions@data$BIOME %in% c("Deserts and Xeric Shrublands"))]<-"Deserts"
+# ecoregions@data$BIOME[(ecoregions@data$BIOME %in% c("Inland Water","NA"))]<-NA
+# ecoregions@data$BIOME <- factor(ecoregions@data$BIOME)
+# biome_mapdata <- fortify(ecoregions, region="BIOME") #  convert shapefile to a data frame, extract biomes 
+# names(biome_mapdata)[grep("id",names(biome_mapdata))] <- "BIOME"
+# biome_mapdata$BIOME <- factor(biome_mapdata$BIOME)
+# 
+# ## reduce size of the data.frame
+# biome_mapdata <- subset(biome_mapdata, hole==FALSE & lat>=-55) # remove points equal to holes (not plotted in ggplot cf https://github.com/hadley/ggplot2/wiki/plotting-polygon-shapefiles) and cut out Antarctica
+# biome_mapdata$lon <- round(biome_mapdata$lon, digits=2) # reduce resolution
+# biome_mapdata$lat <- round(biome_mapdata$lat, digits=2) # reduce resolution
+# biome_mapdata <- biome_mapdata[!duplicated(biome_mapdata[,c("long","lat","BIOME")]),] # remove duplicates not needed for plotting
+# biome_mapdata <- biome_mapdata[,c("long","lat","BIOME","group")] # remove columns not needed for plotting
+# 
+# save(biome_mapdata, file=path2temp %+% "biome_mapdata.Rdata")
+# 
+# # extract ecoregions
+# realms_extract <- extract(ecoregions,lonlat)
+# ES.frame <- cbind(ES.frame,realms_extract$BIOME)
+# colnames(ES.frame)[which(names(ES.frame) == "realms_extract$BIOME")]<-"BIOME"
+# 
+# ES.frame$BIOME <- factor(ES.frame$BIOME)
+# 
+# setwd(path2wd)
+# rm(realms_extract,ecoregions)
+# 
+# ### for ES.frame.noLU
+# # extract ecoregions
+# # if(nrow(ES.frame.noLU) >0){
+# #   realms_extract <- extract(ecoregions,lonlat.noLU)
+# #   ES.frame.noLU <- cbind(ES.frame.noLU,realms_extract$WWF_MHTNAM)
+# #   colnames(ES.frame.noLU)[which(names(ES.frame.noLU) == "realms_extract$WWF_MHTNAM")]<-"BIOME"
+# # }
+
 
 
 ############################################################################
@@ -415,48 +472,6 @@ setwd(path2wd)
 # ES.frame$globcover<-extract(globcover.rc,lonlat, buffer=50000, fun=mean) # consider a buffer of radius=50km² around each dot)
 # 
 
-## climate zones
-# if (file.exists("1976-2000_GIS.zip")==FALSE){
-#   download.file("http://koeppen-geiger.vu-wien.ac.at/data/1976-2000_GIS.zip","1976-2000_GIS.zip", mode="wb")
-#   unzip("1976-2000_GIS.zip")
-# } else {unzip("1976-2000_GIS.zip")}
-# climate_zone <- readOGR(dsn=".",layer="1976-2000")
-# # Legend(GRIDCODE)
-# # 11 ... Af
-# # 12 ... Am
-# # 13 ... As
-# # 14 ... Aw
-# # 21 ... BWk
-# # 22 ... BWh
-# # 26 ... BSk
-# # 27 ... BSh
-# # 31 ... Cfa
-# # 32 ... Cfb
-# # 33 ... Cfc
-# # 34 ... Csa
-# # 35 ... Csb
-# # 36 ... Csc
-# # 37 ... Cwa
-# # 38 ... Cwb
-# # 39 ... Cwc
-# # 41 ... Dfa
-# # 42 ... Dfb
-# # 43 ... Dfc
-# # 44 ... Dfd
-# # 45 ... Dsa
-# # 46 ... Dsb
-# # 47 ... Dsc
-# # 48 ... Dsd
-# # 49 ... Dwa
-# # 50 ... Dwb
-# # 51 ... Dwc
-# # 52 ... Dwd
-# # 61 ... EF
-# # 62 ... ET
-# 
-# # extract ecoregions
-# climate_extract <- extract(climate_zone,lonlat)
-# ES.frame$main_climate <- cut(climate_extract$GRIDCODE, breaks=c(10,20,30,40,50,60), labels=c("equatorial","arid","warm temperature","snow","polar"))
 # 
 # ### for ES.frame.noLU
 # climate_extract <- extract(climate_zone,lonlat.noLU)
