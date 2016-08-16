@@ -48,6 +48,7 @@ data$Yield.Unit.Type[data$yield.unit %in% c("% conifer", "% fruit set", "% of tr
 data$Yield.Unit.Type[data$yield.unit %in% c("g", "kg / animal / day", "kg/tree", "g/m²", "kg/m²", "kg/ha","kg/hm²a","kg/ha/year","t/ha", "Mg/ha")] <- "Mass/area"
 data$Yield.Unit.Type[data$yield.unit %in% c("m³/ha","m³/0.01 ha","m³/ha/year")] <- "Volume/area"
 data$Yield.Unit.Type[data$yield.unit %in% c("cm","cm grass height","m", "m²/ha" )] <- "Area/area"
+data$Yield.Unit.Type[is.na(data$yield.unit)] <- "Others"
 
 ### dissmiss studies with missing mean for BD or yield
 data <- data[!is.na(data$richness.mean),]

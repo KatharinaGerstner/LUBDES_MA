@@ -1,7 +1,7 @@
 ---
 title: "Tables4Manuscript"
 author: "Katharina Gerstner"
-date: "Tuesday, July 26, 2016"
+date: '`r Sys.Date()`'
 output: word_document
 ---
 
@@ -13,13 +13,22 @@ library(knitr)
 ```
 
 ```{r}
+# Fit statistics for species richness
+kable(read.csv(path2temp %+% "fit.tab.richness.csv"), digits=3)
+
+# Fit statistics for yield
+kable(read.csv(path2temp %+% "fit.tab.yield.csv"), digits=3)
+
+```
+
+```{r}
 # LUI
 kable(read.csv(path2temp %+% "preds.LUI.csv"), digits=2)
 ```
 
 ```{r}
 # LUI.SGP
-kable(read.csv(path2temp %+% "preds.LUI.SGP.csv"), digits=2)
+kable(read.csv(path2temp %+% "preds.LUI.SGP.SG.P.csv"), digits=2)
 ```
 
 ```{r}

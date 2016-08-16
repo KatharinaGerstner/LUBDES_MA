@@ -62,7 +62,7 @@ ES.frame.yield$Study.Case <- factor(ES.frame.yield$Study.Case)[drop=T] # drop un
 ###########################################################################
 ### 06.2. save rawdata as table in a word doc
 ###########################################################################
-print(xtable(ES.frame.richness[,c("Study.Case","Longitude", "Latitude","LUI.range.level","Species.Group","Product","main_climate","landuse_history","ES.and.BD","Log.RR","Log.RR.Var")]), type = "html", file=path2temp %+% "ES.frame.richness.doc") # save the HTML table as a .doc file
-print(xtable(ES.frame.yield[,c("Study.Case","Longitude", "Latitude","LUI.range.level","Product","main_climate","landuse_history", "LU.definition.and.ES","Log.RR","Log.RR.Var")]), type = "html", file=path2temp %+% "ES.frame.yield.doc") # save the HTML table as a .doc file
+print(xtable(ES.frame.richness[,c("Study.Case","Longitude", "Latitude","LUI.range.level","Species.Group","Product","main_climate","landuse_history","ES.and.BD","Richness.Plot.Size","Log.RR","Log.RR.Var")]), type = "html", file=path2temp %+% "ES.frame.richness.doc") # save the HTML table as a .doc file
+print(xtable(ES.frame.yield[,c("Study.Case","Longitude", "Latitude","LUI.range.level","Product","main_climate","landuse_history", "LU.definition.and.ES","Yield.Unit.Type","Log.RR","Log.RR.Var")]), type = "html", file=path2temp %+% "ES.frame.yield.doc") # save the HTML table as a .doc file
 
 

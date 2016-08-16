@@ -263,8 +263,10 @@ ES.frame2plot <- ES.frame
 seqBreaks <- log(sapply(-2:7,function(x) 2^x))
 
 LUI.range.level = c("low-low","medium-medium","high-high","low-medium","medium-high","low-high")
-x.max <- max(c(ES.frame2plot$Richness.Log.RR+1.96*sqrt(ES.frame2plot$Richness.Log.RR.Var),ES.frame2plot$Yield.Log.RR+1.96*sqrt(ES.frame2plot$Yield.Log.RR.Var)),na.rm=T)
-x.min <- min(c(ES.frame2plot$Richness.Log.RR-1.96*sqrt(ES.frame2plot$Richness.Log.RR.Var),ES.frame2plot$Yield.Log.RR-1.96*sqrt(ES.frame2plot$Yield.Log.RR.Var)),na.rm=T)
+# x.max <- max(c(ES.frame2plot$Richness.Log.RR+1.96*sqrt(ES.frame2plot$Richness.Log.RR.Var),ES.frame2plot$Yield.Log.RR+1.96*sqrt(ES.frame2plot$Yield.Log.RR.Var)),na.rm=T)
+# x.min <- min(c(ES.frame2plot$Richness.Log.RR-1.96*sqrt(ES.frame2plot$Richness.Log.RR.Var),ES.frame2plot$Yield.Log.RR-1.96*sqrt(ES.frame2plot$Yield.Log.RR.Var)),na.rm=T)
+x.min <- log(0.05)
+x.max <- log(140)
 
 for(LUI.level.to.plot in LUI.range.level){
   data.to.plot = subset(ES.frame2plot, LUI.range.level %in% LUI.level.to.plot)
@@ -347,8 +349,8 @@ for(LUI.level.to.plot in LUI.range.level){
     #scale manually to get the legend correct
     scale_colour_manual("",values=c("#FF6633","grey","#00CC00","grey"),limits=c("Yield value","Yield duplicate","Species Richness value","Species Richness duplicate"),labels=c("Yield","Yield duplicate","Species richness","Species richness duplicate")) +
     scale_linetype("",limits=c("no","yes"),labels=c("SD reported", "SD imputed")) +
-    scale_x_continuous(labels=exp(seqBreaks),breaks=seqBreaks) +
-    scale_y_discrete("Study ID",breaks= as.character(data.to.plot$uniqueID),labels=data.to.plot$axes.naming)  +
+    scale_x_continuous(labels=exp(seqBreaks),breaks=seqBreaks,limits=c(x.min,x.max), oob = squish, expand=c(0,0)) +
+    scale_y_discrete("",breaks= as.character(data.to.plot$uniqueID),labels=data.to.plot$axes.naming)  +
 
     #white background + flip 90 degrees
     theme(axis.ticks.x = element_blank(),panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
@@ -369,38 +371,43 @@ for(LUI.level.to.plot in LUI.range.level){
 ```
 
 ![](c:\Users\hoppek\Documents\temp\Forest_plot_low-low.png)
-![](c:\Users\hoppek\Documents\temp\Forest_plot_low-medium.png)
-![](c:\Users\hoppek\Documents\temp\Forest_plot_low-high.png)
 ![](c:\Users\hoppek\Documents\temp\Forest_plot_medium-medium.png)
-![](c:\Users\hoppek\Documents\temp\Forest_plot_medium-high.png)
 ![](c:\Users\hoppek\Documents\temp\Forest_plot_high-high.png)
+![](c:\Users\hoppek\Documents\temp\Forest_plot_low-medium.png)
+![](c:\Users\hoppek\Documents\temp\Forest_plot_medium-high.png)
+![](c:\Users\hoppek\Documents\temp\Forest_plot_low-high.png)
 
 ```{r confounding variables}
 library(gridExtra)
 ### Are BD and ES measured from the same species (e.g. weed BD and weed biomass in grasslands is linked)?
-p1 <- ggplot(data=ES.frame.richness,aes(y=Log.RR,x=factor(ES.and.BD))) + 
-  geom_boxplot() +
-  theme(axis.text = element_text(size = rel(2)), 
-      axis.ticks = element_line(colour = "black"), 
-      axis.title = element_text(size = rel(2)), 
-      axis.text = element_text(size = rel(2))) +
-  xlab("BD.and.ES")
+sub <- subset(ES.frame.richness,Species.Group=="plants")
+p1 <- ggplot(data=sub,aes(y=Log.RR,x=factor(ES.and.BD))) + 
+     geom_boxplot() +
+     theme(axis.text = element_text(size = rel(1.2)), 
+           axis.ticks = element_line(colour = "black"), 
+           axis.title = element_text(size = rel(1.2))) +
+     xlab("BD.and.ES") +
+     ylab("log(RR)")
+ 
+t.test(Log.RR ~ factor(ES.and.BD), data=sub)
 
-t.test(Log.RR ~ factor(ES.and.BD), data=ES.frame.richness)
 
 ### Is land use intensity measured from data on yield.
 p2 <- ggplot(data=ES.frame.yield,aes(y=Log.RR,x=factor(LU.definition.and.ES))) + 
   geom_boxplot()+
-  theme(axis.text = element_text(size = rel(2)), 
+  theme(axis.text = element_text(size = rel(1.2)), 
       axis.ticks = element_line(colour = "black"), 
-      axis.title = element_text(size = rel(2)), 
-      axis.text = element_text(size = rel(2))) +
-  xlab("LU.definition.and.ES")
+      axis.title = element_text(size = rel(1.2))) +
+  xlab("LU.definition.and.ES") + 
+  ylab("log(RR)") +
+  facet_grid(.~Product)
 
-t.test(Log.RR ~ factor(LU.definition.and.ES), data=ES.frame.yield)
+t.test(Log.RR ~ factor(LU.definition.and.ES), data=subset(ES.frame.yield,Product=="timber"))
+t.test(Log.RR ~ factor(LU.definition.and.ES), data=subset(ES.frame.yield,Product=="green fodder"))
 
-grid.arrange(p1, p2,ncol=2, nrow=1)
-
+p12 <- grid.arrange(p1, p2,ncol=2, nrow=1,widths=c(1.4,3))
+ggsave(p12,file=path2temp %+% "confoundingVariable1.png", width=9,height=5)
+  
 ### Relationship spatial scale - log.RR
 
 hist(log10(ES.frame.richness$Richness.Plot.Size))
@@ -411,22 +418,30 @@ fm <- lm(Log.RR ~ log10(Richness.Plot.Size), data=ES.frame.richness)
 summary(fm)
 
 # plot data and fitted line
-plot(Log.RR~log10(Richness.Plot.Size),data=ES.frame.richness)
-abline(fm,col="red") 
+p3 <- ggplot(data=ES.frame.richness,aes(y=Log.RR,x=log10(Richness.Plot.Size))) + 
+  geom_point(size=2,alpha=0.5) + 
+  stat_smooth(method=lm,se=F,color="red") +
+  theme(axis.text = element_text(size = rel(1.2)), 
+      axis.ticks = element_line(colour = "black"), 
+      axis.title = element_text(size = rel(1.2)))+
+  ylab("log(RR)")
 
 ### Relationship Yield.Unit.Type - log.RR
 fm2 <- aov(Log.RR ~ Yield.Unit.Type, data=ES.frame.yield)
 TukeyHSD(fm2)
 plot(TukeyHSD(fm2),las=1)
 
-ggplot(data=ES.frame.yield,aes(y=Log.RR,x=factor(Yield.Unit.Type))) +
+p4 <- ggplot(data=ES.frame.yield,aes(y=Log.RR,x=factor(Yield.Unit.Type))) +
   geom_boxplot()+
-  theme(axis.text = element_text(size = rel(2)), 
+  theme(axis.text = element_text(size = rel(1.2)), 
       axis.ticks = element_line(colour = "black"), 
-      axis.title = element_text(size = rel(2)), 
-      axis.text = element_text(size = rel(2))) +
-  xlab("Yield.Unit.Type")
+      axis.title = element_text(size = rel(1.2))) + 
+  scale_x_discrete("Yield unit",labels=c("area/area","mass/area", "count/area", "others")) +
+  ylab("log(RR)")
   
+p34 <- grid.arrange(p3, p4,ncol=2, nrow=1,widths=c(1,1))
+ggsave(p34,file=path2temp %+% "confoundingVariable2.png", width=9,height=5)
+
 
 ```
 
