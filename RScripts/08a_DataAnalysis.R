@@ -54,10 +54,10 @@ for(x in c("Product", "landuse_history", "main_climate")){
 ###########################################################################
 ### store models in a list
 ###########################################################################
-Richness.MA.model <- vector("list", length=8)
+Richness.MA.model <- vector("list", length=10)
 Yield.MA.model <- vector("list", length=6)
-names(Richness.MA.model) <- c("None","LUI","LUI.SGP","LUI.SG","LUI.P","SGP","Full","Select")
-names(Yield.MA.model) <- c("None","LUI","LUI.SGP","SGP","Full","Select")
+names(Richness.MA.model) <- c("None","LUI","LUI.SGP","LUI.SG","LUI.P","SGP","SG","P","Full","Select")
+names(Yield.MA.model) <- c("None","LUI","LUI.P","P","Full","Select")
 
 ###########################################################################
 ### Function for model fitting using rma.mv
@@ -93,6 +93,8 @@ Richness.MA.model[["LUI.SGP"]] <- rma.mv.func(df=modelDataRichness, moderators=c
 Richness.MA.model[["LUI.SG"]] <- rma.mv.func(df=modelDataRichness, moderators=c(-1,"LUI.range.level","Species.Group", "LUI.range.level:Species.Group"), fit.method="REML")
 Richness.MA.model[["LUI.P"]] <- rma.mv.func(df=modelDataRichness, moderators=c(-1,"LUI.range.level","Product", "LUI.range.level:Product"), fit.method="REML")
 Richness.MA.model[["SGP"]] <- rma.mv.func(df=modelDataRichness, moderators=c(-1,"Product", "Species.Group", "Species.Group:Product"), fit.method="REML")
+Richness.MA.model[["SG"]] <- rma.mv.func(df=modelDataRichness, moderators=c(-1,"Species.Group"), fit.method="REML")
+Richness.MA.model[["P"]] <- rma.mv.func(df=modelDataRichness, moderators=c(-1,"Product"), fit.method="REML")
 Richness.MA.model[["Full"]] <- rma.mv.func(df=modelDataRichness, moderators=c(-1,"LUI.range.level", "Product", "Species.Group", "landuse_history","main_climate", "LUI.range.level:Product", "LUI.range.level:Species.Group","LUI.range.level:main_climate", "main_climate:landuse_history","Species.Group:Product"), fit.method="REML")
 model2select <- try(rma.mv(yi=Log.RR, V=M.matrix(modelDataRichness)+diag(modelDataRichness$Log.RR.Var), 
                        mods=~LUI.range.level + Product + Species.Group + landuse_history + main_climate + LUI.range.level:Product + LUI.range.level:Species.Group + LUI.range.level:landuse_history + LUI.range.level:main_climate + Species.Group:Product + landuse_history:main_climate,
@@ -120,8 +122,8 @@ Richness.MA.model[["Select"]] <- rma.mv.func(df=modelDataRichness, moderators=c(
 Yield.MA.model[["None"]] <- rma.mv.func(df=modelDataYield, moderators=c(1), fit.method="REML")
 Yield.MA.model[["LUI"]] <- rma.mv.func(df=modelDataYield, moderators=c(-1,"LUI.range.level"), fit.method="REML")
 #Yield.MA.model[["Context"]] <- rma.mv.func(df=modelDataYield, moderators=c(-1,"Product","landuse_history","main_climate","landuse_history:main_climate"), fit.method="REML")
-Yield.MA.model[["LUI.SGP"]] <- rma.mv.func(df=modelDataYield, moderators=c(-1,"LUI.range.level", "Product", "LUI.range.level:Product"), fit.method="REML")
-Yield.MA.model[["SGP"]] <- rma.mv.func(df=modelDataYield, moderators=c(-1,"Product"), fit.method="REML")
+Yield.MA.model[["LUI.P"]] <- rma.mv.func(df=modelDataYield, moderators=c(-1,"LUI.range.level", "Product", "LUI.range.level:Product"), fit.method="REML")
+Yield.MA.model[["P"]] <- rma.mv.func(df=modelDataYield, moderators=c(-1,"Product"), fit.method="REML")
 Yield.MA.model[["Full"]] <- rma.mv.func(df=modelDataYield, moderators=c(-1,"LUI.range.level", "Product", "landuse_history","main_climate", "LUI.range.level:Product","LUI.range.level:main_climate","LUI.range.level:landuse_history", "main_climate:landuse_history"), fit.method="REML")
 model2select <- try(rma.mv(yi=Log.RR, V=M.matrix(modelDataYield)+diag(modelDataYield$Log.RR.Var), 
                            mods=~LUI.range.level + Product + landuse_history + main_climate + LUI.range.level:Product + LUI.range.level:landuse_history + LUI.range.level:main_climate + landuse_history:main_climate,
