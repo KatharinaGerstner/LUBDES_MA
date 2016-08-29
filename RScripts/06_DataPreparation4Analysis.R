@@ -59,10 +59,14 @@ ES.frame.yield$Study.Case <- factor(ES.frame.yield$Study.Case)[drop=T] # drop un
 #ES.frame.yield$npp <- scale(ES.frame.yield$npp)
 #ES.frame.yield$time.since.first.use <- scale(ES.frame.yield$time.since.first.use)
 
+write.table(ES.frame.richness[,c("Study.Case","Longitude", "Latitude","LUI.range.level","Species.Group","Product","main_climate","landuse_history","ES.and.BD","Richness.Plot.Size","Log.RR","Log.RR.Var")], file=path2temp %+% "ES.frame.richness.xls", row.names=F,sep="\t")
+
+write.table(ES.frame.yield[,c("Study.Case","Longitude", "Latitude","LUI.range.level","Product","main_climate","landuse_history", "LU.definition.and.ES","Yield.Unit.Type","Log.RR","Log.RR.Var")], file=path2temp %+% "ES.frame.yield.xls", row.names=F,sep="\t")
+
 ###########################################################################
 ### 06.3. save rawdata as table in a word doc
 ###########################################################################
 print(xtable(ES.frame.richness[,c("Study.Case","Longitude", "Latitude","LUI.range.level","Species.Group","Product","main_climate","landuse_history","ES.and.BD","Richness.Plot.Size","Log.RR","Log.RR.Var")]), type = "html", file=path2temp %+% "ES.frame.richness.doc", rownames=F) # save the HTML table as a .doc file
-print(xtable(ES.frame.yield[,c("Study.Case","Longitude", "Latitude","LUI.range.level","Product","main_climate","landuse_history", "LU.definition.and.ES","Yield.Unit.Type","Log.RR","Log.RR.Var")]), type = "html", file=path2temp %+% "ES.frame.yield.doc") # save the HTML table as a .doc file
+print(xtable(ES.frame.yield[,c("Study.Case","Longitude", "Latitude","LUI.range.level","Product","main_climate","landuse_history", "LU.definition.and.ES","Yield.Unit.Type","Log.RR","Log.RR.Var")]), type = "html", file=path2temp %+% "ES.frame.yield.doc",, rownames=F) # save the HTML table as a .doc file
 
 
