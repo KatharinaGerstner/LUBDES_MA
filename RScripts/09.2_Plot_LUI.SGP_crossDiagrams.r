@@ -1,10 +1,10 @@
 ############################################################################
 ### Purpose of this skript module 09.2 is to:
 ###
-### 09.2.1/2 Predict effects of LUI on richness/yield using the context model
-### 09.2.2/2 Map Biomes with high risk of biodiversity loss/high potential of yield gains facetted using product 
-### 09.2.3/2 Predict effects of LUI on richness/yield using the select model
-### 09.2.2/2 Map Biomes with high risk of biodiversity loss/high potential of yield gains facetted using product and LUI.range.level
+### 09.2.1. Predictions for richness
+### 09.2.2. Predictions for yield
+### 09.2.3. Join and save predictions for richness and yield
+### 09.2.4. Map predictions facetted by Product and/or Species.Group
 ###
 ### Authors: KG, ...
 ############################################################################
@@ -225,7 +225,7 @@ newdat.yield.SGP$logRR.yield.ci.lb <- model$b-1.96*model$se
 newdat.yield.SGP$logRR.yield.ci.ub <- model$b+1.96*model$se
 
 ############################################################################
-### 09.3. Join Predictions for richness and yield
+### 09.2.3. Join and save predictions for richness and yield
 ############################################################################
 ### LUI.SPG and SGP
 newdat.SGP <- join_all(list(newdat.richness.SGP,newdat.yield.SGP),type="full")
@@ -278,7 +278,7 @@ write.csv(newdat.all[,c("Species.Group","Product","LUI.range.level",
           file=path2temp %+% "preds.LUI.SGP.SG.P.csv",row.names=F)
 
 ############################################################################
-### 09.2.3. Map predictions facetted by Product and LUI on top of biomes
+### 09.2.4. Map predictions facetted by Product and/or Species.Group
 ############################################################################
 
 seqBreaks <- log(sapply(-2:7,function(x) 2^x))

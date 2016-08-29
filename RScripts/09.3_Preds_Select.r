@@ -1,5 +1,15 @@
 ############################################################################
-### 09.2.1. Predictions for richness
+### Purpose of this skript module 09.3 is to:
+###
+### 09.3.1. Predictions for richness for model "select"
+### 09.3.2. Predictions for yield for model "select"
+### 09.3.3. join and save predictions for richness and yield for models "select"
+###
+### Authors: KG,...
+############################################################################
+
+############################################################################
+### 09.3.1. Predictions for richness for model "select"
 ############################################################################
 model <- Richness.MA.model[["Select"]]
 
@@ -25,7 +35,7 @@ newdat.richness[,c("logRR.richness","logRR.richness.se","logRR.richness.ci.lb","
 newdat.richness <- subset(newdat.richness,n.richness>0)
 
 ############################################################################
-### 09.2.2. Predictions for yield
+### 09.3.2. Predictions for yield for model "select"
 ############################################################################
 model <- Yield.MA.model[["Select"]]
 
@@ -48,6 +58,11 @@ newdat.yield[,c("logRR.yield","logRR.yield.se","logRR.yield.ci.lb","logRR.yield.
 
 ## remove levels with zero sample size
 newdat.yield <- subset(newdat.yield,n.yield>0)
+
+
+############################################################################
+### 09.3.3. join and save predictions for richness and yield for models "select"
+############################################################################
 
 newdat.select <- join_all(list(newdat.richness,newdat.yield),type="full")
 newdat.select$n.yield[is.na(newdat.select$n.yield)] <- 0

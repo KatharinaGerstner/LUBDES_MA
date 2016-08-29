@@ -1,9 +1,8 @@
 ############################################################################
 ### Purpose of this skript module 05 is to:
 ###
-### 05.1. Intersect studies with global maps of WWF_REALMs Ecoregions, reduce them to five main regions
-### 05.2. Intersect studies with NPP
-### 05.3. Intersect studies with Land-use history
+### 05.1. Intersect studies with main climate zones
+### 05.2. Intersect studies with coarse classes of land-use history
 ### General comments:
 ### * 
 ###
@@ -21,7 +20,7 @@ lonlat <- cbind(ES.frame$Longitude,ES.frame$Latitude)
 # lonlat.noLU <- cbind(ES.frame.noLU$Longitude,ES.frame.noLU$Latitude)
 
 ############################################################################
-### Intersect studies with climate zones
+### 05.1. Intersect studies with main climate zones
 ############################################################################
 print("Intersect studies with climate zones")
 if (file.exists("1976-2000_GIS.zip")==FALSE){
@@ -71,7 +70,7 @@ climate_extract <- climate_extract[!duplicated(climate_extract$point.ID),]
 ES.frame$main_climate <- climate_extract$main_climate
 
 ############################################################################
-### Intersect studies with Land-use history (new version)
+### 05.2. Intersect studies with coarse classes of land-use history
 ############################################################################
 print("Intersect studies with Land-use history")
 

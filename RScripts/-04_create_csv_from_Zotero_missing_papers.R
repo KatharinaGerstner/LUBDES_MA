@@ -1,7 +1,7 @@
 ############################################################################
-### Purpose of this skript module -03 is to:
+### Purpose of this skript module -04 is to:
 ###
-### -03.1. To extract zotero citation data into excel.
+### -04.1. To extract zotero citation data of missing papers into excel.
 ###
 ### General comments:
 ### * This skript is NOT needed to run when doing the analysis. It should work standalone

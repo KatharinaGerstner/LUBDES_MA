@@ -1,10 +1,8 @@
 ############################################################################
 ### Purpose of this skript module 09.1 is to:
 ###
-### 09.1. plot model parameter estimates
-### 09.1.1. plot cross diagrams
-### 09.1.2. plot Panel for LUIrangelevel
-### 09.1.3. Plot model coeeficients + SE relative to the intercept (cf. Fig1 in Newbold et al. 2015)
+### 09.1.1. plot raw data + grand mean
+### 09.1.2. plot LUI cross diagrams
 ###
 ### Authors: KG, TN,...
 ############################################################################

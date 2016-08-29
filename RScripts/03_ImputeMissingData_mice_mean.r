@@ -1,7 +1,12 @@
 ###########################################################################
-### 03.1. impute missing data using the mice package and the mean of 10 imputation chains
+### 03.1. impute missing data using the mice package and the mean of 50 imputation chains
+### 03.2. plot imputed missing data
 ### 
 ### Authors: KG, MB...
+###########################################################################
+
+###########################################################################
+### 03.1. impute missing data using the mice package and the mean of 50 imputation chains
 ###########################################################################
 
 ### prepare dataframe
@@ -43,24 +48,6 @@ temp$is.imputed <- rep(data4imp.richness$richness.SD.is.imputed,10)
 
 richness.mean.imp <- data.frame(.id=unique(temp$.id[temp$is.imputed=="yes"]),mean.imp=rowMeans(matrix(temp$richness.SD[temp$is.imputed=="yes"], ncol=nchains, byrow=F)))
 
-# plot distribution of imputed SDs
-imp.richness <- ggplot() +
-  geom_point(aes(x=.id,y=richness.SD),color="red",alpha=0.3,data=temp[temp$is.imputed=="yes",]) +
-  geom_point(aes(x=richness.mean.imp$.id,y=richness.mean.imp$mean.imp),size=2) +
-  theme(axis.text.x = element_text(angle = 90, hjust = 1)) +
-  ylab("SD(species richness)") + scale_x_discrete("",labels=c())
-print(imp.richness)
-ggsave(imp.richness, file=path2temp %+% "imputed.SD.richness.png",height=5,width=10)
-
-# p.richness <- ggplot(dataimp) +
-#   geom_point(aes(x=richness.mean, y=richness.SD, color=richness.SD.is.imputed), size=2, alpha=.5) +
-#   xlim(range(dataimp$richness.mean[dataimp$richness.SD.is.imputed=="yes"],na.rm=T)) +
-#   ylim(range(dataimp$richness.SD[dataimp$richness.SD.is.imputed=="yes"],na.rm=T)) +
-#   scale_color_discrete(limits=c("no","yes"),labels=c("SD observed","SD imputed")) +
-#   guides(color=guide_legend(title=NULL)) +
-#   theme_lubdes(rel.text.size=0.8,legend.position="bottom")
-# ggsave(p.richness, file=path2temp %+% "imputation_mice_richness.png",height=4,width=3.5)
-
 temp.richness <- data.frame(matrix(temp$richness.SD, ncol=nchains, byrow=F))
 temp.richness$mean <- rowMeans(temp.richness[,1:nchains])
 temp.richness$sd <- apply(temp.richness[,1:nchains],1,sd)
@@ -80,7 +67,31 @@ temp$is.imputed <- rep(data4imp.yield$yield.SD.is.imputed,10)
 
 yield.mean.imp <- data.frame(.id=unique(temp$.id[temp$is.imputed=="yes"]),mean.imp=rowMeans(matrix(temp$yield.SD[temp$is.imputed=="yes"], ncol=nchains, byrow=F)))
 
-# plot distribution of imputed SDs
+### check variability of imputation
+temp.yield <- data.frame(matrix(temp$yield.SD, ncol=nchains, byrow=F))
+temp.yield$mean <- rowMeans(temp.yield[,1:nchains])
+temp.yield$sd <- apply(temp.yield[,1:nchains],1,sd)
+
+save(temp, temp.yield, file = path2temp %+% "imputed.SD.yield.Rdata")
+
+save(dataimp,file=path2temp %+% "dataimp.Rdata")
+
+###########################################################################
+### 03.2. plot imputed missing data
+###########################################################################
+## richness
+load(path2temp %+% "imputed.SD.richness.Rdata") # temp, temp.richness
+imp.richness <- ggplot() +
+  geom_point(aes(x=.id,y=richness.SD),color="red",alpha=0.3,data=temp[temp$is.imputed=="yes",]) +
+  geom_point(aes(x=richness.mean.imp$.id,y=richness.mean.imp$mean.imp),size=2) +
+  theme(axis.text.x = element_text(angle = 90, hjust = 1)) +
+  ylab("SD(species richness)") + scale_x_discrete("",labels=c())
+print(imp.richness)
+ggsave(imp.richness, file=path2temp %+% "imputed.SD.richness.png",height=5,width=10)
+
+
+## yield
+load(path2temp %+% "imputed.SD.yield.Rdata") # temp, temp.yield
 imp.yield <- ggplot() +
   geom_point(aes(x=.id,y=yield.SD),color="red",alpha=0.3,data=temp[temp$is.imputed=="yes",]) +
   geom_point(aes(x=yield.mean.imp$.id,y=yield.mean.imp$mean.imp),size=2) +
@@ -88,6 +99,16 @@ imp.yield <- ggplot() +
   ylab("SD(yield)") + scale_x_discrete("",labels=c())
 print(imp.yield)
 ggsave(imp.yield, file=path2temp %+% "imputed.SD.yield.png",height=5,width=10)
+
+
+#### RESTERAMPE
+# 
+# par(mfrow=c(2,2))
+# hist(temp.richness$mean)
+# hist(temp.richness$sd)
+# hist(temp.yield$mean)
+# hist(temp.yield$sd)
+# par(mfrow=c(1,1))
 
 # p.yield <- ggplot(dataimp) +
 #   geom_point(aes(x=yield.mean, y=yield.SD, color=yield.SD.is.imputed), size=2, alpha=.5) +
@@ -98,21 +119,11 @@ ggsave(imp.yield, file=path2temp %+% "imputed.SD.yield.png",height=5,width=10)
 #   theme_lubdes(legend.position="bottom",rel.text.size=0.8)
 # ggsave(p.yield, file=path2temp %+% "imputation_mice_yield.png",height=4,width=3.5)
 
-### check variability of imputation
-temp.yield <- data.frame(matrix(temp$yield.SD, ncol=nchains, byrow=F))
-temp.yield$mean <- rowMeans(temp.yield[,1:nchains])
-temp.yield$sd <- apply(temp.yield[,1:nchains],1,sd)
-
-save(temp, temp.yield, file = path2temp %+% "imputed.SD.yield.Rdata")
-
-# 
-# par(mfrow=c(2,2))
-# hist(temp.richness$mean)
-# hist(temp.richness$sd)
-# hist(temp.yield$mean)
-# hist(temp.yield$sd)
-# par(mfrow=c(1,1))
-
-save(dataimp,file=path2temp %+% "dataimp.Rdata")
-
-
+# p.richness <- ggplot(dataimp) +
+#   geom_point(aes(x=richness.mean, y=richness.SD, color=richness.SD.is.imputed), size=2, alpha=.5) +
+#   xlim(range(dataimp$richness.mean[dataimp$richness.SD.is.imputed=="yes"],na.rm=T)) +
+#   ylim(range(dataimp$richness.SD[dataimp$richness.SD.is.imputed=="yes"],na.rm=T)) +
+#   scale_color_discrete(limits=c("no","yes"),labels=c("SD observed","SD imputed")) +
+#   guides(color=guide_legend(title=NULL)) +
+#   theme_lubdes(rel.text.size=0.8,legend.position="bottom")
+# ggsave(p.richness, file=path2temp %+% "imputation_mice_richness.png",height=4,width=3.5)

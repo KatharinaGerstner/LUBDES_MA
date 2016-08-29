@@ -1,9 +1,9 @@
 ############################################################################
 ### Purpose of this skript module 07 is to:
 ### 
-### 07a.1. Remove cases with zero variances, pseudo-replicates, redundant LUI.range.level comparisons 
-### 07a.2. remove columns not needed for the analysis, unify names
-### 07a.3 load functions for the data analysis
+### 06.1. Remove cases with zero variances, pseudo-replicates, redundant LUI.range.level comparisons 
+### 06.2. remove columns not needed for the analysis, unify names
+### 06.3. save rawdata as table in a word doc
 ###
 ### Authors: KG
 ############################################################################
@@ -60,7 +60,7 @@ ES.frame.yield$Study.Case <- factor(ES.frame.yield$Study.Case)[drop=T] # drop un
 #ES.frame.yield$time.since.first.use <- scale(ES.frame.yield$time.since.first.use)
 
 ###########################################################################
-### 06.2. save rawdata as table in a word doc
+### 06.3. save rawdata as table in a word doc
 ###########################################################################
 print(xtable(ES.frame.richness[,c("Study.Case","Longitude", "Latitude","LUI.range.level","Species.Group","Product","main_climate","landuse_history","ES.and.BD","Richness.Plot.Size","Log.RR","Log.RR.Var")]), type = "html", file=path2temp %+% "ES.frame.richness.doc", rownames=F) # save the HTML table as a .doc file
 print(xtable(ES.frame.yield[,c("Study.Case","Longitude", "Latitude","LUI.range.level","Product","main_climate","landuse_history", "LU.definition.and.ES","Yield.Unit.Type","Log.RR","Log.RR.Var")]), type = "html", file=path2temp %+% "ES.frame.yield.doc") # save the HTML table as a .doc file
