@@ -1,0 +1,158 @@
+"Study.Case"	"Longitude"	"Latitude"	"LUI.range.level"	"Product"	"main_climate"	"landuse_history"	"LU.definition.and.ES"	"Yield.Unit.Type"	"Log.RR"	"Log.RR.Var"
+"1002-Sullivan2001-1"	-119.855916	49.942425	"medium-medium"	"wood"	"Cold (Continental)"	"after 1950"	"independent"	NA	-0.199788179811517	4.36461949136378e-05
+"1002-Sullivan2001-1"	-119.855916	49.942425	"low-medium"	"wood"	"Cold (Continental)"	"after 1950"	"independent"	NA	-0.882211926941169	0.000491364357098509
+"1002-Sullivan2001-1"	-119.855916	49.942425	"medium-high"	"wood"	"Cold (Continental)"	"after 1950"	"independent"	NA	-0.612208883947524	8.45996447357283e-05
+"1018-Freemark2001-1"	-86.698459	51.091995	"medium-high"	"crop"	"Cold (Continental)"	"after 1950"	"independent"	"Area/area"	0.137828583450619	0.0151915669949062
+"1152-Crow2002-1"	-89.147945	46.270172	"medium-high"	"wood"	"Cold (Continental)"	"after 1950"	"independent"	"Mass/area"	-0.099067228682037	0.000677748958151442
+"1182-Sippola2002-1"	26.583333	68.416667	"high-high"	"wood"	"Cold (Continental)"	"after 1950"	"independent"	NA	-0.700694386195328	0.0400214808880393
+"1184-Ghazoul2002-1"	99.333333	15.6	"low-low"	"wood"	"Tropical"	"1450"	"linked"	NA	1.05314991459135	0.798115497780298
+"1197-Bostrom2002-1"	18.466667	57.616667	"high-high"	"crop"	"Temperate"	"5950 BC"	"independent"	"Mass/area"	0.0416502490396285	0.00732036152010506
+"1247-Summerville2002-1"	-83.24	38.69	"low-high"	"wood"	"Temperate"	"1950"	"linked"	NA	0.303682413798222	0.00571027103432353
+"1299-Sekercioglu2002-1"	30.416667	0.45	"medium-medium"	"wood"	"Tropical"	"1450"	"linked"	NA	-0.169938592975067	1.16425859775521
+"1340-Parrotta2002-1"	-56.45	-1.666667	"low-medium"	"wood"	"Tropical"	"after 1950"	"independent"	NA	0.0857668217574251	0.00122899715165004
+"1340-Parrotta2002-1"	-56.45	-1.666667	"medium-high"	"wood"	"Tropical"	"after 1950"	"independent"	NA	0.532506689827315	0.00209562411074573
+"1385-Sullivan2002-1"	-120.375	50.743	"high-high"	"wood"	"Cold (Continental)"	"50 BC"	"independent"	NA	-0.503835930454336	0.000169594548794279
+"1549-Okland2003-1"	10.533333	60.11	"low-medium"	"wood"	"Cold (Continental)"	"after 1950"	"linked"	NA	1.05476040613926	0.0323827938165927
+"1549-Okland2003-1"	10.533333	60.11	"medium-high"	"wood"	"Cold (Continental)"	"after 1950"	"linked"	NA	0.372751910701862	0.0461811882315277
+"1558-Jones2003-1"	102.6	-1.5	"high-high"	"wood"	"Tropical"	"after 1950"	"independent"	NA	-0.902002866969677	0.00440683428552598
+"1558-Jones2003-1"	102.6	-1.5	"low-medium"	"wood"	"Tropical"	"after 1950"	"independent"	NA	0.125152225387095	0.00145387552029771
+"1558-Jones2003-1"	102.6	-1.5	"medium-high"	"wood"	"Tropical"	"after 1950"	"independent"	NA	-0.561097588354739	0.0101065048199702
+"1566-Peeters2003-1"	-92.770777	17.227384	"medium-medium"	"crop"	"Tropical"	"50 BC"	"independent"	NA	0.114217969491887	0.088557326182468
+"1566-Peeters2003-2"	-92.770777	17.227384	"low-medium"	"wood"	"Tropical"	"50 BC"	"independent"	NA	1.38629436111989	1.60222303206997
+"1579-Van Gemerden2003-1"	10	3	"low-high"	"wood"	"Tropical"	"after 1950"	"independent"	NA	0.499589550499065	0.485824793039239
+"1704-Dolanc2003-1"	-73.75	-4.916667	"high-high"	"wood"	"Tropical"	"after 1950"	"independent"	"Count/area"	-0.0262482260749363	0.00524414151339217
+"1819-Maeto2004-1"	132.705457	33.353858	"low-high"	"wood"	"Temperate"	"1450"	"independent"	NA	0.729755228968495	0.187015435420429
+"2016-Haysom2004-2"	-3.58	55.05	"high-high"	"green fodder"	"Temperate"	"5950 BC"	"independent"	NA	0.523146852298267	0.0064815528238618
+"2135-Laiolo2004-1"	8.275	44.858	"high-high"	"wood"	"Temperate"	"50 BC"	"independent"	"Area/area"	-0.0583618492458419	0.00891160028601722
+"2138-Hylander2004-1"	16.083333	62.666667	"high-high"	"wood"	"Cold (Continental)"	"after 1950"	"independent"	NA	0.779542963562956	0.0043618128378585
+"2270-Decocq2004-1"	3.833333	50	"low-medium"	"wood"	"Temperate"	"50 BC"	"independent"	NA	1.67398143355917	0.461892269072792
+"2457-Holbech2005-1"	-2.212579	5.310389	"low-low"	"wood"	"Tropical"	"1950"	"linked"	"Count/area"	2.3911815075639	0.103572272818453
+"2559-Clarke2005-1"	-61.198129	10.207686	"low-medium"	"wood"	"Tropical"	"after 1950"	"independent"	NA	0.0935260580108235	0.0562333104871851
+"2638-Haeussler2005-1"	-120.466667	55.966667	"high-high"	"wood"	"Cold (Continental)"	"after 1950"	"linked"	"Mass/area"	0.227135572583747	0.0264686136687229
+"2678-Kaur2005-1"	148.16	-23.83	"low-medium"	"green fodder"	"Arid"	"1950"	"independent"	"Mass/area"	0.605285824768611	0.00997276567370458
+"274-Jenkins1999-1"	-86.5	39.166667	"low-medium"	"wood"	"Temperate"	"1950"	"linked"	NA	0.236439918822787	0.00188963576209091
+"274-Jenkins1999-1"	-86.5	39.166667	"medium-high"	"wood"	"Temperate"	"1950"	"linked"	NA	0.839921710301165	0.00143271804606382
+"2774-Etcheverry2005-1"	-69.35	47.6	"high-high"	"wood"	"Cold (Continental)"	"1950"	"independent"	NA	0.405465108108164	0.0340555555555556
+"2775-Nagaike2005-1"	139	37	"high-high"	"wood"	"Temperate"	"1450"	"independent"	NA	0.572687869502776	0.0159298014150831
+"2997-Kern2006-1"	-88.965392	45.757365	"medium-medium"	"wood"	"Cold (Continental)"	"after 1950"	"independent"	NA	-0.229185865770172	0.0148124719361381
+"2997-Kern2006-1"	-88.965392	45.757365	"medium-high"	"wood"	"Cold (Continental)"	"after 1950"	"independent"	NA	0.108041482411084	0.00898284804666521
+"3062-Wang2006-1"	-81.183333	27.15	"low-medium"	"green fodder"	"Temperate"	"1950"	"independent"	"Area/area"	-0.179732687479852	0.00229679243909222
+"3062-Wang2006-2"	-81.183333	27.15	"low-high"	"green fodder"	"Temperate"	"1950"	"independent"	"Area/area"	-0.736056547241123	0.0514539796323245
+"3273-Boncina2007-1"	15	45.616667	"medium-medium"	"wood"	"Temperate"	"50 BC"	"independent"	NA	-0.0819735829596726	0.0750543894230755
+"3273-Boncina2007-1"	15	45.616667	"low-medium"	"wood"	"Temperate"	"50 BC"	"independent"	NA	-0.18532907785791	0.00196734943141644
+"3280-Clough2007-1"	8.353166	50.655242	"medium-high"	"crop"	"Temperate"	"50 BC"	"independent"	"Mass/area"	0.450294232324498	0.00711098440145234
+"3299-Rotenberg2007-1"	-88.758751	15.758404	"high-high"	"wood"	"Tropical"	"1950"	"independent"	NA	-0.0248032056614425	0.0149207899326997
+"3370-Lei2007-1"	130.2	43.333333	"high-high"	"wood"	"Cold (Continental)"	"1950"	"independent"	NA	0.0650954972779477	0.00728980448090419
+"3514-Grimbacher2007-1"	145.616667	-17.25	"medium-high"	"wood"	"Temperate"	"after 1950"	"independent"	NA	-0.214324287880128	0.0412853945372203
+"3528-Isselstein2007-1"	9	52	"low-medium"	"green fodder"	"Temperate"	"50 BC"	"linked"	"Mass/area"	-0.326215736454024	0.0799270576321364
+"3603-Beltman2007-1"	5.433333	51.983333	"medium-medium"	"green fodder"	"Temperate"	"50 BC"	"independent"	NA	0.184127653600177	0.0190629443116127
+"3603-Beltman2007-1"	5.433333	51.983333	"low-medium"	"green fodder"	"Temperate"	"50 BC"	"independent"	NA	0.119500294525793	0.0189545166275429
+"3603-Beltman2007-1"	5.433333	51.983333	"medium-high"	"green fodder"	"Temperate"	"50 BC"	"independent"	NA	0.225901150565337	0.0143727934607202
+"3640-Tero2007-1"	25.083333	61.183333	"medium-medium"	"wood"	"Cold (Continental)"	"1450"	"linked"	NA	0.240215535212857	0.0225738242449761
+"4033-Sullivan2008-1"	-119.883333	49.666667	"high-high"	"wood"	"Cold (Continental)"	"after 1950"	"independent"	NA	0.0636819900359547	0.0465797262538883
+"4033-Sullivan2008-1"	-119.883333	49.666667	"medium-high"	"wood"	"Cold (Continental)"	"after 1950"	"independent"	NA	0.887680197832889	0.0570101344048662
+"4108-Mueller2008-1"	10.483333	49.833333	"low-medium"	"wood"	"Temperate"	"50 BC"	"independent"	"Area/area"	0.235567633813987	0.0471655391026213
+"4165-Kramberger2008-1"	15.6389	46.4711	"high-high"	"green fodder"	"Temperate"	"1450"	"linked"	NA	-0.519084882914588	9.45380340890463e-05
+"417-Bostrom1999-1"	15.22	57.96	"high-high"	"crop"	"Cold (Continental)"	"50 BC"	"independent"	"Mass/area"	0.108192889490141	0.00920916729853636
+"4301-Sirrine2008-1"	-85.583333	45	"high-high"	"crop"	"Cold (Continental)"	"after 1950"	"independent"	"Mass/area"	-0.104326353931352	0.00442992921335964
+"4457-Perez-Ramos2008-1"	-5.5838	36.358884	"low-medium"	"wood"	"Temperate"	"1450"	"independent"	NA	0.0239426067892248	0.12747467326007
+"4677-Gonzalez-Alday2009-1"	-4.483333	41.366667	"medium-medium"	"wood"	"Temperate"	"50 BC"	"linked"	"Count/area"	0.693147180559945	0.00318490972789116
+"4677-Gonzalez-Alday2009-1"	-4.483333	41.366667	"medium-high"	"wood"	"Temperate"	"50 BC"	"linked"	"Count/area"	0.980829253011726	0.0142921102985854
+"472-Wardle1999-1"	175.25	-37.75	"low-high"	"crop"	"Temperate"	"1950"	"independent"	NA	0.0406742656198386	0.0109734408645399
+"4788-Mosquera-Losada2009-1"	-7.329973	43.149118	"medium-medium"	"green fodder"	"Temperate"	"50 BC"	"independent"	"Mass/area"	-0.708813297304345	0.978626467678385
+"4788-Mosquera-Losada2009-1"	-7.329973	43.149118	"high-high"	"green fodder"	"Temperate"	"50 BC"	"independent"	"Mass/area"	-0.0506437328187549	3.05418068809247
+"4788-Mosquera-Losada2009-1"	-7.329973	43.149118	"medium-high"	"green fodder"	"Temperate"	"50 BC"	"independent"	"Mass/area"	-0.600365447108979	0.024158538295145
+"4788-Mosquera-Losada2009-2"	-7.329973	43.149118	"medium-medium"	"wood"	"Temperate"	"50 BC"	"independent"	"Count/area"	0.798103133995253	0.742326809031504
+"4788-Mosquera-Losada2009-2"	-7.329973	43.149118	"high-high"	"wood"	"Temperate"	"50 BC"	"independent"	"Count/area"	0.327702608792397	0.0143057810448857
+"4788-Mosquera-Losada2009-2"	-7.329973	43.149118	"medium-high"	"wood"	"Temperate"	"50 BC"	"independent"	"Count/area"	0.240222666959757	0.00920302827420216
+"509-Parthasarathy1999-1"	77.499982	8.500009	"low-medium"	"wood"	"Tropical"	"50 BC"	"independent"	NA	0.170731423430786	0.00462954907397046
+"5112-Lanta2009-1"	17.416667	48.9	"medium-high"	"green fodder"	"Temperate"	"50 BC"	"independent"	NA	0.220078836330473	0.0491406862839266
+"5113-Cop2009-1"	14.466667	45.966667	"high-high"	"green fodder"	"Temperate"	"50 BC"	"independent"	"Mass/area"	0.131353849483473	0.000967408837599131
+"5113-Cop2009-1"	14.466667	45.966667	"low-medium"	"green fodder"	"Temperate"	"50 BC"	"independent"	"Mass/area"	0.556905351100654	0.00671990011157102
+"5113-Cop2009-1"	14.466667	45.966667	"medium-high"	"green fodder"	"Temperate"	"50 BC"	"independent"	"Mass/area"	0.107409079367557	0.00119655956989927
+"516-Higgins1999-1"	30.1	-24.56667	"low-low"	"wood"	"Arid"	"1950"	"independent"	"Mass/area"	-1.85329663384297	0.00452768639868134
+"5242-Schmitt2010-1"	36.250066	7.26647	"low-medium"	"crop"	"Temperate"	"after 1950"	"independent"	"Mass/area"	2.7408400239252	0.0609460543551448
+"5345-Tozer2010-1"	-78.35	45.616667	"medium-medium"	"wood"	"Cold (Continental)"	"after 1950"	"independent"	NA	-0.535600911731549	0.000345160478881383
+"5648-Scursoni2010-1"	-60.266667	-35.033333	"high-high"	"crop"	"Temperate"	"1950"	"independent"	NA	0.123937388049165	0.00221679299348746
+"5648-Scursoni2010-1"	-60.266667	-35.033333	"medium-high"	"crop"	"Temperate"	"1950"	"independent"	NA	0.63026059465756	0.0109107328300901
+"5972-Geiger2010-1"	9.935556	51.533889	"medium-high"	"crop"	"Temperate"	"50 BC"	"independent"	"Mass/area"	0.721558182392725	0.0023730340164161
+"6216-Summerville2011-1"	-86.736944	39.524444	"low-medium"	"wood"	"Cold (Continental)"	"1950"	"linked"	NA	1.66188438780664	0.0290265555658058
+"6216-Summerville2011-1"	-86.736944	39.524444	"medium-high"	"wood"	"Cold (Continental)"	"1950"	"linked"	NA	-0.398192348779085	0.010030950451652
+"6231-Schon2011-1"	175.08	-37.8	"high-high"	"green fodder"	"Temperate"	"1950"	"independent"	"Mass/area"	0.368907512374367	0.00847108474103167
+"6242-Chizinski2011-1"	-91.574063	47.304331	"low-medium"	"wood"	"Cold (Continental)"	"after 1950"	"linked"	NA	1.39665714815544	0.133849919864698
+"6298-Sebastia2011-1"	1.458237	42.08337	"medium-medium"	"green fodder"	"Temperate"	"50 BC"	"independent"	"Mass/area"	0.105896233635734	0.0200546096652434
+"6528-Sasaki2011-1"	140.75	38.73	"low-low"	"green fodder"	"Temperate"	"1450"	"linked"	NA	0.401066391429454	0.0312125739070084
+"6528-Sasaki2011-1"	140.75	38.73	"high-high"	"green fodder"	"Temperate"	"1450"	"linked"	NA	0.729295694676256	0.0730498090096708
+"6528-Sasaki2011-1"	140.75	38.73	"low-medium"	"green fodder"	"Temperate"	"1450"	"linked"	NA	0.223663578005559	0.0252159514335789
+"6528-Sasaki2011-1"	140.75	38.73	"medium-high"	"green fodder"	"Temperate"	"1450"	"linked"	NA	-0.251758856655154	0.0197333045607399
+"6668-Solomou2011-1"	22.905497	39.119142	"high-high"	"crop"	"Temperate"	"50 BC"	"independent"	"Mass/area"	0.104360015324243	0.00396241864499635
+"6684-Vintu2011-1"	25.179199	47.369793	"medium-medium"	"green fodder"	"Cold (Continental)"	"1450"	"independent"	"Mass/area"	0.772135591878576	0.122350800921724
+"6684-Vintu2011-1"	25.179199	47.369793	"low-medium"	"green fodder"	"Cold (Continental)"	"1450"	"independent"	"Mass/area"	0.614339217521784	0.101667915193475
+"6690-Lomba2011-1"	-8.635	41.424	"medium-medium"	"wood"	"Temperate"	"50 BC"	"independent"	"Area/area"	-0.72292901236557	0.0441555298935646
+"6690-Lomba2011-1"	-8.635	41.424	"medium-high"	"wood"	"Temperate"	"50 BC"	"independent"	"Area/area"	-0.178988461903259	0.0275379312990743
+"6858-Campiglia2012-1"	12.666667	42.433333	"high-high"	"crop"	"Temperate"	"50 BC"	"independent"	"Count/area"	0.178163546645291	0.11443918693612
+"6962-Wan2012-1"	115.940049	28.560383	"high-high"	"crop"	"Temperate"	"50 BC"	"independent"	"Mass/area"	0.145844867314646	0.00255700985312617
+"6962-Wan2012-1"	115.940049	28.560383	"low-high"	"crop"	"Temperate"	"50 BC"	"independent"	"Mass/area"	0.222789506346801	0.00619707431983335
+"7034-Edwards2012-1"	117.682928	5.021463	"low-medium"	"wood"	"Tropical"	"after 1950"	"independent"	NA	1.06901181889182	0.0654220062996187
+"7169-Klein2012-1"	-122.4175	38.8175	"medium-high"	"crop"	"Temperate"	"50 BC"	"independent"	"Count/area"	0.127974464836536	0.00211882465092136
+"7250-Edenius2012-1"	14.15	57	"medium-high"	"wood"	"Temperate"	"50 BC"	"independent"	NA	-0.42819335918572	0.015052112035002
+"7387-Otto2012-1"	-16.405556	28.414444	"low-medium"	"wood"	"Temperate"	"1450"	"independent"	NA	-0.882503734296772	0.0106228063298357
+"7392-Imai2012-1"	117.333333	5.333333	"low-medium"	"wood"	"Tropical"	"after 1950"	"independent"	NA	0.792519654373149	0.16220446184551
+"7577-Mastrangelo2012-1"	-63.69386	-22.750447	"low-low"	"green fodder"	"Temperate"	"5950 BC"	"linked"	"Mass/area"	1.08000561083765	0.0289462208350067
+"7577-Mastrangelo2012-1"	-63.69386	-22.750447	"low-medium"	"green fodder"	"Temperate"	"5950 BC"	"linked"	"Mass/area"	2.03570139389192	0.0289409078923553
+"7577-Mastrangelo2012-1"	-63.69386	-22.750447	"medium-high"	"green fodder"	"Temperate"	"5950 BC"	"linked"	"Mass/area"	0.286035850986607	0.0115306098829908
+"7592-Seiwa2012-1"	140.75	38.75	"medium-high"	"wood"	"Temperate"	"1450"	"independent"	NA	0.647192593778792	0.143413636039709
+"7715-Mueller2012-1"	12.25	51.833333	"medium-medium"	"green fodder"	"Temperate"	"50 BC"	"independent"	NA	-0.107953392045857	0.0135125554019784
+"7715-Mueller2012-1"	12.25	51.833333	"low-medium"	"green fodder"	"Temperate"	"50 BC"	"independent"	NA	0.134688991999789	0.0111872851144896
+"7715-Mueller2012-1"	12.25	51.833333	"medium-high"	"green fodder"	"Temperate"	"50 BC"	"independent"	NA	0.0724012978839159	0.0154464541726979
+"7833-Batary2013-1"	10.21157	51.424986	"medium-high"	"crop"	"Temperate"	"50 BC"	"independent"	"Mass/area"	0.59783700075562	0.0102847365702479
+"7856-Boch2013-1"	9.354281	48.300293	"low-high"	"wood"	"Temperate"	"50 BC"	"independent"	NA	-0.0970277682316469	0.157200810106384
+"7875-Mudrak2013-1"	17.416667	48.9	"low-low"	"green fodder"	"Temperate"	"50 BC"	"linked"	NA	-0.0800427076735364	0.00596474035722113
+"7875-Mudrak2013-1"	17.416667	48.9	"low-medium"	"green fodder"	"Temperate"	"50 BC"	"linked"	NA	-0.237356988564265	0.0141211718491134
+"7875-Mudrak2013-1"	17.416667	48.9	"medium-high"	"green fodder"	"Temperate"	"50 BC"	"linked"	NA	0.163745171221019	0.0149934029078748
+"7887-Sircely2013-1"	34.516667	0.1	"low-medium"	"green fodder"	"Tropical"	"1950"	"independent"	"Mass/area"	0.367269510370128	0.0316449958085219
+"789-Vasseur2000-1"	-72.180129	45.358705	"low-medium"	"green fodder"	"Cold (Continental)"	"50 BC"	"independent"	"Mass/area"	-0.0367349839047493	0.00635568792993472
+"7965-Gabriel2013-1"	-1.110188	52.974749	"medium-high"	"crop"	"Temperate"	"1450"	"independent"	"Mass/area"	0.771399377459694	0.00380263260037478
+"8084-Ruan2013-1"	118.733333	36.916667	"high-high"	"crop"	"Temperate"	"5950 BC"	"independent"	"Mass/area"	0.159979074225924	0.0345431157910887
+"8207-Boreux2013-1"	75.8573449	14.335082	"high-high"	"crop"	"Arid"	"50 BC"	"independent"	NA	0.187128119207585	0.00399520057520668
+"8235-Norvez2013-1"	-71.166667	47.333333	"medium-medium"	"wood"	"Cold (Continental)"	"after 1950"	"independent"	NA	0.693147180559945	0.10413115444301
+"8235-Norvez2013-1"	-71.166667	47.333333	"medium-high"	"wood"	"Cold (Continental)"	"after 1950"	"independent"	NA	0.233483608973823	0.0290981124946021
+"8250-Adekunle2013-1"	6.047399	4.798869	"low-medium"	"wood"	"Tropical"	"1450"	"linked"	NA	0.00937056868483289	0.0280638127347568
+"8293-Murrieta-Galindo2013-1"	-96.959286	19.456422	"low-medium"	"crop"	"Tropical"	"1450"	"independent"	"Mass/area"	0.0425940147350824	0.00153854923985778
+"8428-Boch2013-1"	9.354281	48.300293	"low-high"	"wood"	"Temperate"	"50 BC"	"independent"	NA	-0.0970277682316469	0.157200810106384
+"8449-Gourlet-Fleury2013-1"	18.55	4.5	"medium-medium"	"wood"	"Tropical"	"1950"	"independent"	NA	0.412496708331614	0.0309591595974683
+"8496-Klaus2013-1"	11.033333	50.983333	"medium-high"	"green fodder"	"Temperate"	"50 BC"	"independent"	NA	0.111429252121374	0.0164722086263659
+"8568-Yan2013-1"	102.612532	32.390972	"high-high"	"wood"	"Cold (Continental)"	"50 BC"	"linked"	"Count/area"	0.817412198858269	0.0466849731680443
+"8593-Thompson2013-1"	-82.47	49.42	"high-high"	"wood"	"Cold (Continental)"	"50 BC"	"independent"	"Count/area"	0.591956915027772	0.0422890426505467
+"862-Smith2000-1"	-2.35	54.2	"medium-medium"	"green fodder"	"Temperate"	"1450"	"linked"	"Mass/area"	-0.143590919612256	0.0129729920678979
+"8660-Dickson2013-1"	-85.366667	42.4	"low-high"	"green fodder"	"Cold (Continental)"	"1950"	"independent"	NA	0.369290318409362	0.0294775076787299
+"8799-Gamoun2014-1"	12.982133	32.445684	"medium-high"	"green fodder"	"Arid"	"50 BC"	"independent"	NA	-0.989055482378062	0.00885697849562065
+"8822-Hedwall2013-1"	19.453333	64.111667	"low-high"	"wood"	"Cold (Continental)"	"after 1950"	"independent"	NA	0.884358329314678	0.0166740330594951
+"8822-Hedwall2013-2"	19.453333	64.111667	"high-high"	"wood"	"Cold (Continental)"	"after 1950"	"linked"	NA	-0.328852339071046	0.0340701587125679
+"9078-Hautier2014-2"	8.541821	47.113187	"high-high"	"green fodder"	"Temperate"	"5950 BC"	"independent"	NA	0.308876610050754	0.00788826681008494
+"9078-Hautier2014-1"	-105.233544	39.972022	"low-high"	"green fodder"	"Cold (Continental)"	"1950"	"independent"	NA	0.321178064051889	0.143605347781856
+"9078-Hautier2014-4"	-96.582821	39.070856	"medium-high"	"green fodder"	"Temperate"	"1950"	"independent"	NA	0.497744886181076	0.0279782908062786
+"924-Battles2001-1"	-120.666667	38.866667	"low-high"	"wood"	"Temperate"	"after 1950"	"linked"	NA	0.826473634153112	0.0179811717295735
+"9373-SMITH1994-1"	-2.400103	54.423391	"low-medium"	"green fodder"	"Temperate"	"1450"	"linked"	NA	-0.28483712031955	0.0116614024746633
+"9473-GREENBERG1995-1"	-81.8	29.4	"high-high"	"wood"	"Temperate"	"1950"	"linked"	"Count/area"	0.0870123651324105	0.0910056169248913
+"9503-GREENBERG1995-2"	-81.8	29.4	"high-high"	"wood"	"Temperate"	"1950"	"linked"	"Count/area"	0.126689860807806	0.0218668387069745
+"9555-DRINKWATER1995-1"	-122.201108	40.200171	"low-high"	"crop"	"Temperate"	"50 BC"	"independent"	NA	0.200386639191596	0.000961399740833152
+"9742-Oomes1996-1"	5.930182	52.307361	"low-medium"	"crop"	"Temperate"	"50 BC"	"independent"	"Mass/area"	0	0.0596565200617284
+"9742-Oomes1996-2"	5.930182	52.307361	"medium-high"	"crop"	"Temperate"	"50 BC"	"independent"	"Mass/area"	0.490622916448471	0.0578902682331436
+"9762-Annand1997-1"	-91.066428	36.93072	"high-high"	"wood"	"Temperate"	"1950"	"independent"	NA	0.643824959979984	0.0270834055851709
+"9762-Annand1997-1"	-91.066428	36.93072	"low-medium"	"wood"	"Temperate"	"1950"	"independent"	NA	0	0.0601715777824261
+"9762-Annand1997-1"	-91.066428	36.93072	"medium-high"	"wood"	"Temperate"	"1950"	"independent"	NA	1.08544052111154	0.0366014143168072
+"9868-Baker1997-1"	-83.516667	30.016667	"high-high"	"wood"	"Temperate"	"1950"	"linked"	NA	0.119230363521977	0.0208829735643762
+"9868-Baker1997-1"	-83.516667	30.016667	"medium-high"	"wood"	"Temperate"	"1950"	"linked"	NA	0.240923269853522	0.00618227190102841
+"30479-HerveB2008-1"	11.525	3.417	"high-high"	"wood"	"Tropical"	"1950"	"independent"	NA	0.385836929481945	0.0821771710339264
+"30479-HerveB2008-1"	11.525	3.417	"medium-high"	"wood"	"Tropical"	"1950"	"independent"	NA	0.0387269628190971	0.0132617986869872
+"30347-Krogmann2008-1"	-74.51	39.72	"high-high"	"crop"	"Temperate"	"after 1950"	"independent"	NA	-0.192742077243929	0.00191273748971402
+"30362-Hejcman2010-1"	6.85	50.2	"low-high"	"green fodder"	"Temperate"	"50 BC"	"independent"	"Mass/area"	1.33170617083549	0.0178586386717261
+"30111-Gross2009-1"	3.0225	45.3728	"medium-high"	"green fodder"	"Temperate"	"1950"	"independent"	NA	0.413497279805429	0.00325092207191583
+"30376-Cole2008-1"	-68.338712	47.382311	"high-high"	"wood"	"Cold (Continental)"	"1450"	"independent"	"Count/area"	-0.4728429890216	0.0170412222458939
+"30487-Chen2008-1"	101.283333	37.616667	"low-low"	"green fodder"	"Polar"	"5950 BC"	"linked"	NA	0.810930216216329	0.0498599331458904
+"30487-Chen2008-1"	101.283333	37.616667	"low-medium"	"green fodder"	"Polar"	"5950 BC"	"linked"	NA	1.1239300966524	0.0918584944931188
+"30106-Mayer2009-1"	11.033333	46.866667	"low-low"	"green fodder"	"Cold (Continental)"	"50 BC"	"independent"	"Area/area"	0.309771346057249	0.0113542042212542
+"30478-Philpott2008-1"	104.433333	-4.933333	"low-low"	"crop"	"Tropical"	"after 1950"	"independent"	"Mass/area"	-0.0345699648253228	0.0524269798173376
+"30279-Wampler2008-1"	-105.687889	32.885852	"medium-medium"	"wood"	"Temperate"	"1450"	"linked"	NA	-0.307361630398227	0.0119001019165275
+"30279-Wampler2008-1"	-105.687889	32.885852	"low-medium"	"wood"	"Temperate"	"1450"	"linked"	NA	-0.143326915076836	0.00707655377802245
