@@ -55,7 +55,19 @@ newdat.select$n.richness[is.na(newdat.select$n.richness)] <- 0
 newdat.select$CI95.richness <- "[" %+% round(newdat.select$logRR.richness.ci.lb,digits=2) %+% "," %+%  round(newdat.select$logRR.richness.ci.ub,digits=2) %+% "]"
 newdat.select$CI95.yield <- "[" %+% round(newdat.select$logRR.yield.ci.lb,digits=2) %+% "," %+%  round(newdat.select$logRR.yield.ci.ub,digits=2) %+% "]" 
 
-write.csv(newdat.select[,c("LUI.range.level",  "Product",	"Species.Group",	"landuse_history",	"main_climate",
-                           "n.richness", "logRR.richness",  "logRR.richness.se", "CI95.richness",
-                           "n.yield", "logRR.yield",  "logRR.yield.se", "CI95.yield")],file=path2temp %+% "preds.select.csv",row.names=F)
+newdat.select$perc.rich.change <- 100*(exp(newdat.select$logRR.richness)-1)
+newdat.select$perc.rich.change.ci.lb <- 100*(exp(newdat.select$logRR.richness.ci.lb)-1)
+newdat.select$perc.rich.change.ci.ub <- 100*(exp(newdat.select$logRR.richness.ci.ub)-1)
+newdat.select$CI95.perc.rich.change <- "[" %+% round(newdat.select$perc.rich.change.ci.lb,digits=2) %+% "," %+%  round(newdat.select$perc.rich.change.ci.ub,digits=2) %+% "]"
+
+newdat.select$perc.yield.change <- 100*(exp(newdat.select$logRR.yield)-1)
+newdat.select$perc.yield.change.ci.lb <- 100*(exp(newdat.select$logRR.yield.ci.lb)-1)
+newdat.select$perc.yield.change.ci.ub <- 100*(exp(newdat.select$logRR.yield.ci.ub)-1)
+newdat.select$CI95.perc.yield.change <- "[" %+% round(newdat.select$perc.yield.change.ci.lb,digits=2) %+% "," %+%  round(newdat.select$perc.yield.change.ci.ub,digits=2) %+% "]"
+
+write.csv(newdat.select[,c("LUI.range.level",  "Product",  "Species.Group",	"landuse_history",	"main_climate",
+                        "n.richness", "perc.rich.change",  "CI95.perc.rich.change",
+                        "n.yield", "perc.yield.change","CI95.perc.yield.change")],
+          file=path2temp %+% "preds.select.csv",row.names=F)
+
 #print(xtable(newdat.select, caption="Response ratios for the selected model and available evidence"),type="latex",include.rownames=F)

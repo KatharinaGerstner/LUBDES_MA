@@ -108,6 +108,7 @@ ES.frame$Species.Group<-factor(ES.frame$Species.Group)
 ES.frame$Study.Case <- paste(ES.frame$Study.ID,ES.frame$Case.ID,sep="-")
 
 levels(ES.frame$Product)[levels(ES.frame$Product)=="animal_feed"]  <- "green fodder"
+levels(ES.frame$Product)[levels(ES.frame$Product)=="timber"]  <- "wood"
 
 ############################################################################
 ### 04.2. Calculate response ratio effect sizes

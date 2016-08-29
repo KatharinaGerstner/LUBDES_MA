@@ -118,10 +118,6 @@
     path2wd <- "/home/juro/git/LUBDES_MA/RScripts/" #MB
     path2temp <- "/home/juro/tmp/" #MB
     
-  } else if (cn == "LEIH-HAL6"){
-    path2wd <- "C:/Users/kambach/Desktop/aktuelle Arbeiten/SESYNC/LUBDES_MA-master/RScripts/" #SK
-    path2temp <- "C:/Users/kambach/Desktop/aktuelle Arbeiten/SESYNC/LUBDES_MA-master/RScripts/" #SK
-    
   } else if (cn == "Helen-Phillipss-MacBook-Pro.local"){
     path2wd <- "/Users/Helen/LUBDES_MA/RScripts/"
     path2temp <- "/Users/Helen/tmp/" ##HP

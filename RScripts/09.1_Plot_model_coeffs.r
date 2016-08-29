@@ -10,6 +10,7 @@
 ############################################################################
 
 seqBreaks <- log(sapply(-2:7,function(x) 2^x))
+seqLabels <- 100*(exp(seqBreaks)-1) # labelling with percentage change  
 
 ############################################################################
 ### 09.1.1. plot raw data + grand mean
@@ -31,9 +32,9 @@ plot <- ggplot() +
   geom_pointrange(data=newdat, aes(x=logRR.yield, y=logRR.richness, ymin=logRR.richness - (1.96*logRR.richness.se), 
                       ymax=logRR.richness + (1.96*logRR.richness.se)),color="black", size=1.2) +
   geom_segment(data=newdat, aes(x=logRR.yield - (1.96*logRR.yield.se), xend=logRR.yield + (1.96*logRR.yield.se), y = logRR.richness, yend = logRR.richness), color="black",size=1.2) +
-  scale_y_continuous(labels=exp(seqBreaks),breaks=seqBreaks) + 
-  scale_x_continuous(labels=exp(seqBreaks),breaks=seqBreaks) +
-  ylab("RR (Species Richness)") + xlab("RR (Yield)") + labs(color='') + 
+  scale_y_continuous(labels=seqLabels,breaks=seqBreaks) + 
+  scale_x_continuous(labels=seqLabels,breaks=seqBreaks) +
+  ylab("% Richness difference") + xlab("% Yield difference") + labs(color='') + 
   theme_lubdes() 
 ggsave(plot, file = path2temp %+% "Rawdata+GrandMean_rma.png", width = 16, height = 8, type = "cairo-png")
 
@@ -71,9 +72,19 @@ newdat <- join_all(list(newdat,newdat.GM),type="full")
 newdat$CI95.richness <- "[" %+% round(newdat$logRR.richness.ci.lb,digits=2) %+% "," %+%  round(newdat$logRR.richness.ci.ub,digits=2) %+% "]"
 newdat$CI95.yield <- "[" %+% round(newdat$logRR.yield.ci.lb,digits=2) %+% "," %+%  round(newdat$logRR.yield.ci.ub,digits=2) %+% "]" 
 
+newdat$perc.rich.change <- 100*(exp(newdat$logRR.richness)-1)
+newdat$perc.rich.change.ci.lb <- 100*(exp(newdat$logRR.richness.ci.lb)-1)
+newdat$perc.rich.change.ci.ub <- 100*(exp(newdat$logRR.richness.ci.ub)-1)
+newdat$CI95.perc.rich.change <- "[" %+% round(newdat$perc.rich.change.ci.lb,digits=2) %+% "," %+%  round(newdat$perc.rich.change.ci.ub,digits=2) %+% "]"
+
+newdat$perc.yield.change <- 100*(exp(newdat$logRR.yield)-1)
+newdat$perc.yield.change.ci.lb <- 100*(exp(newdat$logRR.yield.ci.lb)-1)
+newdat$perc.yield.change.ci.ub <- 100*(exp(newdat$logRR.yield.ci.ub)-1)
+newdat$CI95.perc.yield.change <- "[" %+% round(newdat$perc.yield.change.ci.lb,digits=2) %+% "," %+%  round(newdat$perc.yield.change.ci.ub,digits=2) %+% "]"
+
 write.csv(newdat[,c("LUI.range.level", 
-                    "n.richness", "logRR.richness",	"logRR.richness.se", "CI95.richness",
-                    "n.yield", "logRR.yield",  "logRR.yield.se", "CI95.yield")],
+                    "n.richness", "perc.rich.change",  "CI95.perc.rich.change",
+                    "n.yield", "perc.yield.change","CI95.perc.yield.change")],
           file=path2temp %+% "preds.LUI.csv",row.names=F)
 
 ## calculation of 95%CI in forest() from metafor
@@ -86,27 +97,30 @@ plot <- ggplot(data=ES.frame) +
   geom_point(aes(x=Yield.Log.RR, y=Richness.Log.RR,color=LUI.range.level),alpha=0.5) +
   geom_pointrange(aes(x=Yield.Log.RR, y=Richness.Log.RR, ymin=Richness.Log.RR - (1.96*sqrt(Richness.Log.RR.Var)), ymax=Richness.Log.RR + (1.96*sqrt(Richness.Log.RR.Var)),color=LUI.range.level),alpha=0.5) +
   geom_segment(aes(x=Yield.Log.RR - (1.96*sqrt(Yield.Log.RR.Var)), xend=Yield.Log.RR + (1.96*sqrt(Yield.Log.RR.Var)), y = Richness.Log.RR, yend = Richness.Log.RR, color=LUI.range.level),alpha=0.5) +
-  scale_y_continuous(labels=exp(seqBreaks),breaks=seqBreaks) + 
-  scale_x_continuous(labels=exp(seqBreaks),breaks=seqBreaks) +
+  scale_y_continuous(labels=seqLabels,breaks=seqBreaks) + 
+  scale_x_continuous(labels=seqLabels,breaks=seqBreaks) +
+  ylab("% Richness difference") + xlab("% Yield difference") + labs(color='') + 
   scale_colour_manual(values=c("low-low"='#d0d1e6',"medium-medium"="#a6bddb","high-high"="#045a8d","low-medium"='#fee090',"medium-high"='#fc8d59',"low-high"="#d73027","Grand Mean"="darkgrey"),breaks=c(levels(ES.frame$LUI.range.level))) +
-  ylab("RR (Species Richness)") + xlab("RR (Yield)") + labs(color='') + 
   theme_lubdes(legend.position="bottom") +
   guides(color=guide_legend(nrow=3))
 ggsave(plot, file = path2temp %+% "rawdata_LUI.png", width = 16, height = 8, type = "cairo-png")
 
 
 # plot crosses for each covariate combination
+seqBreaks <- log(c(0.6,0.8,0.9,1,1.25,1.5))
+seqLabels <- 100*(exp(seqBreaks)-1)
+
 plot <- ggplot(data=newdat) + 
   geom_hline(aes(yintercept=0), linetype="twodash",size=1.05) + geom_vline(aes(xintercept=0), linetype="twodash",size=1.05) +
   geom_point(aes(x=logRR.yield, y=logRR.richness, color=LUI.range.level), size=3) +
   geom_pointrange(aes(x=logRR.yield, y=logRR.richness, ymin=logRR.richness.ci.lb, 
                                    ymax=logRR.richness.ci.ub,color=LUI.range.level), size=1.2) +
   geom_segment(aes(x=logRR.yield.ci.lb, xend=logRR.yield.ci.ub, y = logRR.richness, yend = logRR.richness, color=LUI.range.level),size=1.2) +
-  scale_y_continuous(labels=exp(seqBreaks),breaks=seqBreaks) + 
-  scale_x_continuous(labels=exp(seqBreaks),breaks=seqBreaks) +
+  scale_y_continuous(labels=seqLabels,breaks=seqBreaks) + 
+  scale_x_continuous(labels=seqLabels,breaks=seqBreaks) +
+  ylab("% Richness difference") + xlab("% Yield difference") + labs(color='') + 
   scale_colour_manual(values=c("low-low"='#d0d1e6',"medium-medium"="#a6bddb","high-high"="#045a8d","low-medium"='#fee090',"medium-high"='#fc8d59',"low-high"="#d73027","Grand Mean"="black"),breaks=levels(newdat$LUI.range.level)) +
-  ylab("RR (Species Richness)") + xlab("RR (Yield)") + labs(color='') +
-  theme_lubdes(legend.position="bottom") +
+  theme_lubdes(legend.position="bottom",rel.text.size=2) +
   guides(color=guide_legend(nrow=3))
 ggsave(plot, file = path2temp %+% "CrossPlot_LUI_rma.png", width = 16, height = 8, type = "cairo-png")
 

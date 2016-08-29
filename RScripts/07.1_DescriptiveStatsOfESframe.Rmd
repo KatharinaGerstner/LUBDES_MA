@@ -61,6 +61,7 @@ source(path2wd %+% "06_DataPreparation4Analysis.R")
 
 str(ES.frame.richness)
 summary(ES.frame.richness)
+sd(ES.frame.richness$Log.RR)
 
 ### distribution of LUI ranges among covariables
 with(ES.frame.richness,table(Species.Group,LUI.range.level))
@@ -68,11 +69,15 @@ with(ES.frame.richness,table(Product,LUI.range.level))
 
 str(ES.frame.yield)
 summary(ES.frame.yield)
+sd(ES.frame.richness$Log.RR)
 
 ### distribution of LUI ranges among covariables
 with(ES.frame.yield,table(Species.Group,LUI.range.level))
 with(ES.frame.yield,table(Product,LUI.range.level))
 
+with(ES.frame.richness,table(Species.Group,Product))
+# How many bird studies in cropland => add Species.Subgroup to ES.frame.richness in 06_DataPreparation4Analysis.R
+# nrow(ES.frame.richness[grep("birds",names(table(ES.frame.richness$Species.Subgroup))),])
 ```
 
 ```{r Histograms}
@@ -402,11 +407,11 @@ p2 <- ggplot(data=ES.frame.yield,aes(y=Log.RR,x=factor(LU.definition.and.ES))) +
   ylab("log(RR)") +
   facet_grid(.~Product)
 
-t.test(Log.RR ~ factor(LU.definition.and.ES), data=subset(ES.frame.yield,Product=="timber"))
+t.test(Log.RR ~ factor(LU.definition.and.ES), data=subset(ES.frame.yield,Product=="wood"))
 t.test(Log.RR ~ factor(LU.definition.and.ES), data=subset(ES.frame.yield,Product=="green fodder"))
 
 p12 <- grid.arrange(p1, p2,ncol=2, nrow=1,widths=c(1.4,3))
-ggsave(p12,file=path2temp %+% "confoundingVariable1.png", width=9,height=5)
+ggsave(p12,file=path2temp %+% "confoundingVariable1.png", width=9,height=4)
   
 ### Relationship spatial scale - log.RR
 
