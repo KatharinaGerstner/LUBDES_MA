@@ -77,7 +77,9 @@ with(ES.frame.yield,table(Product,LUI.range.level))
 
 with(ES.frame.richness,table(Species.Group,Product))
 # How many bird studies in cropland => add Species.Subgroup to ES.frame.richness in 06_DataPreparation4Analysis.R
-# nrow(ES.frame.richness[grep("birds",names(table(ES.frame.richness$Species.Subgroup))),])
+# test <- subset(ES.frame.richness, Species.Group=="vertebrates" & Product=="crop")
+# nrow(test) # total number of vertebrates in crops
+# nrow(test[grep("birds",names(table(test$Species.Subgroup))),]) # number of birds in crops
 ```
 
 ```{r Histograms}

@@ -115,8 +115,8 @@
     path2wd <- "/Users/Helen/LUBDES_MA/RScripts/"
     path2temp <- "/Users/Helen/tmp/" ##HP
   } else {
-    path2wd <- "C:/Users/hoppek/Documents/GitHub/LUBDES_MA/RScripts/" #KG
-    path2temp <- "C:/Users/hoppek/Documents/temp/" #KG 
+    path2wd <- "C:/Users/kg83hyby/Documents/GitHub/LUBDES_MA/RScripts/" #KG
+    path2temp <- "C:/Users/kg83hyby/Documents/temp/" #KG 
   }  
   return(list(path2temp,path2wd))
 }

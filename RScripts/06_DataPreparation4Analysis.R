@@ -38,6 +38,7 @@ for(x in unique(ES.frame$Study.Case)){
 ##########################################################################
 
 ES.frame.richness <- ES.frame.richness[,c("Richness.Log.RR","Richness.Log.RR.Var","Longitude", "Latitude","LUI.range.level","Low.LUI","High.LUI","Study.ID","Case.ID","Study.Case","Species.Group","Product","main_climate","landuse_history","ES.and.BD","Richness.Plot.Size")] #,"npp","time.since.first.use")]
+#ES.frame.richness <- ES.frame.richness[,c("Richness.Log.RR","Richness.Log.RR.Var","Longitude", "Latitude","LUI.range.level","Low.LUI","High.LUI","Study.ID","Case.ID","Study.Case","Species.Group","Species.Subgroup","Product","main_climate","landuse_history","ES.and.BD","Richness.Plot.Size")] #,"npp","time.since.first.use")] # adding Species.Subgroup
 ES.frame.yield <- ES.frame.yield[,c("Yield.Log.RR","Yield.Log.RR.Var","Longitude", "Latitude","LUI.range.level","Low.LUI","High.LUI","Study.ID","Study.Case","Case.ID","Species.Group","Product","main_climate","landuse_history", "LU.definition.and.ES", "Yield.Unit.Type")] #,"npp","time.since.first.use")]
 
 ## remove cases with NA in covariates
