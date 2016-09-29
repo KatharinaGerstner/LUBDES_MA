@@ -6,7 +6,7 @@ output: word_document
 ---
 
 ```{r include=FALSE}
-path2temp <- "C:/Users/hoppek/Documents/temp/"
+path2temp <- "C:/Users/kg83hyby/Documents/temp/"
 library(knitr)
 "%+%" <- function(x,y)paste(x,y,sep="")
 

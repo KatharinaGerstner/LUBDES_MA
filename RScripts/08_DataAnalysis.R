@@ -143,19 +143,27 @@ Yield.MA.model[["Select"]] <- rma.mv.func(df=modelDataYield, moderators=c(-1,mod
 ###########################################################################
 ### 08.3. extract fit statistics
 ###########################################################################
-fit.tab.richness <- data.frame(model=names(Richness.MA.model),
+Richness.models2report <- list(Richness.MA.model[["None"]],
+                      Richness.MA.model[["LUI"]],
+                      Richness.MA.model[["LUI.SGP"]],
+                      Richness.MA.model[["Full"]])
+fit.tab.richness <- data.frame(model=c("None","LUI","LUI.SGP","Full"),
                                logLik=NA, deviance=NA, AIC=NA, BIC=NA, AICc=NA, 
-                               QE=unlist(lapply(Richness.MA.model,function(x) x$QE)), QEp=unlist(lapply(Richness.MA.model,function(x) x$QEp)),
-                               QM=unlist(lapply(Richness.MA.model,function(x) x$QM)),QMp=unlist(lapply(Richness.MA.model,function(x) x$QMp)))
-fit.tab.yield <- data.frame(model=names(Yield.MA.model),
-                            logLik=NA, deviance=NA, AIC=NA, BIC=NA, AICc=NA, 
-                            QE=unlist(lapply(Yield.MA.model,function(x) x$QE)), QEp=unlist(lapply(Yield.MA.model,function(x) x$QEp)),
-                            QM=unlist(lapply(Yield.MA.model,function(x) x$QM)),QMp=unlist(lapply(Yield.MA.model,function(x) x$QMp)))
+                               QE=unlist(lapply(Richness.models2report,function(x) x$QE)), QEp=unlist(lapply(Richness.models2report,function(x) x$QEp)),
+                               QM=unlist(lapply(Richness.models2report,function(x) x$QM)),QMp=unlist(lapply(Richness.models2report,function(x) x$QMp)))
+Yield.models2report <- list(Yield.MA.model[["None"]],
+                               Yield.MA.model[["LUI"]],
+                               Yield.MA.model[["LUI.P"]],
+                               Yield.MA.model[["Full"]])
+fit.tab.yield <- data.frame(model=c("None","LUI","LUI.P","Full"),
+                               logLik=NA, deviance=NA, AIC=NA, BIC=NA, AICc=NA, 
+                               QE=unlist(lapply(Yield.models2report,function(x) x$QE)), QEp=unlist(lapply(Yield.models2report,function(x) x$QEp)),
+                               QM=unlist(lapply(Yield.models2report,function(x) x$QM)),QMp=unlist(lapply(Yield.models2report,function(x) x$QMp)))
 
-for(i in 1:length(Richness.MA.model)){
+for(i in 1:length(Richness.models2report)){
   fit.tab.richness[i,2:6] <- t(fitstats.rma(Richness.MA.model[[i]]))
 }
-for(i in 1:length(Yield.MA.model)){
+for(i in 1:length(Yield.models2report)){
   fit.tab.yield[i,2:6] <- t(fitstats.rma(Yield.MA.model[[i]]))
 }
 fit.tab.richness$R2 <- fit.tab.richness$QM/(fit.tab.richness$QM+fit.tab.richness$QE)
