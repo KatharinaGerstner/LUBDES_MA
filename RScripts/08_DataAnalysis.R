@@ -61,14 +61,14 @@ rma.mv.func <- function(df, moderators, fit.method)
                   mods=mods.formula, 
                   random = list(~1|Study.Case, ~1|Study.ID),
                   slab=paste(Study.Case, Low.LUI, High.LUI,sep="_"),
-                  method=fit.method, tdist=FALSE, level=95, digits=4,data=df))
+                  method=fit.method, tdist=F, level=95, digits=4,data=df)) # tdist=TRUE slightly mimics the Knapp and Hartung (2003) method by using a t-distribution with k-p degrees of freedom for tests of individual coefficients and confidence intervals and an F-distribution with m and k-p degrees of freedom (p being the total number of model coefficients including the intercept if it is present) for the omnibus test statistic, hence adjust for multiple comparisons
   
   if(inherits(fm, "try-error")){
     fm <- rma.mv(yi=Log.RR, V=M.matrix(df)+diag(Log.RR.Var), 
                  mods=mods.formula, 
                  random = list(~1|Study.Case, ~1|Study.ID),
                  slab=paste(Study.Case, Low.LUI, High.LUI,sep="_"),
-                 method=fit.method, tdist=FALSE, level=95, digits=4,data=df,
+                 method=fit.method, tdist=F, level=95, digits=4,data=df,
                  control=list(optimizer="optim", optmethod="BFGS"))
     
   }
@@ -97,14 +97,14 @@ model2select <- try(rma.mv(yi=Log.RR, V=M.matrix(modelDataRichness)+diag(modelDa
                        mods=~LUI.range.level + Product + Species.Group + landuse_history + main_climate + LUI.range.level:Product + LUI.range.level:Species.Group + LUI.range.level:landuse_history + LUI.range.level:main_climate + Species.Group:Product + landuse_history:main_climate,
                        random = list(~1|Study.Case, ~1|Study.ID),
                        slab=paste(Study.Case, Low.LUI, High.LUI,sep="_"),
-                       method="ML", tdist=FALSE, level=95, digits=4,data=modelDataRichness))
+                       method="ML", tdist=F, level=95, digits=4,data=modelDataRichness))
 
 if(inherits(model2select, "try-error")){
   model2select <- rma.mv(yi=Log.RR, V=M.matrix(modelDataRichness)+diag(modelDataRichness$Log.RR.Var), 
                          mods=~LUI.range.level + Product + Species.Group + landuse_history + main_climate + LUI.range.level:Product + LUI.range.level:Species.Group + LUI.range.level:landuse_history + LUI.range.level:main_climate + Species.Group:Product + landuse_history:main_climate,
                          random = list(~1|Study.Case, ~1|Study.ID),
                          slab=paste(Study.Case, Low.LUI, High.LUI,sep="_"),
-                         method="ML", tdist=FALSE, level=95, digits=4,data=modelDataRichness,
+                         method="ML", tdist=F, level=95, digits=4,data=modelDataRichness,
                          control=list(optimizer="optim", optmethod="BFGS"))
 }
 
@@ -124,14 +124,14 @@ model2select <- try(rma.mv(yi=Log.RR, V=M.matrix(modelDataYield)+diag(modelDataY
                            mods=~LUI.range.level + Product + landuse_history + main_climate + LUI.range.level:Product + LUI.range.level:landuse_history + LUI.range.level:main_climate + landuse_history:main_climate,
                            random = list(~1|Study.Case, ~1|Study.ID),
                            slab=paste(Study.Case, Low.LUI, High.LUI,sep="_"),
-                           method="ML", tdist=FALSE, level=95, digits=4,data=modelDataYield))
+                           method="ML", tdist=F, level=95, digits=4,data=modelDataYield))
 
 if(inherits(model2select, "try-error")){
   model2select <- rma.mv(yi=Log.RR, V=M.matrix(modelDataYield)+diag(modelDataYield$Log.RR.Var), 
                          mods=~LUI.range.level + Product + landuse_history + main_climate + LUI.range.level:Product + LUI.range.level:landuse_history + LUI.range.level:main_climate + landuse_history:main_climate,
                          random = list(~1|Study.Case, ~1|Study.ID),
                          slab=paste(Study.Case, Low.LUI, High.LUI,sep="_"),
-                         method="ML", tdist=FALSE, level=95, digits=4,data=modelDataYield,
+                         method="ML", tdist=F, level=95, digits=4,data=modelDataYield,
                          control=list(optimizer="optim", optmethod="BFGS"))
 }
 

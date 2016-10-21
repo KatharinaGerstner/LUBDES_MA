@@ -1,0 +1,206 @@
+---
+title: "Testing covariates"
+author: "Katharina Gerstner"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+```{r opts, echo = FALSE}
+knitr::opts_chunk$set(
+  fig.width = 8
+)
+```
+
+```{r, include=F}
+.setwdntemp <- function(){
+  cu <- Sys.info()["user"]
+  cn <- Sys.info()["nodename"]
+  
+  if (cu == "rseppelt")
+  {
+    path2temp <- "/Users/rseppelt/Documents/Projekte/Synthese & Netzwerke/LU-BD-ES/Temp" 
+    path2wd <- "/Users/rseppelt/Documents/git/LUBDES_MA/RScripts/" 
+  } else if (cn == "UCBTTNE-LT"){
+    path2wd <- "C:/Users/Tim/Documents/LUBDES_MA/RScripts/" #TN
+    path2temp <- "C:/Users/Tim/Documents/LUBDES_MA_Out/" #TN
+    
+  } else if (cn == "juro-MacBookPro"){
+    path2wd <- "/home/juro/git/LUBDES_MA/RScripts/" #MB
+    path2temp <- "/home/juro/tmp/" #MB
+  
+  } else if (cn == "Helen-Phillipss-MacBook-Pro.local"){
+    path2wd <- "/Users/Helen/LUBDES_MA/RScripts/"
+    path2temp <- "/Users/Helen/tmp/" ##HP
+  } else {
+    path2wd <- "C:/Users/kg83hyby/Documents/GitHub/LUBDES_MA/RScripts/" #KG
+    path2temp <- "C:/Users/kg83hyby/Documents/temp/" #KG 
+  }  
+  return(list(path2temp,path2wd))
+}
+
+set.list <-  .setwdntemp()
+path2temp <- set.list[[1]]
+path2wd <- set.list[[2]]
+
+### helper function to combine strings
+"%+%" <- function(x,y)paste(x,y,sep="")
+
+source(path2wd %+% "01_load_libraries_and_functions.r")
+load(file=path2temp %+% "SavedData.Rdata")
+load(path2temp %+% "Models.Rdata")
+library(multcomp)
+library(gridExtra)
+
+```
+
+We perform post-hoc pairwise comparisons after significant effects of covariates with three or more levels of a factor have been found (cf. Test of moderators $Q_M$ in Extended Data Table 5). We'd like to know which pairs of the factor levels are significantly different from each other.  
+
+For the LUI model we use general liner hypothesis testing of type Tukeys' HSD test: 
+
+```{r Testing  LUI}
+summary(glht(Richness.MA.model[["LUI"]],linfct=cbind(contrMat(c("low-low"=1,"medium-medium"=1,"high-high"=1,"low-medium"=1,"low-high"=1,"medium-high"=1),type="Tukey")), test=adjusted("holm")))
+confint(glht(Richness.MA.model[["LUI"]],linfct=cbind(contrMat(c("low-low"=1,"medium-medium"=1,"high-high"=1,"low-medium"=1,"low-high"=1,"medium-high"=1),type="Tukey")), test=adjusted("holm")))
+
+summary(glht(Yield.MA.model[["LUI"]],linfct=cbind(contrMat(c("low-low"=1,"medium-medium"=1,"high-high"=1,"low-medium"=1,"low-high"=1,"medium-high"=1),type="Tukey")), test=adjusted("holm")))
+confint(glht(Yield.MA.model[["LUI"]],linfct=cbind(contrMat(c("low-low"=1,"medium-medium"=1,"high-high"=1,"low-medium"=1,"low-high"=1,"medium-high"=1),type="Tukey")), test=adjusted("holm")))
+
+```
+
+Within the full model we tested pairwise differences using pairwise t-tests with Holm-correction for multiple comparisons. We therefore predicted log-response ratios for all level combinations and tested differences in land-use history and main climate across levels of LUI, species groups, products and main_climate/land-use history. The notched boxplot are a graphical visualization where notches are used to compare groups: if the notches of two boxes do not overlap, this suggests that the medians are significantly different.  
+```{r Testing history}
+### Test for differences in Log RRs with land-use history
+# for richness
+model <- Richness.MA.model[["Full"]]
+
+newdat <- expand.grid(LUI.range.level=levels(modelDataRichness$LUI.range.level),
+                      Product = levels(modelDataRichness$Product),
+                      Species.Group = levels(modelDataRichness$Species.Group),
+                      landuse_history=levels(modelDataRichness$landuse_history),
+                      main_climate=levels(modelDataRichness$main_climate)) 
+
+mm <- model.matrix(~LUI.range.level + Product + Species.Group + landuse_history + main_climate + LUI.range.level:Product + LUI.range.level:Species.Group + LUI.range.level:landuse_history + LUI.range.level:main_climate + Species.Group:Product + landuse_history:main_climate-1,data=newdat)
+mm <- mm[,colnames(mm) %in% rownames(model$b)] # remove colums without coeffs
+preds <- predict.rma(model, newmods = mm)
+newdat[,c("logRR.richness","logRR.richness.se","logRR.richness.ci.lb","logRR.richness.ci.ub")] <- cbind(preds$pred,preds$se,preds$ci.lb,preds$ci.ub)
+
+pairwise.t.test(newdat$logRR.richness,newdat$landuse_history,p.adjust.method="holm")
+
+bp.hist.richness <- ggplot(newdat,aes(landuse_history,logRR.richness)) +
+  geom_boxplot(notch=T) + 
+  scale_x_discrete(limits=c("5950 BC", "50 BC", "1450", "1950", "after 1950")) +
+  xlab("") +
+  ylab("Log(RR) for biodiversity")
+
+pairwise.t.test(newdat$logRR.richness,newdat$main_climate,p.adjust.method="holm")
+
+bp.clim.richness <- ggplot(newdat,aes(main_climate,logRR.richness)) +
+  geom_boxplot(notch=T) + #Notches are used to compare groups; if the notches of two boxes do not overlap, this suggests that the medians are significantly different.
+  scale_x_discrete(limits=c("Polar", "Cold (Continental)", "Temperate", "Arid", "Tropical")) +
+  xlab("") +
+  ylab("Log(RR) for biodiversity")
+
+# for yield
+model <- Yield.MA.model[["Full"]]
+
+newdat <- expand.grid(LUI.range.level=levels(modelDataYield$LUI.range.level),
+                      Product = levels(modelDataYield$Product),
+                      landuse_history=levels(modelDataYield$landuse_history),
+                      main_climate=levels(modelDataYield$main_climate)) 
+
+mm <- model.matrix(~LUI.range.level + Product + landuse_history + main_climate + LUI.range.level:Product + LUI.range.level:landuse_history + LUI.range.level:main_climate + landuse_history:main_climate-1,data=newdat)
+mm <- mm[,colnames(mm) %in% rownames(model$b)] # remove colums without coeffs
+preds <- predict.rma(model, newmods = mm)
+newdat[,c("logRR.Yield","logRR.Yield.se","logRR.Yield.ci.lb","logRR.Yield.ci.ub")] <- cbind(preds$pred,preds$se,preds$ci.lb,preds$ci.ub)
+levels(newdat$landuse_history) <- c("5950 BC", "50 BC", "1450", "1950", "after 1950")
+
+pairwise.t.test(newdat$logRR.Yield,newdat$landuse_history,p.adjust.method="holm")
+
+bp.hist.yield <- ggplot(newdat,aes(landuse_history,logRR.Yield)) +
+  geom_boxplot(notch=T) + #Notches are used to compare groups; if the notches of two boxes do not overlap, this suggests that the medians are significantly different.
+  scale_x_discrete(limits=c("5950 BC", "50 BC", "1450", "1950", "after 1950")) +
+  xlab("") +
+  ylab("Log(RR) for yield")
+
+pairwise.t.test(newdat$logRR.Yield,newdat$main_climate,p.adjust.method="holm")
+
+bp.clim.yield <- ggplot(newdat,aes(main_climate,logRR.Yield)) +
+  geom_boxplot(notch=T) + #Notches are used to compare groups; if the notches of two boxes do not overlap, this suggests that the medians are significantly different.
+  scale_x_discrete(limits=c("Polar", "Cold (Continental)", "Temperate", "Arid", "Tropical")) +
+  xlab("") +
+  ylab("Log(RR) for yield")
+
+bp.hist <- grid.arrange(bp.hist.richness, bp.hist.yield,ncol=2, nrow=1,widths=c(1,1))
+bp.clim <- grid.arrange(bp.clim.richness, bp.clim.yield,ncol=2, nrow=1,widths=c(1,1))
+
+```
+
+```{r confounding variables}
+### Are BD and ES measured from the same species (e.g. weed BD and weed biomass in grasslands is linked)?
+sub <- subset(ES.frame.richness,Species.Group=="plants")
+p1 <- ggplot(data=sub,aes(y=Log.RR,x=factor(ES.and.BD))) + 
+  geom_boxplot() +
+  theme(axis.text = element_text(size = rel(1.2)), 
+        axis.ticks = element_line(colour = "black"), 
+        axis.title = element_text(size = rel(1.2))) +
+  xlab("Biodiversity and yield") +
+  ylab("Log(RR) for biodiversity")
+
+t.test(Log.RR ~ factor(ES.and.BD), data=sub)
+
+
+### Is land use intensity measured from data on yield.
+p2 <- ggplot(data=ES.frame.yield,aes(y=Log.RR,x=factor(LU.definition.and.ES))) + 
+  geom_boxplot()+
+  theme(axis.text = element_text(size = rel(1.2)), 
+        axis.ticks = element_line(colour = "black"), 
+        axis.title = element_text(size = rel(1.2))) +
+  xlab("Land-use intensity and yield") + 
+  ylab("Log(RR) for yield") + 
+  facet_grid(.~Product)
+
+t.test(Log.RR ~ factor(LU.definition.and.ES), data=subset(ES.frame.yield,Product=="wood"))
+t.test(Log.RR ~ factor(LU.definition.and.ES), data=subset(ES.frame.yield,Product=="green fodder"))
+
+p12 <- grid.arrange(p1, p2,ncol=2, nrow=1,widths=c(1.4,3))
+ggsave(p12,file=path2temp %+% "confoundingVariable1.png", width=9,height=4)
+
+### Relationship spatial scale - log.RR
+
+hist(log(ES.frame.richness$Richness.Plot.Size))
+
+# fit linear model
+fm <- lm(Log.RR ~ log(Richness.Plot.Size), data=ES.frame.richness)
+
+summary(fm)
+
+# plot data and fitted line
+p3 <- ggplot(data=ES.frame.richness,aes(y=Log.RR,x=log(Richness.Plot.Size))) + 
+  geom_point(size=2,alpha=0.5) + 
+  stat_smooth(method=lm,se=F,color="black") +
+  theme(axis.text = element_text(size = rel(1.2)), 
+        axis.ticks = element_line(colour = "black"), 
+        axis.title = element_text(size = rel(1.2)))+
+  ylab("Log(RR) for biodiversity") +
+  xlab("Log(spatial grain)")
+
+### Relationship Yield.Unit.Type - log.RR
+# fm2 <- aov(Log.RR ~ Yield.Unit.Type, data=ES.frame.yield)
+# TukeyHSD(fm2)
+# plot(TukeyHSD(fm2),las=1)
+pairwise.t.test(ES.frame.yield$Log.RR,ES.frame.yield$Yield.Unit.Type,p.adjust.method="holm")
+
+p4 <- ggplot(data=ES.frame.yield,aes(y=Log.RR,x=factor(Yield.Unit.Type))) +
+  geom_boxplot(notch=T)+
+  theme(axis.text = element_text(size = rel(1.2)), 
+        axis.ticks = element_line(colour = "black"), 
+        axis.title = element_text(size = rel(1.2))) + 
+  scale_x_discrete("Yield unit",labels=c("area/area","mass/area", "count/area", "others")) +
+  ylab("Log(RR) for yield") +
+  xlab("")
+
+p34 <- grid.arrange(p3, p4,ncol=2, nrow=1,widths=c(1,1))
+ggsave(p34,file=path2temp %+% "confoundingVariable2.png", width=9,height=5)
+```
+
+
+
