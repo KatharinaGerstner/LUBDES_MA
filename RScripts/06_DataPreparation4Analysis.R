@@ -25,11 +25,11 @@ for(x in unique(ES.frame$Study.Case)){
   subset.richness <- subset(ES.frame.richness,Study.Case==x)
   subset.yield <- subset(ES.frame.yield,Study.Case==x)
   ## remove redundant cases
-  if (all(c("low-medium","low-high","medium-high") %in% unique(subset.richness$LUI.range.level))){
-    ES.frame.richness <- ES.frame.richness[!(ES.frame.richness$Study.Case==x & ES.frame.richness$LUI.range.level=="low-high"),]
+  if (all(c("Low-medium","Low-high","Medium-high") %in% unique(subset.richness$LUI.range.level))){
+    ES.frame.richness <- ES.frame.richness[!(ES.frame.richness$Study.Case==x & ES.frame.richness$LUI.range.level=="Low-high"),]
   }
-  if (all(c("low-medium","low-high","medium-high") %in% unique(subset.yield$LUI.range.level))){
-    ES.frame.yield <- ES.frame.yield[!(ES.frame.yield$Study.Case==x & ES.frame.yield$LUI.range.level=="low-high"),]
+  if (all(c("Low-medium","Low-high","Medium-high") %in% unique(subset.yield$LUI.range.level))){
+    ES.frame.yield <- ES.frame.yield[!(ES.frame.yield$Study.Case==x & ES.frame.yield$LUI.range.level=="Low-high"),]
   }
 }  
 
@@ -53,12 +53,6 @@ ES.frame.richness$Study.Case <- factor(ES.frame.richness$Study.Case)[drop=T] # d
 
 ES.frame.yield$Study.ID <- factor(ES.frame.yield$Study.ID)[drop=T] # drop unused study levels
 ES.frame.yield$Study.Case <- factor(ES.frame.yield$Study.Case)[drop=T] # drop unused study levels
-
-### Scale continuous covariates to reduce the influence of extremes
-#ES.frame.richness$npp <- scale(ES.frame.richness$npp)
-#ES.frame.richness$time.since.first.use <- scale(ES.frame.richness$time.since.first.use)
-#ES.frame.yield$npp <- scale(ES.frame.yield$npp)
-#ES.frame.yield$time.since.first.use <- scale(ES.frame.yield$time.since.first.use)
 
 write.table(ES.frame.richness[,c("Study.Case","Longitude", "Latitude","LUI.range.level","Species.Group","Product","main_climate","landuse_history","ES.and.BD","Richness.Plot.Size","Log.RR","Log.RR.Var")], file=path2temp %+% "ES.frame.richness.xls", row.names=F,sep="\t")
 

@@ -18,6 +18,7 @@ needed_libs <- c("devtools",# needed for library googlesheets
                  "mice", # for multiple imputation
                  "metafor",# for meta analysis
                  "ggplot2",# For plotting
+                 "gridExtra", # for arranging multiple plots
                  "scales", # for transformation of axes labels
                  "maptools", # for converting shp into data.frame using fortify() in ggplot
 #                 "rworldmap",

@@ -58,7 +58,7 @@ We perform post-hoc pairwise comparisons after significant effects of covariates
 For the LUI model we use general liner hypothesis testing of type Tukeys' HSD test: 
 
 ```{r Testing  LUI}
-summary(glht(Richness.MA.model[["LUI"]],linfct=cbind(contrMat(c("low-low"=1,"medium-medium"=1,"high-high"=1,"low-medium"=1,"low-high"=1,"medium-high"=1),type="Tukey")), test=adjusted("holm")))
+summary(glht(Richness.MA.model[["LUI"]],linfct=cbind(contrMat(c("low-low"=1,"medium-medium"=1,"high-high"=1,"low-medium"=1,"low-high"=1,"medium-high"=1))), test=adjusted("holm")))
 confint(glht(Richness.MA.model[["LUI"]],linfct=cbind(contrMat(c("low-low"=1,"medium-medium"=1,"high-high"=1,"low-medium"=1,"low-high"=1,"medium-high"=1),type="Tukey")), test=adjusted("holm")))
 
 summary(glht(Yield.MA.model[["LUI"]],linfct=cbind(contrMat(c("low-low"=1,"medium-medium"=1,"high-high"=1,"low-medium"=1,"low-high"=1,"medium-high"=1),type="Tukey")), test=adjusted("holm")))
@@ -85,19 +85,68 @@ newdat[,c("logRR.richness","logRR.richness.se","logRR.richness.ci.lb","logRR.ric
 
 pairwise.t.test(newdat$logRR.richness,newdat$landuse_history,p.adjust.method="holm")
 
+load(path2temp %+% "climate_mapdata.Rdata") #climate_zone
+
+climate_mapdata <- fortify(climate_zone,region="main_climate")
+climate_map <- ggplot() +
+     geom_polygon(data = climate_mapdata, aes(x = long, y = lat, group = group,fill = id)) +
+     scale_x_continuous(breaks=c(-90, 0, 90), labels=c("90°W", "0", "90°E")) +
+     scale_y_continuous(breaks=c(-30, 0, 30, 60), labels=c("30°S","0°", "30°N","60°N"),limits=c(-55,90)) +
+     xlab("") + ylab("") +
+     scale_fill_manual(values=c('#2c7bb6','#abd9e9','#ffffbf','#fdae61','#d7191c'), 
+                       name="",
+                       limits=c("Polar","Cold (Continental)","Temperate","Arid","Tropical"), 
+                       labels=c("Polar","Cold (Continental)","Temperate","Arid","Tropical")) + 
+  theme_lubdes(legend.position="bottom",rel.text.size=1.2) +
+#  guides(fill=guide_legend(nrow=2, byrow=T))+
+  theme(legend.key = element_rect(colour = NA))
+
+load(path2temp %+% "landuse_history_mapdata.Rdata")
+
+LUhistory_data <- rasterToPoints(rmrsrkk11)
+#Make the points a dataframe for ggplot
+df <- data.frame(LUhistory_data)
+#Make appropriate column headings
+colnames(df) <- c("Longitude", "Latitude", "LUhistory")
+df$LUhistory <- factor(df$LUhistory)
+levels(df$LUhistory) <- c("5950 BC","50 BC", "1450","1950", "after 1950")
+
+LUhistory_map <- ggplot(data=df, aes(y=Latitude, x=Longitude)) +
+     geom_polygon(data = climate_mapdata, aes(x = long, y = lat, group = group, fill = NA)) +
+     geom_raster(aes(fill=LUhistory)) + 
+     scale_x_continuous(breaks=c(-90, 0, 90), labels=c("90°W", "0°", "90°E")) +
+     scale_y_continuous(breaks=c(-30, 0, 30, 60), labels=c("30°S","0°", "30°N","60°N"),limits=c(-55,90)) +
+     xlab("") + ylab("") +
+     scale_fill_manual(values=c('#ffffb2','#fecc5c','#fd8d3c','#f03b20','#bd0026'), 
+                       na.value="lightgrey",
+                       name="",
+                       limits=c("5950 BC","50 BC", "1450","1950", "after 1950")) + 
+  theme_lubdes(legend.position="bottom",rel.text.size=1.2)
+
+
 bp.hist.richness <- ggplot(newdat,aes(landuse_history,logRR.richness)) +
-  geom_boxplot(notch=T) + 
-  scale_x_discrete(limits=c("5950 BC", "50 BC", "1450", "1950", "after 1950")) +
-  xlab("") +
-  ylab("Log(RR) for biodiversity")
+  geom_boxplot(aes(fill=landuse_history),notch=T) + 
+  scale_x_discrete("",labels=NULL) +
+  scale_fill_manual(values=c('#ffffb2','#fecc5c','#fd8d3c','#f03b20','#bd0026'), 
+                    na.value="lightgrey",
+                    name="",
+                    limits=c("5950 BC","50 BC", "1450","1950", "after 1950")) +
+  guides(fill="none") +
+  ylab("Log(RR) for biodiversity") +
+  theme_lubdes(rel.text.size=1.2) 
 
 pairwise.t.test(newdat$logRR.richness,newdat$main_climate,p.adjust.method="holm")
 
 bp.clim.richness <- ggplot(newdat,aes(main_climate,logRR.richness)) +
-  geom_boxplot(notch=T) + #Notches are used to compare groups; if the notches of two boxes do not overlap, this suggests that the medians are significantly different.
-  scale_x_discrete(limits=c("Polar", "Cold (Continental)", "Temperate", "Arid", "Tropical")) +
-  xlab("") +
-  ylab("Log(RR) for biodiversity")
+  geom_boxplot(aes(fill=main_climate),notch=T) + #Notches are used to compare groups; if the notches of two boxes do not overlap, this suggests that the medians are significantly different.
+  scale_x_discrete("",labels=NULL) +
+  scale_fill_manual(values=c('#2c7bb6','#abd9e9','#ffffbf','#fdae61','#d7191c'), 
+                    name="",
+                    limits=c("Polar","Cold (Continental)","Temperate","Arid","Tropical"), 
+                    labels=c("Polar","Cold (Continental)","Temperate","Arid","Tropical")) + 
+  guides(fill="none") +
+  ylab("Log(RR) for biodiversity") +
+  theme_lubdes(rel.text.size=1.2) 
 
 # for yield
 model <- Yield.MA.model[["Full"]]
@@ -116,50 +165,70 @@ levels(newdat$landuse_history) <- c("5950 BC", "50 BC", "1450", "1950", "after 1
 pairwise.t.test(newdat$logRR.Yield,newdat$landuse_history,p.adjust.method="holm")
 
 bp.hist.yield <- ggplot(newdat,aes(landuse_history,logRR.Yield)) +
-  geom_boxplot(notch=T) + #Notches are used to compare groups; if the notches of two boxes do not overlap, this suggests that the medians are significantly different.
-  scale_x_discrete(limits=c("5950 BC", "50 BC", "1450", "1950", "after 1950")) +
-  xlab("") +
-  ylab("Log(RR) for yield")
+  geom_boxplot(aes(fill=landuse_history),notch=T) + 
+  scale_x_discrete("",labels=NULL) +
+  scale_fill_manual(values=c('#ffffb2','#fecc5c','#fd8d3c','#f03b20','#bd0026'), 
+                    na.value="lightgrey",
+                    name="",
+                    limits=c("5950 BC","50 BC", "1450","1950", "after 1950")) +
+  guides(fill="none") +
+  ylab("Log(RR) for yield") +
+  theme_lubdes(rel.text.size=1.2) 
 
 pairwise.t.test(newdat$logRR.Yield,newdat$main_climate,p.adjust.method="holm")
 
 bp.clim.yield <- ggplot(newdat,aes(main_climate,logRR.Yield)) +
-  geom_boxplot(notch=T) + #Notches are used to compare groups; if the notches of two boxes do not overlap, this suggests that the medians are significantly different.
-  scale_x_discrete(limits=c("Polar", "Cold (Continental)", "Temperate", "Arid", "Tropical")) +
-  xlab("") +
-  ylab("Log(RR) for yield")
+  geom_boxplot(aes(fill=main_climate),notch=T) + #Notches are used to compare groups; if the notches of two boxes do not overlap, this suggests that the medians are significantly different.
+  scale_x_discrete("",labels=NULL) +
+  scale_fill_manual(values=c('#2c7bb6','#abd9e9','#ffffbf','#fdae61','#d7191c'), 
+                    name="",
+                    limits=c("Polar","Cold (Continental)","Temperate","Arid","Tropical"), 
+                    labels=c("Polar","Cold (Continental)","Temperate","Arid","Tropical")) + 
+  guides(fill="none") +
+  ylab("Log(RR) for yield") +
+  theme_lubdes(rel.text.size=1.2) 
 
-bp.hist <- grid.arrange(bp.hist.richness, bp.hist.yield,ncol=2, nrow=1,widths=c(1,1))
-bp.clim <- grid.arrange(bp.clim.richness, bp.clim.yield,ncol=2, nrow=1,widths=c(1,1))
+lay <- rbind(c(1,1), c(2,3))
+
+bp.hist <- grid.arrange(LUhistory_map,bp.hist.richness, bp.hist.yield,ncol=2, nrow=2,layout_matrix=lay)
+bp.clim <- grid.arrange(climate_map,bp.clim.richness, bp.clim.yield,ncol=2, nrow=2,layout_matrix=lay)
+
+ggsave(bp.hist,file=path2temp %+% "bphist.png", width=10,height=12)
+ggsave(bp.clim,file=path2temp %+% "bpclim.png", width=10,height=12)
 
 ```
 
 ```{r confounding variables}
 ### Are BD and ES measured from the same species (e.g. weed BD and weed biomass in grasslands is linked)?
-sub <- subset(ES.frame.richness,Species.Group=="plants")
+sub <- subset(ES.frame.richness,Species.Group=="Plants")
 p1 <- ggplot(data=sub,aes(y=Log.RR,x=factor(ES.and.BD))) + 
   geom_boxplot() +
   theme(axis.text = element_text(size = rel(1.2)), 
         axis.ticks = element_line(colour = "black"), 
         axis.title = element_text(size = rel(1.2))) +
+  theme_lubdes(legend.position="bottom",rel.text.size=1.8) +
   xlab("Biodiversity and yield") +
+  scale_x_discrete(labels=c("Independent","Linked")) +
   ylab("Log(RR) for biodiversity")
 
 t.test(Log.RR ~ factor(ES.and.BD), data=sub)
 
 
 ### Is land use intensity measured from data on yield.
-p2 <- ggplot(data=ES.frame.yield,aes(y=Log.RR,x=factor(LU.definition.and.ES))) + 
+sub.ES <- subset(ES.frame.yield,Product%in% c("Wood","Green fodder"))
+p2 <- ggplot(data=sub.ES,aes(y=Log.RR,x=factor(LU.definition.and.ES))) + 
   geom_boxplot()+
   theme(axis.text = element_text(size = rel(1.2)), 
         axis.ticks = element_line(colour = "black"), 
         axis.title = element_text(size = rel(1.2))) +
   xlab("Land-use intensity and yield") + 
   ylab("Log(RR) for yield") + 
+  theme_lubdes(legend.position="bottom",rel.text.size=1.8) +
+  scale_x_discrete(labels=c("Independent","Linked")) +
   facet_grid(.~Product)
 
-t.test(Log.RR ~ factor(LU.definition.and.ES), data=subset(ES.frame.yield,Product=="wood"))
-t.test(Log.RR ~ factor(LU.definition.and.ES), data=subset(ES.frame.yield,Product=="green fodder"))
+t.test(Log.RR ~ factor(LU.definition.and.ES), data=subset(ES.frame.yield,Product=="Wood"))
+t.test(Log.RR ~ factor(LU.definition.and.ES), data=subset(ES.frame.yield,Product=="Green fodder"))
 
 p12 <- grid.arrange(p1, p2,ncol=2, nrow=1,widths=c(1.4,3))
 ggsave(p12,file=path2temp %+% "confoundingVariable1.png", width=9,height=4)
@@ -180,6 +249,7 @@ p3 <- ggplot(data=ES.frame.richness,aes(y=Log.RR,x=log(Richness.Plot.Size))) +
   theme(axis.text = element_text(size = rel(1.2)), 
         axis.ticks = element_line(colour = "black"), 
         axis.title = element_text(size = rel(1.2)))+
+  theme_lubdes(legend.position="bottom",rel.text.size=1.8) +
   ylab("Log(RR) for biodiversity") +
   xlab("Log(spatial grain)")
 
@@ -194,12 +264,13 @@ p4 <- ggplot(data=ES.frame.yield,aes(y=Log.RR,x=factor(Yield.Unit.Type))) +
   theme(axis.text = element_text(size = rel(1.2)), 
         axis.ticks = element_line(colour = "black"), 
         axis.title = element_text(size = rel(1.2))) + 
-  scale_x_discrete("Yield unit",labels=c("area/area","mass/area", "count/area", "others")) +
+  scale_x_discrete("Yield unit",labels=c("Area/area","Mass/area", "Count/area", "Others")) +
+  theme_lubdes(legend.position="bottom",rel.text.size=1.8) +
   ylab("Log(RR) for yield") +
   xlab("")
 
-p34 <- grid.arrange(p3, p4,ncol=2, nrow=1,widths=c(1,1))
-ggsave(p34,file=path2temp %+% "confoundingVariable2.png", width=9,height=5)
+p.grid <- grid.arrange(p1,p2,p3, p4,ncol=2, nrow=2,widths=c(1,1))
+ggsave(p.grid,file=path2temp %+% "confoundingVariables.png", width=14,height=14)
 ```
 
 

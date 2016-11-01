@@ -7,39 +7,36 @@
 ### Authors: KG, TN,...
 ############################################################################
 
-seqBreaks <- log(sapply(-2:7,function(x) 2^x))
-seqLabels <- 100*(exp(seqBreaks)-1) # labelling with percentage change  
+# seqBreaks <- log(sapply(-2:7,function(x) 2^x))
+# seqLabels <- 100*(exp(seqBreaks)-1) # labelling with percentage change  
+# 
+# ############################################################################
+# ### 09.1.1. plot raw data + grand mean
+# ############################################################################
+# newdat <- data.frame(1)
+# 
+# model <- Richness.MA.model[["None"]]
+# newdat$logRR.richness <- model$b
+# newdat$logRR.richness.se <- model$se
+# 
+# model <- Yield.MA.model[["None"]]
+# newdat$logRR.yield <- model$b
+# newdat$logRR.yield.se <- model$se
+# 
+# plot <- ggplot() +
+#   geom_hline(aes(yintercept=0), linetype="twodash",size=1.05) + geom_vline(aes(xintercept=0), linetype="twodash",size=1.05) +
+#   geom_point(data=ES.frame, aes(x=Yield.Log.RR, y=Richness.Log.RR),color="grey",alpha=0.5,size=2) +
+#   geom_point(data=newdat, aes(x=logRR.yield, y=logRR.richness), color="black", size=1.1) +
+#   geom_pointrange(data=newdat, aes(x=logRR.yield, y=logRR.richness, ymin=logRR.richness - (1.96*logRR.richness.se), 
+#                       ymax=logRR.richness + (1.96*logRR.richness.se)),color="black", size=1.2) +
+#   geom_segment(data=newdat, aes(x=logRR.yield - (1.96*logRR.yield.se), xend=logRR.yield + (1.96*logRR.yield.se), y = logRR.richness, yend = logRR.richness), color="black",size=1.2) +
+#   scale_y_continuous(labels=seqLabels,breaks=seqBreaks) + 
+#   scale_x_continuous(labels=seqLabels,breaks=seqBreaks) +
+#   ylab("% Richness difference") + xlab("% Yield difference") + labs(color='') + 
+#   theme_lubdes() 
+# ggsave(plot, file = path2temp %+% "Rawdata+GrandMean_rma.png", width = 16, height = 8, type = "cairo-png")
 
-############################################################################
-### 09.1.1. plot raw data + grand mean
-############################################################################
-newdat <- data.frame(1)
-
-model <- Richness.MA.model[["None"]]
-newdat$logRR.richness <- model$b
-newdat$logRR.richness.se <- model$se
-
-model <- Yield.MA.model[["None"]]
-newdat$logRR.yield <- model$b
-newdat$logRR.yield.se <- model$se
-
-plot <- ggplot() +
-  geom_hline(aes(yintercept=0), linetype="twodash",size=1.05) + geom_vline(aes(xintercept=0), linetype="twodash",size=1.05) +
-  geom_point(data=ES.frame, aes(x=Yield.Log.RR, y=Richness.Log.RR),color="grey",alpha=0.5,size=2) +
-  geom_point(data=newdat, aes(x=logRR.yield, y=logRR.richness), color="black", size=1.1) +
-  geom_pointrange(data=newdat, aes(x=logRR.yield, y=logRR.richness, ymin=logRR.richness - (1.96*logRR.richness.se), 
-                      ymax=logRR.richness + (1.96*logRR.richness.se)),color="black", size=1.2) +
-  geom_segment(data=newdat, aes(x=logRR.yield - (1.96*logRR.yield.se), xend=logRR.yield + (1.96*logRR.yield.se), y = logRR.richness, yend = logRR.richness), color="black",size=1.2) +
-  scale_y_continuous(labels=seqLabels,breaks=seqBreaks) + 
-  scale_x_continuous(labels=seqLabels,breaks=seqBreaks) +
-  ylab("% Richness difference") + xlab("% Yield difference") + labs(color='') + 
-  theme_lubdes() 
-ggsave(plot, file = path2temp %+% "Rawdata+GrandMean_rma.png", width = 16, height = 8, type = "cairo-png")
-
-############################################################################
-### 09.1.2. plot LUI cross diagrams
-############################################################################
-# predict for each covariate combination
+### predict for each covariate combination
 newdat <- expand.grid(LUI.range.level=levels(ES.frame$LUI.range.level))
 #newdat$level <- factor(newdat$level, levels = rev(levels(newdat$level)))
 
@@ -58,7 +55,7 @@ newdat$n.yield <- as.numeric(table(modelDataYield$LUI.range.level))
 
 model1 <- Richness.MA.model[["None"]]
 model2 <- Yield.MA.model[["None"]]
-newdat.GM <- data.frame(LUI.range.level="Grand Mean",
+newdat.GM <- data.frame(LUI.range.level="Grand mean",
                         logRR.richness= model1$b, logRR.richness.se= model1$se, 
                         logRR.richness.ci.lb=model1$b-1.96*model1$se,logRR.richness.ci.ub=model1$b+1.96*model1$se,
                         n.richness=nrow(modelDataRichness),
@@ -66,7 +63,7 @@ newdat.GM <- data.frame(LUI.range.level="Grand Mean",
                         logRR.yield.ci.lb=model2$b-1.96*model2$se,logRR.yield.ci.ub=model2$b+1.96*model2$se,
                         n.yield=nrow(modelDataYield))
 
-newdat <- join_all(list(newdat,newdat.GM),type="full")
+newdat <- join_all(list(newdat.GM,newdat),type="full")
 newdat$CI95.richness <- "[" %+% round(newdat$logRR.richness.ci.lb,digits=2) %+% "," %+%  round(newdat$logRR.richness.ci.ub,digits=2) %+% "]"
 newdat$CI95.yield <- "[" %+% round(newdat$logRR.yield.ci.lb,digits=2) %+% "," %+%  round(newdat$logRR.yield.ci.ub,digits=2) %+% "]" 
 
@@ -90,37 +87,68 @@ write.csv(newdat[,c("LUI.range.level",
 #ci.lb <- yi - qnorm(alpha/2, lower.tail=FALSE) * sei
 #ci.ub <- yi + qnorm(alpha/2, lower.tail=FALSE) * sei
 
-### plot rawdata
-plot <- ggplot(data=ES.frame) +
-  geom_point(aes(x=Yield.Log.RR, y=Richness.Log.RR,color=LUI.range.level),alpha=0.5) +
-  geom_pointrange(aes(x=Yield.Log.RR, y=Richness.Log.RR, ymin=Richness.Log.RR - (1.96*sqrt(Richness.Log.RR.Var)), ymax=Richness.Log.RR + (1.96*sqrt(Richness.Log.RR.Var)),color=LUI.range.level),alpha=0.5) +
-  geom_segment(aes(x=Yield.Log.RR - (1.96*sqrt(Yield.Log.RR.Var)), xend=Yield.Log.RR + (1.96*sqrt(Yield.Log.RR.Var)), y = Richness.Log.RR, yend = Richness.Log.RR, color=LUI.range.level),alpha=0.5) +
-  scale_y_continuous(labels=seqLabels,breaks=seqBreaks) + 
-  scale_x_continuous(labels=seqLabels,breaks=seqBreaks) +
-  ylab("% Richness difference") + xlab("% Yield difference") + labs(color='') + 
-  scale_colour_manual(values=c("low-low"='#d0d1e6',"medium-medium"="#a6bddb","high-high"="#045a8d","low-medium"='#fee090',"medium-high"='#fc8d59',"low-high"="#d73027","Grand Mean"="darkgrey"),breaks=c(levels(ES.frame$LUI.range.level))) +
-  theme_lubdes(legend.position="bottom") +
-  guides(color=guide_legend(nrow=3))
-ggsave(plot, file = path2temp %+% "rawdata_LUI.png", width = 16, height = 8, type = "cairo-png")
-
-
-# plot crosses for each covariate combination
-seqBreaks <- log(c(0.6,0.8,0.9,1,1.25,1.5))
+seqBreaks <- log(c(0.6,0.8,0.9,1,1.25,1.5,1.75,2))
 seqLabels <- 100*(exp(seqBreaks)-1)
 
+# ### plot rawdata
+# plot <- ggplot(data=ES.frame) +
+#   geom_point(aes(x=Yield.Log.RR, y=Richness.Log.RR,color=LUI.range.level),alpha=0.5) +
+#   geom_pointrange(aes(x=Yield.Log.RR, y=Richness.Log.RR, ymin=Richness.Log.RR - (1.96*sqrt(Richness.Log.RR.Var)), ymax=Richness.Log.RR + (1.96*sqrt(Richness.Log.RR.Var)),color=LUI.range.level),alpha=0.5) +
+#   geom_segment(aes(x=Yield.Log.RR - (1.96*sqrt(Yield.Log.RR.Var)), xend=Yield.Log.RR + (1.96*sqrt(Yield.Log.RR.Var)), y = Richness.Log.RR, yend = Richness.Log.RR, color=LUI.range.level),alpha=0.5) +
+#   scale_y_continuous(labels=seqLabels,breaks=seqBreaks) + 
+#   scale_x_continuous(labels=seqLabels,breaks=seqBreaks) +
+#   ylab("% Richness difference") + xlab("% Yield difference") + labs(color='') + 
+#   scale_color_manual(name="",values=c("Low-low"='#2b83ba',"Medium-medium"='#008837',"High-high"='#abdda4',"Low-medium"='#fdae61',"Medium-high"='#d7191c',"Low-high"='#7b3294',"Grand mean"="black"),labels=levels(newdat$LUI.range.level)) +
+#   theme_lubdes(legend.position="bottom") +
+#   guides(color=guide_legend(nrow=3))
+# ggsave(plot, file = path2temp %+% "rawdata_LUI.png", width = 16, height = 8, type = "cairo-png")
+
+############################################################################
+### 09.1.2. plot LUI cross diagrams
+############################################################################
 plot <- ggplot(data=newdat) + 
   geom_hline(aes(yintercept=0), linetype="twodash",size=1.05) + geom_vline(aes(xintercept=0), linetype="twodash",size=1.05) +
-  geom_point(aes(x=logRR.yield, y=logRR.richness, color=LUI.range.level), size=3) +
+  geom_point(aes(x=logRR.yield, y=logRR.richness, color=LUI.range.level),size=3) +
   geom_pointrange(aes(x=logRR.yield, y=logRR.richness, ymin=logRR.richness.ci.lb, 
-                                   ymax=logRR.richness.ci.ub,color=LUI.range.level), size=1.2) +
+                                 ymax=logRR.richness.ci.ub,color=LUI.range.level), size=1.2) +
   geom_segment(aes(x=logRR.yield.ci.lb, xend=logRR.yield.ci.ub, y = logRR.richness, yend = logRR.richness, color=LUI.range.level),size=1.2) +
   scale_y_continuous(labels=seqLabels,breaks=seqBreaks) + 
   scale_x_continuous(labels=seqLabels,breaks=seqBreaks) +
-  ylab("% Richness difference") + xlab("% Yield difference") + labs(color='') + 
-  scale_colour_manual(values=c("low-low"='#d0d1e6',"medium-medium"="#a6bddb","high-high"="#045a8d","low-medium"='#fee090',"medium-high"='#fc8d59',"low-high"="#d73027","Grand Mean"="black"),breaks=levels(newdat$LUI.range.level)) +
+  ylab("% Richness difference") + xlab("% Yield difference") + 
+  scale_color_manual(name="",values=c("Low-low"='#2b83ba',"Medium-medium"='#008837',"High-high"='#abdda4',"Low-medium"='#fdae61',"Medium-high"='#d7191c',"Low-high"='#7b3294',"Grand mean"="black"),labels=levels(newdat$LUI.range.level)) +
   theme_lubdes(legend.position="bottom",rel.text.size=2) +
   guides(color=guide_legend(nrow=3))
+
 ggsave(plot, file = path2temp %+% "CrossPlot_LUI_rma.png", width = 16, height = 8, type = "cairo-png")
+
+############################################################################
+### 09.1.3. plot LUI forest plots
+############################################################################
+plot.richness <- ggplot(data=newdat) + 
+  geom_vline(aes(xintercept=0), linetype="twodash",size=0.8) +
+  geom_errorbarh(aes(x=logRR.richness, y=LUI.range.level, 
+                     xmin=logRR.richness.ci.lb,xmax=logRR.richness.ci.ub, color=LUI.range.level),size=1.5,height=0.3) +
+  geom_point(aes(x=logRR.richness,y=LUI.range.level, color=LUI.range.level),size=6) +
+  scale_y_discrete("",limits=rev(newdat$LUI.range.level)) +#c("7"="Grand Mean","6"="low-low","5"="medium-medium","4"="high-high","5"="low-medium","6"="medium-high","7"="low-high")) + 
+  scale_x_continuous("% Richness difference",labels=seqLabels,breaks=seqBreaks) +
+  scale_color_manual(name="",values=c("Low-low"='#2b83ba',"Medium-medium"='#008837',"High-high"='#abdda4',"Low-medium"='#fdae61',"Medium-high"='#d7191c',"Low-high"='#7b3294',"Grand mean"="black"),labels=levels(newdat$LUI.range.level)) +
+  theme_lubdes(rel.text.size=1.5) +
+  guides(color="none",fill="none")
+#,limits=c(-0.45,0.5)
+plot.yield <- ggplot(data=newdat) + 
+  geom_vline(aes(xintercept=0), linetype="twodash",size=0.8) +
+  geom_errorbarh(aes(x=logRR.yield, y=LUI.range.level, 
+                     xmin=logRR.yield.ci.lb,xmax=logRR.yield.ci.ub, color=LUI.range.level),size=1.5,height=0.3) +
+  geom_point(aes(x=logRR.yield,y=LUI.range.level, color=LUI.range.level),size=6) +
+  scale_y_discrete("",limits=rev(newdat$LUI.range.level),labels=NULL) +
+  scale_x_continuous("% Yield difference",labels=seqLabels,breaks=seqBreaks,limits=c(-0.2,0.85)) +
+  scale_color_manual(name="",values=c("Low-low"='#2b83ba',"Medium-medium"='#008837',"High-high"='#abdda4',"Low-medium"='#fdae61',"Medium-high"='#d7191c',"Low-high"='#7b3294',"Grand mean"="black"),labels=levels(newdat$LUI.range.level)) +
+  theme_lubdes(rel.text.size=1.5) +
+  guides(color="none",fill="none")
+
+png(file = path2temp %+% "LUI_rma.png", width = 800, height = 300)
+  grid.arrange(plot.richness,plot.yield,ncol=2,nrow=1,widths=c(15,11))
+dev.off()
 
 
 ############################################################################
