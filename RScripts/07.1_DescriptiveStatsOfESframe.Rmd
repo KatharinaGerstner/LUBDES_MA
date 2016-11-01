@@ -27,13 +27,17 @@ knitr::opts_chunk$set(
   } else if (cn == "juro-MacBookPro"){
     path2wd <- "/home/juro/git/LUBDES_MA/RScripts/" #MB
     path2temp <- "/home/juro/tmp/" #MB
-  
+    
+  } else if (cn == "LEIH-HAL6"){
+    path2wd <- "C:/Users/kambach/Desktop/aktuelle Arbeiten/SESYNC/LUBDES_MA-master/RScripts/" #SK
+    path2temp <- "C:/Users/kambach/Desktop/aktuelle Arbeiten/SESYNC/LUBDES_MA-master/RScripts/" #SK
+    
   } else if (cn == "Helen-Phillipss-MacBook-Pro.local"){
     path2wd <- "/Users/Helen/LUBDES_MA/RScripts/"
     path2temp <- "/Users/Helen/tmp/" ##HP
   } else {
-    path2wd <- "C:/Users/kg83hyby/Documents/GitHub/LUBDES_MA/RScripts/" #KG
-    path2temp <- "C:/Users/kg83hyby/Documents/temp/" #KG 
+    path2wd <- "C:/Users/hoppek/Documents/GitHub/LUBDES_MA/RScripts/" #KG
+    path2temp <- "C:/Users/hoppek/Documents/temp/" #KG 
   }  
   return(list(path2temp,path2wd))
 }
@@ -347,4 +351,73 @@ for(LUI.level.to.plot in LUI.range.level){
 ![](C:\Users\kg83hyby\Documents\temp\Forest_plot_low-medium.png)
 ![](C:\Users\kg83hyby\Documents\temp\Forest_plot_medium-high.png)
 ![](C:\Users\kg83hyby\Documents\temp\Forest_plot_low-high.png)
+
+```{r confounding variables}
+library(gridExtra)
+### Are BD and ES measured from the same species (e.g. weed BD and weed biomass in grasslands is linked)?
+sub <- subset(ES.frame.richness,Species.Group=="plants")
+p1 <- ggplot(data=sub,aes(y=Log.RR,x=factor(ES.and.BD))) + 
+     geom_boxplot() +
+     theme(axis.text = element_text(size = rel(1.2)), 
+           axis.ticks = element_line(colour = "black"), 
+           axis.title = element_text(size = rel(1.2))) +
+     xlab("BD.and.ES") +
+     ylab("log(RR)")
+ 
+t.test(Log.RR ~ factor(ES.and.BD), data=sub)
+
+
+### Is land use intensity measured from data on yield.
+p2 <- ggplot(data=ES.frame.yield,aes(y=Log.RR,x=factor(LU.definition.and.ES))) + 
+  geom_boxplot()+
+  theme(axis.text = element_text(size = rel(1.2)), 
+      axis.ticks = element_line(colour = "black"), 
+      axis.title = element_text(size = rel(1.2))) +
+  xlab("LU.definition.and.ES") + 
+  ylab("log(RR)") +
+  facet_grid(.~Product)
+
+t.test(Log.RR ~ factor(LU.definition.and.ES), data=subset(ES.frame.yield,Product=="wood"))
+t.test(Log.RR ~ factor(LU.definition.and.ES), data=subset(ES.frame.yield,Product=="green fodder"))
+
+p12 <- grid.arrange(p1, p2,ncol=2, nrow=1,widths=c(1.4,3))
+ggsave(p12,file=path2temp %+% "confoundingVariable1.png", width=9,height=4)
+  
+### Relationship spatial scale - log.RR
+
+hist(log10(ES.frame.richness$Richness.Plot.Size))
+
+# fit linear model
+fm <- lm(Log.RR ~ log10(Richness.Plot.Size), data=ES.frame.richness)
+
+summary(fm)
+
+# plot data and fitted line
+p3 <- ggplot(data=ES.frame.richness,aes(y=Log.RR,x=log10(Richness.Plot.Size))) + 
+  geom_point(size=2,alpha=0.5) + 
+  stat_smooth(method=lm,se=F,color="red") +
+  theme(axis.text = element_text(size = rel(1.2)), 
+      axis.ticks = element_line(colour = "black"), 
+      axis.title = element_text(size = rel(1.2)))+
+  ylab("log(RR)")
+
+### Relationship Yield.Unit.Type - log.RR
+fm2 <- aov(Log.RR ~ Yield.Unit.Type, data=ES.frame.yield)
+TukeyHSD(fm2)
+plot(TukeyHSD(fm2),las=1)
+
+p4 <- ggplot(data=ES.frame.yield,aes(y=Log.RR,x=factor(Yield.Unit.Type))) +
+  geom_boxplot()+
+  theme(axis.text = element_text(size = rel(1.2)), 
+      axis.ticks = element_line(colour = "black"), 
+      axis.title = element_text(size = rel(1.2))) + 
+  scale_x_discrete("Yield unit",labels=c("area/area","mass/area", "count/area", "others")) +
+  ylab("log(RR)")
+  
+p34 <- grid.arrange(p3, p4,ncol=2, nrow=1,widths=c(1,1))
+ggsave(p34,file=path2temp %+% "confoundingVariable2.png", width=9,height=5)
+
+
+```
+
 

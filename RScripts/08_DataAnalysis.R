@@ -61,14 +61,14 @@ rma.mv.func <- function(df, moderators, fit.method)
                   mods=mods.formula, 
                   random = list(~1|Study.Case, ~1|Study.ID),
                   slab=paste(Study.Case, Low.LUI, High.LUI,sep="_"),
-                  method=fit.method, tdist=F, level=95, digits=4,data=df)) # tdist=TRUE slightly mimics the Knapp and Hartung (2003) method by using a t-distribution with k-p degrees of freedom for tests of individual coefficients and confidence intervals and an F-distribution with m and k-p degrees of freedom (p being the total number of model coefficients including the intercept if it is present) for the omnibus test statistic, hence adjust for multiple comparisons
+                  method=fit.method, tdist=FALSE, level=95, digits=4,data=df))
   
   if(inherits(fm, "try-error")){
     fm <- rma.mv(yi=Log.RR, V=M.matrix(df)+diag(Log.RR.Var), 
                  mods=mods.formula, 
                  random = list(~1|Study.Case, ~1|Study.ID),
                  slab=paste(Study.Case, Low.LUI, High.LUI,sep="_"),
-                 method=fit.method, tdist=F, level=95, digits=4,data=df,
+                 method=fit.method, tdist=FALSE, level=95, digits=4,data=df,
                  control=list(optimizer="optim", optmethod="BFGS"))
     
   }
@@ -100,7 +100,9 @@ Yield.MA.model[["LUI"]] <- rma.mv.func(df=modelDataYield, moderators=c(-1,"LUI.r
 #Yield.MA.model[["Context"]] <- rma.mv.func(df=modelDataYield, moderators=c("Product","landuse_history","main_climate","landuse_history:main_climate"), fit.method="REML")
 Yield.MA.model[["LUI.P"]] <- rma.mv.func(df=modelDataYield, moderators=c(-1,"LUI.range.level", "Product", "LUI.range.level:Product"), fit.method="REML")
 Yield.MA.model[["P"]] <- rma.mv.func(df=modelDataYield, moderators=c(-1,"Product"), fit.method="REML")
+
 Yield.MA.model[["Full"]] <- rma.mv.func(df=modelDataYield, moderators=c(-1,"LUI.range.level", "Product", "landuse_history","main_climate", "LUI.range.level:Product","LUI.range.level:main_climate","LUI.range.level:landuse_history"), fit.method="REML")
+
 
 ###########################################################################
 ### 08.3. extract fit statistics
