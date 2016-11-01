@@ -33,6 +33,6 @@ kable(read.csv(path2temp %+% "preds.LUI.SGP.SG.P.csv"), digits=2)
 
 ```{r}
 # SELECT
-kable(read.csv(path2temp %+% "preds.select.csv"), digits=2)
+kable(read.csv(path2temp %+% "preds.full.csv"), digits=2)
 ```
 

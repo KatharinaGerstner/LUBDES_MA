@@ -88,27 +88,34 @@ for(i in unique(dataimp$study.case)){
 
 }
 
-ES.frame$LUI.range.level <- factor(paste(ES.frame$Low.LUI,ES.frame$High.LUI,sep="-"))
-ES.frame$LUI.range.level <- factor(ES.frame$LUI.range.level,levels=c("low-low","medium-medium","high-high","low-medium","medium-high","low-high")) # reorder factor levels
+## define LUI-range levels starting with a capital letter
+.simpleCap <- function(x) {
+  s <- strsplit(x, " ")[[1]]
+  paste(toupper(substring(s, 1, 1)), substring(s, 2),
+        sep = "", collapse = " ")
+}
+ES.frame$LUI.range.level <- factor(paste(sapply(ES.frame$Low.LUI,function(x){.simpleCap(as.character(x))}),ES.frame$High.LUI,sep="-"))
+ES.frame$LUI.range.level <- factor(ES.frame$LUI.range.level,levels=c("Low-low","Medium-medium","High-high","Low-medium","Medium-high","Low-high")) # reorder factor levels
 
 ES.frame$LUI.range <- NA
-ES.frame$LUI.range[ES.frame$LUI.range.level %in% c("low-low","medium-medium","high-high")] <- 0
-ES.frame$LUI.range[ES.frame$LUI.range.level %in% c("low-medium","medium-high")] <- 1
-ES.frame$LUI.range[ES.frame$LUI.range.level %in% c("low-high")] <- 2
+ES.frame$LUI.range[ES.frame$LUI.range.level %in% c("Low-low","Medium-medium","High-high")] <- 0
+ES.frame$LUI.range[ES.frame$LUI.range.level %in% c("Low-medium","Medium-high")] <- 1
+ES.frame$LUI.range[ES.frame$LUI.range.level %in% c("Low-high")] <- 2
 
 ES.frame$Species.Group<-paste(ES.frame$Species.Group)
 
-ES.frame$Species.Group[(ES.frame$Species.Group %in% c("all plants","non-woody plants", "woody plants"))] <- "plants"
-ES.frame$Species.Group[ES.frame$Species.Group %in% c("birds","mammals","reptiles/amphibians")]<-"vertebrates"
-ES.frame$Species.Group[ES.frame$Species.Group %in% c("non-arthropod invertebrates","arthropods")]<-"invertebrates"
+ES.frame$Species.Group[(ES.frame$Species.Group %in% c("all plants","non-woody plants", "woody plants"))] <- "Plants"
+ES.frame$Species.Group[ES.frame$Species.Group %in% c("birds","mammals","reptiles/amphibians")]<-"Vertebrates"
+ES.frame$Species.Group[ES.frame$Species.Group %in% c("non-arthropod invertebrates","arthropods")]<-"Invertebrates"
 ES.frame$Species.Group[(ES.frame$Species.Group=="fungi")]<-NA
 ES.frame$Species.Group[(ES.frame$Species.Group=="NA")]<-NA
 ES.frame$Species.Group<-factor(ES.frame$Species.Group)
 
 ES.frame$Study.Case <- paste(ES.frame$Study.ID,ES.frame$Case.ID,sep="-")
 
-levels(ES.frame$Product)[levels(ES.frame$Product)=="animal_feed"]  <- "green fodder"
-levels(ES.frame$Product)[levels(ES.frame$Product)=="timber"]  <- "wood"
+levels(ES.frame$Product)[levels(ES.frame$Product)=="crop"]  <- "Crop"
+levels(ES.frame$Product)[levels(ES.frame$Product)=="animal_feed"]  <- "Green fodder"
+levels(ES.frame$Product)[levels(ES.frame$Product)=="timber"]  <- "Wood"
 
 ############################################################################
 ### 04.2. Calculate response ratio effect sizes

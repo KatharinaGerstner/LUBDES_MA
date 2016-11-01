@@ -167,7 +167,7 @@ source(path2wd %+% "01_load_libraries_and_functions.r")
 load(file=path2temp %+% "SavedData.Rdata")
 
 ### Describe and plot the raw data
-knit(path2wd %+% "07.1_DescriptiveStatsOfESframe.Rmd") # summary statistics, plot histograms of responses and covariables, plot maps of study location, plot forest plots for each Study.Case-LUI.range.level combination
+#knit(path2wd %+% "07.1_DescriptiveStatsOfESframe.Rmd") # summary statistics, plot histograms of responses and covariables, plot maps of study location, plot forest plots for each Study.Case-LUI.range.level combination
 
 ### FREQUENTIST ANALYSIS
 source(path2wd %+% "08_DataAnalysis.R")

@@ -83,7 +83,7 @@ model <- Richness.MA.model[["SGP"]]
 
 newdat.richness.SGP <- expand.grid(Product = levels(modelDataRichness$Product),
                                Species.Group = levels(modelDataRichness$Species.Group)) 
-newdat.richness.SGP$LUI.range.level <- "Grand Mean"
+newdat.richness.SGP$LUI.range.level <- "Grand mean"
 
 ## count number of cases within groups
 newdat.richness.SGP$n.richness <- NA
@@ -217,7 +217,7 @@ newdat.yield.P <- newdat.yield.P[,c("Product","LUI.range.level","n.yield","logRR
 model <- Yield.MA.model[["None"]]
 
 newdat.yield.SGP <- data.frame(1)
-newdat.yield.SGP$LUI.range.level <- "Grand Mean"
+newdat.yield.SGP$LUI.range.level <- "Grand mean"
 newdat.yield.SGP$logRR.yield <- model$b
 newdat.yield.SGP$logRR.yield.se <- model$se
 newdat.yield.SGP$n.yield <- nrow(modelDataYield)
@@ -233,7 +233,7 @@ newdat.LUI.SGP <- join_all(list(newdat.richness.LUI.SGP,newdat.yield.LUI.SGP,new
 newdat.LUI.SGP$CI95.richness <- "[" %+% round(newdat.LUI.SGP$logRR.richness.ci.lb,digits=2) %+% "," %+%  round(newdat.LUI.SGP$logRR.richness.ci.ub,digits=2) %+% "]"
 newdat.LUI.SGP$CI95.yield <- "[" %+% round(newdat.LUI.SGP$logRR.yield.ci.lb,digits=2) %+% "," %+%  round(newdat.LUI.SGP$logRR.yield.ci.ub,digits=2) %+% "]" 
 
-newdat.LUI.SGP$LUI.range.level <- factor(newdat.LUI.SGP$LUI.range.level, levels = c("low-low","medium-medium","high-high","Grand Mean","low-medium","medium-high","low-high"))
+newdat.LUI.SGP$LUI.range.level <- factor(newdat.LUI.SGP$LUI.range.level, levels = c("Grand mean","Low-low","Medium-medium","High-high","Low-medium","Medium-high","Low-high"))
 
 # write.csv(newdat.LUI.SGP[,c("Species.Group","Product","LUI.range.level",
 #                  "n.richness", "logRR.richness",  "logRR.richness.se", "CI95.richness",
@@ -255,9 +255,9 @@ newdat.LUI.P$CI95.yield <- "[" %+% round(newdat.LUI.P$logRR.yield.ci.lb,digits=2
 
 ############################################################################
 newdat.LUI.SG$Product <- NA
-newdat.LUI.SG$Product <- factor(newdat.LUI.SG$Product, levels = c("crop","green fodder","wood","NA"))
+newdat.LUI.SG$Product <- factor(newdat.LUI.SG$Product, levels = c("Crop","Green fodder","Wood","NA"))
 newdat.LUI.P$Species.Group <- NA
-newdat.LUI.P$Species.Group <- factor(newdat.LUI.P$Species.Group, levels = c("plants","invertebrates","vertebrates","NA"))
+newdat.LUI.P$Species.Group <- factor(newdat.LUI.P$Species.Group, levels = c("Plants","Invertebrates","Vertebrates","NA"))
 
 newdat.SG.P <- join_all(list(newdat.LUI.SG,newdat.LUI.P),type="full")
 newdat.all <- join_all(list(newdat.LUI.SGP,newdat.LUI.SG,newdat.LUI.P),type="full")
@@ -284,63 +284,86 @@ write.csv(newdat.all[,c("Species.Group","Product","LUI.range.level",
 seqBreaks <- log(sapply(-2:7,function(x) 2^x))
 seqLabels <- 100*(exp(seqBreaks)-1)
 
+### plot 1 with legend
 plot1 <- ggplot(data=newdat.LUI.SGP) + 
-  geom_hline(aes(yintercept=0), linetype="twodash",size=1.05) + geom_vline(aes(xintercept=0), linetype="twodash",size=1.05) +
+  geom_hline(aes(yintercept=0), linetype="twodash",size=0.6) + geom_vline(aes(xintercept=0), linetype="twodash",size=0.6) +
   geom_point(aes(x=logRR.yield, y=logRR.richness, color=LUI.range.level), size=3) +
   geom_pointrange(aes(x=logRR.yield, y=logRR.richness, ymin=logRR.richness - (1.96*logRR.richness.se), 
-                      ymax=logRR.richness + (1.96*logRR.richness.se),color=LUI.range.level), size=1.2) +
+                      ymax=logRR.richness + (1.96*logRR.richness.se),color=LUI.range.level), size=1.3) +
   geom_segment(aes(x=logRR.yield - (1.96*logRR.yield.se), xend=logRR.yield + (1.96*logRR.yield.se), y = logRR.richness, yend = logRR.richness, color=LUI.range.level),size=1.2) +
   scale_y_continuous(labels=seqLabels,breaks=seqBreaks,limits=c(log(0.4),log(2.05)), oob = squish, expand=c(0,0)) + 
   scale_x_continuous(labels=seqLabels,breaks=seqBreaks,limits=c(log(0.3),log(3.25)), oob = squish, expand=c(0,0)) +
-  scale_colour_manual(values=c("low-low"='#d0d1e6',"medium-medium"="#a6bddb","high-high"="#045a8d","Grand Mean"="black","low-medium"='#fee090',"medium-high"='#fc8d59',"low-high"="#d73027"),breaks=c(levels(newdat.LUI.SGP$LUI.range.level))) +
-  ylab("% Richness difference") + xlab("% Yield difference") + labs(color='') + 
+  scale_color_manual(name="",values=c("Low-low"='#2b83ba',"Medium-medium"='#008837',"High-high"='#abdda4',"Low-medium"='#fdae61',"Medium-high"='#d7191c',"Low-high"='#7b3294',"Grand mean"="black"),labels=levels(newdat.LUI.SGP$LUI.range.level)) +
+  ylab("% Richness difference") + xlab("% Yield difference") + 
   facet_grid(Species.Group~Product) + 
   theme_lubdes(legend.position="bottom",rel.text.size=1.8) +
-#  guides(color=guide_legend(ncol=2))
+  theme(strip.text.x = element_blank(),strip.text.y = element_blank(),legend.key.size=unit(1.6,"line")) +
+  guides(color=guide_legend(direction="vertical"))
+#  guides(color=F)
+g_legend<-function(a.gplot){ 
+  tmp <- ggplot_gtable(ggplot_build(a.gplot)) 
+  leg <- which(sapply(tmp$grobs, function(x) x$name) == "guide-box") 
+  legend <- tmp$grobs[[leg]] 
+  return(legend)} 
+
+### save legend
+# # if legend from plot1 is drawn
+legend <- g_legend(plot1)
+png(path2temp %+% "legend.png")
+grid.draw(legend)
+dev.off()
+
+### plot1 without legend
+plot1 <- ggplot(data=newdat.LUI.SGP) + 
+  geom_hline(aes(yintercept=0), linetype="twodash",size=0.6) + geom_vline(aes(xintercept=0), linetype="twodash",size=0.6) +
+  geom_point(aes(x=logRR.yield, y=logRR.richness, color=LUI.range.level), size=3) +
+  geom_pointrange(aes(x=logRR.yield, y=logRR.richness, ymin=logRR.richness - (1.96*logRR.richness.se), 
+                      ymax=logRR.richness + (1.96*logRR.richness.se),color=LUI.range.level), size=1.3) +
+  geom_segment(aes(x=logRR.yield - (1.96*logRR.yield.se), xend=logRR.yield + (1.96*logRR.yield.se), y = logRR.richness, yend = logRR.richness, color=LUI.range.level),size=1.2) +
+  scale_y_continuous(labels=seqLabels,breaks=seqBreaks,limits=c(log(0.4),log(2.05)), oob = squish, expand=c(0,0)) + 
+  scale_x_continuous(labels=seqLabels,breaks=seqBreaks,limits=c(log(0.3),log(3.25)), oob = squish, expand=c(0,0)) +
+  scale_color_manual(name="",values=c("Low-low"='#2b83ba',"Medium-medium"='#008837',"High-high"='#abdda4',"Low-medium"='#fdae61',"Medium-high"='#d7191c',"Low-high"='#7b3294',"Grand mean"="black"),labels=levels(newdat.LUI.SGP$LUI.range.level)) +
+  ylab("% Richness difference") + xlab("% Yield difference") + 
+  facet_grid(Species.Group~Product) + 
+  theme_lubdes(legend.position="bottom",rel.text.size=1.8) +
+  theme(strip.text.x = element_blank(),strip.text.y = element_blank(),legend.key.size=unit(1.6,"line")) +
+  #  guides(color=guide_legend(direction="vertical"))
   guides(color=F)
-ggsave(plot1,file = path2temp %+% "CrossPlot_LUI.SGP.png", width = 15, height = 10, units = "in")
 
 plot2 <- ggplot(data=newdat.LUI.SG) + 
-  geom_hline(aes(yintercept=0), linetype="twodash",size=1.05) + geom_vline(aes(xintercept=0), linetype="twodash",size=1.05) +
+  geom_hline(aes(yintercept=0), linetype="twodash",size=0.6) + geom_vline(aes(xintercept=0), linetype="twodash",size=0.6) +
   geom_point(aes(x=logRR.yield, y=logRR.richness, color=LUI.range.level), size=2) +
   geom_pointrange(aes(x=logRR.yield, y=logRR.richness, ymin=logRR.richness - (1.96*logRR.richness.se), 
-                      ymax=logRR.richness + (1.96*logRR.richness.se),color=LUI.range.level), size=1.2) +
+                      ymax=logRR.richness + (1.96*logRR.richness.se),color=LUI.range.level), size=1.3) +
   geom_segment(aes(x=logRR.yield - (1.96*logRR.yield.se), xend=logRR.yield + (1.96*logRR.yield.se), y = logRR.richness, yend = logRR.richness, color=LUI.range.level),size=1) +
   scale_y_continuous(labels=seqLabels,breaks=seqBreaks,limits=c(log(0.4),log(2.05)), oob = squish, expand=c(0,0)) + 
   scale_x_continuous(labels=seqLabels,breaks=seqBreaks,limits=c(log(0.3),log(3.25)), oob = squish, expand=c(0,0)) +
-  scale_colour_manual(values=c("low-low"='#d0d1e6',"medium-medium"="#a6bddb","high-high"="#045a8d","low-medium"='#fee090',"medium-high"='#fc8d59',"low-high"="#d73027","Grand Mean"="black"),breaks=c(levels(newdat.LUI.SG$LUI.range.level))) +
-  ylab("% Richness difference") + xlab("% Yield difference") + labs(color='') + 
+  scale_color_manual(name="",values=c("Low-low"='#2b83ba',"Medium-medium"='#008837',"High-high"='#abdda4',"Low-medium"='#fdae61',"Medium-high"='#d7191c',"Low-high"='#7b3294',"Grand mean"="black"),labels=levels(newdat.LUI.SG$LUI.range.level)) +
+  ylab("") + xlab("") + 
   facet_grid(Species.Group~.) + 
   theme_lubdes(legend.position="bottom",rel.text.size=1.8) +
+  theme(axis.text.y=element_blank()) +
   guides(color=F)
-ggsave(plot2,file=path2temp %+% "CrossPlot_LUI.SG.png",height=9,width=5.5, units = "in")
 
 plot3 <- ggplot(data=newdat.LUI.P) + 
-  geom_hline(aes(yintercept=0), linetype="twodash",size=1.05) + geom_vline(aes(xintercept=0), linetype="twodash",size=1.05) +
+  geom_hline(aes(yintercept=0), linetype="twodash",size=0.6) + geom_vline(aes(xintercept=0), linetype="twodash",size=0.6) +
   geom_point(aes(x=logRR.yield, y=logRR.richness, color=LUI.range.level), size=2) +
   geom_pointrange(aes(x=logRR.yield, y=logRR.richness, ymin=logRR.richness - (1.96*logRR.richness.se), 
-                      ymax=logRR.richness + (1.96*logRR.richness.se),color=LUI.range.level), size=1.2) +
+                      ymax=logRR.richness + (1.96*logRR.richness.se),color=LUI.range.level), size=1.3) +
   geom_segment(aes(x=logRR.yield - (1.96*logRR.yield.se), xend=logRR.yield + (1.96*logRR.yield.se), y = logRR.richness, yend = logRR.richness, color=LUI.range.level),size=1) +
   scale_y_continuous(labels=seqLabels,breaks=seqBreaks,limits=c(log(0.4),log(2.05)), oob = squish, expand=c(0,0)) + 
   scale_x_continuous(labels=seqLabels,breaks=seqBreaks,limits=c(log(0.3),log(3.25)), oob = squish, expand=c(0,0)) +
-  scale_colour_manual("",values=c("low-low"='#d0d1e6',"medium-medium"="#a6bddb","high-high"="#045a8d","low-medium"='#fee090',"medium-high"='#fc8d59',"low-high"="#d73027","Grand Mean"="black"),breaks=c(levels(newdat.LUI.P$LUI.range.level))) +
-  ylab("% Richness difference") + xlab("% Yield difference") + labs(color='') + 
+  scale_color_manual(name="",values=c("Low-low"='#2b83ba',"Medium-medium"='#008837',"High-high"='#abdda4',"Low-medium"='#fdae61',"Medium-high"='#d7191c',"Low-high"='#7b3294',"Grand mean"="black"),labels=levels(newdat.LUI.P$LUI.range.level)) +
+  ylab("") + xlab("") + 
   facet_grid(.~Product) +
   theme_lubdes(legend.position="bottom",rel.text.size=1.8) +
+  theme(axis.text.x=element_blank()) +
   guides(color=F)
-ggsave(plot3,file=path2temp %+% "CrossPlot_LUI.P.png",height=3.8,width=14, units = "in")
 
-g_legend<-function(a.gplot){ 
-      tmp <- ggplot_gtable(ggplot_build(a.gplot)) 
-      leg <- which(sapply(tmp$grobs, function(x) x$name) == "guide-box") 
-      legend <- tmp$grobs[[leg]] 
-      return(legend)} 
- 
-# # if legend from plot1 is drawn
-# legend <- g_legend(plot1) 
-# png(path2temp %+% "legend.png")
-# grid.draw(legend) 
-# dev.off()
+plot.grid <- grid.arrange(plot3,legend, plot1, plot2, nrow=2,ncol=2, heights=c(5,13),widths=c(13,5))
+ggsave(plot.grid,file=path2temp %+% "CrossPlot.png",height=15,width=15, units = "in")
+
+
 
 
 # 

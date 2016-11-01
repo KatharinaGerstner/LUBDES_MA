@@ -24,7 +24,7 @@
 ### 08.1. define list of moderators
 ###########################################################################
 
-mods.Richness <- c("Species.Group","LUI.range.level","Product","landuse_history", "main_climate", paste("LUI.range.level:",c("Species.Group","Product","landuse_history", "main_climate"),sep=""),"landuse_history:main_climate")
+mods.Richness <- c("Species.Group","LUI.range.level","Product","landuse_history", "main_climate", paste("LUI.range.level:",c("Species.Group","Product","landuse_history", "main_climate"),sep=""))
 modelDataRichness <- ES.frame.richness[,c('Log.RR','Log.RR.Var',paste(mods.Richness[1:5],sep=","),
                                           'Case.ID','Study.ID','Study.Case','Low.LUI','High.LUI')]
 # modelDataRichness <- na.omit(modelDataRichness)
@@ -38,11 +38,11 @@ modelDataYield <- ES.frame.yield[,c('Log.RR','Log.RR.Var',paste(mods.Yield[1:4],
 ### 08.2. Fit models for richness and yield
 ###########################################################################
 
-### set reference level to the most common level, i.e.
-### for richness: timber-non-woody.plants-temp.boreal.forest
-### for yield: timber-temp.boreal.forest
-setRefToMostCommonLevel <- function(f) { 
-  f <- as.factor(f) 
+## set reference level to the most common level, i.e.
+## for richness: timber-non-woody.plants-temp.boreal.forest
+## for yield: timber-temp.boreal.forest
+setRefToMostCommonLevel <- function(f) {
+  f <- as.factor(f)
   t <- table(f)
   relevel(f,ref=as.integer(which(t>=max(t))[[1]]))
 }
@@ -79,8 +79,8 @@ rma.mv.func <- function(df, moderators, fit.method)
 ### store models in a list
 Richness.MA.model <- vector("list", length=10)
 Yield.MA.model <- vector("list", length=6)
-names(Richness.MA.model) <- c("None","LUI","LUI.SGP","LUI.SG","LUI.P","SGP","SG","P","Full","Select")
-names(Yield.MA.model) <- c("None","LUI","LUI.P","P","Full","Select")
+names(Richness.MA.model) <- c("None","LUI","LUI.SGP","LUI.SG","LUI.P","SGP","SG","P","Full")
+names(Yield.MA.model) <- c("None","LUI","LUI.P","P","Full")
 
 ### Analysis for richness
 Richness.MA.model[["None"]] <- rma.mv.func(df=modelDataRichness, moderators=c(1), fit.method="REML")
@@ -92,53 +92,15 @@ Richness.MA.model[["LUI.P"]] <- rma.mv.func(df=modelDataRichness, moderators=c(-
 Richness.MA.model[["SGP"]] <- rma.mv.func(df=modelDataRichness, moderators=c(-1,"Product", "Species.Group", "Species.Group:Product"), fit.method="REML")
 Richness.MA.model[["SG"]] <- rma.mv.func(df=modelDataRichness, moderators=c(-1,"Species.Group"), fit.method="REML")
 Richness.MA.model[["P"]] <- rma.mv.func(df=modelDataRichness, moderators=c(-1,"Product"), fit.method="REML")
-Richness.MA.model[["Full"]] <- rma.mv.func(df=modelDataRichness, moderators=c(-1,"LUI.range.level", "Product", "Species.Group", "landuse_history","main_climate", "LUI.range.level:Product", "LUI.range.level:Species.Group","LUI.range.level:main_climate", "main_climate:landuse_history","Species.Group:Product"), fit.method="REML")
-model2select <- try(rma.mv(yi=Log.RR, V=M.matrix(modelDataRichness)+diag(modelDataRichness$Log.RR.Var), 
-                       mods=~LUI.range.level + Product + Species.Group + landuse_history + main_climate + LUI.range.level:Product + LUI.range.level:Species.Group + LUI.range.level:landuse_history + LUI.range.level:main_climate + Species.Group:Product + landuse_history:main_climate,
-                       random = list(~1|Study.Case, ~1|Study.ID),
-                       slab=paste(Study.Case, Low.LUI, High.LUI,sep="_"),
-                       method="ML", tdist=F, level=95, digits=4,data=modelDataRichness))
-
-if(inherits(model2select, "try-error")){
-  model2select <- rma.mv(yi=Log.RR, V=M.matrix(modelDataRichness)+diag(modelDataRichness$Log.RR.Var), 
-                         mods=~LUI.range.level + Product + Species.Group + landuse_history + main_climate + LUI.range.level:Product + LUI.range.level:Species.Group + LUI.range.level:landuse_history + LUI.range.level:main_climate + Species.Group:Product + landuse_history:main_climate,
-                         random = list(~1|Study.Case, ~1|Study.ID),
-                         slab=paste(Study.Case, Low.LUI, High.LUI,sep="_"),
-                         method="ML", tdist=F, level=95, digits=4,data=modelDataRichness,
-                         control=list(optimizer="optim", optmethod="BFGS"))
-}
-
-              
-model.select <- RMASelect(model2select)
-print(model.select$call$mods[[2]])
-Richness.MA.model[["Select"]] <- rma.mv.func(df=modelDataRichness, moderators=c(-1,model.select$call$mods[[2]]), fit.method="REML")
+Richness.MA.model[["Full"]] <- rma.mv.func(df=modelDataRichness, moderators=c(-1,"LUI.range.level", "Product", "Species.Group", "landuse_history","main_climate", "LUI.range.level:Product", "LUI.range.level:Species.Group","LUI.range.level:main_climate","Species.Group:Product"), fit.method="REML")
 
 ### Analysis for yield
 Yield.MA.model[["None"]] <- rma.mv.func(df=modelDataYield, moderators=c(1), fit.method="REML")
 Yield.MA.model[["LUI"]] <- rma.mv.func(df=modelDataYield, moderators=c(-1,"LUI.range.level"), fit.method="REML")
-#Yield.MA.model[["Context"]] <- rma.mv.func(df=modelDataYield, moderators=c(-1,"Product","landuse_history","main_climate","landuse_history:main_climate"), fit.method="REML")
+#Yield.MA.model[["Context"]] <- rma.mv.func(df=modelDataYield, moderators=c("Product","landuse_history","main_climate","landuse_history:main_climate"), fit.method="REML")
 Yield.MA.model[["LUI.P"]] <- rma.mv.func(df=modelDataYield, moderators=c(-1,"LUI.range.level", "Product", "LUI.range.level:Product"), fit.method="REML")
 Yield.MA.model[["P"]] <- rma.mv.func(df=modelDataYield, moderators=c(-1,"Product"), fit.method="REML")
-Yield.MA.model[["Full"]] <- rma.mv.func(df=modelDataYield, moderators=c(-1,"LUI.range.level", "Product", "landuse_history","main_climate", "LUI.range.level:Product","LUI.range.level:main_climate","LUI.range.level:landuse_history", "main_climate:landuse_history"), fit.method="REML")
-model2select <- try(rma.mv(yi=Log.RR, V=M.matrix(modelDataYield)+diag(modelDataYield$Log.RR.Var), 
-                           mods=~LUI.range.level + Product + landuse_history + main_climate + LUI.range.level:Product + LUI.range.level:landuse_history + LUI.range.level:main_climate + landuse_history:main_climate,
-                           random = list(~1|Study.Case, ~1|Study.ID),
-                           slab=paste(Study.Case, Low.LUI, High.LUI,sep="_"),
-                           method="ML", tdist=F, level=95, digits=4,data=modelDataYield))
-
-if(inherits(model2select, "try-error")){
-  model2select <- rma.mv(yi=Log.RR, V=M.matrix(modelDataYield)+diag(modelDataYield$Log.RR.Var), 
-                         mods=~LUI.range.level + Product + landuse_history + main_climate + LUI.range.level:Product + LUI.range.level:landuse_history + LUI.range.level:main_climate + landuse_history:main_climate,
-                         random = list(~1|Study.Case, ~1|Study.ID),
-                         slab=paste(Study.Case, Low.LUI, High.LUI,sep="_"),
-                         method="ML", tdist=F, level=95, digits=4,data=modelDataYield,
-                         control=list(optimizer="optim", optmethod="BFGS"))
-}
-
-model.select <- RMASelect(model2select)
-print(model.select$call$mods[[2]])
-Yield.MA.model[["Select"]] <- rma.mv.func(df=modelDataYield, moderators=c(-1,model.select$call$mods[[2]]), fit.method="REML")
-
+Yield.MA.model[["Full"]] <- rma.mv.func(df=modelDataYield, moderators=c(-1,"LUI.range.level", "Product", "landuse_history","main_climate", "LUI.range.level:Product","LUI.range.level:main_climate","LUI.range.level:landuse_history"), fit.method="REML")
 
 ###########################################################################
 ### 08.3. extract fit statistics
@@ -179,6 +141,44 @@ fit.tab.yield$deltaBIC <- fit.tab.yield$BIC - min(fit.tab.yield$BIC)
 write.csv(fit.tab.richness[,c("model","deltaAICc","deltaBIC","QM","QMp","QE","R2")],file=path2temp %+% "fit.tab.richness.csv",row.names=F)
 write.csv(fit.tab.yield[,c("model","deltaAICc","deltaBIC","QM","QMp","QE","R2")],file=path2temp %+% "fit.tab.yield.csv",row.names=F)
 
+# model2select <- try(rma.mv(yi=Log.RR, V=M.matrix(modelDataYield)+diag(modelDataYield$Log.RR.Var), 
+#                            mods=~LUI.range.level + Product + landuse_history + main_climate + LUI.range.level:Product + LUI.range.level:landuse_history + LUI.range.level:main_climate + landuse_history:main_climate,
+#                            random = list(~1|Study.Case, ~1|Study.ID),
+#                            slab=paste(Study.Case, Low.LUI, High.LUI,sep="_"),
+#                            method="ML", tdist=F, level=95, digits=4,data=modelDataYield))
+# 
+# if(inherits(model2select, "try-error")){
+#   model2select <- rma.mv(yi=Log.RR, V=M.matrix(modelDataYield)+diag(modelDataYield$Log.RR.Var), 
+#                          mods=~LUI.range.level + Product + landuse_history + main_climate + LUI.range.level:Product + LUI.range.level:landuse_history + LUI.range.level:main_climate + landuse_history:main_climate,
+#                          random = list(~1|Study.Case, ~1|Study.ID),
+#                          slab=paste(Study.Case, Low.LUI, High.LUI,sep="_"),
+#                          method="ML", tdist=F, level=95, digits=4,data=modelDataYield,
+#                          control=list(optimizer="optim", optmethod="BFGS"))
+# }
+# 
+# model.select <- RMASelect(model2select)
+# print(model.select$call$mods[[2]])
+# Yield.MA.model[["Select"]] <- rma.mv.func(df=modelDataYield, moderators=c(model.select$call$mods[[2]]), fit.method="REML")
+# 
+# model2select <- try(rma.mv(yi=Log.RR, V=M.matrix(modelDataRichness)+diag(modelDataRichness$Log.RR.Var), 
+#                        mods=~LUI.range.level + Product + Species.Group + landuse_history + main_climate + LUI.range.level:Product + LUI.range.level:Species.Group + LUI.range.level:landuse_history + LUI.range.level:main_climate + Species.Group:Product + landuse_history:main_climate,
+#                        random = list(~1|Study.Case, ~1|Study.ID),
+#                        slab=paste(Study.Case, Low.LUI, High.LUI,sep="_"),
+#                        method="ML", tdist=F, level=95, digits=4,data=modelDataRichness))
+# 
+# if(inherits(model2select, "try-error")){
+#   model2select <- rma.mv(yi=Log.RR, V=M.matrix(modelDataRichness)+diag(modelDataRichness$Log.RR.Var), 
+#                          mods=~LUI.range.level + Product + Species.Group + landuse_history + main_climate + LUI.range.level:Product + LUI.range.level:Species.Group + LUI.range.level:landuse_history + LUI.range.level:main_climate + Species.Group:Product + landuse_history:main_climate,
+#                          random = list(~1|Study.Case, ~1|Study.ID),
+#                          slab=paste(Study.Case, Low.LUI, High.LUI,sep="_"),
+#                          method="ML", tdist=F, level=95, digits=4,data=modelDataRichness,
+#                          control=list(optimizer="optim", optmethod="BFGS"))
+# }
+# 
+#               
+# model.select <- RMASelect(model2select)
+# print(model.select$call$mods[[2]])
+# Richness.MA.model[["Select"]] <- rma.mv.func(df=modelDataRichness, moderators=c(model.select$call$mods[[2]]), fit.method="REML")
 ## estimation of R² according to Nakagaw&Schielzeth2012 for LMM, however this does not account for the weights in contrast to the heterogeneity statistics (cf Koricheva et al. 2013)
 # var.fixed.richness <- lapply(Richness.MA.model,function(x) {ifelse(length(coef(x))==1,0,var(coef(x)))})
 # var.fixed.yield <- lapply(Yield.MA.model,function(x) {ifelse(length(coef(x))==1,0,var(coef(x)))})

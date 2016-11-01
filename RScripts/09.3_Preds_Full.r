@@ -9,9 +9,9 @@
 ############################################################################
 
 ############################################################################
-### 09.3.1. Predictions for richness for model "select"
+### 09.3.1. Predictions for richness for model "full"
 ############################################################################
-model <- Richness.MA.model[["Select"]]
+model <- Richness.MA.model[["Full"]]
 
 newdat.richness <- expand.grid(LUI.range.level=levels(modelDataRichness$LUI.range.level),
                                Product = levels(modelDataRichness$Product),
@@ -37,7 +37,7 @@ newdat.richness <- subset(newdat.richness,n.richness>0)
 ############################################################################
 ### 09.3.2. Predictions for yield for model "select"
 ############################################################################
-model <- Yield.MA.model[["Select"]]
+model <- Yield.MA.model[["Full"]]
 
 newdat.yield <- expand.grid(LUI.range.level=levels(modelDataYield$LUI.range.level),
                             Product = levels(modelDataYield$Product),
@@ -83,6 +83,6 @@ newdat.select$CI95.perc.yield.change <- "[" %+% round(newdat.select$perc.yield.c
 write.csv(newdat.select[,c("LUI.range.level",  "Product",  "Species.Group",	"landuse_history",	"main_climate",
                         "n.richness", "perc.rich.change",  "CI95.perc.rich.change",
                         "n.yield", "perc.yield.change","CI95.perc.yield.change")],
-          file=path2temp %+% "preds.select.csv",row.names=F)
+          file=path2temp %+% "preds.full.csv",row.names=F)
 
 #print(xtable(newdat.select, caption="Response ratios for the selected model and available evidence"),type="latex",include.rownames=F)

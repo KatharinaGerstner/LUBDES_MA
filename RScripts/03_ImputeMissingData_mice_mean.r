@@ -81,26 +81,34 @@ save(dataimp,file=path2temp %+% "dataimp.Rdata")
 ###########################################################################
 ## richness
 load(path2temp %+% "imputed.SD.richness.Rdata") # temp, temp.richness
+nchains <- 50
+richness.mean.imp <- data.frame(.id=unique(temp$.id[temp$is.imputed=="yes"]),mean.imp=rowMeans(matrix(temp$richness.SD[temp$is.imputed=="yes"], ncol=nchains, byrow=F)))
 imp.richness <- ggplot() +
   geom_point(aes(x=.id,y=richness.SD),color="red",alpha=0.3,data=temp[temp$is.imputed=="yes",]) +
   geom_point(aes(x=richness.mean.imp$.id,y=richness.mean.imp$mean.imp),size=2) +
   theme(axis.text.x = element_text(angle = 90, hjust = 1)) +
-  ylab("SD(species richness)") + scale_x_discrete("",labels=c())
-print(imp.richness)
-ggsave(imp.richness, file=path2temp %+% "imputed.SD.richness.png",height=5,width=10)
+  ylab("SD(species richness)") + scale_x_discrete("",labels=c()) +
+  theme_lubdes()
+# print(imp.richness)
+# ggsave(imp.richness, file=path2temp %+% "imputed.SD.richness.png",height=5,width=10)
 
 
 ## yield
 load(path2temp %+% "imputed.SD.yield.Rdata") # temp, temp.yield
+nchains <- 50
+yield.mean.imp <- data.frame(.id=unique(temp$.id[temp$is.imputed=="yes"]),mean.imp=rowMeans(matrix(temp$yield.SD[temp$is.imputed=="yes"], ncol=nchains, byrow=F)))
 imp.yield <- ggplot() +
   geom_point(aes(x=.id,y=yield.SD),color="red",alpha=0.3,data=temp[temp$is.imputed=="yes",]) +
   geom_point(aes(x=yield.mean.imp$.id,y=yield.mean.imp$mean.imp),size=2) +
   theme(axis.text.x = element_text(angle = 90, hjust = 1)) +
-  ylab("SD(yield)") + scale_x_discrete("",labels=c())
-print(imp.yield)
-ggsave(imp.yield, file=path2temp %+% "imputed.SD.yield.png",height=5,width=10)
+  ylab("SD(yield)") + scale_x_discrete("",labels=c()) + 
+  theme_lubdes()
+# print(imp.yield)
+# ggsave(imp.yield, file=path2temp %+% "imputed.SD.yield.png",height=5,width=10)
 
-
+png(file = path2temp %+% "imputed.SD.png", width = 800, height = 500)
+grid.arrange(imp.richness,imp.yield,nrow=2,heights=c(1,1))
+dev.off()
 #### RESTERAMPE
 # 
 # par(mfrow=c(2,2))
