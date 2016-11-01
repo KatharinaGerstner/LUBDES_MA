@@ -58,10 +58,10 @@ rma.mv.func <- function(df, moderators, fit.method)
 {
   mods.formula <- as.formula("~" %+% paste(moderators,collapse="+"))
   fm <- try(rma.mv(yi=Log.RR, V=M.matrix(df)+diag(Log.RR.Var), 
-                   mods=mods.formula, 
-                   random = list(~1|Study.Case, ~1|Study.ID),
-                   slab=paste(Study.Case, Low.LUI, High.LUI,sep="_"),
-                   method=fit.method, tdist=F, level=95, digits=4,data=df)) # tdist=TRUE slightly mimics the Knapp and Hartung (2003) method by using a t-distribution with k-p degrees of freedom for tests of individual coefficients and confidence intervals and an F-distribution with m and k-p degrees of freedom (p being the total number of model coefficients including the intercept if it is present) for the omnibus test statistic, hence adjust for multiple comparisons
+                  mods=mods.formula, 
+                  random = list(~1|Study.Case, ~1|Study.ID),
+                  slab=paste(Study.Case, Low.LUI, High.LUI,sep="_"),
+                  method=fit.method, tdist=F, level=95, digits=4,data=df)) # tdist=TRUE slightly mimics the Knapp and Hartung (2003) method by using a t-distribution with k-p degrees of freedom for tests of individual coefficients and confidence intervals and an F-distribution with m and k-p degrees of freedom (p being the total number of model coefficients including the intercept if it is present) for the omnibus test statistic, hence adjust for multiple comparisons
   
   if(inherits(fm, "try-error")){
     fm <- rma.mv(yi=Log.RR, V=M.matrix(df)+diag(Log.RR.Var), 
