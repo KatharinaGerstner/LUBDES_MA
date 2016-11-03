@@ -130,29 +130,28 @@
 ############################################################################
 ### DATA PREPARATION
 ############################################################################
-set.list <-  .setwdntemp()
-path2temp <- set.list[[1]]
-path2wd <- set.list[[2]]
-
-### helper function to combine strings
-"%+%" <- function(x,y)paste(x,y,sep="")
-
+# set.list <-  .setwdntemp()
+# path2temp <- set.list[[1]]
+# path2wd <- set.list[[2]]
+# 
+# ### helper function to combine strings
+# "%+%" <- function(x,y)paste(x,y,sep="")
+# 
 ### load libraries, functions and google sheets 
 #source(path2wd %+% "-01_load+analyse_screeningtable.r")
-source(path2wd %+% "01_load_libraries_and_functions.r")
+#source(path2wd %+% "01_load_libraries_and_functions.r")
 #source(path2wd %+% "02_load_table_directly_from_google.R")
 
 ### Compile raw data
 #source(path2wd %+% "03_ImputeMissingData_mice_mean.r")
-load(file=path2temp %+% "SavedData.Rdata")
-source(path2wd %+% "04_CompileESframe.R")
-source(path2wd %+% "05_AddMapDataToESframe.R")
+#source(path2wd %+% "04_CompileESframe.R")
+#source(path2wd %+% "05_AddMapDataToESframe.R")
 # 
 ### some additional data preparation steps
-source(path2wd %+% "06_DataPreparation4Analysis.R")
+#source(path2wd %+% "06_DataPreparation4Analysis.R")
 
-save(data,dataimp,ES.frame,ES.frame.richness,ES.frame.yield,file=path2temp %+% "SavedData.Rdata")
-rm(list=objects()) # empty workspace, keep libraries loaded
+#save(data,dataimp,ES.frame,ES.frame.richness,ES.frame.yield,file=path2temp %+% "SavedData.Rdata")
+#rm(list=objects()) # empty workspace, keep libraries loaded
 
 ############################################################################
 ###  DATA ANALYSIS
@@ -188,12 +187,14 @@ load(path2temp %+% "Models.Rdata")
 
 ### cross plots for LUI range level and forest plots for models 
 source(path2wd %+% "09.1_Plot_model_coeffs.r") 
+source(path2wd %+% "09.1_Plot_model_coeffs_equidist.r") 
 
 ### Mapping effects of LUI on richness/yield using the LUI.SGP model
 source(path2wd %+% "09.2_Plot_LUI.SGP_crossDiagrams.r") 
+source(path2wd %+% "09.2_Plot_LUI.SGP_crossDiagrams_equidist.r") 
 
 ### Table with coefficients for the selected model
-source(path2wd %+% "09.3_Preds_Select.r") 
+source(path2wd %+% "09.3_Preds_Full.r") 
 
 knit(path2wd %+% "Tables4Manuscript.Rmd")
 

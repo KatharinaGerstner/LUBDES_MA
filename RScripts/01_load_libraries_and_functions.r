@@ -52,7 +52,45 @@ rm(needed_libs, usePackage)
 ###
 ### 
 ############################################################################
+############################################################################
+convert.log2equidist <- function(logRR.mean,logRR.ci.lb,logRR.ci.ub){
+  perc.change <- 100*(exp(logRR.mean)-1)
+  perc.change.ci.lb <- 100*(exp(logRR.ci.lb)-1)
+  perc.change.ci.ub <- 100*(exp(logRR.ci.ub)-1)
+  CI95.perc.change <- "[" %+% round(perc.change.ci.lb,digits=2) %+% "," %+%  round(perc.change.ci.ub,digits=2) %+% "]"
 
+  return(data.frame(perc.change,perc.change.ci.lb,perc.change.ci.ub,CI95.perc.change))
+  }
+
+
+############################################################################
+rename.factor.levels <- function(dat){
+  if(!is.null(levels(dat$LUI.range.level))){
+    levels(dat$LUI.range.level)[levels(dat$LUI.range.level)=="low-low"]  <- "Low-low"
+    levels(dat$LUI.range.level)[levels(dat$LUI.range.level)=="low-medium"]  <- "Low-medium"
+    levels(dat$LUI.range.level)[levels(dat$LUI.range.level)=="low-high"]  <- "Low-high"
+    levels(dat$LUI.range.level)[levels(dat$LUI.range.level)=="medium-medium"]  <- "Medium-medium"
+    levels(dat$LUI.range.level)[levels(dat$LUI.range.level)=="medium-high"]  <- "Medium-high"
+    levels(dat$LUI.range.level)[levels(dat$LUI.range.level)=="high-high"]  <- "High-high"
+    dat$LUI.range.level <- factor(dat$LUI.range.level)[drop=T] # drop unused levels
+  }
+
+  if(!is.null(levels(dat$Species.Group))){
+    levels(dat$Species.Group)[levels(dat$Species.Group)=="plants"] <- "Plants"
+    levels(dat$Species.Group)[levels(dat$Species.Group)=="vertebrates"]<-"Vertebrates"
+    levels(dat$Species.Group)[levels(dat$Species.Group)=="invertebrates"]<-"Invertebrates"
+    dat$Species.Group <- factor(dat$Species.Group)[drop=T] # drop unused levels
+  }
+  
+  if(!is.null(levels(dat$Product))){
+    levels(dat$Product)[levels(dat$Product)=="crop"]  <- "Crop"
+    levels(dat$Product)[levels(dat$Product)=="green fodder"]  <- "Green fodder"
+    levels(dat$Product)[levels(dat$Product)=="wood"]  <- "Wood"
+    dat$Product <- factor(dat$Product)[drop=T] # drop unused levels
+  }
+
+  return(dat) 
+}
 
 
 ############################################################################

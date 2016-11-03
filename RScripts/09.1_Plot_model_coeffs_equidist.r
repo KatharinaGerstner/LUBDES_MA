@@ -66,16 +66,18 @@ newdat.GM <- data.frame(LUI.range.level="Grand mean",
 newdat <- join_all(list(newdat.GM,newdat),type="full")
 newdat$CI95.richness <- "[" %+% round(newdat$logRR.richness.ci.lb,digits=2) %+% "," %+%  round(newdat$logRR.richness.ci.ub,digits=2) %+% "]"
 newdat$CI95.yield <- "[" %+% round(newdat$logRR.yield.ci.lb,digits=2) %+% "," %+%  round(newdat$logRR.yield.ci.ub,digits=2) %+% "]" 
+newdat[,c("perc.rich.change","perc.rich.change.ci.lb","perc.rich.change.ci.ub","CI95.perc.rich.change")] <- convert.log2equidist(newdat$logRR.richness,newdat$logRR.richness.ci.lb,newdat$logRR.richness.ci.ub)
+newdat[,c("perc.yield.change","perc.yield.change.ci.lb","perc.yield.change.ci.ub","CI95.perc.yield.change")] <- convert.log2equidist(newdat$logRR.yield,newdat$logRR.yield.ci.lb,newdat$logRR.yield.ci.ub)
 
-newdat$perc.rich.change <- 100*(exp(newdat$logRR.richness)-1)
-newdat$perc.rich.change.ci.lb <- 100*(exp(newdat$logRR.richness.ci.lb)-1)
-newdat$perc.rich.change.ci.ub <- 100*(exp(newdat$logRR.richness.ci.ub)-1)
-newdat$CI95.perc.rich.change <- "[" %+% round(newdat$perc.rich.change.ci.lb,digits=2) %+% "," %+%  round(newdat$perc.rich.change.ci.ub,digits=2) %+% "]"
+# newdat$perc.rich.change <- 100*(exp(newdat$logRR.richness)-1)
+# newdat$perc.rich.change.ci.lb <- 100*(exp(newdat$logRR.richness.ci.lb)-1)
+# newdat$perc.rich.change.ci.ub <- 100*(exp(newdat$logRR.richness.ci.ub)-1)
+# newdat$CI95.perc.rich.change <- "[" %+% round(newdat$perc.rich.change.ci.lb,digits=2) %+% "," %+%  round(newdat$perc.rich.change.ci.ub,digits=2) %+% "]"
 
-newdat$perc.yield.change <- 100*(exp(newdat$logRR.yield)-1)
-newdat$perc.yield.change.ci.lb <- 100*(exp(newdat$logRR.yield.ci.lb)-1)
-newdat$perc.yield.change.ci.ub <- 100*(exp(newdat$logRR.yield.ci.ub)-1)
-newdat$CI95.perc.yield.change <- "[" %+% round(newdat$perc.yield.change.ci.lb,digits=2) %+% "," %+%  round(newdat$perc.yield.change.ci.ub,digits=2) %+% "]"
+# newdat$perc.yield.change <- 100*(exp(newdat$logRR.yield)-1)
+# newdat$perc.yield.change.ci.lb <- 100*(exp(newdat$logRR.yield.ci.lb)-1)
+# newdat$perc.yield.change.ci.ub <- 100*(exp(newdat$logRR.yield.ci.ub)-1)
+# newdat$CI95.perc.yield.change <- "[" %+% round(newdat$perc.yield.change.ci.lb,digits=2) %+% "," %+%  round(newdat$perc.yield.change.ci.ub,digits=2) %+% "]"
 
 newdat <- rename.factor.levels(newdat)
 write.csv(newdat[,c("LUI.range.level", 
@@ -88,9 +90,8 @@ write.csv(newdat[,c("LUI.range.level",
 #ci.lb <- yi - qnorm(alpha/2, lower.tail=FALSE) * sei
 #ci.ub <- yi + qnorm(alpha/2, lower.tail=FALSE) * sei
 
-seqBreaks <- log(c(0.6,0.8,0.9,1,1.25,1.5,1.75,2))
-seqLabels <- 100*(exp(seqBreaks)-1)
-
+seqBreaks <- seq(-0.5,2,by=0.25)# c(0.6,0.8,0.9,1,1.25,1.5,1.75,2)
+seqLabels <- 100*seqBreaks
 plot.richness <- ggplot(data=newdat) + 
   geom_vline(aes(xintercept=0), linetype="twodash",size=0.6) +
   geom_errorbarh(aes(x=perc.rich.change, y=LUI.range.level, 

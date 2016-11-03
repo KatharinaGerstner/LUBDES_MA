@@ -300,18 +300,20 @@ write.csv(newdat.all[,c("Species.Group","Product","LUI.range.level",
 ### 09.2.4. Map predictions facetted by Product and/or Species.Group
 ############################################################################
 
-seqBreaks <- log(sapply(-2:7,function(x) 2^x))
-seqLabels <- 100*(exp(seqBreaks)-1)
+# seqBreaks <- log(sapply(-2:7,function(x) 2^x))
+# seqLabels <- 100*(exp(seqBreaks)-1)
+seqBreaks <- seq(-1,2,by=0.5)# c(0.6,0.8,0.9,1,1.25,1.5,1.75,2)
+seqLabels <- 100*seqBreaks
 
 ### plot 1 with legend
 plot1 <- ggplot(data=newdat.LUI.SGP) + 
   geom_hline(aes(yintercept=0), linetype="twodash",size=0.6) + geom_vline(aes(xintercept=0), linetype="twodash",size=0.6) +
-  geom_point(aes(x=logRR.yield, y=logRR.richness, color=LUI.range.level), size=3) +
-  geom_pointrange(aes(x=logRR.yield, y=logRR.richness, ymin=logRR.richness - (1.96*logRR.richness.se), 
-                      ymax=logRR.richness + (1.96*logRR.richness.se),color=LUI.range.level), size=1.3) +
-  geom_segment(aes(x=logRR.yield - (1.96*logRR.yield.se), xend=logRR.yield + (1.96*logRR.yield.se), y = logRR.richness, yend = logRR.richness, color=LUI.range.level),size=1.2) +
-  scale_y_continuous(labels=seqLabels,breaks=seqBreaks,limits=c(log(0.4),log(2.05)), oob = squish, expand=c(0,0)) + 
-  scale_x_continuous(labels=seqLabels,breaks=seqBreaks,limits=c(log(0.3),log(3.25)), oob = squish, expand=c(0,0)) +
+  geom_point(aes(x=perc.yield.change, y=perc.rich.change, color=LUI.range.level), size=2.5) +
+  geom_pointrange(aes(x=perc.yield.change, y=perc.rich.change, ymin=perc.rich.change.ci.lb, 
+                      ymax=perc.rich.change.ci.ub,color=LUI.range.level), size=1.3) +
+  geom_segment(aes(x=perc.yield.change.ci.lb, xend=perc.yield.change.ci.ub, y = perc.rich.change, yend = perc.rich.change, color=LUI.range.level),size=1.2) +
+  scale_y_continuous(breaks=seqLabels,limits=c(-65,90), oob = squish, expand=c(0,0)) + 
+  scale_x_continuous(breaks=seqLabels,limits=c(-75,140), oob = squish, expand=c(0,0)) +
   scale_color_manual(name="",values=c("Low-low"='#2b83ba',"Medium-medium"='#008837',"High-high"='#abdda4',"Low-medium"='#fdae61',"Medium-high"='#d7191c',"Low-high"='#7b3294',"Grand mean"="black"),labels=levels(newdat.LUI.SGP$LUI.range.level)) +
   ylab("% Richness difference") + xlab("% Yield difference") + 
   facet_grid(Species.Group~Product) + 
@@ -335,29 +337,29 @@ dev.off()
 ### plot1 without legend
 plot1 <- ggplot(data=newdat.LUI.SGP) + 
   geom_hline(aes(yintercept=0), linetype="twodash",size=0.6) + geom_vline(aes(xintercept=0), linetype="twodash",size=0.6) +
-  geom_point(aes(x=logRR.yield, y=logRR.richness, color=LUI.range.level), size=3) +
-  geom_pointrange(aes(x=logRR.yield, y=logRR.richness, ymin=logRR.richness - (1.96*logRR.richness.se), 
-                      ymax=logRR.richness + (1.96*logRR.richness.se),color=LUI.range.level), size=1.3) +
-  geom_segment(aes(x=logRR.yield - (1.96*logRR.yield.se), xend=logRR.yield + (1.96*logRR.yield.se), y = logRR.richness, yend = logRR.richness, color=LUI.range.level),size=1.2) +
-  scale_y_continuous(labels=seqLabels,breaks=seqBreaks,limits=c(log(0.4),log(2.05)), oob = squish, expand=c(0,0)) + 
-  scale_x_continuous(labels=seqLabels,breaks=seqBreaks,limits=c(log(0.3),log(3.25)), oob = squish, expand=c(0,0)) +
+  geom_point(aes(x=perc.yield.change, y=perc.rich.change, color=LUI.range.level), size=2.5) +
+  geom_pointrange(aes(x=perc.yield.change, y=perc.rich.change, ymin=perc.rich.change.ci.lb, 
+                      ymax=perc.rich.change.ci.ub,color=LUI.range.level), size=1.3) +
+  geom_segment(aes(x=perc.yield.change.ci.lb, xend=perc.yield.change.ci.ub, y = perc.rich.change, yend = perc.rich.change, color=LUI.range.level),size=1.2) +
+  scale_y_continuous(breaks=seqLabels,limits=c(-65,90), oob = squish, expand=c(0,0)) + 
+  scale_x_continuous(breaks=seqLabels,limits=c(-75,140), oob = squish, expand=c(0,0)) +
   scale_color_manual(name="",values=c("Low-low"='#2b83ba',"Medium-medium"='#008837',"High-high"='#abdda4',"Low-medium"='#fdae61',"Medium-high"='#d7191c',"Low-high"='#7b3294',"Grand mean"="black"),labels=levels(newdat.LUI.SGP$LUI.range.level)) +
   ylab("% Richness difference") + xlab("% Yield difference") + 
   facet_grid(Species.Group~Product) + 
   theme_lubdes(legend.position="bottom",rel.text.size=1.8) +
   theme(strip.text.x = element_blank(),strip.text.y = element_blank(),legend.key.size=unit(1.6,"line")) +
-  #  guides(color=guide_legend(direction="vertical"))
+  guides(color=guide_legend(direction="vertical")) +
   guides(color=F)
 
 plot2 <- ggplot(data=newdat.LUI.SG) + 
   geom_hline(aes(yintercept=0), linetype="twodash",size=0.6) + geom_vline(aes(xintercept=0), linetype="twodash",size=0.6) +
-  geom_point(aes(x=logRR.yield, y=logRR.richness, color=LUI.range.level), size=2) +
-  geom_pointrange(aes(x=logRR.yield, y=logRR.richness, ymin=logRR.richness - (1.96*logRR.richness.se), 
-                      ymax=logRR.richness + (1.96*logRR.richness.se),color=LUI.range.level), size=1.3) +
-  geom_segment(aes(x=logRR.yield - (1.96*logRR.yield.se), xend=logRR.yield + (1.96*logRR.yield.se), y = logRR.richness, yend = logRR.richness, color=LUI.range.level),size=1) +
-  scale_y_continuous(labels=seqLabels,breaks=seqBreaks,limits=c(log(0.4),log(2.05)), oob = squish, expand=c(0,0)) + 
-  scale_x_continuous(labels=seqLabels,breaks=seqBreaks,limits=c(log(0.3),log(3.25)), oob = squish, expand=c(0,0)) +
-  scale_color_manual(name="",values=c("Low-low"='#2b83ba',"Medium-medium"='#008837',"High-high"='#abdda4',"Low-medium"='#fdae61',"Medium-high"='#d7191c',"Low-high"='#7b3294',"Grand mean"="black"),labels=levels(newdat.LUI.SG$LUI.range.level)) +
+  geom_point(aes(x=perc.yield.change, y=perc.rich.change, color=LUI.range.level), size=2.5) +
+  geom_pointrange(aes(x=perc.yield.change, y=perc.rich.change, ymin=perc.rich.change.ci.lb, 
+                      ymax=perc.rich.change.ci.ub,color=LUI.range.level), size=1.3) +
+  geom_segment(aes(x=perc.yield.change.ci.lb, xend=perc.yield.change.ci.ub, y = perc.rich.change, yend = perc.rich.change, color=LUI.range.level),size=1.2) +
+  scale_y_continuous(breaks=seqLabels,limits=c(-65,90), oob = squish, expand=c(0,0)) + 
+  scale_x_continuous(breaks=seqLabels,limits=c(-75,140), oob = squish, expand=c(0,0)) +
+  scale_color_manual(name="",values=c("Low-low"='#2b83ba',"Medium-medium"='#008837',"High-high"='#abdda4',"Low-medium"='#fdae61',"Medium-high"='#d7191c',"Low-high"='#7b3294',"Grand mean"="black"),labels=levels(newdat.LUI.SGP$LUI.range.level)) +
   ylab("") + xlab("") + 
   facet_grid(Species.Group~.) + 
   theme_lubdes(legend.position="bottom",rel.text.size=1.8) +
@@ -366,13 +368,13 @@ plot2 <- ggplot(data=newdat.LUI.SG) +
 
 plot3 <- ggplot(data=newdat.LUI.P) + 
   geom_hline(aes(yintercept=0), linetype="twodash",size=0.6) + geom_vline(aes(xintercept=0), linetype="twodash",size=0.6) +
-  geom_point(aes(x=logRR.yield, y=logRR.richness, color=LUI.range.level), size=2) +
-  geom_pointrange(aes(x=logRR.yield, y=logRR.richness, ymin=logRR.richness - (1.96*logRR.richness.se), 
-                      ymax=logRR.richness + (1.96*logRR.richness.se),color=LUI.range.level), size=1.3) +
-  geom_segment(aes(x=logRR.yield - (1.96*logRR.yield.se), xend=logRR.yield + (1.96*logRR.yield.se), y = logRR.richness, yend = logRR.richness, color=LUI.range.level),size=1) +
-  scale_y_continuous(labels=seqLabels,breaks=seqBreaks,limits=c(log(0.4),log(2.05)), oob = squish, expand=c(0,0)) + 
-  scale_x_continuous(labels=seqLabels,breaks=seqBreaks,limits=c(log(0.3),log(3.25)), oob = squish, expand=c(0,0)) +
-  scale_color_manual(name="",values=c("Low-low"='#2b83ba',"Medium-medium"='#008837',"High-high"='#abdda4',"Low-medium"='#fdae61',"Medium-high"='#d7191c',"Low-high"='#7b3294',"Grand mean"="black"),labels=levels(newdat.LUI.P$LUI.range.level)) +
+  geom_point(aes(x=perc.yield.change, y=perc.rich.change, color=LUI.range.level), size=2.5) +
+  geom_pointrange(aes(x=perc.yield.change, y=perc.rich.change, ymin=perc.rich.change.ci.lb, 
+                      ymax=perc.rich.change.ci.ub,color=LUI.range.level), size=1.3) +
+  geom_segment(aes(x=perc.yield.change.ci.lb, xend=perc.yield.change.ci.ub, y = perc.rich.change, yend = perc.rich.change, color=LUI.range.level),size=1.2) +
+  scale_y_continuous(breaks=seqLabels,limits=c(-65,90), oob = squish, expand=c(0,0)) + 
+  scale_x_continuous(breaks=seqLabels,limits=c(-75,140), oob = squish, expand=c(0,0)) +
+  scale_color_manual(name="",values=c("Low-low"='#2b83ba',"Medium-medium"='#008837',"High-high"='#abdda4',"Low-medium"='#fdae61',"Medium-high"='#d7191c',"Low-high"='#7b3294',"Grand mean"="black"),labels=levels(newdat.LUI.SGP$LUI.range.level)) +
   ylab("") + xlab("") + 
   facet_grid(.~Product) +
   theme_lubdes(legend.position="bottom",rel.text.size=1.8) +
@@ -380,7 +382,7 @@ plot3 <- ggplot(data=newdat.LUI.P) +
   guides(color=F)
 
 plot.grid <- grid.arrange(plot3,legend, plot1, plot2, nrow=2,ncol=2, heights=c(5,13),widths=c(13,5))
-ggsave(plot.grid,file=path2temp %+% "CrossPlot.png",height=10,width=15, units = "in")
+ggsave(plot.grid,file=path2temp %+% "CrossPlot_equidist.png",height=10,width=15, units = "in")
 
 
 

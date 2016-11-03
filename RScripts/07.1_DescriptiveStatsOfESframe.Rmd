@@ -36,8 +36,8 @@ knitr::opts_chunk$set(
     path2wd <- "/Users/Helen/LUBDES_MA/RScripts/"
     path2temp <- "/Users/Helen/tmp/" ##HP
   } else {
-    path2wd <- "C:/Users/hoppek/Documents/GitHub/LUBDES_MA/RScripts/" #KG
-    path2temp <- "C:/Users/hoppek/Documents/temp/" #KG 
+    path2wd <- "C:/Users/kg83hyby/Documents/GitHub/LUBDES_MA/RScripts/" #KG
+    path2temp <- "C:/Users/kg83hyby/Documents/temp/" #KG 
   }  
   return(list(path2temp,path2wd))
 }
@@ -51,8 +51,6 @@ path2wd <- set.list[[2]]
 
 source(path2wd %+% "01_load_libraries_and_functions.r")
 load(file=path2temp %+% "SavedData.Rdata")
-### some additional data preparation steps
-source(path2wd %+% "06_DataPreparation4Analysis.R")
 
 ```
 
@@ -237,7 +235,8 @@ ES.frame2plot <- ES.frame
   #subset(ES.frame, !(is.na(Richness.Log.RR.Var)) & Richness.Log.RR.Var>0 & !is.na(Yield.Log.RR.Var) & Yield.Log.RR.Var>0) 
 seqBreaks <- log(sapply(-2:7,function(x) 2^x))
 
-LUI.range.level = c("Low-low","Medium-medium","High-high","Low-medium","Medium-high","Low-high")
+ES.frame2plot <- rename.factor.levels(ES.frame2plot)
+LUI.range.level <- levels(ES.frame2plot$LUI.range.level)
 # x.max <- max(c(ES.frame2plot$Richness.Log.RR+1.96*sqrt(ES.frame2plot$Richness.Log.RR.Var),ES.frame2plot$Yield.Log.RR+1.96*sqrt(ES.frame2plot$Yield.Log.RR.Var)),na.rm=T)
 # x.min <- min(c(ES.frame2plot$Richness.Log.RR-1.96*sqrt(ES.frame2plot$Richness.Log.RR.Var),ES.frame2plot$Yield.Log.RR-1.96*sqrt(ES.frame2plot$Yield.Log.RR.Var)),na.rm=T)
 x.min <- log(0.05)
