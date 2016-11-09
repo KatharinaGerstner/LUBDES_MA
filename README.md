@@ -52,14 +52,14 @@ Overall structure of the modules is:
 06.2. remove columns not needed for the analysis, unify names  
 06.3. save rawdata as table in a word doc  
   
-07 07.1_DescriptiveStatsOfESFrame.Rmd  
+07 07_DescriptiveStatsOfESFrame.Rmd  
 07.1. Protocol structure and summary of variables in the ES.frames for richness and yield  
 07.2. Plot Histograms of all variables in the ES.frame   
 07.3. Plot maps of added data  
 07.4. Plot map of studies  
 07.5. Forest Plots of study.cases per LUI.range.level  
   
-08 08a_DataAnalysis.R  
+08 08_DataAnalysis.R  
 08.1. define list of moderators  
 08.2. Fit models for richness and yield  
 08.3. extract fit statistics  
@@ -74,13 +74,8 @@ Overall structure of the modules is:
 09.2.3. Join and save predictions for richness and yield  
 09.2.4. Map predictions facetted by Product and/or Species.Group  
   
-09 09.3_Preds_Select.r  
-09.3.1. Predictions for richness for model "select"  
-09.3.2. Predictions for yield for model "select"  
-09.3.3. join and save predictions for richness and yield for models "select"  
-  
-10 10_ModelDiagnostics.r  
-10.1. relationship residuals vs model fit, non-linear?, homogeneity of variances?   
-10.2. normality of resiuals  
-10.3. influential points  
+09 09.3_Preds_Full.r  
+09.3.1. Predictions for richness for model "Full"  
+09.3.2. Predictions for yield for model "Full"  
+09.3.3. join and save predictions for richness and yield for models "Full"  
   

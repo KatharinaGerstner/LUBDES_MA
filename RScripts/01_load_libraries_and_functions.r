@@ -30,7 +30,7 @@ needed_libs <- c("devtools",# needed for library googlesheets
                  "reshape2",
                  "knitr", # for knitting .Rmd-documents
                  "xtable",  # for saving tables as .doc
-                 "ncdf4", # for loading landuse history data
+                 "ncdf4" # for loading landuse history data
 )
 usePackage <- function(p) {
   if (!is.element(p, installed.packages()[,1]))

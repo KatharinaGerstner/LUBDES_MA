@@ -25,11 +25,11 @@ for(x in unique(ES.frame$Study.Case)){
   subset.richness <- subset(ES.frame.richness,Study.Case==x)
   subset.yield <- subset(ES.frame.yield,Study.Case==x)
   ## remove redundant cases
-  if (all(c("Low-medium","Low-high","Medium-high") %in% unique(subset.richness$LUI.range.level))){
-    ES.frame.richness <- ES.frame.richness[!(ES.frame.richness$Study.Case==x & ES.frame.richness$LUI.range.level=="Low-high"),]
+  if (all(c("low-medium","low-high","medium-high") %in% unique(subset.richness$LUI.range.level))){
+    ES.frame.richness <- ES.frame.richness[!(ES.frame.richness$Study.Case==x & ES.frame.richness$LUI.range.level=="low-high"),]
   }
-  if (all(c("Low-medium","Low-high","Medium-high") %in% unique(subset.yield$LUI.range.level))){
-    ES.frame.yield <- ES.frame.yield[!(ES.frame.yield$Study.Case==x & ES.frame.yield$LUI.range.level=="Low-high"),]
+  if (all(c("low-medium","low-high","medium-high") %in% unique(subset.yield$LUI.range.level))){
+    ES.frame.yield <- ES.frame.yield[!(ES.frame.yield$Study.Case==x & ES.frame.yield$LUI.range.level=="low-high"),]
   }
 }  
 
@@ -61,6 +61,6 @@ write.table(ES.frame.yield[,c("Study.Case","Longitude", "Latitude","LUI.range.le
 ### 06.3. save rawdata as table in a word doc
 ###########################################################################
 print(xtable(ES.frame.richness[,c("Study.Case","Longitude", "Latitude","LUI.range.level","Species.Group","Product","main_climate","landuse_history","ES.and.BD","Richness.Plot.Size","Log.RR","Log.RR.Var")]), type = "html", file=path2temp %+% "ES.frame.richness.doc", rownames=F) # save the HTML table as a .doc file
-print(xtable(ES.frame.yield[,c("Study.Case","Longitude", "Latitude","LUI.range.level","Product","main_climate","landuse_history", "LU.definition.and.ES","Yield.Unit.Type","Log.RR","Log.RR.Var")]), type = "html", file=path2temp %+% "ES.frame.yield.doc",, rownames=F) # save the HTML table as a .doc file
+print(xtable(ES.frame.yield[,c("Study.Case","Longitude", "Latitude","LUI.range.level","Product","main_climate","landuse_history", "LU.definition.and.ES","Yield.Unit.Type","Log.RR","Log.RR.Var")]), type = "html", file=path2temp %+% "ES.frame.yield.doc", rownames=F) # save the HTML table as a .doc file
 
 
