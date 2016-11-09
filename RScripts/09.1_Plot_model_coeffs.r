@@ -2,40 +2,43 @@
 ### Purpose of this skript module 09.1 is to:
 ###
 ### 09.1.1. plot raw data + grand mean
-### 09.1.2. plot LUI cross diagrams
+### 09.1.2. plot LUI forest plots
 ###
 ### Authors: KG, TN,...
 ############################################################################
 
-# seqBreaks <- log(sapply(-2:7,function(x) 2^x))
-# seqLabels <- 100*(exp(seqBreaks)-1) # labelling with percentage change  
-# 
-# ############################################################################
-# ### 09.1.1. plot raw data + grand mean
-# ############################################################################
-# newdat <- data.frame(1)
-# 
-# model <- Richness.MA.model[["None"]]
-# newdat$logRR.richness <- model$b
-# newdat$logRR.richness.se <- model$se
-# 
-# model <- Yield.MA.model[["None"]]
-# newdat$logRR.yield <- model$b
-# newdat$logRR.yield.se <- model$se
-# 
-# plot <- ggplot() +
-#   geom_hline(aes(yintercept=0), linetype="twodash",size=1.05) + geom_vline(aes(xintercept=0), linetype="twodash",size=1.05) +
-#   geom_point(data=ES.frame, aes(x=Yield.Log.RR, y=Richness.Log.RR),color="grey",alpha=0.5,size=2) +
-#   geom_point(data=newdat, aes(x=logRR.yield, y=logRR.richness), color="black", size=1.1) +
-#   geom_pointrange(data=newdat, aes(x=logRR.yield, y=logRR.richness, ymin=logRR.richness - (1.96*logRR.richness.se), 
-#                       ymax=logRR.richness + (1.96*logRR.richness.se)),color="black", size=1.2) +
-#   geom_segment(data=newdat, aes(x=logRR.yield - (1.96*logRR.yield.se), xend=logRR.yield + (1.96*logRR.yield.se), y = logRR.richness, yend = logRR.richness), color="black",size=1.2) +
-#   scale_y_continuous(labels=seqLabels,breaks=seqBreaks) + 
-#   scale_x_continuous(labels=seqLabels,breaks=seqBreaks) +
-#   ylab("% Richness difference") + xlab("% Yield difference") + labs(color='') + 
-#   theme_lubdes() 
-# ggsave(plot, file = path2temp %+% "Rawdata+GrandMean_rma.png", width = 16, height = 8, type = "cairo-png")
+seqBreaks <- log(sapply(-2:7,function(x) 2^x))
+seqLabels <- 100*(exp(seqBreaks)-1) # labelling with percentage change
 
+############################################################################
+### 09.1.1. plot raw data + grand mean
+############################################################################
+newdat <- data.frame(1)
+
+model <- Richness.MA.model[["None"]]
+newdat$logRR.richness <- model$b
+newdat$logRR.richness.se <- model$se
+
+model <- Yield.MA.model[["None"]]
+newdat$logRR.yield <- model$b
+newdat$logRR.yield.se <- model$se
+
+plot <- ggplot() +
+  geom_hline(aes(yintercept=0), linetype="twodash",size=1.05) + geom_vline(aes(xintercept=0), linetype="twodash",size=1.05) +
+  geom_point(data=ES.frame, aes(x=Yield.Log.RR, y=Richness.Log.RR),color="grey",alpha=0.5,size=2) +
+  geom_point(data=newdat, aes(x=logRR.yield, y=logRR.richness), color="black", size=1.1) +
+  geom_pointrange(data=newdat, aes(x=logRR.yield, y=logRR.richness, ymin=logRR.richness - (1.96*logRR.richness.se),
+                      ymax=logRR.richness + (1.96*logRR.richness.se)),color="black", size=1.2) +
+  geom_segment(data=newdat, aes(x=logRR.yield - (1.96*logRR.yield.se), xend=logRR.yield + (1.96*logRR.yield.se), y = logRR.richness, yend = logRR.richness), color="black",size=1.2) +
+  scale_y_continuous(labels=seqLabels,breaks=seqBreaks) +
+  scale_x_continuous(labels=seqLabels,breaks=seqBreaks) +
+  ylab("% Richness difference") + xlab("% Yield difference") + labs(color='') +
+  theme_lubdes()
+ggsave(plot, file = path2temp %+% "Rawdata+GrandMean_rma.png", width = 16, height = 8, type = "cairo-png")
+
+############################################################################
+### 09.1.2. plot LUI forest plots
+############################################################################
 ### predict for each covariate combination
 newdat <- expand.grid(LUI.range.level=levels(ES.frame$LUI.range.level))
 #newdat$level <- factor(newdat$level, levels = rev(levels(newdat$level)))

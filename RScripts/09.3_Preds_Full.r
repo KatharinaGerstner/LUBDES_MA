@@ -1,9 +1,9 @@
 ############################################################################
 ### Purpose of this skript module 09.3 is to:
 ###
-### 09.3.1. Predictions for richness for model "select"
-### 09.3.2. Predictions for yield for model "select"
-### 09.3.3. join and save predictions for richness and yield for models "select"
+### 09.3.1. Predictions for richness for model "full"
+### 09.3.2. Predictions for yield for model "full"
+### 09.3.3. join and save predictions for richness and yield for models "full"
 ###
 ### Authors: KG,...
 ############################################################################
@@ -35,7 +35,7 @@ newdat.richness[,c("logRR.richness","logRR.richness.se","logRR.richness.ci.lb","
 newdat.richness <- subset(newdat.richness,n.richness>0)
 
 ############################################################################
-### 09.3.2. Predictions for yield for model "select"
+### 09.3.2. Predictions for yield for model "full"
 ############################################################################
 model <- Yield.MA.model[["Full"]]
 
@@ -61,23 +61,22 @@ newdat.yield <- subset(newdat.yield,n.yield>0)
 
 
 ############################################################################
-### 09.3.3. join and save predictions for richness and yield for models "select"
+### 09.3.3. join and save predictions for richness and yield for models "full"
 ############################################################################
 
-newdat.select <- join_all(list(newdat.richness,newdat.yield),type="full")
-newdat.select$n.yield[is.na(newdat.select$n.yield)] <- 0
-newdat.select$n.richness[is.na(newdat.select$n.richness)] <- 0
-newdat.select$CI95.richness <- "[" %+% round(newdat.select$logRR.richness.ci.lb,digits=2) %+% "," %+%  round(newdat.select$logRR.richness.ci.ub,digits=2) %+% "]"
-newdat.select$CI95.yield <- "[" %+% round(newdat.select$logRR.yield.ci.lb,digits=2) %+% "," %+%  round(newdat.select$logRR.yield.ci.ub,digits=2) %+% "]" 
+newdat.full <- join_all(list(newdat.richness,newdat.yield),type="full")
+newdat.full$n.yield[is.na(newdat.full$n.yield)] <- 0
+newdat.full$n.richness[is.na(newdat.full$n.richness)] <- 0
+newdat.full$CI95.richness <- "[" %+% round(newdat.full$logRR.richness.ci.lb,digits=2) %+% "," %+%  round(newdat.full$logRR.richness.ci.ub,digits=2) %+% "]"
+newdat.full$CI95.yield <- "[" %+% round(newdat.full$logRR.yield.ci.lb,digits=2) %+% "," %+%  round(newdat.full$logRR.yield.ci.ub,digits=2) %+% "]" 
 
-newdat.select[,c("perc.rich.change","perc.rich.change.ci.lb","perc.rich.change.ci.ub","CI95.perc.rich.change")] <- convert.log2equidist(newdat.select$logRR.richness,newdat.select$logRR.richness.ci.lb,newdat.select$logRR.richness.ci.ub)
-newdat.select[,c("perc.yield.change","perc.yield.change.ci.lb","perc.yield.change.ci.ub","CI95.perc.yield.change")] <- convert.log2equidist(newdat.select$logRR.yield,newdat.select$logRR.yield.ci.lb,newdat.select$logRR.yield.ci.ub)
+newdat.full[,c("perc.rich.change","perc.rich.change.ci.lb","perc.rich.change.ci.ub","CI95.perc.rich.change")] <- convert.log2equidist(newdat.full$logRR.richness,newdat.full$logRR.richness.ci.lb,newdat.full$logRR.richness.ci.ub)
+newdat.full[,c("perc.yield.change","perc.yield.change.ci.lb","perc.yield.change.ci.ub","CI95.perc.yield.change")] <- convert.log2equidist(newdat.full$logRR.yield,newdat.full$logRR.yield.ci.lb,newdat.full$logRR.yield.ci.ub)
 
-newdat.select <- rename.factor.levels(newdat.select)
+newdat.full <- rename.factor.levels(newdat.full)
 
-write.csv(newdat.select[,c("LUI.range.level",  "Product",  "Species.Group",	"landuse_history",	"main_climate",
+write.csv(newdat.full[,c("LUI.range.level",  "Product",  "Species.Group",	"landuse_history",	"main_climate",
                         "n.richness", "perc.rich.change",  "CI95.perc.rich.change",
                         "n.yield", "perc.yield.change","CI95.perc.yield.change")],
           file=path2temp %+% "preds.full.csv",row.names=F)
 
-#print(xtable(newdat.select, caption="Response ratios for the selected model and available evidence"),type="latex",include.rownames=F)

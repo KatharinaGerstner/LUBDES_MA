@@ -17,8 +17,6 @@
 ### all lines should stay commented out, only temporarily set your wd
 ############################################################################
 
-#setwd("~/Dropbox/SESYNC-UFZ-sDiv-Call Biodiversity and Ecosystem Services/Meta-Analysis/papers_for_coding") #MB
-
 ############################################################################
 ### -02.2. create directory structure based on study IDs and place an empty note file within
 ### 

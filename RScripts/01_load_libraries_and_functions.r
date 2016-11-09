@@ -21,22 +21,16 @@ needed_libs <- c("devtools",# needed for library googlesheets
                  "gridExtra", # for arranging multiple plots
                  "scales", # for transformation of axes labels
                  "maptools", # for converting shp into data.frame using fortify() in ggplot
-#                 "rworldmap",
                  "raster",# for adding map data
-                 "rasterVis", # for plotting map data with levelplot(), needs version >0.35
                  "rgdal", # for loading map data
                  "rgeos",# dependency for rgdal
-                 "RColorBrewer",# fancy color schemes for plotting
                  "plyr",# for joining datasets
-                 "countrycode",# convert FAO country IDs to ISO3
                  "VennDiagram",
-                  "venneuler",
+                 "venneuler",
                  "reshape2",
-#                 "rjags", # for running bayesian models
                  "knitr", # for knitting .Rmd-documents
                  "xtable",  # for saving tables as .doc
-                  "ncdf4", # for loading landuse history data
-                  "rasterVis" #plotting maps
+                 "ncdf4", # for loading landuse history data
 )
 usePackage <- function(p) {
   if (!is.element(p, installed.packages()[,1]))
@@ -289,132 +283,3 @@ convertAreaUnits <- function(data, type=c("bd", "yield")){
   return(data)
 }
 
-### Sort transects and traps
-# SortTransectsTraps <- function(data){
-#   if(!("reported.area.of.BD" %in% names(data))){stop("There must be a column called 'reported.area.of.BD'")}
-#   
-#   new_units <- data$sampled.size.unit
-#   new_area <- as.numeric(data$sampled.area)
-#   
-#   transects <- c("points/transect", "transect", "transect (km)","transect (m)")
-#   new_units <- ifelse(new_units %in% transects, "transects", new_units)	
-#   new_area <- ifelse(new_units %in% transects, NA, new_area)
-#   
-#   traps <- c("traps", "traps (mistnets)")
-#   new_units <- ifelse(new_units %in% traps, "traps", new_units)	
-#   new_area <- ifelse(new_units %in% traps, NA, new_area)
-#   
-#   data$sampled.size.unit <- new_units
-#   data$sampled.area <- new_area
-#   
-#   return(data)
-# }
-
-# ############################################################################
-# ### standardize yield units (by HP, KG)
-# ############################################################################
-# 
-# convertYieldUnits <- function(data){
-#   if(!("yield.unit" %in% names(data))){stop("There must be a column called 'yield.unit'")}
-#   if(!("yield.mean" %in% names(data))){stop("There must be a column called 'yield.mean'")}
-#   
-#   new_units <- data$yield.unit  
-#   new_means <- data$yield.mean
-#   new_sd <- data$yield.SD
-#   
-#   ## getting rid of inconsistencies with names
-#   new_units <- ifelse(!is.na(new_units) & new_units == "cm grass height", "cm", new_units)
-#   new_units <- ifelse(!is.na(new_units) & new_units == "Mg/ha", "t/ha", new_units)
-#   new_units <- ifelse(!is.na(new_units) & new_units == "m³/ha/year", "m³/ha", new_units)
-#   
-#   
-#   new_means  <- ifelse(!is.na(new_units) & new_units == "cm", new_means/100, new_means)
-#   new_SD <- ifelse(!is.na(new_units) & new_units == "cm", new_SD/100, new_SD)
-#   new_units <- ifelse(!is.na(new_units) & new_units == "cm", "m", new_units)	
-#   
-#   new_means  <- ifelse(!is.na(new_units) & new_units == "kg/hm²a", new_means*10000, new_means)
-#   new_SD <- ifelse(!is.na(new_units) & new_units == "kg/hm²a", new_SD*10000, new_SD)
-#   new_units <- ifelse(!is.na(new_units) & new_units == "kg/hm²a", "kg/m²", new_units)
-#   
-#   new_means  <- ifelse(!is.na(new_units) & new_units == "m³/0.01 ha", new_means*100, new_means)
-#   new_SD  <- ifelse(!is.na(new_units) & new_units == "m³/0.01 ha", new_SD*100, new_SD)
-#   new_units <- ifelse(!is.na(new_units) & new_units == "m³/0.01 ha", "m³/ha", new_units)
-#   
-#   new_means  <- ifelse(!is.na(new_units) & new_units == "g/m²", new_means/1000, new_means)
-#   new_SD  <- ifelse(!is.na(new_units) & new_units == "g/m²", new_SD/1000, new_SD)
-#   new_units <- ifelse(!is.na(new_units) & new_units == "g/m²", "kg/m²", new_units)
-#   new_means  <- ifelse(!is.na(new_units) & new_units == "kg/m²", new_means*10, new_means)
-#   new_SD  <- ifelse(!is.na(new_units) & new_units == "kg/m²", new_SD*10, new_SD)
-#   new_units <- ifelse(!is.na(new_units) & new_units == "kg/m²", "t/ha", new_units)
-#   
-#   data$yield.unit <- new_units
-#   data$yield.mean <- new_means
-#   
-#   data$Yield.Unit.Type <- NA
-#   counts <- c("% conifer", "% fruit set", "% of trees of original volume removed","fruit/sq.m.", "treecover (%)", "trees/ha", "trees/year")
-#   mass <- c("g", "kg / animal / day", "kg/tree", "t/ha")
-#   volume <- c("m³/ha")
-#   area <- c("m", "m²/ha" )
-#   data$Yield.Unit.Type[data$yield.unit %in% counts] <- "Count/area"
-#   data$Yield.Unit.Type[data$yield.unit %in% mass] <- "Mass/area"
-#   data$Yield.Unit.Type[data$yield.unit %in% volume] <- "Volume/area"
-#   data$Yield.Unit.Type[data$yield.unit %in% area] <- "Area/area"
-#   
-#   return(data)
-# }
-# 
-# ############################################################################
-# ### RMA select function (by HP and TN)
-# ############################################################################
-# RMASelect <- function(model){
-#   
-#   allTerms <- trim(strsplit(paste(model$call$mods)[2],'[+]')[[1]])
-#   
-#   stats <- data.frame(terms=allTerms,df=NA,LR=NA,P=NA)
-#   
-#   currentModel <- model
-#   currentTerms <- allTerms
-#   
-#   while(TRUE){
-#     LRTs <- numeric(length(currentTerms))
-#     dfs <- character(length(currentTerms))
-#     Ps <- numeric(length(currentTerms))
-#     
-#     t<-1
-#     for (term in currentTerms){
-#       
-#       #newModel<-update(currentModel,paste("~.-",term,sep=""))
-#       newModel <- update(currentModel,paste("~.-",term,sep=""))
-#       
-#       an <- anova(currentModel,newModel)
-#       
-#       LRTs[t]<-an$LRT
-#       dfs[t]<-paste(an$p.r,an$p.f)
-#       Ps[t]<-an$pval
-#       
-#       t<-t+1
-#     }
-#     
-#     if (all(Ps<0.05)) break
-#     
-#     dropTermPos <- which(LRTs==min(LRTs))
-#     dropTerm <- currentTerms[dropTermPos]
-#     
-#     stats$LR[which(stats$terms==dropTerm)]<-LRTs[which(currentTerms==dropTerm)]
-#     stats$df[which(stats$terms==dropTerm)]<-dfs[which(currentTerms==dropTerm)]
-#     stats$P[which(stats$terms==dropTerm)]<-Ps[which(currentTerms==dropTerm)]
-#     
-#     #currentModel <- update(currentModel,paste("~.-",dropTerm,sep=""))
-#     currentModel <- update(currentModel,paste("~.-",dropTerm,sep=""))
-#     currentTerms <- currentTerms[-dropTermPos]
-#     
-#   }
-#   
-#   stats$LR[is.na(stats$LR)] <- LRTs[match(stats$terms[is.na(stats$LR)],currentTerms)]
-#   stats$df[is.na(stats$df)] <- dfs[match(stats$terms[is.na(stats$df)],currentTerms)]
-#   stats$P[is.na(stats$P)] <- Ps[match(stats$terms[is.na(stats$P)],currentTerms)]
-#   
-#   return(list(model=currentModel,stats=stats))
-#   
-# }
-# 

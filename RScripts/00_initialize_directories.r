@@ -55,21 +55,21 @@
 ### 06.2. remove columns not needed for the analysis, unify names
 ### 06.3. save rawdata as table in a word doc
 ###
-### 07 07.1_DescriptiveStatsOfESFrame.Rmd
+### 07 07_DescriptiveStatsOfESFrame.Rmd
 ### 07.1. Protocol structure and summary of variables in the ES.frames for richness and yield
 ### 07.2. Plot Histograms of all variables in the ES.frame 
 ### 07.3. Plot maps of added data
 ### 07.4. Plot map of studies
 ### 07.5. Forest Plots of study.cases per LUI.range.level
 ###
-### 08 08a_DataAnalysis.R
+### 08 08_DataAnalysis.R
 ### 08.1. define list of moderators
 ### 08.2. Fit models for richness and yield
 ### 08.3. extract fit statistics
 ###
 ### 09 09.1_Plot_model_coeffs.r
 ### 09.1.1. plot raw data + grand mean
-### 09.1.2. plot LUI cross diagrams
+### 09.1.2. plot LUI forest plots
 ### 
 ### 09 09.2_Plot_LUI.SGP.crossDiagrams.r
 ### 09.2.1. Predictions for richness
@@ -196,9 +196,7 @@ source(path2wd %+% "09.2_Plot_LUI.SGP_crossDiagrams_equidist.r")
 ### Table with coefficients for the selected model
 source(path2wd %+% "09.3_Preds_Full.r") 
 
+### write model estimates in tables
 knit(path2wd %+% "Tables4Manuscript.Rmd")
-
-### Model diagnostics
-source(path2wd %+% "10_ModelDiagnostics.R") 
 
 

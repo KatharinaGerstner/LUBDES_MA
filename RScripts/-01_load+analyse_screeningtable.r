@@ -124,18 +124,17 @@ venn.studies$labels<-rep("", length(venn.studies$labels))
 # use center coordinates and diameter to locate text-boxes
 # surprisingly, venneuler seems to mix up diameters of categories, anyhow.
 
-
 png(file = "venn_screening_paper_MB.png", bg = "transparent",width=1000,height=600)
 par(mar=c(0,0,0,0), cex=3)
 
 plot(venn.studies)
-text(venn.studies$centers[1], 0.75, paste("BD\nn=", length(subset.bd$LU)),        cex = 0.8)
-text(venn.studies$centers[2]+0.1, 0.5, paste("Y\nn=", length(subset.es$LU)),        cex = 0.8)
-text(venn.studies$centers[3], 0.25, paste("LU\nn=", length(subset.lu$LU)),        cex = 0.8)
+text(venn.studies$centers[1], 0.75, paste("BD\nn=", length(subset.bd$LU)), cex = 0.8)
+text(venn.studies$centers[2]+0.1, 0.5, paste("Y\nn=", length(subset.es$LU)), cex = 0.8)
+text(venn.studies$centers[3], 0.25, paste("LU\nn=", length(subset.lu$LU)), cex = 0.8)
 
-text(venn.studies$centers[2]-0.07, 0.5, paste("LU-BD-Y\nn=", length(subset.lu.bd.es$LU)),        cex = 0.8)
-text(venn.studies$centers[3]-0.06, 0.45, paste("LU-BD\nn=", length(subset.lu.bd$LU)),        cex = 0.8)
-text(venn.studies$centers[2], 0.4, paste("BD-Y\nn=", length(subset.bd.es$LU)),        cex = 0.8)
-text(venn.studies$centers[2], 0.6, paste("LU-Y\nn=", length(subset.lu.es$LU)),        cex = 0.8)
+text(venn.studies$centers[2]-0.07, 0.5, paste("LU-BD-Y\nn=", length(subset.lu.bd.es$LU)), cex = 0.8)
+text(venn.studies$centers[3]-0.06, 0.45, paste("LU-BD\nn=", length(subset.lu.bd$LU)), cex = 0.8)
+text(venn.studies$centers[2], 0.4, paste("BD-Y\nn=", length(subset.bd.es$LU)), cex = 0.8)
+text(venn.studies$centers[2], 0.6, paste("LU-Y\nn=", length(subset.lu.es$LU)), cex = 0.8)
 
 dev.off()

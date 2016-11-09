@@ -89,9 +89,6 @@ imp.richness <- ggplot() +
   theme(axis.text.x = element_text(angle = 90, hjust = 1)) +
   ylab("SD(species richness)") + scale_x_discrete("",labels=c()) +
   theme_lubdes()
-# print(imp.richness)
-# ggsave(imp.richness, file=path2temp %+% "imputed.SD.richness.png",height=5,width=10)
-
 
 ## yield
 load(path2temp %+% "imputed.SD.yield.Rdata") # temp, temp.yield
@@ -103,35 +100,7 @@ imp.yield <- ggplot() +
   theme(axis.text.x = element_text(angle = 90, hjust = 1)) +
   ylab("SD(yield)") + scale_x_discrete("",labels=c()) + 
   theme_lubdes()
-# print(imp.yield)
-# ggsave(imp.yield, file=path2temp %+% "imputed.SD.yield.png",height=5,width=10)
 
 png(file = path2temp %+% "imputed.SD.png", width = 800, height = 500)
 grid.arrange(imp.richness,imp.yield,nrow=2,heights=c(1,1))
 dev.off()
-#### RESTERAMPE
-# 
-# par(mfrow=c(2,2))
-# hist(temp.richness$mean)
-# hist(temp.richness$sd)
-# hist(temp.yield$mean)
-# hist(temp.yield$sd)
-# par(mfrow=c(1,1))
-
-# p.yield <- ggplot(dataimp) +
-#   geom_point(aes(x=yield.mean, y=yield.SD, color=yield.SD.is.imputed), size=2, alpha=.5) +
-#   xlim(range(dataimp$yield.mean[dataimp$yield.SD.is.imputed=="yes"],na.rm=T)) +
-#   ylim(range(dataimp$yield.SD[dataimp$yield.SD.is.imputed=="yes"],na.rm=T)) +
-#   scale_color_discrete(limits=c("no","yes"),labels=c("SD observed","SD imputed")) +
-#   guides(color=guide_legend(title=NULL)) +
-#   theme_lubdes(legend.position="bottom",rel.text.size=0.8)
-# ggsave(p.yield, file=path2temp %+% "imputation_mice_yield.png",height=4,width=3.5)
-
-# p.richness <- ggplot(dataimp) +
-#   geom_point(aes(x=richness.mean, y=richness.SD, color=richness.SD.is.imputed), size=2, alpha=.5) +
-#   xlim(range(dataimp$richness.mean[dataimp$richness.SD.is.imputed=="yes"],na.rm=T)) +
-#   ylim(range(dataimp$richness.SD[dataimp$richness.SD.is.imputed=="yes"],na.rm=T)) +
-#   scale_color_discrete(limits=c("no","yes"),labels=c("SD observed","SD imputed")) +
-#   guides(color=guide_legend(title=NULL)) +
-#   theme_lubdes(rel.text.size=0.8,legend.position="bottom")
-# ggsave(p.richness, file=path2temp %+% "imputation_mice_richness.png",height=4,width=3.5)

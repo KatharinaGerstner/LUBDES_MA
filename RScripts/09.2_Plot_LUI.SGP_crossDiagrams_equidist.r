@@ -234,7 +234,7 @@ newdat.yield.SGP$logRR.yield.ci.lb <- model$b-1.96*model$se
 newdat.yield.SGP$logRR.yield.ci.ub <- model$b+1.96*model$se
 
 ############################################################################
-### 09.2.3. Join and save predictions for richness and yield
+### 09.2.3. Join predictions for richness and yield
 ############################################################################
 ### LUI.SPG and SGP
 newdat.SGP <- join_all(list(newdat.richness.SGP,newdat.yield.SGP),type="full")
@@ -246,12 +246,6 @@ newdat.LUI.SGP[,c("perc.yield.change","perc.yield.change.ci.lb","perc.yield.chan
 
 newdat.LUI.SGP$LUI.range.level <- factor(newdat.LUI.SGP$LUI.range.level, levels = c("Grand mean","Low-low","Medium-medium","High-high","Low-medium","Medium-high","Low-high"))
 
-# write.csv(newdat.LUI.SGP[,c("Species.Group","Product","LUI.range.level",
-#                  "n.richness", "logRR.richness",  "logRR.richness.se", "CI95.richness",
-#                  "n.yield", "logRR.yield",  "logRR.yield.se", "CI95.yield")],
-#           file=path2temp %+% "preds.LUI.SGP.csv",row.names=F)
-#print(xtable(newdat, caption="Response ratios for the LUI.SGP model and available evidence"),type="latex",include.rownames=F)
-
 ### LUI.SG and SG
 newdat.SG <- cbind(newdat.richness.SG,rbind(newdat.yield.SGP[,-1],newdat.yield.SGP[,-1],newdat.yield.SGP[,-1]))
 newdat.LUI.SG <- join_all(list(newdat.richness.LUI.SG,newdat.yield.LUI.SG,newdat.SG),type="full")
@@ -259,7 +253,6 @@ newdat.LUI.SG$CI95.richness <- "[" %+% round(newdat.LUI.SG$logRR.richness.ci.lb,
 newdat.LUI.SG$CI95.yield <- "[" %+% round(newdat.LUI.SG$logRR.yield.ci.lb,digits=2) %+% "," %+%  round(newdat.LUI.SG$logRR.yield.ci.ub,digits=2) %+% "]" 
 newdat.LUI.SG[,c("perc.rich.change","perc.rich.change.ci.lb","perc.rich.change.ci.ub","CI95.perc.rich.change")] <- convert.log2equidist(newdat.LUI.SG$logRR.richness,newdat.LUI.SG$logRR.richness.ci.lb,newdat.LUI.SG$logRR.richness.ci.ub)
 newdat.LUI.SG[,c("perc.yield.change","perc.yield.change.ci.lb","perc.yield.change.ci.ub","CI95.perc.yield.change")] <- convert.log2equidist(newdat.LUI.SG$logRR.yield,newdat.LUI.SG$logRR.yield.ci.lb,newdat.LUI.SG$logRR.yield.ci.ub)
-
 
 ### LUI.P and P
 newdat.P <- join_all(list(newdat.richness.P,newdat.yield.P),type="full")
@@ -269,27 +262,11 @@ newdat.LUI.P$CI95.yield <- "[" %+% round(newdat.LUI.P$logRR.yield.ci.lb,digits=2
 newdat.LUI.P[,c("perc.rich.change","perc.rich.change.ci.lb","perc.rich.change.ci.ub","CI95.perc.rich.change")] <- convert.log2equidist(newdat.LUI.P$logRR.richness,newdat.LUI.P$logRR.richness.ci.lb,newdat.LUI.P$logRR.richness.ci.ub)
 newdat.LUI.P[,c("perc.yield.change","perc.yield.change.ci.lb","perc.yield.change.ci.ub","CI95.perc.yield.change")] <- convert.log2equidist(newdat.LUI.P$logRR.yield,newdat.LUI.P$logRR.yield.ci.lb,newdat.LUI.P$logRR.yield.ci.ub)
 
-############################################################################
-# newdat.LUI.SG$Product <- NA
-# newdat.LUI.SG$Product <- factor(newdat.LUI.SG$Product, levels = c("Crop","Green fodder","Wood","NA"))
-# newdat.LUI.P$Species.Group <- NA
-# newdat.LUI.P$Species.Group <- factor(newdat.LUI.P$Species.Group, levels = c("Plants","Invertebrates","Vertebrates","NA"))
-
 newdat.SG.P <- join_all(list(newdat.LUI.SG,newdat.LUI.P),type="full")
 newdat.all <- join_all(list(newdat.LUI.SGP,newdat.LUI.SG,newdat.LUI.P),type="full")
 
 newdat.all[,c("perc.rich.change","perc.rich.change.ci.lb","perc.rich.change.ci.ub","CI95.perc.rich.change")] <- convert.log2equidist(newdat.all$logRR.richness,newdat.all$logRR.richness.ci.lb,newdat.all$logRR.richness.ci.ub)
 newdat.all[,c("perc.yield.change","perc.yield.change.ci.lb","perc.yield.change.ci.ub","CI95.perc.yield.change")] <- convert.log2equidist(newdat.all$logRR.yield,newdat.all$logRR.yield.ci.lb,newdat.all$logRR.yield.ci.ub)
-
-# newdat.all$perc.rich.change <- 100*(exp(newdat.all$logRR.richness)-1)
-# newdat.all$perc.rich.change.ci.lb <- 100*(exp(newdat.all$logRR.richness.ci.lb)-1)
-# newdat.all$perc.rich.change.ci.ub <- 100*(exp(newdat.all$logRR.richness.ci.ub)-1)
-# newdat.all$CI95.perc.rich.change <- "[" %+% round(newdat.all$perc.rich.change.ci.lb,digits=2) %+% "," %+%  round(newdat.all$perc.rich.change.ci.ub,digits=2) %+% "]"
-# 
-# newdat.all$perc.yield.change <- 100*(exp(newdat.all$logRR.yield)-1)
-# newdat.all$perc.yield.change.ci.lb <- 100*(exp(newdat.all$logRR.yield.ci.lb)-1)
-# newdat.all$perc.yield.change.ci.ub <- 100*(exp(newdat.all$logRR.yield.ci.ub)-1)
-# newdat.all$CI95.perc.yield.change <- "[" %+% round(newdat.all$perc.yield.change.ci.lb,digits=2) %+% "," %+%  round(newdat.all$perc.yield.change.ci.ub,digits=2) %+% "]"
 
 write.csv(newdat.all[,c("Species.Group","Product","LUI.range.level",
                         "n.richness", "perc.rich.change",  "CI95.perc.rich.change",
@@ -300,8 +277,6 @@ write.csv(newdat.all[,c("Species.Group","Product","LUI.range.level",
 ### 09.2.4. Map predictions facetted by Product and/or Species.Group
 ############################################################################
 
-# seqBreaks <- log(sapply(-2:7,function(x) 2^x))
-# seqLabels <- 100*(exp(seqBreaks)-1)
 seqBreaks <- seq(-1,2,by=0.5)# c(0.6,0.8,0.9,1,1.25,1.5,1.75,2)
 seqLabels <- 100*seqBreaks
 
@@ -383,17 +358,3 @@ plot3 <- ggplot(data=newdat.LUI.P) +
 
 plot.grid <- grid.arrange(plot3,legend, plot1, plot2, nrow=2,ncol=2, heights=c(5,13),widths=c(13,5))
 ggsave(plot.grid,file=path2temp %+% "CrossPlot_equidist.png",height=10,width=15, units = "in")
-
-
-
-
-# 
-# model1 <- Richness.MA.model[["None"]]
-# preds <- predict.rma(model1)
-# newdat.GM <- data.frame(Species.Group=newdat.LUI.SGP$Species.Group,Product=newdat.LUI.SGP$Product,LUI.range.level="Grand Mean",n.richness=nrow(modelDataRichness),logRR.richness=preds$pred,logRR.richness.se=preds$se,logRR.richness.ci.lb=preds$ci.lb,logRR.richness.ci.ub=preds$ci.ub)
-# 
-# model2 <- Yield.MA.model[["None"]]
-# preds <- predict.rma(model2)
-# newdat.GM[,c("n.yield","logRR.yield","logRR.yield.se","logRR.yield.ci.lb","logRR.yield.ci.ub")] <- matrix(rep(c(nrow(modelDataYield),preds$pred,preds$se,preds$ci.lb,preds$ci.ub),times=nrow(newdat.GM)),ncol=5,byrow=T)
-
-#newdat <- join_all(list(newdat.LUI.SGP,newdat.SGP),type="full")
