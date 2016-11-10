@@ -1,28 +1,26 @@
-Some general comments on the structure of the LUBDES_MA scripts:
-* Each module (-01, 00, 01 ...) builds on the previous ones and does NOT work standalone - this avoids redundancies.
-* Exceptions to that rule are -03 to -01 which should not be run by anyone other than MB.
-* Data, functions etc. will be carried over from one module to another. Saving and loading of interim outputs is done into path2temp. 
-* In case interim data needs to be saved it must NOT be saved in the git directory. This will avoid that accidentally our whole dataset is visible to everyone on the internet. 
-* All needed output files (tables, plots etc.) must NOT be saved in the git directory but in path2temp instead.
-* Hidden files like .rhistory .oauth etc must NOT be commited to github. This avoids errors. Also, uploading the authorization token for google docs to github might allow access to google accounts by hackers (presumably, #MB)
-* The data input comes directly from google docs. loading .csv is deprecated.
-* created functions should be own sub-sections (i.e. 01.03 blabla function)
+LUBDES meta analysis - code and other resources
+
+This github repository contains all R-code and data files created within the LUBDES project. 
+The repository is accompanying a paper entitled "The complex trade-offs of land-use intensification for biodiversity and yield" which is authored by:
+
+Michael Beckmann1, Katharina Gerstner1,2, Morodoluwa Akin-Fajiye3, Silvia Ceau??u2,4, Stephan Kambach4,5, Nicole L. Kinlock3, Helen R. P. Phillips6,7, Willem Verhagen8, Jessica Gurevitch3, Stefan Klotz2,5, Tim Newbold9,10, Peter H. Verburg8, Marten Winter2, Ralf Seppelt1,2
+
+1  UFZ - Helmholtz Centre for Environmental Research, Department Computational Landscape Ecology, 04318 Leipzig, Germany
+2 iDiv - German Centre for Integrative Biodiversity Research, 04103 Leipzig, Germany
+3 Department of Ecology and Evolution, Stony Brook University, Stony Brook, NY 11794, USA 
+4 Institute of Biology/Geobotany and Botanical Garden, Martin-Luther-University Halle-Wittenberg, 06099 Halle (Saale), Germany
+5  UFZ - Helmholtz Centre for Environmental Research, Department Community Ecology, 06120 Halle (Saale), Germany
+6 Department of Life Sciences, Imperial College London, Silwood Park, SL5 7PY, UK.
+7 Department of Life Sciences, Natural History Museum, Cromwell Road, London SW7 5BD, UK.
+8 Environmental Geography Group, Department of Earth Sciences, Vrije Universiteit Amsterdam, de Boelelaan 1087, 1081 HV Amsterdam, The Netherlands
+9 United Nations Environment Programme World Conservation Monitoring Centre, 219 Huntingdon Road, Cambridge CB3 0DL, UK. 
+10 Centre for Biodiversity and Environment Research, Department of Genetics, Evolution and Environment, University College London, Gower Street, London WC1E 6BT, UK.
+
+Acknowledgements. This work was supported by the National Socio-Environmental Synthesis Center (SESYNC; NSF DBI-1052875), the Helmholtz Centre for Environmental Research - UFZ and sDiv, the Synthesis Centre of the German Centre for Integrative Biodiversity Research (iDiv) Halle-Jena-Leipzig (DFG FZT 118). M.B. and S.K. are funded by the Helmholtz Research School for Ecosystem Services under Changing Land Use and Climate (ESCALATE, VH-KO-613). T.N. acknowledges funding from the UK Natural Environment Research Council (NE/J011193/1) and a Leverhulme Trust Research Project Grant.  K.G. received funding with the project GLUES from the German Federal Ministry of Education and Research (01LL0901A).  W.V. and P.V. are supported by OPERAs, funded within the EU 7th Framework Program (308393).  J.G. acknowledges support from the U.S. NSF project 1119891. This research contributes to the Global Land Project (www.globallandproject.org). We thank Kristin Powell, Chase Mendenhall for input to the conceptual design of the study; Wolfgang Viechtbauer for help with the conducted meta-analysis; Byron C. Wallace for support with text analysis; Jeff Kaplan for providing land-use history data; Tomás Václavík, Simon Attwood and Josef Settele for comments; Rachel Lorraine Lamb, Anna-Katharina Steinmetz and Marketa Václavíkova for support in paper screening.
+
+Author contributions. M.B., R.S., S.Kl., P.H.V., T.N., M.W. and K.G. designed the project and the meta-analysis; M.B., K.G., W.V., H.R.P.P., S.C. and T.N. designed the data-collection protocols and database; M.B., W.V., K.G. H.R.P.P., S.C., S.Ka., N.K. and M.A-F. collated the data; K.G., J.G, N.K., T.N. designed the statistical analysis; K.G., H.R.P.P. and M.B. performed the analyses; M.B., R.S., T.N. and K.G. wrote the manuscript with contributions from H.R.P.P., S.Kl., W.V., S.C., S.Ka., N.K., J.G., P.H.V., M.W. and M.A-F.
 
 Overall structure of the modules is:  
--04 -04_create_csv_from_zotero_missing_papers.R   
-[-04.1. Extract zotero citation data of missing papers into excel.]  
-  
--03 -03_create_csv_from_Zotero.R   
-[-03.1. To extract zotero citation data into excel.]  
-  
--02 -02_create_folders_for_papers.R    
-[-02.1. set working directory to create folders in]   
-[-02.2. create directory structure based on study IDs and place an empty note file within]   
-  
--01 -01_load+analyse_screeningtable.r   
-[-01.1. load screening data directly from google docs]   
-[-01.2. plot pie charts about statistics]   
-  
 00 00_initialize_directories.r  
 00.1. set the working and temporary directories  
 00.2. source all relevant R scripts  
