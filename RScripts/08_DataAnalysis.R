@@ -100,6 +100,35 @@ Yield.MA.model[["P"]] <- rma.mv.func(df=modelDataYield, moderators=c(-1,"Product
 
 Yield.MA.model[["Full"]] <- rma.mv.func(df=modelDataYield, moderators=c(-1,"LUI.range.level", "Product", "landuse_history","main_climate", "LUI.range.level:Product","LUI.range.level:landuse_history","LUI.range.level:main_climate"), fit.method="REML")
 
+### for AIC comparisons
+### Zuur et al. (2009; PAGE 122) suggest that "To compare models with nested fixed effects (but with the same random structure), ML estimation must be used and not REML."
+### Faraway's (2006) Extending the linear model with R (p. 156): "The reason is that REML estimates the random effects by considering linear combinations of the data that remove the fixed effects. If these fixed effects are changed, the likelihoods of the two models will not be directly comparable."
+### store models in a list
+Richness.MA.model.ML <- vector("list", length=9)
+Yield.MA.model.ML <- vector("list", length=5)
+names(Richness.MA.model.ML) <- c("None","LUI","LUI.SGP","LUI.SG","LUI.P","SGP","SG","P","Full")
+names(Yield.MA.model.ML) <- c("None","LUI","LUI.P","P","Full")
+
+### Analysis for richness
+Richness.MA.model.ML[["None"]] <- rma.mv.func(df=modelDataRichness, moderators=c(1), fit.method="ML")
+Richness.MA.model.ML[["LUI"]] <- rma.mv.func(df=modelDataRichness, moderators=c(-1,"LUI.range.level"), fit.method="ML")
+Richness.MA.model.ML[["LUI.SGP"]] <- rma.mv.func(df=modelDataRichness, moderators=c(-1,"LUI.range.level","Product", "Species.Group", "LUI.range.level:Product", "LUI.range.level:Species.Group", "Species.Group:Product"), fit.method="ML")
+Richness.MA.model.ML[["LUI.SG"]] <- rma.mv.func(df=modelDataRichness, moderators=c(-1,"LUI.range.level","Species.Group", "LUI.range.level:Species.Group"), fit.method="ML")
+Richness.MA.model.ML[["LUI.P"]] <- rma.mv.func(df=modelDataRichness, moderators=c(-1,"LUI.range.level","Product", "LUI.range.level:Product"), fit.method="ML")
+Richness.MA.model.ML[["SGP"]] <- rma.mv.func(df=modelDataRichness, moderators=c(-1,"Product", "Species.Group", "Species.Group:Product"), fit.method="ML")
+Richness.MA.model.ML[["SG"]] <- rma.mv.func(df=modelDataRichness, moderators=c(-1,"Species.Group"), fit.method="ML")
+Richness.MA.model.ML[["P"]] <- rma.mv.func(df=modelDataRichness, moderators=c(-1,"Product"), fit.method="ML")
+Richness.MA.model.ML[["Full"]] <- rma.mv.func(df=modelDataRichness, moderators=c(-1,"LUI.range.level", "Product", "Species.Group", "landuse_history","main_climate", "LUI.range.level:Product", "LUI.range.level:Species.Group","LUI.range.level:landuse_history","LUI.range.level:main_climate","Species.Group:Product"), fit.method="ML")
+
+### Analysis for yield
+Yield.MA.model.ML[["None"]] <- rma.mv.func(df=modelDataYield, moderators=c(1), fit.method="ML")
+Yield.MA.model.ML[["LUI"]] <- rma.mv.func(df=modelDataYield, moderators=c(-1,"LUI.range.level"), fit.method="ML")
+Yield.MA.model.ML[["LUI.P"]] <- rma.mv.func(df=modelDataYield, moderators=c(-1,"LUI.range.level", "Product", "LUI.range.level:Product"), fit.method="ML")
+Yield.MA.model.ML[["P"]] <- rma.mv.func(df=modelDataYield, moderators=c(-1,"Product"), fit.method="ML")
+
+Yield.MA.model.ML[["Full"]] <- rma.mv.func(df=modelDataYield, moderators=c(-1,"LUI.range.level", "Product", "landuse_history","main_climate", "LUI.range.level:Product","LUI.range.level:landuse_history","LUI.range.level:main_climate"), fit.method="ML")
+
+
 ###########################################################################
 ### 08.3. extract fit statistics
 ###########################################################################
@@ -107,6 +136,10 @@ Richness.models2report <- list(Richness.MA.model[["None"]],
                       Richness.MA.model[["LUI"]],
                       Richness.MA.model[["LUI.SGP"]],
                       Richness.MA.model[["Full"]])
+Richness.models2report4AIC <- list(Richness.MA.model.ML[["None"]],
+                               Richness.MA.model.ML[["LUI"]],
+                               Richness.MA.model.ML[["LUI.SGP"]],
+                               Richness.MA.model.ML[["Full"]])
 fit.tab.richness <- data.frame(model=c("None","LUI","LUI.SGP","Full"),
                                logLik=NA, deviance=NA, AIC=NA, BIC=NA, AICc=NA, 
                                QE=unlist(lapply(Richness.models2report,function(x) x$QE)), QEp=unlist(lapply(Richness.models2report,function(x) x$QEp)),
@@ -115,13 +148,17 @@ Yield.models2report <- list(Yield.MA.model[["None"]],
                                Yield.MA.model[["LUI"]],
                                Yield.MA.model[["LUI.P"]],
                                Yield.MA.model[["Full"]])
+Yield.models2report4AIC <- list(Yield.MA.model.ML[["None"]],
+                            Yield.MA.model.ML[["LUI"]],
+                            Yield.MA.model.ML[["LUI.P"]],
+                            Yield.MA.model.ML[["Full"]])
 fit.tab.yield <- data.frame(model=c("None","LUI","LUI.P","Full"),
                                logLik=NA, deviance=NA, AIC=NA, BIC=NA, AICc=NA, 
                                QE=unlist(lapply(Yield.models2report,function(x) x$QE)), QEp=unlist(lapply(Yield.models2report,function(x) x$QEp)),
                                QM=unlist(lapply(Yield.models2report,function(x) x$QM)),QMp=unlist(lapply(Yield.models2report,function(x) x$QMp)))
 
-fit.tab.richness[,2:6] <- t(sapply(Richness.models2report,fitstats.rma))
-fit.tab.yield[,2:6] <- t(sapply(Yield.models2report,fitstats.rma))
+fit.tab.richness[,2:6] <- t(sapply(Richness.models2report4AIC,fitstats.rma))
+fit.tab.yield[,2:6] <- t(sapply(Yield.models2report4AIC,fitstats.rma))
 
 fit.tab.richness$R2 <- fit.tab.richness$QM/(fit.tab.richness$QM+fit.tab.richness$QE)
 fit.tab.yield$R2 <- fit.tab.yield$QM/(fit.tab.yield$QM+fit.tab.yield$QE)
