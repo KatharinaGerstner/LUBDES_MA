@@ -59,6 +59,7 @@ rma.mv.func <- function(df, moderators, fit.method)
   fm <- try(rma.mv(yi=Log.RR, V=M.matrix(df)+diag(Log.RR.Var), 
                   mods=mods.formula, 
                   random = list(~1|Study.Case, ~1|Study.ID),
+#                  random = list(~1|Study.ID/Study.Case), # results are the same compared to include two random effects separately
                   slab=paste(Study.Case, Low.LUI, High.LUI,sep="_"),
                   method=fit.method, tdist=FALSE, level=95, digits=4,data=df))
   
@@ -66,6 +67,7 @@ rma.mv.func <- function(df, moderators, fit.method)
     fm <- rma.mv(yi=Log.RR, V=M.matrix(df)+diag(Log.RR.Var), 
                  mods=mods.formula, 
                  random = list(~1|Study.Case, ~1|Study.ID),
+#                random = list(~1|Study.ID/Study.Case), # results are the same compared to include two random effects separately
                  slab=paste(Study.Case, Low.LUI, High.LUI,sep="_"),
                  method=fit.method, tdist=FALSE, level=95, digits=4,data=df,
                  control=list(optimizer="optim", optmethod="BFGS"))
@@ -160,15 +162,19 @@ fit.tab.yield <- data.frame(model=c("None","LUI","LUI.P","Full"),
 fit.tab.richness[,2:6] <- t(sapply(Richness.models2report4AIC,fitstats.rma))
 fit.tab.yield[,2:6] <- t(sapply(Yield.models2report4AIC,fitstats.rma))
 
+fit.tab.richness$I2_StudyID <- sapply(Richness.models2report, function(x) x$sigma2[1]/sum(x$sigma2))
+fit.tab.richness$I2_StudyCase <- sapply(Richness.models2report, function(x) x$sigma2[2]/sum(x$sigma2))
+fit.tab.yield$I2_StudyID <- sapply(Yield.models2report, function(x) x$sigma2[1]/sum(x$sigma2))
+fit.tab.yield$I2_StudyCase <- sapply(Yield.models2report, function(x) x$sigma2[2]/sum(x$sigma2))
+
 fit.tab.richness$R2 <- fit.tab.richness$QM/(fit.tab.richness$QM+fit.tab.richness$QE)
 fit.tab.yield$R2 <- fit.tab.yield$QM/(fit.tab.yield$QM+fit.tab.yield$QE)
 
 fit.tab.richness$deltaAICc <- fit.tab.richness$AICc - min(fit.tab.richness$AICc)
 fit.tab.richness$deltaBIC <- fit.tab.richness$BIC - min(fit.tab.richness$BIC)
-
 fit.tab.yield$deltaAICc <- fit.tab.yield$AICc - min(fit.tab.yield$AICc)
 fit.tab.yield$deltaBIC <- fit.tab.yield$BIC - min(fit.tab.yield$BIC)
 
-write.csv(fit.tab.richness[,c("model","deltaAICc","deltaBIC","QM","QMp","QE","R2")],file=path2temp %+% "fit.tab.richness.csv",row.names=F)
-write.csv(fit.tab.yield[,c("model","deltaAICc","deltaBIC","QM","QMp","QE","R2")],file=path2temp %+% "fit.tab.yield.csv",row.names=F)
+write.csv(fit.tab.richness[,c("model","deltaAICc","deltaBIC","QM","QMp","QE","R2","I2_StudyID","I2_StudyCase")],file=path2temp %+% "fit.tab.richness.csv",row.names=F)
+write.csv(fit.tab.yield[,c("model","deltaAICc","deltaBIC","QM","QMp","QE","R2","I2_StudyID","I2_StudyCase")],file=path2temp %+% "fit.tab.yield.csv",row.names=F)
 
